@@ -248,7 +248,7 @@ pos.xy(uv);         // assign only x and y from a vec2
 
 ```cpp
 vec3 test(1.0f, 2.0f, 3.0f);
-vec3 result = vec3(test.y, test.x, test.z); // manual construction
+vec3 result = vec3(test.y, test.x, test.z);  // manual construction
 vec3 result2 = test.yxz();                   // swizzle-based construction
 test.yxz(result2.zxy());                     // assign back with a swizzle
 ```
@@ -289,11 +289,12 @@ Create arrays, then transfer data to and from `simdfloat`, `simddouble`, or
 ### Loading: Building a `simdfloat` from an array
 
 ```cpp
-alignas(64) float tab[simdwidth];
-for (int k = 0; k < simdwidth; ++k)
+alignas(64) float tab[simdwidth]; // declaring an aligned array of simdwidth elements
+
+for (int k = 0; k < simdwidth; ++k) // writing loop counter into array
     tab[k] = static_cast<float>(k);
 
-simdfloat value = simd_load_float(tab);
+simdfloat value = simd_load_float(tab); // creating a simdfloat with values from the array
 ```
 
 ### Storing: Writing Results Back to an array
@@ -301,9 +302,9 @@ simdfloat value = simd_load_float(tab);
 ```cpp
 vec3 position; // initialized somewhere
 
-alignas(64) float out[simdwidth];
+alignas(64) float out[simdwidth]; // declaring an aligned array of simdwidth elements
 
-simd_store_float(out, position.z);
+simd_store_float(out, position.z); // storing content of position into the array
 ```
 
 ---
@@ -361,9 +362,9 @@ simdfloat l2 = log2(8.0f);
 ```cpp
 vec3 v(0.3f, 1.7f, -0.5f);
 
-vec3 clamped = clamp(v, 0.0f, 1.0f);
-vec3 mixed = mix(vec3(0.0f), vec3(1.0f), 0.5f);
-vec3 stepped = smoothstep(vec3(0.0f), vec3(1.0f), v);
+vec3 clamped = clamp(v, 0.0f, 1.0f); // clamp individual components values between 0.0f and 1.0f
+vec3 mixed = mix(vec3(0.0f), vec3(1.0f), 0.5f); // linear interpolation between 0.0f and 1.0f (here 0.5f)
+vec3 stepped = smoothstep(vec3(0.0f), vec3(1.0f), v); // hermite interpolation
 ```
 
 ### Geometric
@@ -372,15 +373,15 @@ vec3 stepped = smoothstep(vec3(0.0f), vec3(1.0f), v);
 vec3 a(1, 0, 0);
 vec3 b2(0, 1, 0);
 
-simdfloat d2 = dot(a, b2);
-vec3 c3 = cross(a, b2);
-simdfloat len = length(a);
-vec3 n = normalize(a);
-simdfloat dist = distance(a, b2);
+simdfloat d2 = dot(a, b2); // scalar product
+vec3 c3 = cross(a, b2); // cross product
+simdfloat len = length(a); // length of a vector
+vec3 n = normalize(a); // normalization
+simdfloat dist = distance(a, b2); // distance between two points
 
 vec3 incident(0.5f, -1.0f, 0.0f);
 vec3 normal2(0.0f, 1.0f, 0.0f);
-vec3 refl = reflect(incident, normal2);
+vec3 refl = reflect(incident, normal2); // reflection vector
 ```
 
 ### Min and Max
@@ -389,8 +390,8 @@ vec3 refl = reflect(incident, normal2);
 simdfloat lo = min(a, b);
 simdfloat hi = max(a, b);
 
-vec3 vlo = min(vec3(1, 2, 3), vec3(3, 1, 2));
-vec3 vhi = max(vec3(0.0f), some_vec);
+vec3 vlo = min(vec3(1, 2, 3), vec3(3, 1, 2)); // minimum of individual components
+vec3 vhi = max(vec3(0.0f), some_vec); // maximum
 ```
 
 ---
@@ -432,7 +433,7 @@ while (!maskAll(x == 100)) // will stop loop when every lane of x is 100
     // if (x == 100) break;
 
     simdfloat tempX = x + 1;
-    x = blendv(x, tempX, x < 100);
+    x = blendv(x, tempX, x < 100); // assigning values according to the condition
 }
 ```
 
