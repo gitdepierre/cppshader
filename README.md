@@ -123,13 +123,13 @@ parallel and returns a `simdfloat` containing those eight results.
 cppshader provides vector types similar to GLSL, with the same names. Each
 component is a `simdfloat`, so a `vec3` stores three SIMD values at once.
 
-| Type | Aliases | Components |
-|---|---|---|
-| `vec2` | - | `x, y` or `r, g`, or `s, t` |
-| `vec3` | - | `x, y, z` or `r, g, b`, or `s, t, p` |
-| `vec4` | - | `x, y, z, w` or `r, g, b, a`, or `s, t, p, q` |
-| `dvec2/3/4` | - | same layout, double precision |
-| `ivec2/3/4` | - | same layout, integer |
+| Type | Components |
+|---|---|
+| `vec2` | `x, y` or `r, g`, or `s, t` |
+| `vec3` | `x, y, z` or `r, g, b`, or `s, t, p` |
+| `vec4` | `x, y, z, w` or `r, g, b, a`, or `s, t, p, q` |
+| `dvec2/3/4` | same layout, double precision |
+| `ivec2/3/4` | same layout, integer |
 
 Construction mirrors GLSL, so you can mix `float` literals and `simdfloat`
 values:
