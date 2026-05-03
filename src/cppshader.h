@@ -958,6 +958,8 @@ struct vec2
 	simdfloat x, y;
 	simdfloat& r = x;
 	simdfloat& g = y;
+	simdfloat& s = x;
+	simdfloat& t = y;
 
 	vec2() { x = (0.0f);	y = (0.0f); }
 	vec2(const vec2& other) = default;
@@ -998,6 +1000,34 @@ struct vec2
 	inline vec3 rrr() const;
 	inline vec4 rrrg() const;
 	inline vec4 rrrr() const;
+	inline vec2 tt() const;
+	inline vec3 ttt() const;
+	inline vec4 tttt() const;
+	inline vec4 ttts() const;
+	inline vec3 tts() const;
+	inline vec4 ttst() const;
+	inline vec4 ttss() const;
+	inline vec2 ts() const;
+	inline vec3 tst() const;
+	inline vec4 tstt() const;
+	inline vec4 tsts() const;
+	inline vec3 tss() const;
+	inline vec4 tsst() const;
+	inline vec4 tsss() const;
+	inline vec2 st() const;
+	inline vec3 stt() const;
+	inline vec4 sttt() const;
+	inline vec4 stts() const;
+	inline vec3 sts() const;
+	inline vec4 stst() const;
+	inline vec4 stss() const;
+	inline vec2 ss() const;
+	inline vec3 sst() const;
+	inline vec4 sstt() const;
+	inline vec4 ssts() const;
+	inline vec3 sss() const;
+	inline vec4 ssst() const;
+	inline vec4 ssss() const;
 	inline vec2 xx() const;
 	inline vec3 xxx() const;
 	inline vec4 xxxx() const;
@@ -1032,6 +1062,12 @@ struct vec2
 	inline void rg(const simdfloat&, const simdfloat&);
 	inline void rg(const vec2&);
 	inline void rg(const simdfloat&);
+	inline void ts(const simdfloat&, const simdfloat&);
+	inline void ts(const vec2&);
+	inline void ts(const simdfloat&);
+	inline void st(const simdfloat&, const simdfloat&);
+	inline void st(const vec2&);
+	inline void st(const simdfloat&);
 	inline void xy(const simdfloat&, const simdfloat&);
 	inline void xy(const vec2&);
 	inline void xy(const simdfloat&);
@@ -1041,6 +1077,8 @@ struct vec2
 #ifndef USE_SCALAR
 	inline void gr(const float&);
 	inline void rg(const float&);
+	inline void ts(const float&);
+	inline void st(const float&);
 	inline void xy(const float&);
 	inline void yx(const float&);
 #endif
@@ -1074,6 +1112,9 @@ struct vec3
 	simdfloat& r = x;
 	simdfloat& g = y;
 	simdfloat& b = z;
+	simdfloat& s = x;
+	simdfloat& t = y;
+	simdfloat& p = z;
 
 	vec3() { x = (0.0f); y = (0.0f); z = (0.0f); }
 	vec3(const vec3& other) = default;
@@ -1216,6 +1257,123 @@ struct vec3
 	inline vec4 rrrb() const;
 	inline vec4 rrrg() const;
 	inline vec4 rrrr() const;
+	inline vec2 pp() const;
+	inline vec3 ppp() const;
+	inline vec4 pppp() const;
+	inline vec4 pppt() const;
+	inline vec4 ppps() const;
+	inline vec3 ppt() const;
+	inline vec4 pptp() const;
+	inline vec4 pptt() const;
+	inline vec4 ppts() const;
+	inline vec3 pps() const;
+	inline vec4 ppsp() const;
+	inline vec4 ppst() const;
+	inline vec4 ppss() const;
+	inline vec2 pt() const;
+	inline vec3 ptp() const;
+	inline vec4 ptpp() const;
+	inline vec4 ptpt() const;
+	inline vec4 ptps() const;
+	inline vec3 ptt() const;
+	inline vec4 pttp() const;
+	inline vec4 pttt() const;
+	inline vec4 ptts() const;
+	inline vec3 pts() const;
+	inline vec4 ptsp() const;
+	inline vec4 ptst() const;
+	inline vec4 ptss() const;
+	inline vec2 ps() const;
+	inline vec3 psp() const;
+	inline vec4 pspp() const;
+	inline vec4 pspt() const;
+	inline vec4 psps() const;
+	inline vec3 pst() const;
+	inline vec4 pstp() const;
+	inline vec4 pstt() const;
+	inline vec4 psts() const;
+	inline vec3 pss() const;
+	inline vec4 pssp() const;
+	inline vec4 psst() const;
+	inline vec4 psss() const;
+	inline vec2 tp() const;
+	inline vec3 tpp() const;
+	inline vec4 tppp() const;
+	inline vec4 tppt() const;
+	inline vec4 tpps() const;
+	inline vec3 tpt() const;
+	inline vec4 tptp() const;
+	inline vec4 tptt() const;
+	inline vec4 tpts() const;
+	inline vec3 tps() const;
+	inline vec4 tpsp() const;
+	inline vec4 tpst() const;
+	inline vec4 tpss() const;
+	inline vec2 tt() const;
+	inline vec3 ttp() const;
+	inline vec4 ttpp() const;
+	inline vec4 ttpt() const;
+	inline vec4 ttps() const;
+	inline vec3 ttt() const;
+	inline vec4 tttp() const;
+	inline vec4 tttt() const;
+	inline vec4 ttts() const;
+	inline vec3 tts() const;
+	inline vec4 ttsp() const;
+	inline vec4 ttst() const;
+	inline vec4 ttss() const;
+	inline vec2 ts() const;
+	inline vec3 tsp() const;
+	inline vec4 tspp() const;
+	inline vec4 tspt() const;
+	inline vec4 tsps() const;
+	inline vec3 tst() const;
+	inline vec4 tstp() const;
+	inline vec4 tstt() const;
+	inline vec4 tsts() const;
+	inline vec3 tss() const;
+	inline vec4 tssp() const;
+	inline vec4 tsst() const;
+	inline vec4 tsss() const;
+	inline vec2 sp() const;
+	inline vec3 spp() const;
+	inline vec4 sppp() const;
+	inline vec4 sppt() const;
+	inline vec4 spps() const;
+	inline vec3 spt() const;
+	inline vec4 sptp() const;
+	inline vec4 sptt() const;
+	inline vec4 spts() const;
+	inline vec3 sps() const;
+	inline vec4 spsp() const;
+	inline vec4 spst() const;
+	inline vec4 spss() const;
+	inline vec2 st() const;
+	inline vec3 stp() const;
+	inline vec4 stpp() const;
+	inline vec4 stpt() const;
+	inline vec4 stps() const;
+	inline vec3 stt() const;
+	inline vec4 sttp() const;
+	inline vec4 sttt() const;
+	inline vec4 stts() const;
+	inline vec3 sts() const;
+	inline vec4 stsp() const;
+	inline vec4 stst() const;
+	inline vec4 stss() const;
+	inline vec2 ss() const;
+	inline vec3 ssp() const;
+	inline vec4 sspp() const;
+	inline vec4 sspt() const;
+	inline vec4 ssps() const;
+	inline vec3 sst() const;
+	inline vec4 sstp() const;
+	inline vec4 sstt() const;
+	inline vec4 ssts() const;
+	inline vec3 sss() const;
+	inline vec4 sssp() const;
+	inline vec4 ssst() const;
+	inline vec4 ssss() const;
 	inline vec2 xx() const;
 	inline vec3 xxx() const;
 	inline vec4 xxxx() const;
@@ -1369,6 +1527,42 @@ struct vec3
 	inline void rgb(const simdfloat&, const simdfloat&, const simdfloat&);
 	inline void rgb(const vec3&);
 	inline void rgb(const simdfloat&);
+	inline void pt(const simdfloat&, const simdfloat&);
+	inline void pt(const vec2&);
+	inline void pt(const simdfloat&);
+	inline void pts(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void pts(const vec3&);
+	inline void pts(const simdfloat&);
+	inline void ps(const simdfloat&, const simdfloat&);
+	inline void ps(const vec2&);
+	inline void ps(const simdfloat&);
+	inline void pst(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void pst(const vec3&);
+	inline void pst(const simdfloat&);
+	inline void tp(const simdfloat&, const simdfloat&);
+	inline void tp(const vec2&);
+	inline void tp(const simdfloat&);
+	inline void tps(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void tps(const vec3&);
+	inline void tps(const simdfloat&);
+	inline void ts(const simdfloat&, const simdfloat&);
+	inline void ts(const vec2&);
+	inline void ts(const simdfloat&);
+	inline void tsp(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void tsp(const vec3&);
+	inline void tsp(const simdfloat&);
+	inline void sp(const simdfloat&, const simdfloat&);
+	inline void sp(const vec2&);
+	inline void sp(const simdfloat&);
+	inline void spt(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void spt(const vec3&);
+	inline void spt(const simdfloat&);
+	inline void st(const simdfloat&, const simdfloat&);
+	inline void st(const vec2&);
+	inline void st(const simdfloat&);
+	inline void stp(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void stp(const vec3&);
+	inline void stp(const simdfloat&);
 	inline void xy(const simdfloat&, const simdfloat&);
 	inline void xy(const vec2&);
 	inline void xy(const simdfloat&);
@@ -1418,6 +1612,18 @@ struct vec3
 	inline void rbg(const float&);
 	inline void rg(const float&);
 	inline void rgb(const float&);
+	inline void pt(const float&);
+	inline void pts(const float&);
+	inline void ps(const float&);
+	inline void pst(const float&);
+	inline void tp(const float&);
+	inline void tps(const float&);
+	inline void ts(const float&);
+	inline void tsp(const float&);
+	inline void sp(const float&);
+	inline void spt(const float&);
+	inline void st(const float&);
+	inline void stp(const float&);
 	inline void xy(const float&);
 	inline void xyz(const float&);
 	inline void xz(const float&);
@@ -1465,6 +1671,10 @@ struct vec4
 	simdfloat& g = y;
 	simdfloat& b = z;
 	simdfloat& a = w;
+	simdfloat& s = x;
+	simdfloat& t = y;
+	simdfloat& p = z;
+	simdfloat& q = w;
 
 	vec4() { x = (0.0f);	y = (0.0f);	z = (0.0f);	w = (0.0f); }
 	vec4(const vec4& other) = default;
@@ -1836,6 +2046,342 @@ struct vec4
 	inline vec4 rrrb() const;
 	inline vec4 rrrg() const;
 	inline vec4 rrrr() const;
+	inline vec2 qq() const;
+	inline vec3 qqq() const;
+	inline vec4 qqqq() const;
+	inline vec4 qqqp() const;
+	inline vec4 qqqt() const;
+	inline vec4 qqqs() const;
+	inline vec3 qqp() const;
+	inline vec4 qqpq() const;
+	inline vec4 qqpp() const;
+	inline vec4 qqpt() const;
+	inline vec4 qqps() const;
+	inline vec3 qqt() const;
+	inline vec4 qqtq() const;
+	inline vec4 qqtp() const;
+	inline vec4 qqtt() const;
+	inline vec4 qqts() const;
+	inline vec3 qqs() const;
+	inline vec4 qqsq() const;
+	inline vec4 qqsp() const;
+	inline vec4 qqst() const;
+	inline vec4 qqss() const;
+	inline vec2 qp() const;
+	inline vec3 qpq() const;
+	inline vec4 qpqq() const;
+	inline vec4 qpqp() const;
+	inline vec4 qpqt() const;
+	inline vec4 qpqs() const;
+	inline vec3 qpp() const;
+	inline vec4 qppq() const;
+	inline vec4 qppp() const;
+	inline vec4 qppt() const;
+	inline vec4 qpps() const;
+	inline vec3 qpt() const;
+	inline vec4 qptq() const;
+	inline vec4 qptp() const;
+	inline vec4 qptt() const;
+	inline vec4 qpts() const;
+	inline vec3 qps() const;
+	inline vec4 qpsq() const;
+	inline vec4 qpsp() const;
+	inline vec4 qpst() const;
+	inline vec4 qpss() const;
+	inline vec2 qt() const;
+	inline vec3 qtq() const;
+	inline vec4 qtqq() const;
+	inline vec4 qtqp() const;
+	inline vec4 qtqt() const;
+	inline vec4 qtqs() const;
+	inline vec3 qtp() const;
+	inline vec4 qtpq() const;
+	inline vec4 qtpp() const;
+	inline vec4 qtpt() const;
+	inline vec4 qtps() const;
+	inline vec3 qtt() const;
+	inline vec4 qttq() const;
+	inline vec4 qttp() const;
+	inline vec4 qttt() const;
+	inline vec4 qtts() const;
+	inline vec3 qts() const;
+	inline vec4 qtsq() const;
+	inline vec4 qtsp() const;
+	inline vec4 qtst() const;
+	inline vec4 qtss() const;
+	inline vec2 qs() const;
+	inline vec3 qsq() const;
+	inline vec4 qsqq() const;
+	inline vec4 qsqp() const;
+	inline vec4 qsqt() const;
+	inline vec4 qsqs() const;
+	inline vec3 qsp() const;
+	inline vec4 qspq() const;
+	inline vec4 qspp() const;
+	inline vec4 qspt() const;
+	inline vec4 qsps() const;
+	inline vec3 qst() const;
+	inline vec4 qstq() const;
+	inline vec4 qstp() const;
+	inline vec4 qstt() const;
+	inline vec4 qsts() const;
+	inline vec3 qss() const;
+	inline vec4 qssq() const;
+	inline vec4 qssp() const;
+	inline vec4 qsst() const;
+	inline vec4 qsss() const;
+	inline vec2 pq() const;
+	inline vec3 pqq() const;
+	inline vec4 pqqq() const;
+	inline vec4 pqqp() const;
+	inline vec4 pqqt() const;
+	inline vec4 pqqs() const;
+	inline vec3 pqp() const;
+	inline vec4 pqpq() const;
+	inline vec4 pqpp() const;
+	inline vec4 pqpt() const;
+	inline vec4 pqps() const;
+	inline vec3 pqt() const;
+	inline vec4 pqtq() const;
+	inline vec4 pqtp() const;
+	inline vec4 pqtt() const;
+	inline vec4 pqts() const;
+	inline vec3 pqs() const;
+	inline vec4 pqsq() const;
+	inline vec4 pqsp() const;
+	inline vec4 pqst() const;
+	inline vec4 pqss() const;
+	inline vec2 pp() const;
+	inline vec3 ppq() const;
+	inline vec4 ppqq() const;
+	inline vec4 ppqp() const;
+	inline vec4 ppqt() const;
+	inline vec4 ppqs() const;
+	inline vec3 ppp() const;
+	inline vec4 pppq() const;
+	inline vec4 pppp() const;
+	inline vec4 pppt() const;
+	inline vec4 ppps() const;
+	inline vec3 ppt() const;
+	inline vec4 pptq() const;
+	inline vec4 pptp() const;
+	inline vec4 pptt() const;
+	inline vec4 ppts() const;
+	inline vec3 pps() const;
+	inline vec4 ppsq() const;
+	inline vec4 ppsp() const;
+	inline vec4 ppst() const;
+	inline vec4 ppss() const;
+	inline vec2 pt() const;
+	inline vec3 ptq() const;
+	inline vec4 ptqq() const;
+	inline vec4 ptqp() const;
+	inline vec4 ptqt() const;
+	inline vec4 ptqs() const;
+	inline vec3 ptp() const;
+	inline vec4 ptpq() const;
+	inline vec4 ptpp() const;
+	inline vec4 ptpt() const;
+	inline vec4 ptps() const;
+	inline vec3 ptt() const;
+	inline vec4 pttq() const;
+	inline vec4 pttp() const;
+	inline vec4 pttt() const;
+	inline vec4 ptts() const;
+	inline vec3 pts() const;
+	inline vec4 ptsq() const;
+	inline vec4 ptsp() const;
+	inline vec4 ptst() const;
+	inline vec4 ptss() const;
+	inline vec2 ps() const;
+	inline vec3 psq() const;
+	inline vec4 psqq() const;
+	inline vec4 psqp() const;
+	inline vec4 psqt() const;
+	inline vec4 psqs() const;
+	inline vec3 psp() const;
+	inline vec4 pspq() const;
+	inline vec4 pspp() const;
+	inline vec4 pspt() const;
+	inline vec4 psps() const;
+	inline vec3 pst() const;
+	inline vec4 pstq() const;
+	inline vec4 pstp() const;
+	inline vec4 pstt() const;
+	inline vec4 psts() const;
+	inline vec3 pss() const;
+	inline vec4 pssq() const;
+	inline vec4 pssp() const;
+	inline vec4 psst() const;
+	inline vec4 psss() const;
+	inline vec2 tq() const;
+	inline vec3 tqq() const;
+	inline vec4 tqqq() const;
+	inline vec4 tqqp() const;
+	inline vec4 tqqt() const;
+	inline vec4 tqqs() const;
+	inline vec3 tqp() const;
+	inline vec4 tqpq() const;
+	inline vec4 tqpp() const;
+	inline vec4 tqpt() const;
+	inline vec4 tqps() const;
+	inline vec3 tqt() const;
+	inline vec4 tqtq() const;
+	inline vec4 tqtp() const;
+	inline vec4 tqtt() const;
+	inline vec4 tqts() const;
+	inline vec3 tqs() const;
+	inline vec4 tqsq() const;
+	inline vec4 tqsp() const;
+	inline vec4 tqst() const;
+	inline vec4 tqss() const;
+	inline vec2 tp() const;
+	inline vec3 tpq() const;
+	inline vec4 tpqq() const;
+	inline vec4 tpqp() const;
+	inline vec4 tpqt() const;
+	inline vec4 tpqs() const;
+	inline vec3 tpp() const;
+	inline vec4 tppq() const;
+	inline vec4 tppp() const;
+	inline vec4 tppt() const;
+	inline vec4 tpps() const;
+	inline vec3 tpt() const;
+	inline vec4 tptq() const;
+	inline vec4 tptp() const;
+	inline vec4 tptt() const;
+	inline vec4 tpts() const;
+	inline vec3 tps() const;
+	inline vec4 tpsq() const;
+	inline vec4 tpsp() const;
+	inline vec4 tpst() const;
+	inline vec4 tpss() const;
+	inline vec2 tt() const;
+	inline vec3 ttq() const;
+	inline vec4 ttqq() const;
+	inline vec4 ttqp() const;
+	inline vec4 ttqt() const;
+	inline vec4 ttqs() const;
+	inline vec3 ttp() const;
+	inline vec4 ttpq() const;
+	inline vec4 ttpp() const;
+	inline vec4 ttpt() const;
+	inline vec4 ttps() const;
+	inline vec3 ttt() const;
+	inline vec4 tttq() const;
+	inline vec4 tttp() const;
+	inline vec4 tttt() const;
+	inline vec4 ttts() const;
+	inline vec3 tts() const;
+	inline vec4 ttsq() const;
+	inline vec4 ttsp() const;
+	inline vec4 ttst() const;
+	inline vec4 ttss() const;
+	inline vec2 ts() const;
+	inline vec3 tsq() const;
+	inline vec4 tsqq() const;
+	inline vec4 tsqp() const;
+	inline vec4 tsqt() const;
+	inline vec4 tsqs() const;
+	inline vec3 tsp() const;
+	inline vec4 tspq() const;
+	inline vec4 tspp() const;
+	inline vec4 tspt() const;
+	inline vec4 tsps() const;
+	inline vec3 tst() const;
+	inline vec4 tstq() const;
+	inline vec4 tstp() const;
+	inline vec4 tstt() const;
+	inline vec4 tsts() const;
+	inline vec3 tss() const;
+	inline vec4 tssq() const;
+	inline vec4 tssp() const;
+	inline vec4 tsst() const;
+	inline vec4 tsss() const;
+	inline vec2 sq() const;
+	inline vec3 sqq() const;
+	inline vec4 sqqq() const;
+	inline vec4 sqqp() const;
+	inline vec4 sqqt() const;
+	inline vec4 sqqs() const;
+	inline vec3 sqp() const;
+	inline vec4 sqpq() const;
+	inline vec4 sqpp() const;
+	inline vec4 sqpt() const;
+	inline vec4 sqps() const;
+	inline vec3 sqt() const;
+	inline vec4 sqtq() const;
+	inline vec4 sqtp() const;
+	inline vec4 sqtt() const;
+	inline vec4 sqts() const;
+	inline vec3 sqs() const;
+	inline vec4 sqsq() const;
+	inline vec4 sqsp() const;
+	inline vec4 sqst() const;
+	inline vec4 sqss() const;
+	inline vec2 sp() const;
+	inline vec3 spq() const;
+	inline vec4 spqq() const;
+	inline vec4 spqp() const;
+	inline vec4 spqt() const;
+	inline vec4 spqs() const;
+	inline vec3 spp() const;
+	inline vec4 sppq() const;
+	inline vec4 sppp() const;
+	inline vec4 sppt() const;
+	inline vec4 spps() const;
+	inline vec3 spt() const;
+	inline vec4 sptq() const;
+	inline vec4 sptp() const;
+	inline vec4 sptt() const;
+	inline vec4 spts() const;
+	inline vec3 sps() const;
+	inline vec4 spsq() const;
+	inline vec4 spsp() const;
+	inline vec4 spst() const;
+	inline vec4 spss() const;
+	inline vec2 st() const;
+	inline vec3 stq() const;
+	inline vec4 stqq() const;
+	inline vec4 stqp() const;
+	inline vec4 stqt() const;
+	inline vec4 stqs() const;
+	inline vec3 stp() const;
+	inline vec4 stpq() const;
+	inline vec4 stpp() const;
+	inline vec4 stpt() const;
+	inline vec4 stps() const;
+	inline vec3 stt() const;
+	inline vec4 sttq() const;
+	inline vec4 sttp() const;
+	inline vec4 sttt() const;
+	inline vec4 stts() const;
+	inline vec3 sts() const;
+	inline vec4 stsq() const;
+	inline vec4 stsp() const;
+	inline vec4 stst() const;
+	inline vec4 stss() const;
+	inline vec2 ss() const;
+	inline vec3 ssq() const;
+	inline vec4 ssqq() const;
+	inline vec4 ssqp() const;
+	inline vec4 ssqt() const;
+	inline vec4 ssqs() const;
+	inline vec3 ssp() const;
+	inline vec4 sspq() const;
+	inline vec4 sspp() const;
+	inline vec4 sspt() const;
+	inline vec4 ssps() const;
+	inline vec3 sst() const;
+	inline vec4 sstq() const;
+	inline vec4 sstp() const;
+	inline vec4 sstt() const;
+	inline vec4 ssts() const;
+	inline vec3 sss() const;
+	inline vec4 sssq() const;
+	inline vec4 sssp() const;
+	inline vec4 ssst() const;
+	inline vec4 ssss() const;
 	inline vec2 ww() const;
 	inline vec3 www() const;
 	inline vec4 wwww() const;
@@ -2352,6 +2898,186 @@ struct vec4
 	inline void rgba(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
 	inline void rgba(const vec4&);
 	inline void rgba(const simdfloat&);
+	inline void qs(const simdfloat&, const simdfloat&);
+	inline void qs(const vec2&);
+	inline void qs(const simdfloat&);
+	inline void qst(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void qst(const vec3&);
+	inline void qst(const simdfloat&);
+	inline void qstp(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void qstp(const vec4&);
+	inline void qstp(const simdfloat&);
+	inline void qsp(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void qsp(const vec3&);
+	inline void qsp(const simdfloat&);
+	inline void qspt(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void qspt(const vec4&);
+	inline void qspt(const simdfloat&);
+	inline void qt(const simdfloat&, const simdfloat&);
+	inline void qt(const vec2&);
+	inline void qt(const simdfloat&);
+	inline void qts(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void qts(const vec3&);
+	inline void qts(const simdfloat&);
+	inline void qtsp(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void qtsp(const vec4&);
+	inline void qtsp(const simdfloat&);
+	inline void qtp(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void qtp(const vec3&);
+	inline void qtp(const simdfloat&);
+	inline void qtps(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void qtps(const vec4&);
+	inline void qtps(const simdfloat&);
+	inline void qp(const simdfloat&, const simdfloat&);
+	inline void qp(const vec2&);
+	inline void qp(const simdfloat&);
+	inline void qps(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void qps(const vec3&);
+	inline void qps(const simdfloat&);
+	inline void qpst(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void qpst(const vec4&);
+	inline void qpst(const simdfloat&);
+	inline void qpt(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void qpt(const vec3&);
+	inline void qpt(const simdfloat&);
+	inline void qpts(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void qpts(const vec4&);
+	inline void qpts(const simdfloat&);
+	inline void sq(const simdfloat&, const simdfloat&);
+	inline void sq(const vec2&);
+	inline void sq(const simdfloat&);
+	inline void sqt(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void sqt(const vec3&);
+	inline void sqt(const simdfloat&);
+	inline void sqtp(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void sqtp(const vec4&);
+	inline void sqtp(const simdfloat&);
+	inline void sqp(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void sqp(const vec3&);
+	inline void sqp(const simdfloat&);
+	inline void sqpt(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void sqpt(const vec4&);
+	inline void sqpt(const simdfloat&);
+	inline void st(const simdfloat&, const simdfloat&);
+	inline void st(const vec2&);
+	inline void st(const simdfloat&);
+	inline void stq(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void stq(const vec3&);
+	inline void stq(const simdfloat&);
+	inline void stqp(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void stqp(const vec4&);
+	inline void stqp(const simdfloat&);
+	inline void stp(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void stp(const vec3&);
+	inline void stp(const simdfloat&);
+	inline void stpq(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void stpq(const vec4&);
+	inline void stpq(const simdfloat&);
+	inline void sp(const simdfloat&, const simdfloat&);
+	inline void sp(const vec2&);
+	inline void sp(const simdfloat&);
+	inline void spq(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void spq(const vec3&);
+	inline void spq(const simdfloat&);
+	inline void spqt(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void spqt(const vec4&);
+	inline void spqt(const simdfloat&);
+	inline void spt(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void spt(const vec3&);
+	inline void spt(const simdfloat&);
+	inline void sptq(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void sptq(const vec4&);
+	inline void sptq(const simdfloat&);
+	inline void tq(const simdfloat&, const simdfloat&);
+	inline void tq(const vec2&);
+	inline void tq(const simdfloat&);
+	inline void tqs(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void tqs(const vec3&);
+	inline void tqs(const simdfloat&);
+	inline void tqsp(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void tqsp(const vec4&);
+	inline void tqsp(const simdfloat&);
+	inline void tqp(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void tqp(const vec3&);
+	inline void tqp(const simdfloat&);
+	inline void tqps(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void tqps(const vec4&);
+	inline void tqps(const simdfloat&);
+	inline void ts(const simdfloat&, const simdfloat&);
+	inline void ts(const vec2&);
+	inline void ts(const simdfloat&);
+	inline void tsq(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void tsq(const vec3&);
+	inline void tsq(const simdfloat&);
+	inline void tsqp(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void tsqp(const vec4&);
+	inline void tsqp(const simdfloat&);
+	inline void tsp(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void tsp(const vec3&);
+	inline void tsp(const simdfloat&);
+	inline void tspq(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void tspq(const vec4&);
+	inline void tspq(const simdfloat&);
+	inline void tp(const simdfloat&, const simdfloat&);
+	inline void tp(const vec2&);
+	inline void tp(const simdfloat&);
+	inline void tpq(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void tpq(const vec3&);
+	inline void tpq(const simdfloat&);
+	inline void tpqs(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void tpqs(const vec4&);
+	inline void tpqs(const simdfloat&);
+	inline void tps(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void tps(const vec3&);
+	inline void tps(const simdfloat&);
+	inline void tpsq(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void tpsq(const vec4&);
+	inline void tpsq(const simdfloat&);
+	inline void pq(const simdfloat&, const simdfloat&);
+	inline void pq(const vec2&);
+	inline void pq(const simdfloat&);
+	inline void pqs(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void pqs(const vec3&);
+	inline void pqs(const simdfloat&);
+	inline void pqst(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void pqst(const vec4&);
+	inline void pqst(const simdfloat&);
+	inline void pqt(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void pqt(const vec3&);
+	inline void pqt(const simdfloat&);
+	inline void pqts(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void pqts(const vec4&);
+	inline void pqts(const simdfloat&);
+	inline void ps(const simdfloat&, const simdfloat&);
+	inline void ps(const vec2&);
+	inline void ps(const simdfloat&);
+	inline void psq(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void psq(const vec3&);
+	inline void psq(const simdfloat&);
+	inline void psqt(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void psqt(const vec4&);
+	inline void psqt(const simdfloat&);
+	inline void pst(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void pst(const vec3&);
+	inline void pst(const simdfloat&);
+	inline void pstq(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void pstq(const vec4&);
+	inline void pstq(const simdfloat&);
+	inline void pt(const simdfloat&, const simdfloat&);
+	inline void pt(const vec2&);
+	inline void pt(const simdfloat&);
+	inline void ptq(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void ptq(const vec3&);
+	inline void ptq(const simdfloat&);
+	inline void ptqs(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void ptqs(const vec4&);
+	inline void ptqs(const simdfloat&);
+	inline void pts(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void pts(const vec3&);
+	inline void pts(const simdfloat&);
+	inline void ptsq(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void ptsq(const vec4&);
+	inline void ptsq(const simdfloat&);
 	inline void wx(const simdfloat&, const simdfloat&);
 	inline void wx(const vec2&);
 	inline void wx(const simdfloat&);
@@ -2593,6 +3319,66 @@ struct vec4
 	inline void rgab(const float&);
 	inline void rgb(const float&);
 	inline void rgba(const float&);
+	inline void ps(const float&);
+	inline void pst(const float&);
+	inline void pstq(const float&);
+	inline void psq(const float&);
+	inline void psqt(const float&);
+	inline void pt(const float&);
+	inline void pts(const float&);
+	inline void ptsq(const float&);
+	inline void ptq(const float&);
+	inline void ptqs(const float&);
+	inline void pq(const float&);
+	inline void pqs(const float&);
+	inline void pqst(const float&);
+	inline void pqt(const float&);
+	inline void pqts(const float&);
+	inline void sp(const float&);
+	inline void spt(const float&);
+	inline void sptq(const float&);
+	inline void spq(const float&);
+	inline void spqt(const float&);
+	inline void st(const float&);
+	inline void stp(const float&);
+	inline void stpq(const float&);
+	inline void stq(const float&);
+	inline void stqp(const float&);
+	inline void sq(const float&);
+	inline void sqp(const float&);
+	inline void sqpt(const float&);
+	inline void sqt(const float&);
+	inline void sqtp(const float&);
+	inline void tp(const float&);
+	inline void tps(const float&);
+	inline void tpsq(const float&);
+	inline void tpq(const float&);
+	inline void tpqs(const float&);
+	inline void ts(const float&);
+	inline void tsp(const float&);
+	inline void tspq(const float&);
+	inline void tsq(const float&);
+	inline void tsqp(const float&);
+	inline void tq(const float&);
+	inline void tqp(const float&);
+	inline void tqps(const float&);
+	inline void tqs(const float&);
+	inline void tqsp(const float&);
+	inline void qp(const float&);
+	inline void qps(const float&);
+	inline void qpst(const float&);
+	inline void qpt(const float&);
+	inline void qpts(const float&);
+	inline void qs(const float&);
+	inline void qsp(const float&);
+	inline void qspt(const float&);
+	inline void qst(const float&);
+	inline void qstp(const float&);
+	inline void qt(const float&);
+	inline void qtp(const float&);
+	inline void qtps(const float&);
+	inline void qts(const float&);
+	inline void qtsp(const float&);
 	inline void wx(const float&);
 	inline void wxy(const float&);
 	inline void wxyz(const float&);
@@ -2693,6 +3479,8 @@ struct dvec2
 	simddouble x, y;
 	simddouble& r = x;
 	simddouble& g = y;
+	simddouble& s = x;
+	simddouble& t = y;
 
 	dvec2() { x = (0.0);	y = (0.0); }
 	dvec2(const dvec2& other) = default;
@@ -2733,6 +3521,34 @@ struct dvec2
 	inline dvec3 rrr() const;
 	inline dvec4 rrrg() const;
 	inline dvec4 rrrr() const;
+	inline dvec2 ss() const;
+	inline dvec3 sss() const;
+	inline dvec4 ssss() const;
+	inline dvec4 ssst() const;
+	inline dvec3 sst() const;
+	inline dvec4 ssts() const;
+	inline dvec4 sstt() const;
+	inline dvec2 st() const;
+	inline dvec3 sts() const;
+	inline dvec4 stss() const;
+	inline dvec4 stst() const;
+	inline dvec3 stt() const;
+	inline dvec4 stts() const;
+	inline dvec4 sttt() const;
+	inline dvec2 ts() const;
+	inline dvec3 tss() const;
+	inline dvec4 tsss() const;
+	inline dvec4 tsst() const;
+	inline dvec3 tst() const;
+	inline dvec4 tsts() const;
+	inline dvec4 tstt() const;
+	inline dvec2 tt() const;
+	inline dvec3 tts() const;
+	inline dvec4 ttss() const;
+	inline dvec4 ttst() const;
+	inline dvec3 ttt() const;
+	inline dvec4 ttts() const;
+	inline dvec4 tttt() const;
 	inline dvec2 xx() const;
 	inline dvec3 xxx() const;
 	inline dvec4 xxxx() const;
@@ -2767,6 +3583,12 @@ struct dvec2
 	inline void rg(const simddouble&, const simddouble&);
 	inline void rg(const dvec2&);
 	inline void rg(const simddouble&);
+	inline void st(const simddouble&, const simddouble&);
+	inline void st(const dvec2&);
+	inline void st(const simddouble&);
+	inline void ts(const simddouble&, const simddouble&);
+	inline void ts(const dvec2&);
+	inline void ts(const simddouble&);
 	inline void xy(const simddouble&, const simddouble&);
 	inline void xy(const dvec2&);
 	inline void xy(const simddouble&);
@@ -2776,6 +3598,8 @@ struct dvec2
 #ifndef USE_SCALAR
 	inline void gr(const double&);
 	inline void rg(const double&);
+	inline void st(const double&);
+	inline void ts(const double&);
 	inline void xy(const double&);
 	inline void yx(const double&);
 #endif
@@ -2809,6 +3633,9 @@ struct dvec3
 	simddouble& r = x;
 	simddouble& g = y;
 	simddouble& b = z;
+	simddouble& s = x;
+	simddouble& t = y;
+	simddouble& p = z;
 
 	dvec3() { x = (0.0); y = (0.0); z = (0.0); }
 	dvec3(const dvec3& other) = default;
@@ -2951,6 +3778,124 @@ struct dvec3
 	inline dvec4 rrrb() const;
 	inline dvec4 rrrg() const;
 	inline dvec4 rrrr() const;
+
+	inline dvec2 ss() const;
+	inline dvec3 sss() const;
+	inline dvec4 ssss() const;
+	inline dvec4 ssst() const;
+	inline dvec4 sssp() const;
+	inline dvec3 sst() const;
+	inline dvec4 ssts() const;
+	inline dvec4 sstt() const;
+	inline dvec4 sstp() const;
+	inline dvec3 ssp() const;
+	inline dvec4 ssps() const;
+	inline dvec4 sspt() const;
+	inline dvec4 sspp() const;
+	inline dvec2 st() const;
+	inline dvec3 sts() const;
+	inline dvec4 stss() const;
+	inline dvec4 stst() const;
+	inline dvec4 stsp() const;
+	inline dvec3 stt() const;
+	inline dvec4 stts() const;
+	inline dvec4 sttt() const;
+	inline dvec4 sttp() const;
+	inline dvec3 stp() const;
+	inline dvec4 stps() const;
+	inline dvec4 stpt() const;
+	inline dvec4 stpp() const;
+	inline dvec2 sp() const;
+	inline dvec3 sps() const;
+	inline dvec4 spss() const;
+	inline dvec4 spst() const;
+	inline dvec4 spsp() const;
+	inline dvec3 spt() const;
+	inline dvec4 spts() const;
+	inline dvec4 sptt() const;
+	inline dvec4 sptp() const;
+	inline dvec3 spp() const;
+	inline dvec4 spps() const;
+	inline dvec4 sppt() const;
+	inline dvec4 sppp() const;
+	inline dvec2 ts() const;
+	inline dvec3 tss() const;
+	inline dvec4 tsss() const;
+	inline dvec4 tsst() const;
+	inline dvec4 tssp() const;
+	inline dvec3 tst() const;
+	inline dvec4 tsts() const;
+	inline dvec4 tstt() const;
+	inline dvec4 tstp() const;
+	inline dvec3 tsp() const;
+	inline dvec4 tsps() const;
+	inline dvec4 tspt() const;
+	inline dvec4 tspp() const;
+	inline dvec2 tt() const;
+	inline dvec3 tts() const;
+	inline dvec4 ttss() const;
+	inline dvec4 ttst() const;
+	inline dvec4 ttsp() const;
+	inline dvec3 ttt() const;
+	inline dvec4 ttts() const;
+	inline dvec4 tttt() const;
+	inline dvec4 tttp() const;
+	inline dvec3 ttp() const;
+	inline dvec4 ttps() const;
+	inline dvec4 ttpt() const;
+	inline dvec4 ttpp() const;
+	inline dvec2 tp() const;
+	inline dvec3 tps() const;
+	inline dvec4 tpss() const;
+	inline dvec4 tpst() const;
+	inline dvec4 tpsp() const;
+	inline dvec3 tpt() const;
+	inline dvec4 tpts() const;
+	inline dvec4 tptt() const;
+	inline dvec4 tptp() const;
+	inline dvec3 tpp() const;
+	inline dvec4 tpps() const;
+	inline dvec4 tppt() const;
+	inline dvec4 tppp() const;
+	inline dvec2 ps() const;
+	inline dvec3 pss() const;
+	inline dvec4 psss() const;
+	inline dvec4 psst() const;
+	inline dvec4 pssp() const;
+	inline dvec3 pst() const;
+	inline dvec4 psts() const;
+	inline dvec4 pstt() const;
+	inline dvec4 pstp() const;
+	inline dvec3 psp() const;
+	inline dvec4 psps() const;
+	inline dvec4 pspt() const;
+	inline dvec4 pspp() const;
+	inline dvec2 pt() const;
+	inline dvec3 pts() const;
+	inline dvec4 ptss() const;
+	inline dvec4 ptst() const;
+	inline dvec4 ptsp() const;
+	inline dvec3 ptt() const;
+	inline dvec4 ptts() const;
+	inline dvec4 pttt() const;
+	inline dvec4 pttp() const;
+	inline dvec3 ptp() const;
+	inline dvec4 ptps() const;
+	inline dvec4 ptpt() const;
+	inline dvec4 ptpp() const;
+	inline dvec2 pp() const;
+	inline dvec3 pps() const;
+	inline dvec4 ppss() const;
+	inline dvec4 ppst() const;
+	inline dvec4 ppsp() const;
+	inline dvec3 ppt() const;
+	inline dvec4 ppts() const;
+	inline dvec4 pptt() const;
+	inline dvec4 pptp() const;
+	inline dvec3 ppp() const;
+	inline dvec4 ppps() const;
+	inline dvec4 pppt() const;
+	inline dvec4 pppp() const;
 	inline dvec2 xx() const;
 	inline dvec3 xxx() const;
 	inline dvec4 xxxx() const;
@@ -3104,6 +4049,42 @@ struct dvec3
 	inline void rgb(const simddouble&, const simddouble&, const simddouble&);
 	inline void rgb(const dvec3&);
 	inline void rgb(const simddouble&);
+	inline void st(const simddouble&, const simddouble&);
+	inline void st(const dvec2&);
+	inline void st(const simddouble&);
+	inline void stp(const simddouble&, const simddouble&, const simddouble&);
+	inline void stp(const dvec3&);
+	inline void stp(const simddouble&);
+	inline void sp(const simddouble&, const simddouble&);
+	inline void sp(const dvec2&);
+	inline void sp(const simddouble&);
+	inline void spt(const simddouble&, const simddouble&, const simddouble&);
+	inline void spt(const dvec3&);
+	inline void spt(const simddouble&);
+	inline void ts(const simddouble&, const simddouble&);
+	inline void ts(const dvec2&);
+	inline void ts(const simddouble&);
+	inline void tsp(const simddouble&, const simddouble&, const simddouble&);
+	inline void tsp(const dvec3&);
+	inline void tsp(const simddouble&);
+	inline void tp(const simddouble&, const simddouble&);
+	inline void tp(const dvec2&);
+	inline void tp(const simddouble&);
+	inline void tps(const simddouble&, const simddouble&, const simddouble&);
+	inline void tps(const dvec3&);
+	inline void tps(const simddouble&);
+	inline void ps(const simddouble&, const simddouble&);
+	inline void ps(const dvec2&);
+	inline void ps(const simddouble&);
+	inline void pst(const simddouble&, const simddouble&, const simddouble&);
+	inline void pst(const dvec3&);
+	inline void pst(const simddouble&);
+	inline void pt(const simddouble&, const simddouble&);
+	inline void pt(const dvec2&);
+	inline void pt(const simddouble&);
+	inline void pts(const simddouble&, const simddouble&, const simddouble&);
+	inline void pts(const dvec3&);
+	inline void pts(const simddouble&);
 	inline void xy(const simddouble&, const simddouble&);
 	inline void xy(const dvec2&);
 	inline void xy(const simddouble&);
@@ -3153,6 +4134,18 @@ struct dvec3
 	inline void rbg(const double&);
 	inline void rg(const double&);
 	inline void rgb(const double&);
+	inline void st(const double&);
+	inline void stp(const double&);
+	inline void sp(const double&);
+	inline void spt(const double&);
+	inline void ts(const double&);
+	inline void tsp(const double&);
+	inline void tp(const double&);
+	inline void tps(const double&);
+	inline void ps(const double&);
+	inline void pst(const double&);
+	inline void pt(const double&);
+	inline void pts(const double&);
 	inline void xy(const double&);
 	inline void xyz(const double&);
 	inline void xz(const double&);
@@ -3200,6 +4193,10 @@ struct dvec4
 	simddouble& g = y;
 	simddouble& b = z;
 	simddouble& a = w;
+	simddouble& s = x;
+	simddouble& t = y;
+	simddouble& p = z;
+	simddouble& q = w;
 
 	dvec4() { x = (0.0);	y = (0.0);	z = (0.0);	w = (0.0); }
 	dvec4(const dvec4& other) = default;
@@ -3571,6 +4568,342 @@ struct dvec4
 	inline dvec4 rrrb() const;
 	inline dvec4 rrrg() const;
 	inline dvec4 rrrr() const;
+	inline dvec2 qq() const;
+	inline dvec3 qqq() const;
+	inline dvec4 qqqq() const;
+	inline dvec4 qqqs() const;
+	inline dvec4 qqqt() const;
+	inline dvec4 qqqp() const;
+	inline dvec3 qqs() const;
+	inline dvec4 qqsq() const;
+	inline dvec4 qqss() const;
+	inline dvec4 qqst() const;
+	inline dvec4 qqsp() const;
+	inline dvec3 qqt() const;
+	inline dvec4 qqtq() const;
+	inline dvec4 qqts() const;
+	inline dvec4 qqtt() const;
+	inline dvec4 qqtp() const;
+	inline dvec3 qqp() const;
+	inline dvec4 qqpq() const;
+	inline dvec4 qqps() const;
+	inline dvec4 qqpt() const;
+	inline dvec4 qqpp() const;
+	inline dvec2 qs() const;
+	inline dvec3 qsq() const;
+	inline dvec4 qsqq() const;
+	inline dvec4 qsqs() const;
+	inline dvec4 qsqt() const;
+	inline dvec4 qsqp() const;
+	inline dvec3 qss() const;
+	inline dvec4 qssq() const;
+	inline dvec4 qsss() const;
+	inline dvec4 qsst() const;
+	inline dvec4 qssp() const;
+	inline dvec3 qst() const;
+	inline dvec4 qstq() const;
+	inline dvec4 qsts() const;
+	inline dvec4 qstt() const;
+	inline dvec4 qstp() const;
+	inline dvec3 qsp() const;
+	inline dvec4 qspq() const;
+	inline dvec4 qsps() const;
+	inline dvec4 qspt() const;
+	inline dvec4 qspp() const;
+	inline dvec2 qt() const;
+	inline dvec3 qtq() const;
+	inline dvec4 qtqq() const;
+	inline dvec4 qtqs() const;
+	inline dvec4 qtqt() const;
+	inline dvec4 qtqp() const;
+	inline dvec3 qts() const;
+	inline dvec4 qtsq() const;
+	inline dvec4 qtss() const;
+	inline dvec4 qtst() const;
+	inline dvec4 qtsp() const;
+	inline dvec3 qtt() const;
+	inline dvec4 qttq() const;
+	inline dvec4 qtts() const;
+	inline dvec4 qttt() const;
+	inline dvec4 qttp() const;
+	inline dvec3 qtp() const;
+	inline dvec4 qtpq() const;
+	inline dvec4 qtps() const;
+	inline dvec4 qtpt() const;
+	inline dvec4 qtpp() const;
+	inline dvec2 qp() const;
+	inline dvec3 qpq() const;
+	inline dvec4 qpqq() const;
+	inline dvec4 qpqs() const;
+	inline dvec4 qpqt() const;
+	inline dvec4 qpqp() const;
+	inline dvec3 qps() const;
+	inline dvec4 qpsq() const;
+	inline dvec4 qpss() const;
+	inline dvec4 qpst() const;
+	inline dvec4 qpsp() const;
+	inline dvec3 qpt() const;
+	inline dvec4 qptq() const;
+	inline dvec4 qpts() const;
+	inline dvec4 qptt() const;
+	inline dvec4 qptp() const;
+	inline dvec3 qpp() const;
+	inline dvec4 qppq() const;
+	inline dvec4 qpps() const;
+	inline dvec4 qppt() const;
+	inline dvec4 qppp() const;
+	inline dvec2 sq() const;
+	inline dvec3 sqq() const;
+	inline dvec4 sqqq() const;
+	inline dvec4 sqqs() const;
+	inline dvec4 sqqt() const;
+	inline dvec4 sqqp() const;
+	inline dvec3 sqs() const;
+	inline dvec4 sqsq() const;
+	inline dvec4 sqss() const;
+	inline dvec4 sqst() const;
+	inline dvec4 sqsp() const;
+	inline dvec3 sqt() const;
+	inline dvec4 sqtq() const;
+	inline dvec4 sqts() const;
+	inline dvec4 sqtt() const;
+	inline dvec4 sqtp() const;
+	inline dvec3 sqp() const;
+	inline dvec4 sqpq() const;
+	inline dvec4 sqps() const;
+	inline dvec4 sqpt() const;
+	inline dvec4 sqpp() const;
+	inline dvec2 ss() const;
+	inline dvec3 ssq() const;
+	inline dvec4 ssqq() const;
+	inline dvec4 ssqs() const;
+	inline dvec4 ssqt() const;
+	inline dvec4 ssqp() const;
+	inline dvec3 sss() const;
+	inline dvec4 sssq() const;
+	inline dvec4 ssss() const;
+	inline dvec4 ssst() const;
+	inline dvec4 sssp() const;
+	inline dvec3 sst() const;
+	inline dvec4 sstq() const;
+	inline dvec4 ssts() const;
+	inline dvec4 sstt() const;
+	inline dvec4 sstp() const;
+	inline dvec3 ssp() const;
+	inline dvec4 sspq() const;
+	inline dvec4 ssps() const;
+	inline dvec4 sspt() const;
+	inline dvec4 sspp() const;
+	inline dvec2 st() const;
+	inline dvec3 stq() const;
+	inline dvec4 stqq() const;
+	inline dvec4 stqs() const;
+	inline dvec4 stqt() const;
+	inline dvec4 stqp() const;
+	inline dvec3 sts() const;
+	inline dvec4 stsq() const;
+	inline dvec4 stss() const;
+	inline dvec4 stst() const;
+	inline dvec4 stsp() const;
+	inline dvec3 stt() const;
+	inline dvec4 sttq() const;
+	inline dvec4 stts() const;
+	inline dvec4 sttt() const;
+	inline dvec4 sttp() const;
+	inline dvec3 stp() const;
+	inline dvec4 stpq() const;
+	inline dvec4 stps() const;
+	inline dvec4 stpt() const;
+	inline dvec4 stpp() const;
+	inline dvec2 sp() const;
+	inline dvec3 spq() const;
+	inline dvec4 spqq() const;
+	inline dvec4 spqs() const;
+	inline dvec4 spqt() const;
+	inline dvec4 spqp() const;
+	inline dvec3 sps() const;
+	inline dvec4 spsq() const;
+	inline dvec4 spss() const;
+	inline dvec4 spst() const;
+	inline dvec4 spsp() const;
+	inline dvec3 spt() const;
+	inline dvec4 sptq() const;
+	inline dvec4 spts() const;
+	inline dvec4 sptt() const;
+	inline dvec4 sptp() const;
+	inline dvec3 spp() const;
+	inline dvec4 sppq() const;
+	inline dvec4 spps() const;
+	inline dvec4 sppt() const;
+	inline dvec4 sppp() const;
+	inline dvec2 tq() const;
+	inline dvec3 tqq() const;
+	inline dvec4 tqqq() const;
+	inline dvec4 tqqs() const;
+	inline dvec4 tqqt() const;
+	inline dvec4 tqqp() const;
+	inline dvec3 tqs() const;
+	inline dvec4 tqsq() const;
+	inline dvec4 tqss() const;
+	inline dvec4 tqst() const;
+	inline dvec4 tqsp() const;
+	inline dvec3 tqt() const;
+	inline dvec4 tqtq() const;
+	inline dvec4 tqts() const;
+	inline dvec4 tqtt() const;
+	inline dvec4 tqtp() const;
+	inline dvec3 tqp() const;
+	inline dvec4 tqpq() const;
+	inline dvec4 tqps() const;
+	inline dvec4 tqpt() const;
+	inline dvec4 tqpp() const;
+	inline dvec2 ts() const;
+	inline dvec3 tsq() const;
+	inline dvec4 tsqq() const;
+	inline dvec4 tsqs() const;
+	inline dvec4 tsqt() const;
+	inline dvec4 tsqp() const;
+	inline dvec3 tss() const;
+	inline dvec4 tssq() const;
+	inline dvec4 tsss() const;
+	inline dvec4 tsst() const;
+	inline dvec4 tssp() const;
+	inline dvec3 tst() const;
+	inline dvec4 tstq() const;
+	inline dvec4 tsts() const;
+	inline dvec4 tstt() const;
+	inline dvec4 tstp() const;
+	inline dvec3 tsp() const;
+	inline dvec4 tspq() const;
+	inline dvec4 tsps() const;
+	inline dvec4 tspt() const;
+	inline dvec4 tspp() const;
+	inline dvec2 tt() const;
+	inline dvec3 ttq() const;
+	inline dvec4 ttqq() const;
+	inline dvec4 ttqs() const;
+	inline dvec4 ttqt() const;
+	inline dvec4 ttqp() const;
+	inline dvec3 tts() const;
+	inline dvec4 ttsq() const;
+	inline dvec4 ttss() const;
+	inline dvec4 ttst() const;
+	inline dvec4 ttsp() const;
+	inline dvec3 ttt() const;
+	inline dvec4 tttq() const;
+	inline dvec4 ttts() const;
+	inline dvec4 tttt() const;
+	inline dvec4 tttp() const;
+	inline dvec3 ttp() const;
+	inline dvec4 ttpq() const;
+	inline dvec4 ttps() const;
+	inline dvec4 ttpt() const;
+	inline dvec4 ttpp() const;
+	inline dvec2 tp() const;
+	inline dvec3 tpq() const;
+	inline dvec4 tpqq() const;
+	inline dvec4 tpqs() const;
+	inline dvec4 tpqt() const;
+	inline dvec4 tpqp() const;
+	inline dvec3 tps() const;
+	inline dvec4 tpsq() const;
+	inline dvec4 tpss() const;
+	inline dvec4 tpst() const;
+	inline dvec4 tpsp() const;
+	inline dvec3 tpt() const;
+	inline dvec4 tptq() const;
+	inline dvec4 tpts() const;
+	inline dvec4 tptt() const;
+	inline dvec4 tptp() const;
+	inline dvec3 tpp() const;
+	inline dvec4 tppq() const;
+	inline dvec4 tpps() const;
+	inline dvec4 tppt() const;
+	inline dvec4 tppp() const;
+	inline dvec2 pq() const;
+	inline dvec3 pqq() const;
+	inline dvec4 pqqq() const;
+	inline dvec4 pqqs() const;
+	inline dvec4 pqqt() const;
+	inline dvec4 pqqp() const;
+	inline dvec3 pqs() const;
+	inline dvec4 pqsq() const;
+	inline dvec4 pqss() const;
+	inline dvec4 pqst() const;
+	inline dvec4 pqsp() const;
+	inline dvec3 pqt() const;
+	inline dvec4 pqtq() const;
+	inline dvec4 pqts() const;
+	inline dvec4 pqtt() const;
+	inline dvec4 pqtp() const;
+	inline dvec3 pqp() const;
+	inline dvec4 pqpq() const;
+	inline dvec4 pqps() const;
+	inline dvec4 pqpt() const;
+	inline dvec4 pqpp() const;
+	inline dvec2 ps() const;
+	inline dvec3 psq() const;
+	inline dvec4 psqq() const;
+	inline dvec4 psqs() const;
+	inline dvec4 psqt() const;
+	inline dvec4 psqp() const;
+	inline dvec3 pss() const;
+	inline dvec4 pssq() const;
+	inline dvec4 psss() const;
+	inline dvec4 psst() const;
+	inline dvec4 pssp() const;
+	inline dvec3 pst() const;
+	inline dvec4 pstq() const;
+	inline dvec4 psts() const;
+	inline dvec4 pstt() const;
+	inline dvec4 pstp() const;
+	inline dvec3 psp() const;
+	inline dvec4 pspq() const;
+	inline dvec4 psps() const;
+	inline dvec4 pspt() const;
+	inline dvec4 pspp() const;
+	inline dvec2 pt() const;
+	inline dvec3 ptq() const;
+	inline dvec4 ptqq() const;
+	inline dvec4 ptqs() const;
+	inline dvec4 ptqt() const;
+	inline dvec4 ptqp() const;
+	inline dvec3 pts() const;
+	inline dvec4 ptsq() const;
+	inline dvec4 ptss() const;
+	inline dvec4 ptst() const;
+	inline dvec4 ptsp() const;
+	inline dvec3 ptt() const;
+	inline dvec4 pttq() const;
+	inline dvec4 ptts() const;
+	inline dvec4 pttt() const;
+	inline dvec4 pttp() const;
+	inline dvec3 ptp() const;
+	inline dvec4 ptpq() const;
+	inline dvec4 ptps() const;
+	inline dvec4 ptpt() const;
+	inline dvec4 ptpp() const;
+	inline dvec2 pp() const;
+	inline dvec3 ppq() const;
+	inline dvec4 ppqq() const;
+	inline dvec4 ppqs() const;
+	inline dvec4 ppqt() const;
+	inline dvec4 ppqp() const;
+	inline dvec3 pps() const;
+	inline dvec4 ppsq() const;
+	inline dvec4 ppss() const;
+	inline dvec4 ppst() const;
+	inline dvec4 ppsp() const;
+	inline dvec3 ppt() const;
+	inline dvec4 pptq() const;
+	inline dvec4 ppts() const;
+	inline dvec4 pptt() const;
+	inline dvec4 pptp() const;
+	inline dvec3 ppp() const;
+	inline dvec4 pppq() const;
+	inline dvec4 ppps() const;
+	inline dvec4 pppt() const;
+	inline dvec4 pppp() const;
 	inline dvec2 ww() const;
 	inline dvec3 www() const;
 	inline dvec4 wwww() const;
@@ -4087,6 +5420,186 @@ struct dvec4
 	inline void rgba(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
 	inline void rgba(const dvec4&);
 	inline void rgba(const simddouble&);
+	inline void qs(const simddouble&, const simddouble&);
+	inline void qs(const dvec2&);
+	inline void qs(const simddouble&);
+	inline void qst(const simddouble&, const simddouble&, const simddouble&);
+	inline void qst(const dvec3&);
+	inline void qst(const simddouble&);
+	inline void qstp(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void qstp(const dvec4&);
+	inline void qstp(const simddouble&);
+	inline void qsp(const simddouble&, const simddouble&, const simddouble&);
+	inline void qsp(const dvec3&);
+	inline void qsp(const simddouble&);
+	inline void qspt(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void qspt(const dvec4&);
+	inline void qspt(const simddouble&);
+	inline void qt(const simddouble&, const simddouble&);
+	inline void qt(const dvec2&);
+	inline void qt(const simddouble&);
+	inline void qts(const simddouble&, const simddouble&, const simddouble&);
+	inline void qts(const dvec3&);
+	inline void qts(const simddouble&);
+	inline void qtsp(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void qtsp(const dvec4&);
+	inline void qtsp(const simddouble&);
+	inline void qtp(const simddouble&, const simddouble&, const simddouble&);
+	inline void qtp(const dvec3&);
+	inline void qtp(const simddouble&);
+	inline void qtps(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void qtps(const dvec4&);
+	inline void qtps(const simddouble&);
+	inline void qp(const simddouble&, const simddouble&);
+	inline void qp(const dvec2&);
+	inline void qp(const simddouble&);
+	inline void qps(const simddouble&, const simddouble&, const simddouble&);
+	inline void qps(const dvec3&);
+	inline void qps(const simddouble&);
+	inline void qpst(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void qpst(const dvec4&);
+	inline void qpst(const simddouble&);
+	inline void qpt(const simddouble&, const simddouble&, const simddouble&);
+	inline void qpt(const dvec3&);
+	inline void qpt(const simddouble&);
+	inline void qpts(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void qpts(const dvec4&);
+	inline void qpts(const simddouble&);
+	inline void sq(const simddouble&, const simddouble&);
+	inline void sq(const dvec2&);
+	inline void sq(const simddouble&);
+	inline void sqt(const simddouble&, const simddouble&, const simddouble&);
+	inline void sqt(const dvec3&);
+	inline void sqt(const simddouble&);
+	inline void sqtp(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void sqtp(const dvec4&);
+	inline void sqtp(const simddouble&);
+	inline void sqp(const simddouble&, const simddouble&, const simddouble&);
+	inline void sqp(const dvec3&);
+	inline void sqp(const simddouble&);
+	inline void sqpt(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void sqpt(const dvec4&);
+	inline void sqpt(const simddouble&);
+	inline void st(const simddouble&, const simddouble&);
+	inline void st(const dvec2&);
+	inline void st(const simddouble&);
+	inline void stq(const simddouble&, const simddouble&, const simddouble&);
+	inline void stq(const dvec3&);
+	inline void stq(const simddouble&);
+	inline void stqp(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void stqp(const dvec4&);
+	inline void stqp(const simddouble&);
+	inline void stp(const simddouble&, const simddouble&, const simddouble&);
+	inline void stp(const dvec3&);
+	inline void stp(const simddouble&);
+	inline void stpq(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void stpq(const dvec4&);
+	inline void stpq(const simddouble&);
+	inline void sp(const simddouble&, const simddouble&);
+	inline void sp(const dvec2&);
+	inline void sp(const simddouble&);
+	inline void spq(const simddouble&, const simddouble&, const simddouble&);
+	inline void spq(const dvec3&);
+	inline void spq(const simddouble&);
+	inline void spqt(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void spqt(const dvec4&);
+	inline void spqt(const simddouble&);
+	inline void spt(const simddouble&, const simddouble&, const simddouble&);
+	inline void spt(const dvec3&);
+	inline void spt(const simddouble&);
+	inline void sptq(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void sptq(const dvec4&);
+	inline void sptq(const simddouble&);
+	inline void tq(const simddouble&, const simddouble&);
+	inline void tq(const dvec2&);
+	inline void tq(const simddouble&);
+	inline void tqs(const simddouble&, const simddouble&, const simddouble&);
+	inline void tqs(const dvec3&);
+	inline void tqs(const simddouble&);
+	inline void tqsp(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void tqsp(const dvec4&);
+	inline void tqsp(const simddouble&);
+	inline void tqp(const simddouble&, const simddouble&, const simddouble&);
+	inline void tqp(const dvec3&);
+	inline void tqp(const simddouble&);
+	inline void tqps(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void tqps(const dvec4&);
+	inline void tqps(const simddouble&);
+	inline void ts(const simddouble&, const simddouble&);
+	inline void ts(const dvec2&);
+	inline void ts(const simddouble&);
+	inline void tsq(const simddouble&, const simddouble&, const simddouble&);
+	inline void tsq(const dvec3&);
+	inline void tsq(const simddouble&);
+	inline void tsqp(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void tsqp(const dvec4&);
+	inline void tsqp(const simddouble&);
+	inline void tsp(const simddouble&, const simddouble&, const simddouble&);
+	inline void tsp(const dvec3&);
+	inline void tsp(const simddouble&);
+	inline void tspq(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void tspq(const dvec4&);
+	inline void tspq(const simddouble&);
+	inline void tp(const simddouble&, const simddouble&);
+	inline void tp(const dvec2&);
+	inline void tp(const simddouble&);
+	inline void tpq(const simddouble&, const simddouble&, const simddouble&);
+	inline void tpq(const dvec3&);
+	inline void tpq(const simddouble&);
+	inline void tpqs(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void tpqs(const dvec4&);
+	inline void tpqs(const simddouble&);
+	inline void tps(const simddouble&, const simddouble&, const simddouble&);
+	inline void tps(const dvec3&);
+	inline void tps(const simddouble&);
+	inline void tpsq(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void tpsq(const dvec4&);
+	inline void tpsq(const simddouble&);
+	inline void pq(const simddouble&, const simddouble&);
+	inline void pq(const dvec2&);
+	inline void pq(const simddouble&);
+	inline void pqs(const simddouble&, const simddouble&, const simddouble&);
+	inline void pqs(const dvec3&);
+	inline void pqs(const simddouble&);
+	inline void pqst(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void pqst(const dvec4&);
+	inline void pqst(const simddouble&);
+	inline void pqt(const simddouble&, const simddouble&, const simddouble&);
+	inline void pqt(const dvec3&);
+	inline void pqt(const simddouble&);
+	inline void pqts(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void pqts(const dvec4&);
+	inline void pqts(const simddouble&);
+	inline void ps(const simddouble&, const simddouble&);
+	inline void ps(const dvec2&);
+	inline void ps(const simddouble&);
+	inline void psq(const simddouble&, const simddouble&, const simddouble&);
+	inline void psq(const dvec3&);
+	inline void psq(const simddouble&);
+	inline void psqt(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void psqt(const dvec4&);
+	inline void psqt(const simddouble&);
+	inline void pst(const simddouble&, const simddouble&, const simddouble&);
+	inline void pst(const dvec3&);
+	inline void pst(const simddouble&);
+	inline void pstq(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void pstq(const dvec4&);
+	inline void pstq(const simddouble&);
+	inline void pt(const simddouble&, const simddouble&);
+	inline void pt(const dvec2&);
+	inline void pt(const simddouble&);
+	inline void ptq(const simddouble&, const simddouble&, const simddouble&);
+	inline void ptq(const dvec3&);
+	inline void ptq(const simddouble&);
+	inline void ptqs(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void ptqs(const dvec4&);
+	inline void ptqs(const simddouble&);
+	inline void pts(const simddouble&, const simddouble&, const simddouble&);
+	inline void pts(const dvec3&);
+	inline void pts(const simddouble&);
+	inline void ptsq(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void ptsq(const dvec4&);
+	inline void ptsq(const simddouble&);
 	inline void wx(const simddouble&, const simddouble&);
 	inline void wx(const dvec2&);
 	inline void wx(const simddouble&);
@@ -4328,6 +5841,66 @@ struct dvec4
 	inline void rgab(const double&);
 	inline void rgb(const double&);
 	inline void rgba(const double&);
+	inline void qs(const double&);
+	inline void qst(const double&);
+	inline void qstp(const double&);
+	inline void qsp(const double&);
+	inline void qspt(const double&);
+	inline void qt(const double&);
+	inline void qts(const double&);
+	inline void qtsp(const double&);
+	inline void qtp(const double&);
+	inline void qtps(const double&);
+	inline void qp(const double&);
+	inline void qps(const double&);
+	inline void qpst(const double&);
+	inline void qpt(const double&);
+	inline void qpts(const double&);
+	inline void sq(const double&);
+	inline void sqt(const double&);
+	inline void sqtp(const double&);
+	inline void sqp(const double&);
+	inline void sqpt(const double&);
+	inline void st(const double&);
+	inline void stq(const double&);
+	inline void stqp(const double&);
+	inline void stp(const double&);
+	inline void stpq(const double&);
+	inline void sp(const double&);
+	inline void spq(const double&);
+	inline void spqt(const double&);
+	inline void spt(const double&);
+	inline void sptq(const double&);
+	inline void tq(const double&);
+	inline void tqs(const double&);
+	inline void tqsp(const double&);
+	inline void tqp(const double&);
+	inline void tqps(const double&);
+	inline void ts(const double&);
+	inline void tsq(const double&);
+	inline void tsqp(const double&);
+	inline void tsp(const double&);
+	inline void tspq(const double&);
+	inline void tp(const double&);
+	inline void tpq(const double&);
+	inline void tpqs(const double&);
+	inline void tps(const double&);
+	inline void tpsq(const double&);
+	inline void pq(const double&);
+	inline void pqs(const double&);
+	inline void pqst(const double&);
+	inline void pqt(const double&);
+	inline void pqts(const double&);
+	inline void ps(const double&);
+	inline void psq(const double&);
+	inline void psqt(const double&);
+	inline void pst(const double&);
+	inline void pstq(const double&);
+	inline void pt(const double&);
+	inline void ptq(const double&);
+	inline void ptqs(const double&);
+	inline void pts(const double&);
+	inline void ptsq(const double&);
 	inline void wx(const double&);
 	inline void wxy(const double&);
 	inline void wxyz(const double&);
@@ -4428,6 +6001,8 @@ struct ivec2
 	simdint x, y;
 	simdint& r = x;
 	simdint& g = y;
+	simdint& s = x;
+	simdint& t = y;
 
 	ivec2() { x = (0);	y = (0); }
 	ivec2(const ivec2& other) = default;
@@ -4468,6 +6043,34 @@ struct ivec2
 	inline ivec3 rrr() const;
 	inline ivec4 rrrg() const;
 	inline ivec4 rrrr() const;
+	inline ivec2 ss() const;
+	inline ivec3 sss() const;
+	inline ivec4 ssss() const;
+	inline ivec4 ssst() const;
+	inline ivec3 sst() const;
+	inline ivec4 ssts() const;
+	inline ivec4 sstt() const;
+	inline ivec2 st() const;
+	inline ivec3 sts() const;
+	inline ivec4 stss() const;
+	inline ivec4 stst() const;
+	inline ivec3 stt() const;
+	inline ivec4 stts() const;
+	inline ivec4 sttt() const;
+	inline ivec2 ts() const;
+	inline ivec3 tss() const;
+	inline ivec4 tsss() const;
+	inline ivec4 tsst() const;
+	inline ivec3 tst() const;
+	inline ivec4 tsts() const;
+	inline ivec4 tstt() const;
+	inline ivec2 tt() const;
+	inline ivec3 tts() const;
+	inline ivec4 ttss() const;
+	inline ivec4 ttst() const;
+	inline ivec3 ttt() const;
+	inline ivec4 ttts() const;
+	inline ivec4 tttt() const;
 	inline ivec2 xx() const;
 	inline ivec3 xxx() const;
 	inline ivec4 xxxx() const;
@@ -4502,6 +6105,12 @@ struct ivec2
 	inline void rg(const simdint&, const simdint&);
 	inline void rg(const ivec2&);
 	inline void rg(const simdint&);
+	inline void st(const simdint&, const simdint&);
+	inline void st(const ivec2&);
+	inline void st(const simdint&);
+	inline void ts(const simdint&, const simdint&);
+	inline void ts(const ivec2&);
+	inline void ts(const simdint&);
 	inline void xy(const simdint&, const simdint&);
 	inline void xy(const ivec2&);
 	inline void xy(const simdint&);
@@ -4511,6 +6120,8 @@ struct ivec2
 #ifndef USE_SCALAR
 	inline void gr(const int&);
 	inline void rg(const int&);
+	inline void st(const int&);
+	inline void ts(const int&);
 	inline void xy(const int&);
 	inline void yx(const int&);
 #endif
@@ -4544,6 +6155,9 @@ struct ivec3
 	simdint& r = x;
 	simdint& g = y;
 	simdint& b = z;
+	simdint& s = x;
+	simdint& t = y;
+	simdint& p = z;
 
 	ivec3() { x = (0); y = (0); z = (0); }
 	ivec3(const ivec3& other) = default;
@@ -4686,6 +6300,123 @@ struct ivec3
 	inline ivec4 rrrb() const;
 	inline ivec4 rrrg() const;
 	inline ivec4 rrrr() const;
+	inline ivec2 ss() const;
+	inline ivec3 sss() const;
+	inline ivec4 ssss() const;
+	inline ivec4 ssst() const;
+	inline ivec4 sssp() const;
+	inline ivec3 sst() const;
+	inline ivec4 ssts() const;
+	inline ivec4 sstt() const;
+	inline ivec4 sstp() const;
+	inline ivec3 ssp() const;
+	inline ivec4 ssps() const;
+	inline ivec4 sspt() const;
+	inline ivec4 sspp() const;
+	inline ivec2 st() const;
+	inline ivec3 sts() const;
+	inline ivec4 stss() const;
+	inline ivec4 stst() const;
+	inline ivec4 stsp() const;
+	inline ivec3 stt() const;
+	inline ivec4 stts() const;
+	inline ivec4 sttt() const;
+	inline ivec4 sttp() const;
+	inline ivec3 stp() const;
+	inline ivec4 stps() const;
+	inline ivec4 stpt() const;
+	inline ivec4 stpp() const;
+	inline ivec2 sp() const;
+	inline ivec3 sps() const;
+	inline ivec4 spss() const;
+	inline ivec4 spst() const;
+	inline ivec4 spsp() const;
+	inline ivec3 spt() const;
+	inline ivec4 spts() const;
+	inline ivec4 sptt() const;
+	inline ivec4 sptp() const;
+	inline ivec3 spp() const;
+	inline ivec4 spps() const;
+	inline ivec4 sppt() const;
+	inline ivec4 sppp() const;
+	inline ivec2 ts() const;
+	inline ivec3 tss() const;
+	inline ivec4 tsss() const;
+	inline ivec4 tsst() const;
+	inline ivec4 tssp() const;
+	inline ivec3 tst() const;
+	inline ivec4 tsts() const;
+	inline ivec4 tstt() const;
+	inline ivec4 tstp() const;
+	inline ivec3 tsp() const;
+	inline ivec4 tsps() const;
+	inline ivec4 tspt() const;
+	inline ivec4 tspp() const;
+	inline ivec2 tt() const;
+	inline ivec3 tts() const;
+	inline ivec4 ttss() const;
+	inline ivec4 ttst() const;
+	inline ivec4 ttsp() const;
+	inline ivec3 ttt() const;
+	inline ivec4 ttts() const;
+	inline ivec4 tttt() const;
+	inline ivec4 tttp() const;
+	inline ivec3 ttp() const;
+	inline ivec4 ttps() const;
+	inline ivec4 ttpt() const;
+	inline ivec4 ttpp() const;
+	inline ivec2 tp() const;
+	inline ivec3 tps() const;
+	inline ivec4 tpss() const;
+	inline ivec4 tpst() const;
+	inline ivec4 tpsp() const;
+	inline ivec3 tpt() const;
+	inline ivec4 tpts() const;
+	inline ivec4 tptt() const;
+	inline ivec4 tptp() const;
+	inline ivec3 tpp() const;
+	inline ivec4 tpps() const;
+	inline ivec4 tppt() const;
+	inline ivec4 tppp() const;
+	inline ivec2 ps() const;
+	inline ivec3 pss() const;
+	inline ivec4 psss() const;
+	inline ivec4 psst() const;
+	inline ivec4 pssp() const;
+	inline ivec3 pst() const;
+	inline ivec4 psts() const;
+	inline ivec4 pstt() const;
+	inline ivec4 pstp() const;
+	inline ivec3 psp() const;
+	inline ivec4 psps() const;
+	inline ivec4 pspt() const;
+	inline ivec4 pspp() const;
+	inline ivec2 pt() const;
+	inline ivec3 pts() const;
+	inline ivec4 ptss() const;
+	inline ivec4 ptst() const;
+	inline ivec4 ptsp() const;
+	inline ivec3 ptt() const;
+	inline ivec4 ptts() const;
+	inline ivec4 pttt() const;
+	inline ivec4 pttp() const;
+	inline ivec3 ptp() const;
+	inline ivec4 ptps() const;
+	inline ivec4 ptpt() const;
+	inline ivec4 ptpp() const;
+	inline ivec2 pp() const;
+	inline ivec3 pps() const;
+	inline ivec4 ppss() const;
+	inline ivec4 ppst() const;
+	inline ivec4 ppsp() const;
+	inline ivec3 ppt() const;
+	inline ivec4 ppts() const;
+	inline ivec4 pptt() const;
+	inline ivec4 pptp() const;
+	inline ivec3 ppp() const;
+	inline ivec4 ppps() const;
+	inline ivec4 pppt() const;
+	inline ivec4 pppp() const;
 	inline ivec2 xx() const;
 	inline ivec3 xxx() const;
 	inline ivec4 xxxx() const;
@@ -4839,6 +6570,42 @@ struct ivec3
 	inline void rgb(const simdint&, const simdint&, const simdint&);
 	inline void rgb(const ivec3&);
 	inline void rgb(const simdint&);
+	inline void st(const simdint&, const simdint&);
+	inline void st(const ivec2&);
+	inline void st(const simdint&);
+	inline void stp(const simdint&, const simdint&, const simdint&);
+	inline void stp(const ivec3&);
+	inline void stp(const simdint&);
+	inline void sp(const simdint&, const simdint&);
+	inline void sp(const ivec2&);
+	inline void sp(const simdint&);
+	inline void spt(const simdint&, const simdint&, const simdint&);
+	inline void spt(const ivec3&);
+	inline void spt(const simdint&);
+	inline void ts(const simdint&, const simdint&);
+	inline void ts(const ivec2&);
+	inline void ts(const simdint&);
+	inline void tsp(const simdint&, const simdint&, const simdint&);
+	inline void tsp(const ivec3&);
+	inline void tsp(const simdint&);
+	inline void tp(const simdint&, const simdint&);
+	inline void tp(const ivec2&);
+	inline void tp(const simdint&);
+	inline void tps(const simdint&, const simdint&, const simdint&);
+	inline void tps(const ivec3&);
+	inline void tps(const simdint&);
+	inline void ps(const simdint&, const simdint&);
+	inline void ps(const ivec2&);
+	inline void ps(const simdint&);
+	inline void pst(const simdint&, const simdint&, const simdint&);
+	inline void pst(const ivec3&);
+	inline void pst(const simdint&);
+	inline void pt(const simdint&, const simdint&);
+	inline void pt(const ivec2&);
+	inline void pt(const simdint&);
+	inline void pts(const simdint&, const simdint&, const simdint&);
+	inline void pts(const ivec3&);
+	inline void pts(const simdint&);
 	inline void xy(const simdint&, const simdint&);
 	inline void xy(const ivec2&);
 	inline void xy(const simdint&);
@@ -4888,6 +6655,18 @@ struct ivec3
 	inline void rbg(const int&);
 	inline void rg(const int&);
 	inline void rgb(const int&);
+	inline void st(const int&);
+	inline void stp(const int&);
+	inline void sp(const int&);
+	inline void spt(const int&);
+	inline void ts(const int&);
+	inline void tsp(const int&);
+	inline void tp(const int&);
+	inline void tps(const int&);
+	inline void ps(const int&);
+	inline void pst(const int&);
+	inline void pt(const int&);
+	inline void pts(const int&);
 	inline void xy(const int&);
 	inline void xyz(const int&);
 	inline void xz(const int&);
@@ -4935,6 +6714,10 @@ struct ivec4
 	simdint& g = y;
 	simdint& b = z;
 	simdint& a = w;
+	simdint& s = x;
+	simdint& t = y;
+	simdint& p = z;
+	simdint& q = w;
 
 	ivec4() { x = (0);	y = (0);	z = (0);	w = (0); }
 	ivec4(const ivec4& other) = default;
@@ -5306,6 +7089,342 @@ struct ivec4
 	inline ivec4 rrrb() const;
 	inline ivec4 rrrg() const;
 	inline ivec4 rrrr() const;
+	inline ivec2 qq() const;
+	inline ivec3 qqq() const;
+	inline ivec4 qqqq() const;
+	inline ivec4 qqqs() const;
+	inline ivec4 qqqt() const;
+	inline ivec4 qqqp() const;
+	inline ivec3 qqs() const;
+	inline ivec4 qqsq() const;
+	inline ivec4 qqss() const;
+	inline ivec4 qqst() const;
+	inline ivec4 qqsp() const;
+	inline ivec3 qqt() const;
+	inline ivec4 qqtq() const;
+	inline ivec4 qqts() const;
+	inline ivec4 qqtt() const;
+	inline ivec4 qqtp() const;
+	inline ivec3 qqp() const;
+	inline ivec4 qqpq() const;
+	inline ivec4 qqps() const;
+	inline ivec4 qqpt() const;
+	inline ivec4 qqpp() const;
+	inline ivec2 qs() const;
+	inline ivec3 qsq() const;
+	inline ivec4 qsqq() const;
+	inline ivec4 qsqs() const;
+	inline ivec4 qsqt() const;
+	inline ivec4 qsqp() const;
+	inline ivec3 qss() const;
+	inline ivec4 qssq() const;
+	inline ivec4 qsss() const;
+	inline ivec4 qsst() const;
+	inline ivec4 qssp() const;
+	inline ivec3 qst() const;
+	inline ivec4 qstq() const;
+	inline ivec4 qsts() const;
+	inline ivec4 qstt() const;
+	inline ivec4 qstp() const;
+	inline ivec3 qsp() const;
+	inline ivec4 qspq() const;
+	inline ivec4 qsps() const;
+	inline ivec4 qspt() const;
+	inline ivec4 qspp() const;
+	inline ivec2 qt() const;
+	inline ivec3 qtq() const;
+	inline ivec4 qtqq() const;
+	inline ivec4 qtqs() const;
+	inline ivec4 qtqt() const;
+	inline ivec4 qtqp() const;
+	inline ivec3 qts() const;
+	inline ivec4 qtsq() const;
+	inline ivec4 qtss() const;
+	inline ivec4 qtst() const;
+	inline ivec4 qtsp() const;
+	inline ivec3 qtt() const;
+	inline ivec4 qttq() const;
+	inline ivec4 qtts() const;
+	inline ivec4 qttt() const;
+	inline ivec4 qttp() const;
+	inline ivec3 qtp() const;
+	inline ivec4 qtpq() const;
+	inline ivec4 qtps() const;
+	inline ivec4 qtpt() const;
+	inline ivec4 qtpp() const;
+	inline ivec2 qp() const;
+	inline ivec3 qpq() const;
+	inline ivec4 qpqq() const;
+	inline ivec4 qpqs() const;
+	inline ivec4 qpqt() const;
+	inline ivec4 qpqp() const;
+	inline ivec3 qps() const;
+	inline ivec4 qpsq() const;
+	inline ivec4 qpss() const;
+	inline ivec4 qpst() const;
+	inline ivec4 qpsp() const;
+	inline ivec3 qpt() const;
+	inline ivec4 qptq() const;
+	inline ivec4 qpts() const;
+	inline ivec4 qptt() const;
+	inline ivec4 qptp() const;
+	inline ivec3 qpp() const;
+	inline ivec4 qppq() const;
+	inline ivec4 qpps() const;
+	inline ivec4 qppt() const;
+	inline ivec4 qppp() const;
+	inline ivec2 sq() const;
+	inline ivec3 sqq() const;
+	inline ivec4 sqqq() const;
+	inline ivec4 sqqs() const;
+	inline ivec4 sqqt() const;
+	inline ivec4 sqqp() const;
+	inline ivec3 sqs() const;
+	inline ivec4 sqsq() const;
+	inline ivec4 sqss() const;
+	inline ivec4 sqst() const;
+	inline ivec4 sqsp() const;
+	inline ivec3 sqt() const;
+	inline ivec4 sqtq() const;
+	inline ivec4 sqts() const;
+	inline ivec4 sqtt() const;
+	inline ivec4 sqtp() const;
+	inline ivec3 sqp() const;
+	inline ivec4 sqpq() const;
+	inline ivec4 sqps() const;
+	inline ivec4 sqpt() const;
+	inline ivec4 sqpp() const;
+	inline ivec2 ss() const;
+	inline ivec3 ssq() const;
+	inline ivec4 ssqq() const;
+	inline ivec4 ssqs() const;
+	inline ivec4 ssqt() const;
+	inline ivec4 ssqp() const;
+	inline ivec3 sss() const;
+	inline ivec4 sssq() const;
+	inline ivec4 ssss() const;
+	inline ivec4 ssst() const;
+	inline ivec4 sssp() const;
+	inline ivec3 sst() const;
+	inline ivec4 sstq() const;
+	inline ivec4 ssts() const;
+	inline ivec4 sstt() const;
+	inline ivec4 sstp() const;
+	inline ivec3 ssp() const;
+	inline ivec4 sspq() const;
+	inline ivec4 ssps() const;
+	inline ivec4 sspt() const;
+	inline ivec4 sspp() const;
+	inline ivec2 st() const;
+	inline ivec3 stq() const;
+	inline ivec4 stqq() const;
+	inline ivec4 stqs() const;
+	inline ivec4 stqt() const;
+	inline ivec4 stqp() const;
+	inline ivec3 sts() const;
+	inline ivec4 stsq() const;
+	inline ivec4 stss() const;
+	inline ivec4 stst() const;
+	inline ivec4 stsp() const;
+	inline ivec3 stt() const;
+	inline ivec4 sttq() const;
+	inline ivec4 stts() const;
+	inline ivec4 sttt() const;
+	inline ivec4 sttp() const;
+	inline ivec3 stp() const;
+	inline ivec4 stpq() const;
+	inline ivec4 stps() const;
+	inline ivec4 stpt() const;
+	inline ivec4 stpp() const;
+	inline ivec2 sp() const;
+	inline ivec3 spq() const;
+	inline ivec4 spqq() const;
+	inline ivec4 spqs() const;
+	inline ivec4 spqt() const;
+	inline ivec4 spqp() const;
+	inline ivec3 sps() const;
+	inline ivec4 spsq() const;
+	inline ivec4 spss() const;
+	inline ivec4 spst() const;
+	inline ivec4 spsp() const;
+	inline ivec3 spt() const;
+	inline ivec4 sptq() const;
+	inline ivec4 spts() const;
+	inline ivec4 sptt() const;
+	inline ivec4 sptp() const;
+	inline ivec3 spp() const;
+	inline ivec4 sppq() const;
+	inline ivec4 spps() const;
+	inline ivec4 sppt() const;
+	inline ivec4 sppp() const;
+	inline ivec2 tq() const;
+	inline ivec3 tqq() const;
+	inline ivec4 tqqq() const;
+	inline ivec4 tqqs() const;
+	inline ivec4 tqqt() const;
+	inline ivec4 tqqp() const;
+	inline ivec3 tqs() const;
+	inline ivec4 tqsq() const;
+	inline ivec4 tqss() const;
+	inline ivec4 tqst() const;
+	inline ivec4 tqsp() const;
+	inline ivec3 tqt() const;
+	inline ivec4 tqtq() const;
+	inline ivec4 tqts() const;
+	inline ivec4 tqtt() const;
+	inline ivec4 tqtp() const;
+	inline ivec3 tqp() const;
+	inline ivec4 tqpq() const;
+	inline ivec4 tqps() const;
+	inline ivec4 tqpt() const;
+	inline ivec4 tqpp() const;
+	inline ivec2 ts() const;
+	inline ivec3 tsq() const;
+	inline ivec4 tsqq() const;
+	inline ivec4 tsqs() const;
+	inline ivec4 tsqt() const;
+	inline ivec4 tsqp() const;
+	inline ivec3 tss() const;
+	inline ivec4 tssq() const;
+	inline ivec4 tsss() const;
+	inline ivec4 tsst() const;
+	inline ivec4 tssp() const;
+	inline ivec3 tst() const;
+	inline ivec4 tstq() const;
+	inline ivec4 tsts() const;
+	inline ivec4 tstt() const;
+	inline ivec4 tstp() const;
+	inline ivec3 tsp() const;
+	inline ivec4 tspq() const;
+	inline ivec4 tsps() const;
+	inline ivec4 tspt() const;
+	inline ivec4 tspp() const;
+	inline ivec2 tt() const;
+	inline ivec3 ttq() const;
+	inline ivec4 ttqq() const;
+	inline ivec4 ttqs() const;
+	inline ivec4 ttqt() const;
+	inline ivec4 ttqp() const;
+	inline ivec3 tts() const;
+	inline ivec4 ttsq() const;
+	inline ivec4 ttss() const;
+	inline ivec4 ttst() const;
+	inline ivec4 ttsp() const;
+	inline ivec3 ttt() const;
+	inline ivec4 tttq() const;
+	inline ivec4 ttts() const;
+	inline ivec4 tttt() const;
+	inline ivec4 tttp() const;
+	inline ivec3 ttp() const;
+	inline ivec4 ttpq() const;
+	inline ivec4 ttps() const;
+	inline ivec4 ttpt() const;
+	inline ivec4 ttpp() const;
+	inline ivec2 tp() const;
+	inline ivec3 tpq() const;
+	inline ivec4 tpqq() const;
+	inline ivec4 tpqs() const;
+	inline ivec4 tpqt() const;
+	inline ivec4 tpqp() const;
+	inline ivec3 tps() const;
+	inline ivec4 tpsq() const;
+	inline ivec4 tpss() const;
+	inline ivec4 tpst() const;
+	inline ivec4 tpsp() const;
+	inline ivec3 tpt() const;
+	inline ivec4 tptq() const;
+	inline ivec4 tpts() const;
+	inline ivec4 tptt() const;
+	inline ivec4 tptp() const;
+	inline ivec3 tpp() const;
+	inline ivec4 tppq() const;
+	inline ivec4 tpps() const;
+	inline ivec4 tppt() const;
+	inline ivec4 tppp() const;
+	inline ivec2 pq() const;
+	inline ivec3 pqq() const;
+	inline ivec4 pqqq() const;
+	inline ivec4 pqqs() const;
+	inline ivec4 pqqt() const;
+	inline ivec4 pqqp() const;
+	inline ivec3 pqs() const;
+	inline ivec4 pqsq() const;
+	inline ivec4 pqss() const;
+	inline ivec4 pqst() const;
+	inline ivec4 pqsp() const;
+	inline ivec3 pqt() const;
+	inline ivec4 pqtq() const;
+	inline ivec4 pqts() const;
+	inline ivec4 pqtt() const;
+	inline ivec4 pqtp() const;
+	inline ivec3 pqp() const;
+	inline ivec4 pqpq() const;
+	inline ivec4 pqps() const;
+	inline ivec4 pqpt() const;
+	inline ivec4 pqpp() const;
+	inline ivec2 ps() const;
+	inline ivec3 psq() const;
+	inline ivec4 psqq() const;
+	inline ivec4 psqs() const;
+	inline ivec4 psqt() const;
+	inline ivec4 psqp() const;
+	inline ivec3 pss() const;
+	inline ivec4 pssq() const;
+	inline ivec4 psss() const;
+	inline ivec4 psst() const;
+	inline ivec4 pssp() const;
+	inline ivec3 pst() const;
+	inline ivec4 pstq() const;
+	inline ivec4 psts() const;
+	inline ivec4 pstt() const;
+	inline ivec4 pstp() const;
+	inline ivec3 psp() const;
+	inline ivec4 pspq() const;
+	inline ivec4 psps() const;
+	inline ivec4 pspt() const;
+	inline ivec4 pspp() const;
+	inline ivec2 pt() const;
+	inline ivec3 ptq() const;
+	inline ivec4 ptqq() const;
+	inline ivec4 ptqs() const;
+	inline ivec4 ptqt() const;
+	inline ivec4 ptqp() const;
+	inline ivec3 pts() const;
+	inline ivec4 ptsq() const;
+	inline ivec4 ptss() const;
+	inline ivec4 ptst() const;
+	inline ivec4 ptsp() const;
+	inline ivec3 ptt() const;
+	inline ivec4 pttq() const;
+	inline ivec4 ptts() const;
+	inline ivec4 pttt() const;
+	inline ivec4 pttp() const;
+	inline ivec3 ptp() const;
+	inline ivec4 ptpq() const;
+	inline ivec4 ptps() const;
+	inline ivec4 ptpt() const;
+	inline ivec4 ptpp() const;
+	inline ivec2 pp() const;
+	inline ivec3 ppq() const;
+	inline ivec4 ppqq() const;
+	inline ivec4 ppqs() const;
+	inline ivec4 ppqt() const;
+	inline ivec4 ppqp() const;
+	inline ivec3 pps() const;
+	inline ivec4 ppsq() const;
+	inline ivec4 ppss() const;
+	inline ivec4 ppst() const;
+	inline ivec4 ppsp() const;
+	inline ivec3 ppt() const;
+	inline ivec4 pptq() const;
+	inline ivec4 ppts() const;
+	inline ivec4 pptt() const;
+	inline ivec4 pptp() const;
+	inline ivec3 ppp() const;
+	inline ivec4 pppq() const;
+	inline ivec4 ppps() const;
+	inline ivec4 pppt() const;
+	inline ivec4 pppp() const;
 	inline ivec2 ww() const;
 	inline ivec3 www() const;
 	inline ivec4 wwww() const;
@@ -5822,6 +7941,186 @@ struct ivec4
 	inline void rgba(const simdint&, const simdint&, const simdint&, const simdint&);
 	inline void rgba(const ivec4&);
 	inline void rgba(const simdint&);
+	inline void qs(const simdint&, const simdint&);
+	inline void qs(const ivec2&);
+	inline void qs(const simdint&);
+	inline void qst(const simdint&, const simdint&, const simdint&);
+	inline void qst(const ivec3&);
+	inline void qst(const simdint&);
+	inline void qstp(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void qstp(const ivec4&);
+	inline void qstp(const simdint&);
+	inline void qsp(const simdint&, const simdint&, const simdint&);
+	inline void qsp(const ivec3&);
+	inline void qsp(const simdint&);
+	inline void qspt(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void qspt(const ivec4&);
+	inline void qspt(const simdint&);
+	inline void qt(const simdint&, const simdint&);
+	inline void qt(const ivec2&);
+	inline void qt(const simdint&);
+	inline void qts(const simdint&, const simdint&, const simdint&);
+	inline void qts(const ivec3&);
+	inline void qts(const simdint&);
+	inline void qtsp(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void qtsp(const ivec4&);
+	inline void qtsp(const simdint&);
+	inline void qtp(const simdint&, const simdint&, const simdint&);
+	inline void qtp(const ivec3&);
+	inline void qtp(const simdint&);
+	inline void qtps(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void qtps(const ivec4&);
+	inline void qtps(const simdint&);
+	inline void qp(const simdint&, const simdint&);
+	inline void qp(const ivec2&);
+	inline void qp(const simdint&);
+	inline void qps(const simdint&, const simdint&, const simdint&);
+	inline void qps(const ivec3&);
+	inline void qps(const simdint&);
+	inline void qpst(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void qpst(const ivec4&);
+	inline void qpst(const simdint&);
+	inline void qpt(const simdint&, const simdint&, const simdint&);
+	inline void qpt(const ivec3&);
+	inline void qpt(const simdint&);
+	inline void qpts(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void qpts(const ivec4&);
+	inline void qpts(const simdint&);
+	inline void sq(const simdint&, const simdint&);
+	inline void sq(const ivec2&);
+	inline void sq(const simdint&);
+	inline void sqt(const simdint&, const simdint&, const simdint&);
+	inline void sqt(const ivec3&);
+	inline void sqt(const simdint&);
+	inline void sqtp(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void sqtp(const ivec4&);
+	inline void sqtp(const simdint&);
+	inline void sqp(const simdint&, const simdint&, const simdint&);
+	inline void sqp(const ivec3&);
+	inline void sqp(const simdint&);
+	inline void sqpt(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void sqpt(const ivec4&);
+	inline void sqpt(const simdint&);
+	inline void st(const simdint&, const simdint&);
+	inline void st(const ivec2&);
+	inline void st(const simdint&);
+	inline void stq(const simdint&, const simdint&, const simdint&);
+	inline void stq(const ivec3&);
+	inline void stq(const simdint&);
+	inline void stqp(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void stqp(const ivec4&);
+	inline void stqp(const simdint&);
+	inline void stp(const simdint&, const simdint&, const simdint&);
+	inline void stp(const ivec3&);
+	inline void stp(const simdint&);
+	inline void stpq(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void stpq(const ivec4&);
+	inline void stpq(const simdint&);
+	inline void sp(const simdint&, const simdint&);
+	inline void sp(const ivec2&);
+	inline void sp(const simdint&);
+	inline void spq(const simdint&, const simdint&, const simdint&);
+	inline void spq(const ivec3&);
+	inline void spq(const simdint&);
+	inline void spqt(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void spqt(const ivec4&);
+	inline void spqt(const simdint&);
+	inline void spt(const simdint&, const simdint&, const simdint&);
+	inline void spt(const ivec3&);
+	inline void spt(const simdint&);
+	inline void sptq(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void sptq(const ivec4&);
+	inline void sptq(const simdint&);
+	inline void tq(const simdint&, const simdint&);
+	inline void tq(const ivec2&);
+	inline void tq(const simdint&);
+	inline void tqs(const simdint&, const simdint&, const simdint&);
+	inline void tqs(const ivec3&);
+	inline void tqs(const simdint&);
+	inline void tqsp(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void tqsp(const ivec4&);
+	inline void tqsp(const simdint&);
+	inline void tqp(const simdint&, const simdint&, const simdint&);
+	inline void tqp(const ivec3&);
+	inline void tqp(const simdint&);
+	inline void tqps(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void tqps(const ivec4&);
+	inline void tqps(const simdint&);
+	inline void ts(const simdint&, const simdint&);
+	inline void ts(const ivec2&);
+	inline void ts(const simdint&);
+	inline void tsq(const simdint&, const simdint&, const simdint&);
+	inline void tsq(const ivec3&);
+	inline void tsq(const simdint&);
+	inline void tsqp(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void tsqp(const ivec4&);
+	inline void tsqp(const simdint&);
+	inline void tsp(const simdint&, const simdint&, const simdint&);
+	inline void tsp(const ivec3&);
+	inline void tsp(const simdint&);
+	inline void tspq(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void tspq(const ivec4&);
+	inline void tspq(const simdint&);
+	inline void tp(const simdint&, const simdint&);
+	inline void tp(const ivec2&);
+	inline void tp(const simdint&);
+	inline void tpq(const simdint&, const simdint&, const simdint&);
+	inline void tpq(const ivec3&);
+	inline void tpq(const simdint&);
+	inline void tpqs(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void tpqs(const ivec4&);
+	inline void tpqs(const simdint&);
+	inline void tps(const simdint&, const simdint&, const simdint&);
+	inline void tps(const ivec3&);
+	inline void tps(const simdint&);
+	inline void tpsq(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void tpsq(const ivec4&);
+	inline void tpsq(const simdint&);
+	inline void pq(const simdint&, const simdint&);
+	inline void pq(const ivec2&);
+	inline void pq(const simdint&);
+	inline void pqs(const simdint&, const simdint&, const simdint&);
+	inline void pqs(const ivec3&);
+	inline void pqs(const simdint&);
+	inline void pqst(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void pqst(const ivec4&);
+	inline void pqst(const simdint&);
+	inline void pqt(const simdint&, const simdint&, const simdint&);
+	inline void pqt(const ivec3&);
+	inline void pqt(const simdint&);
+	inline void pqts(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void pqts(const ivec4&);
+	inline void pqts(const simdint&);
+	inline void ps(const simdint&, const simdint&);
+	inline void ps(const ivec2&);
+	inline void ps(const simdint&);
+	inline void psq(const simdint&, const simdint&, const simdint&);
+	inline void psq(const ivec3&);
+	inline void psq(const simdint&);
+	inline void psqt(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void psqt(const ivec4&);
+	inline void psqt(const simdint&);
+	inline void pst(const simdint&, const simdint&, const simdint&);
+	inline void pst(const ivec3&);
+	inline void pst(const simdint&);
+	inline void pstq(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void pstq(const ivec4&);
+	inline void pstq(const simdint&);
+	inline void pt(const simdint&, const simdint&);
+	inline void pt(const ivec2&);
+	inline void pt(const simdint&);
+	inline void ptq(const simdint&, const simdint&, const simdint&);
+	inline void ptq(const ivec3&);
+	inline void ptq(const simdint&);
+	inline void ptqs(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void ptqs(const ivec4&);
+	inline void ptqs(const simdint&);
+	inline void pts(const simdint&, const simdint&, const simdint&);
+	inline void pts(const ivec3&);
+	inline void pts(const simdint&);
+	inline void ptsq(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void ptsq(const ivec4&);
+	inline void ptsq(const simdint&);
 	inline void wx(const simdint&, const simdint&);
 	inline void wx(const ivec2&);
 	inline void wx(const simdint&);
@@ -6063,6 +8362,66 @@ struct ivec4
 	inline void rgab(const int&);
 	inline void rgb(const int&);
 	inline void rgba(const int&);
+	inline void qs(const int&);
+	inline void qst(const int&);
+	inline void qstp(const int&);
+	inline void qsp(const int&);
+	inline void qspt(const int&);
+	inline void qt(const int&);
+	inline void qts(const int&);
+	inline void qtsp(const int&);
+	inline void qtp(const int&);
+	inline void qtps(const int&);
+	inline void qp(const int&);
+	inline void qps(const int&);
+	inline void qpst(const int&);
+	inline void qpt(const int&);
+	inline void qpts(const int&);
+	inline void sq(const int&);
+	inline void sqt(const int&);
+	inline void sqtp(const int&);
+	inline void sqp(const int&);
+	inline void sqpt(const int&);
+	inline void st(const int&);
+	inline void stq(const int&);
+	inline void stqp(const int&);
+	inline void stp(const int&);
+	inline void stpq(const int&);
+	inline void sp(const int&);
+	inline void spq(const int&);
+	inline void spqt(const int&);
+	inline void spt(const int&);
+	inline void sptq(const int&);
+	inline void tq(const int&);
+	inline void tqs(const int&);
+	inline void tqsp(const int&);
+	inline void tqp(const int&);
+	inline void tqps(const int&);
+	inline void ts(const int&);
+	inline void tsq(const int&);
+	inline void tsqp(const int&);
+	inline void tsp(const int&);
+	inline void tspq(const int&);
+	inline void tp(const int&);
+	inline void tpq(const int&);
+	inline void tpqs(const int&);
+	inline void tps(const int&);
+	inline void tpsq(const int&);
+	inline void pq(const int&);
+	inline void pqs(const int&);
+	inline void pqst(const int&);
+	inline void pqt(const int&);
+	inline void pqts(const int&);
+	inline void ps(const int&);
+	inline void psq(const int&);
+	inline void psqt(const int&);
+	inline void pst(const int&);
+	inline void pstq(const int&);
+	inline void pt(const int&);
+	inline void ptq(const int&);
+	inline void ptqs(const int&);
+	inline void pts(const int&);
+	inline void ptsq(const int&);
 	inline void wx(const int&);
 	inline void wxy(const int&);
 	inline void wxyz(const int&);
@@ -9063,6 +11422,34 @@ inline vec4 vec2::rrgr() const { return { r, r, g, r }; }
 inline vec3 vec2::rrr() const { return { r, r, r }; }
 inline vec4 vec2::rrrg() const { return { r, r, r, g }; }
 inline vec4 vec2::rrrr() const { return { r, r, r, r }; }
+inline vec2 vec2::ss() const { return { s, s }; }
+inline vec3 vec2::sss() const { return { s, s, s }; }
+inline vec4 vec2::ssss() const { return { s, s, s, s }; }
+inline vec4 vec2::ssst() const { return { s, s, s, t }; }
+inline vec3 vec2::sst() const { return { s, s, t }; }
+inline vec4 vec2::ssts() const { return { s, s, t, s }; }
+inline vec4 vec2::sstt() const { return { s, s, t, t }; }
+inline vec2 vec2::st() const { return { s, t }; }
+inline vec3 vec2::sts() const { return { s, t, s }; }
+inline vec4 vec2::stss() const { return { s, t, s, s }; }
+inline vec4 vec2::stst() const { return { s, t, s, t }; }
+inline vec3 vec2::stt() const { return { s, t, t }; }
+inline vec4 vec2::stts() const { return { s, t, t, s }; }
+inline vec4 vec2::sttt() const { return { s, t, t, t }; }
+inline vec2 vec2::ts() const { return { t, s }; }
+inline vec3 vec2::tss() const { return { t, s, s }; }
+inline vec4 vec2::tsss() const { return { t, s, s, s }; }
+inline vec4 vec2::tsst() const { return { t, s, s, t }; }
+inline vec3 vec2::tst() const { return { t, s, t }; }
+inline vec4 vec2::tsts() const { return { t, s, t, s }; }
+inline vec4 vec2::tstt() const { return { t, s, t, t }; }
+inline vec2 vec2::tt() const { return { t, t }; }
+inline vec3 vec2::tts() const { return { t, t, s }; }
+inline vec4 vec2::ttss() const { return { t, t, s, s }; }
+inline vec4 vec2::ttst() const { return { t, t, s, t }; }
+inline vec3 vec2::ttt() const { return { t, t, t }; }
+inline vec4 vec2::ttts() const { return { t, t, t, s }; }
+inline vec4 vec2::tttt() const { return { t, t, t, t }; }
 inline vec2 vec2::xx() const { return { x, x }; }
 inline vec3 vec2::xxx() const { return { x, x, x }; }
 inline vec4 vec2::xxxx() const { return { x, x, x, x }; }
@@ -9097,6 +11484,12 @@ inline void vec2::gr(const simdfloat& _val) { g = _val; r = _val; }
 inline void vec2::rg(const simdfloat& _val0, const simdfloat& _val1) { r = _val0; g = _val1; }
 inline void vec2::rg(const vec2& _val) { r = _val.x; g = _val.y; }
 inline void vec2::rg(const simdfloat& _val) { r = _val; g = _val; }
+inline void vec2::st(const simdfloat& _val0, const simdfloat& _val1) { s = _val0; t = _val1; }
+inline void vec2::st(const vec2& _val) { s = _val.s; t = _val.t; }
+inline void vec2::st(const simdfloat& _val) { s = _val; t = _val; }
+inline void vec2::ts(const simdfloat& _val0, const simdfloat& _val1) { t = _val0; s = _val1; }
+inline void vec2::ts(const vec2& _val) { t = _val.s; s = _val.t; }
+inline void vec2::ts(const simdfloat& _val) { t = _val; s = _val; }
 inline void vec2::xy(const simdfloat& _val0, const simdfloat& _val1) { x = _val0; y = _val1; }
 inline void vec2::xy(const vec2& _val) { x = _val.x; y = _val.y; }
 inline void vec2::xy(const simdfloat& _val) { x = _val; y = _val; }
@@ -9106,6 +11499,8 @@ inline void vec2::yx(const simdfloat& _val) { y = _val; x = _val; }
 #ifndef USE_SCALAR
 inline void vec2::gr(const float& _val) { const simdfloat temp = simd_set1_float(_val); g = temp; r = temp; }
 inline void vec2::rg(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; g = temp; }
+inline void vec2::st(const float& _val) { const simdfloat temp = simd_set1_float(_val); s = temp; t = temp; }
+inline void vec2::ts(const float& _val) { const simdfloat temp = simd_set1_float(_val); t = temp; s = temp; }
 inline void vec2::xy(const float& _val) { const simdfloat temp = simd_set1_float(_val); x = temp; y = temp; }
 inline void vec2::yx(const float& _val) { const simdfloat temp = simd_set1_float(_val); y = temp; x = temp; }
 #endif
@@ -9232,6 +11627,124 @@ inline vec3 vec3::rrr() const { return { r, r, r }; }
 inline vec4 vec3::rrrb() const { return { r, r, r, b }; }
 inline vec4 vec3::rrrg() const { return { r, r, r, g }; }
 inline vec4 vec3::rrrr() const { return { r, r, r, r }; }
+
+inline vec2 vec3::ss() const { return { s, s }; }
+inline vec3 vec3::sss() const { return { s, s, s }; }
+inline vec4 vec3::ssss() const { return { s, s, s, s }; }
+inline vec4 vec3::ssst() const { return { s, s, s, t }; }
+inline vec4 vec3::sssp() const { return { s, s, s, p }; }
+inline vec3 vec3::sst() const { return { s, s, t }; }
+inline vec4 vec3::ssts() const { return { s, s, t, s }; }
+inline vec4 vec3::sstt() const { return { s, s, t, t }; }
+inline vec4 vec3::sstp() const { return { s, s, t, p }; }
+inline vec3 vec3::ssp() const { return { s, s, p }; }
+inline vec4 vec3::ssps() const { return { s, s, p, s }; }
+inline vec4 vec3::sspt() const { return { s, s, p, t }; }
+inline vec4 vec3::sspp() const { return { s, s, p, p }; }
+inline vec2 vec3::st() const { return { s, t }; }
+inline vec3 vec3::sts() const { return { s, t, s }; }
+inline vec4 vec3::stss() const { return { s, t, s, s }; }
+inline vec4 vec3::stst() const { return { s, t, s, t }; }
+inline vec4 vec3::stsp() const { return { s, t, s, p }; }
+inline vec3 vec3::stt() const { return { s, t, t }; }
+inline vec4 vec3::stts() const { return { s, t, t, s }; }
+inline vec4 vec3::sttt() const { return { s, t, t, t }; }
+inline vec4 vec3::sttp() const { return { s, t, t, p }; }
+inline vec3 vec3::stp() const { return { s, t, p }; }
+inline vec4 vec3::stps() const { return { s, t, p, s }; }
+inline vec4 vec3::stpt() const { return { s, t, p, t }; }
+inline vec4 vec3::stpp() const { return { s, t, p, p }; }
+inline vec2 vec3::sp() const { return { s, p }; }
+inline vec3 vec3::sps() const { return { s, p, s }; }
+inline vec4 vec3::spss() const { return { s, p, s, s }; }
+inline vec4 vec3::spst() const { return { s, p, s, t }; }
+inline vec4 vec3::spsp() const { return { s, p, s, p }; }
+inline vec3 vec3::spt() const { return { s, p, t }; }
+inline vec4 vec3::spts() const { return { s, p, t, s }; }
+inline vec4 vec3::sptt() const { return { s, p, t, t }; }
+inline vec4 vec3::sptp() const { return { s, p, t, p }; }
+inline vec3 vec3::spp() const { return { s, p, p }; }
+inline vec4 vec3::spps() const { return { s, p, p, s }; }
+inline vec4 vec3::sppt() const { return { s, p, p, t }; }
+inline vec4 vec3::sppp() const { return { s, p, p, p }; }
+inline vec2 vec3::ts() const { return { t, s }; }
+inline vec3 vec3::tss() const { return { t, s, s }; }
+inline vec4 vec3::tsss() const { return { t, s, s, s }; }
+inline vec4 vec3::tsst() const { return { t, s, s, t }; }
+inline vec4 vec3::tssp() const { return { t, s, s, p }; }
+inline vec3 vec3::tst() const { return { t, s, t }; }
+inline vec4 vec3::tsts() const { return { t, s, t, s }; }
+inline vec4 vec3::tstt() const { return { t, s, t, t }; }
+inline vec4 vec3::tstp() const { return { t, s, t, p }; }
+inline vec3 vec3::tsp() const { return { t, s, p }; }
+inline vec4 vec3::tsps() const { return { t, s, p, s }; }
+inline vec4 vec3::tspt() const { return { t, s, p, t }; }
+inline vec4 vec3::tspp() const { return { t, s, p, p }; }
+inline vec2 vec3::tt() const { return { t, t }; }
+inline vec3 vec3::tts() const { return { t, t, s }; }
+inline vec4 vec3::ttss() const { return { t, t, s, s }; }
+inline vec4 vec3::ttst() const { return { t, t, s, t }; }
+inline vec4 vec3::ttsp() const { return { t, t, s, p }; }
+inline vec3 vec3::ttt() const { return { t, t, t }; }
+inline vec4 vec3::ttts() const { return { t, t, t, s }; }
+inline vec4 vec3::tttt() const { return { t, t, t, t }; }
+inline vec4 vec3::tttp() const { return { t, t, t, p }; }
+inline vec3 vec3::ttp() const { return { t, t, p }; }
+inline vec4 vec3::ttps() const { return { t, t, p, s }; }
+inline vec4 vec3::ttpt() const { return { t, t, p, t }; }
+inline vec4 vec3::ttpp() const { return { t, t, p, p }; }
+inline vec2 vec3::tp() const { return { t, p }; }
+inline vec3 vec3::tps() const { return { t, p, s }; }
+inline vec4 vec3::tpss() const { return { t, p, s, s }; }
+inline vec4 vec3::tpst() const { return { t, p, s, t }; }
+inline vec4 vec3::tpsp() const { return { t, p, s, p }; }
+inline vec3 vec3::tpt() const { return { t, p, t }; }
+inline vec4 vec3::tpts() const { return { t, p, t, s }; }
+inline vec4 vec3::tptt() const { return { t, p, t, t }; }
+inline vec4 vec3::tptp() const { return { t, p, t, p }; }
+inline vec3 vec3::tpp() const { return { t, p, p }; }
+inline vec4 vec3::tpps() const { return { t, p, p, s }; }
+inline vec4 vec3::tppt() const { return { t, p, p, t }; }
+inline vec4 vec3::tppp() const { return { t, p, p, p }; }
+inline vec2 vec3::ps() const { return { p, s }; }
+inline vec3 vec3::pss() const { return { p, s, s }; }
+inline vec4 vec3::psss() const { return { p, s, s, s }; }
+inline vec4 vec3::psst() const { return { p, s, s, t }; }
+inline vec4 vec3::pssp() const { return { p, s, s, p }; }
+inline vec3 vec3::pst() const { return { p, s, t }; }
+inline vec4 vec3::psts() const { return { p, s, t, s }; }
+inline vec4 vec3::pstt() const { return { p, s, t, t }; }
+inline vec4 vec3::pstp() const { return { p, s, t, p }; }
+inline vec3 vec3::psp() const { return { p, s, p }; }
+inline vec4 vec3::psps() const { return { p, s, p, s }; }
+inline vec4 vec3::pspt() const { return { p, s, p, t }; }
+inline vec4 vec3::pspp() const { return { p, s, p, p }; }
+inline vec2 vec3::pt() const { return { p, t }; }
+inline vec3 vec3::pts() const { return { p, t, s }; }
+inline vec4 vec3::ptss() const { return { p, t, s, s }; }
+inline vec4 vec3::ptst() const { return { p, t, s, t }; }
+inline vec4 vec3::ptsp() const { return { p, t, s, p }; }
+inline vec3 vec3::ptt() const { return { p, t, t }; }
+inline vec4 vec3::ptts() const { return { p, t, t, s }; }
+inline vec4 vec3::pttt() const { return { p, t, t, t }; }
+inline vec4 vec3::pttp() const { return { p, t, t, p }; }
+inline vec3 vec3::ptp() const { return { p, t, p }; }
+inline vec4 vec3::ptps() const { return { p, t, p, s }; }
+inline vec4 vec3::ptpt() const { return { p, t, p, t }; }
+inline vec4 vec3::ptpp() const { return { p, t, p, p }; }
+inline vec2 vec3::pp() const { return { p, p }; }
+inline vec3 vec3::pps() const { return { p, p, s }; }
+inline vec4 vec3::ppss() const { return { p, p, s, s }; }
+inline vec4 vec3::ppst() const { return { p, p, s, t }; }
+inline vec4 vec3::ppsp() const { return { p, p, s, p }; }
+inline vec3 vec3::ppt() const { return { p, p, t }; }
+inline vec4 vec3::ppts() const { return { p, p, t, s }; }
+inline vec4 vec3::pptt() const { return { p, p, t, t }; }
+inline vec4 vec3::pptp() const { return { p, p, t, p }; }
+inline vec3 vec3::ppp() const { return { p, p, p }; }
+inline vec4 vec3::ppps() const { return { p, p, p, s }; }
+inline vec4 vec3::pppt() const { return { p, p, p, t }; }
+inline vec4 vec3::pppp() const { return { p, p, p, p }; }
 inline vec2 vec3::xx() const { return { x, x }; }
 inline vec3 vec3::xxx() const { return { x, x, x }; }
 inline vec4 vec3::xxxx() const { return { x, x, x, x }; }
@@ -9385,6 +11898,43 @@ inline void vec3::rg(const simdfloat& _val) { r = _val; g = _val; }
 inline void vec3::rgb(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { r = _val0; g = _val1; b = _val2; }
 inline void vec3::rgb(const vec3& _val) { r = _val.x; g = _val.y; b = _val.z; }
 inline void vec3::rgb(const simdfloat& _val) { r = _val; g = _val; b = _val; }
+inline void vec3::st(const simdfloat& _val0, const simdfloat& _val1) { s = _val0; t = _val1; }
+inline void vec3::st(const vec2& _val) { s = _val.s; t = _val.t; }
+inline void vec3::st(const simdfloat& _val) { s = _val; t = _val; }
+inline void vec3::stp(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { s = _val0; t = _val1; p = _val2; }
+inline void vec3::stp(const vec3& _val) { s = _val.s; t = _val.t; p = _val.p; }
+inline void vec3::stp(const simdfloat& _val) { s = _val; t = _val; p = _val; }
+inline void vec3::sp(const simdfloat& _val0, const simdfloat& _val1) { s = _val0; p = _val1; }
+inline void vec3::sp(const vec2& _val) { s = _val.s; p = _val.t; }
+inline void vec3::sp(const simdfloat& _val) { s = _val; p = _val; }
+inline void vec3::spt(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { s = _val0; p = _val1; t = _val2; }
+inline void vec3::spt(const vec3& _val) { s = _val.s; p = _val.t; t = _val.p; }
+inline void vec3::spt(const simdfloat& _val) { s = _val; p = _val; t = _val; }
+inline void vec3::ts(const simdfloat& _val0, const simdfloat& _val1) { t = _val0; s = _val1; }
+inline void vec3::ts(const vec2& _val) { t = _val.s; s = _val.t; }
+inline void vec3::ts(const simdfloat& _val) { t = _val; s = _val; }
+inline void vec3::tsp(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { t = _val0; s = _val1; p = _val2; }
+inline void vec3::tsp(const vec3& _val) { t = _val.s; s = _val.t; p = _val.p; }
+inline void vec3::tsp(const simdfloat& _val) { t = _val; s = _val; p = _val; }
+inline void vec3::tp(const simdfloat& _val0, const simdfloat& _val1) { t = _val0; p = _val1; }
+inline void vec3::tp(const vec2& _val) { t = _val.s; p = _val.t; }
+inline void vec3::tp(const simdfloat& _val) { t = _val; p = _val; }
+inline void vec3::tps(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { t = _val0; p = _val1; s = _val2; }
+inline void vec3::tps(const vec3& _val) { t = _val.s; p = _val.t; s = _val.p; }
+inline void vec3::tps(const simdfloat& _val) { t = _val; p = _val; s = _val; }
+inline void vec3::ps(const simdfloat& _val0, const simdfloat& _val1) { p = _val0; s = _val1; }
+inline void vec3::ps(const vec2& _val) { p = _val.s; s = _val.t; }
+inline void vec3::ps(const simdfloat& _val) { p = _val; s = _val; }
+inline void vec3::pst(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { p = _val0; s = _val1; t = _val2; }
+inline void vec3::pst(const vec3& _val) { p = _val.s; s = _val.t; t = _val.p; }
+inline void vec3::pst(const simdfloat& _val) { p = _val; s = _val; t = _val; }
+inline void vec3::pt(const simdfloat& _val0, const simdfloat& _val1) { p = _val0; t = _val1; }
+inline void vec3::pt(const vec2& _val) { p = _val.s; t = _val.t; }
+inline void vec3::pt(const simdfloat& _val) { p = _val; t = _val; }
+inline void vec3::pts(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { p = _val0; t = _val1; s = _val2; }
+inline void vec3::pts(const vec3& _val) { p = _val.s; t = _val.t; s = _val.p; }
+inline void vec3::pts(const simdfloat& _val) { p = _val; t = _val; s = _val; }
+
 inline void vec3::xy(const simdfloat& _val0, const simdfloat& _val1) { x = _val0; y = _val1; }
 inline void vec3::xy(const vec2& _val) { x = _val.x; y = _val.y; }
 inline void vec3::xy(const simdfloat& _val) { x = _val; y = _val; }
@@ -9434,6 +11984,18 @@ inline void vec3::rb(const float& _val) { const simdfloat temp = simd_set1_float
 inline void vec3::rbg(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; b = temp; g = temp; }
 inline void vec3::rg(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; g = temp; }
 inline void vec3::rgb(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; g = temp; b = temp; }
+inline void vec3::st(const float& _val) { const simdfloat temp = simd_set1_float(_val); s = temp; t = temp; }
+inline void vec3::stp(const float& _val) { const simdfloat temp = simd_set1_float(_val); s = temp; t = temp; p = temp; }
+inline void vec3::sp(const float& _val) { const simdfloat temp = simd_set1_float(_val); s = temp; p = temp; }
+inline void vec3::spt(const float& _val) { const simdfloat temp = simd_set1_float(_val); s = temp; p = temp; t = temp; }
+inline void vec3::ts(const float& _val) { const simdfloat temp = simd_set1_float(_val); t = temp; s = temp; }
+inline void vec3::tsp(const float& _val) { const simdfloat temp = simd_set1_float(_val); t = temp; s = temp; p = temp; }
+inline void vec3::tp(const float& _val) { const simdfloat temp = simd_set1_float(_val); t = temp; p = temp; }
+inline void vec3::tps(const float& _val) { const simdfloat temp = simd_set1_float(_val); t = temp; p = temp; s = temp; }
+inline void vec3::ps(const float& _val) { const simdfloat temp = simd_set1_float(_val); p = temp; s = temp; }
+inline void vec3::pst(const float& _val) { const simdfloat temp = simd_set1_float(_val); p = temp; s = temp; t = temp; }
+inline void vec3::pt(const float& _val) { const simdfloat temp = simd_set1_float(_val); p = temp; t = temp; }
+inline void vec3::pts(const float& _val) { const simdfloat temp = simd_set1_float(_val); p = temp; t = temp; s = temp; }
 inline void vec3::xy(const float& _val) { const simdfloat temp = simd_set1_float(_val); x = temp; y = temp; }
 inline void vec3::xyz(const float& _val) { const simdfloat temp = simd_set1_float(_val); x = temp; y = temp; z = temp; }
 inline void vec3::xz(const float& _val) { const simdfloat temp = simd_set1_float(_val); x = temp; z = temp; }
@@ -9789,6 +12351,342 @@ inline vec4 vec4::rrra() const { return { r, r, r, a }; }
 inline vec4 vec4::rrrb() const { return { r, r, r, b }; }
 inline vec4 vec4::rrrg() const { return { r, r, r, g }; }
 inline vec4 vec4::rrrr() const { return { r, r, r, r }; }
+inline vec2 vec4::qq() const { return { q, q }; }
+inline vec3 vec4::qqq() const { return { q, q, q }; }
+inline vec4 vec4::qqqq() const { return { q, q, q, q }; }
+inline vec4 vec4::qqqs() const { return { q, q, q, s }; }
+inline vec4 vec4::qqqt() const { return { q, q, q, t }; }
+inline vec4 vec4::qqqp() const { return { q, q, q, p }; }
+inline vec3 vec4::qqs() const { return { q, q, s }; }
+inline vec4 vec4::qqsq() const { return { q, q, s, q }; }
+inline vec4 vec4::qqss() const { return { q, q, s, s }; }
+inline vec4 vec4::qqst() const { return { q, q, s, t }; }
+inline vec4 vec4::qqsp() const { return { q, q, s, p }; }
+inline vec3 vec4::qqt() const { return { q, q, t }; }
+inline vec4 vec4::qqtq() const { return { q, q, t, q }; }
+inline vec4 vec4::qqts() const { return { q, q, t, s }; }
+inline vec4 vec4::qqtt() const { return { q, q, t, t }; }
+inline vec4 vec4::qqtp() const { return { q, q, t, p }; }
+inline vec3 vec4::qqp() const { return { q, q, p }; }
+inline vec4 vec4::qqpq() const { return { q, q, p, q }; }
+inline vec4 vec4::qqps() const { return { q, q, p, s }; }
+inline vec4 vec4::qqpt() const { return { q, q, p, t }; }
+inline vec4 vec4::qqpp() const { return { q, q, p, p }; }
+inline vec2 vec4::qs() const { return { q, s }; }
+inline vec3 vec4::qsq() const { return { q, s, q }; }
+inline vec4 vec4::qsqq() const { return { q, s, q, q }; }
+inline vec4 vec4::qsqs() const { return { q, s, q, s }; }
+inline vec4 vec4::qsqt() const { return { q, s, q, t }; }
+inline vec4 vec4::qsqp() const { return { q, s, q, p }; }
+inline vec3 vec4::qss() const { return { q, s, s }; }
+inline vec4 vec4::qssq() const { return { q, s, s, q }; }
+inline vec4 vec4::qsss() const { return { q, s, s, s }; }
+inline vec4 vec4::qsst() const { return { q, s, s, t }; }
+inline vec4 vec4::qssp() const { return { q, s, s, p }; }
+inline vec3 vec4::qst() const { return { q, s, t }; }
+inline vec4 vec4::qstq() const { return { q, s, t, q }; }
+inline vec4 vec4::qsts() const { return { q, s, t, s }; }
+inline vec4 vec4::qstt() const { return { q, s, t, t }; }
+inline vec4 vec4::qstp() const { return { q, s, t, p }; }
+inline vec3 vec4::qsp() const { return { q, s, p }; }
+inline vec4 vec4::qspq() const { return { q, s, p, q }; }
+inline vec4 vec4::qsps() const { return { q, s, p, s }; }
+inline vec4 vec4::qspt() const { return { q, s, p, t }; }
+inline vec4 vec4::qspp() const { return { q, s, p, p }; }
+inline vec2 vec4::qt() const { return { q, t }; }
+inline vec3 vec4::qtq() const { return { q, t, q }; }
+inline vec4 vec4::qtqq() const { return { q, t, q, q }; }
+inline vec4 vec4::qtqs() const { return { q, t, q, s }; }
+inline vec4 vec4::qtqt() const { return { q, t, q, t }; }
+inline vec4 vec4::qtqp() const { return { q, t, q, p }; }
+inline vec3 vec4::qts() const { return { q, t, s }; }
+inline vec4 vec4::qtsq() const { return { q, t, s, q }; }
+inline vec4 vec4::qtss() const { return { q, t, s, s }; }
+inline vec4 vec4::qtst() const { return { q, t, s, t }; }
+inline vec4 vec4::qtsp() const { return { q, t, s, p }; }
+inline vec3 vec4::qtt() const { return { q, t, t }; }
+inline vec4 vec4::qttq() const { return { q, t, t, q }; }
+inline vec4 vec4::qtts() const { return { q, t, t, s }; }
+inline vec4 vec4::qttt() const { return { q, t, t, t }; }
+inline vec4 vec4::qttp() const { return { q, t, t, p }; }
+inline vec3 vec4::qtp() const { return { q, t, p }; }
+inline vec4 vec4::qtpq() const { return { q, t, p, q }; }
+inline vec4 vec4::qtps() const { return { q, t, p, s }; }
+inline vec4 vec4::qtpt() const { return { q, t, p, t }; }
+inline vec4 vec4::qtpp() const { return { q, t, p, p }; }
+inline vec2 vec4::qp() const { return { q, p }; }
+inline vec3 vec4::qpq() const { return { q, p, q }; }
+inline vec4 vec4::qpqq() const { return { q, p, q, q }; }
+inline vec4 vec4::qpqs() const { return { q, p, q, s }; }
+inline vec4 vec4::qpqt() const { return { q, p, q, t }; }
+inline vec4 vec4::qpqp() const { return { q, p, q, p }; }
+inline vec3 vec4::qps() const { return { q, p, s }; }
+inline vec4 vec4::qpsq() const { return { q, p, s, q }; }
+inline vec4 vec4::qpss() const { return { q, p, s, s }; }
+inline vec4 vec4::qpst() const { return { q, p, s, t }; }
+inline vec4 vec4::qpsp() const { return { q, p, s, p }; }
+inline vec3 vec4::qpt() const { return { q, p, t }; }
+inline vec4 vec4::qptq() const { return { q, p, t, q }; }
+inline vec4 vec4::qpts() const { return { q, p, t, s }; }
+inline vec4 vec4::qptt() const { return { q, p, t, t }; }
+inline vec4 vec4::qptp() const { return { q, p, t, p }; }
+inline vec3 vec4::qpp() const { return { q, p, p }; }
+inline vec4 vec4::qppq() const { return { q, p, p, q }; }
+inline vec4 vec4::qpps() const { return { q, p, p, s }; }
+inline vec4 vec4::qppt() const { return { q, p, p, t }; }
+inline vec4 vec4::qppp() const { return { q, p, p, p }; }
+inline vec2 vec4::sq() const { return { s, q }; }
+inline vec3 vec4::sqq() const { return { s, q, q }; }
+inline vec4 vec4::sqqq() const { return { s, q, q, q }; }
+inline vec4 vec4::sqqs() const { return { s, q, q, s }; }
+inline vec4 vec4::sqqt() const { return { s, q, q, t }; }
+inline vec4 vec4::sqqp() const { return { s, q, q, p }; }
+inline vec3 vec4::sqs() const { return { s, q, s }; }
+inline vec4 vec4::sqsq() const { return { s, q, s, q }; }
+inline vec4 vec4::sqss() const { return { s, q, s, s }; }
+inline vec4 vec4::sqst() const { return { s, q, s, t }; }
+inline vec4 vec4::sqsp() const { return { s, q, s, p }; }
+inline vec3 vec4::sqt() const { return { s, q, t }; }
+inline vec4 vec4::sqtq() const { return { s, q, t, q }; }
+inline vec4 vec4::sqts() const { return { s, q, t, s }; }
+inline vec4 vec4::sqtt() const { return { s, q, t, t }; }
+inline vec4 vec4::sqtp() const { return { s, q, t, p }; }
+inline vec3 vec4::sqp() const { return { s, q, p }; }
+inline vec4 vec4::sqpq() const { return { s, q, p, q }; }
+inline vec4 vec4::sqps() const { return { s, q, p, s }; }
+inline vec4 vec4::sqpt() const { return { s, q, p, t }; }
+inline vec4 vec4::sqpp() const { return { s, q, p, p }; }
+inline vec2 vec4::ss() const { return { s, s }; }
+inline vec3 vec4::ssq() const { return { s, s, q }; }
+inline vec4 vec4::ssqq() const { return { s, s, q, q }; }
+inline vec4 vec4::ssqs() const { return { s, s, q, s }; }
+inline vec4 vec4::ssqt() const { return { s, s, q, t }; }
+inline vec4 vec4::ssqp() const { return { s, s, q, p }; }
+inline vec3 vec4::sss() const { return { s, s, s }; }
+inline vec4 vec4::sssq() const { return { s, s, s, q }; }
+inline vec4 vec4::ssss() const { return { s, s, s, s }; }
+inline vec4 vec4::ssst() const { return { s, s, s, t }; }
+inline vec4 vec4::sssp() const { return { s, s, s, p }; }
+inline vec3 vec4::sst() const { return { s, s, t }; }
+inline vec4 vec4::sstq() const { return { s, s, t, q }; }
+inline vec4 vec4::ssts() const { return { s, s, t, s }; }
+inline vec4 vec4::sstt() const { return { s, s, t, t }; }
+inline vec4 vec4::sstp() const { return { s, s, t, p }; }
+inline vec3 vec4::ssp() const { return { s, s, p }; }
+inline vec4 vec4::sspq() const { return { s, s, p, q }; }
+inline vec4 vec4::ssps() const { return { s, s, p, s }; }
+inline vec4 vec4::sspt() const { return { s, s, p, t }; }
+inline vec4 vec4::sspp() const { return { s, s, p, p }; }
+inline vec2 vec4::st() const { return { s, t }; }
+inline vec3 vec4::stq() const { return { s, t, q }; }
+inline vec4 vec4::stqq() const { return { s, t, q, q }; }
+inline vec4 vec4::stqs() const { return { s, t, q, s }; }
+inline vec4 vec4::stqt() const { return { s, t, q, t }; }
+inline vec4 vec4::stqp() const { return { s, t, q, p }; }
+inline vec3 vec4::sts() const { return { s, t, s }; }
+inline vec4 vec4::stsq() const { return { s, t, s, q }; }
+inline vec4 vec4::stss() const { return { s, t, s, s }; }
+inline vec4 vec4::stst() const { return { s, t, s, t }; }
+inline vec4 vec4::stsp() const { return { s, t, s, p }; }
+inline vec3 vec4::stt() const { return { s, t, t }; }
+inline vec4 vec4::sttq() const { return { s, t, t, q }; }
+inline vec4 vec4::stts() const { return { s, t, t, s }; }
+inline vec4 vec4::sttt() const { return { s, t, t, t }; }
+inline vec4 vec4::sttp() const { return { s, t, t, p }; }
+inline vec3 vec4::stp() const { return { s, t, p }; }
+inline vec4 vec4::stpq() const { return { s, t, p, q }; }
+inline vec4 vec4::stps() const { return { s, t, p, s }; }
+inline vec4 vec4::stpt() const { return { s, t, p, t }; }
+inline vec4 vec4::stpp() const { return { s, t, p, p }; }
+inline vec2 vec4::sp() const { return { s, p }; }
+inline vec3 vec4::spq() const { return { s, p, q }; }
+inline vec4 vec4::spqq() const { return { s, p, q, q }; }
+inline vec4 vec4::spqs() const { return { s, p, q, s }; }
+inline vec4 vec4::spqt() const { return { s, p, q, t }; }
+inline vec4 vec4::spqp() const { return { s, p, q, p }; }
+inline vec3 vec4::sps() const { return { s, p, s }; }
+inline vec4 vec4::spsq() const { return { s, p, s, q }; }
+inline vec4 vec4::spss() const { return { s, p, s, s }; }
+inline vec4 vec4::spst() const { return { s, p, s, t }; }
+inline vec4 vec4::spsp() const { return { s, p, s, p }; }
+inline vec3 vec4::spt() const { return { s, p, t }; }
+inline vec4 vec4::sptq() const { return { s, p, t, q }; }
+inline vec4 vec4::spts() const { return { s, p, t, s }; }
+inline vec4 vec4::sptt() const { return { s, p, t, t }; }
+inline vec4 vec4::sptp() const { return { s, p, t, p }; }
+inline vec3 vec4::spp() const { return { s, p, p }; }
+inline vec4 vec4::sppq() const { return { s, p, p, q }; }
+inline vec4 vec4::spps() const { return { s, p, p, s }; }
+inline vec4 vec4::sppt() const { return { s, p, p, t }; }
+inline vec4 vec4::sppp() const { return { s, p, p, p }; }
+inline vec2 vec4::tq() const { return { t, q }; }
+inline vec3 vec4::tqq() const { return { t, q, q }; }
+inline vec4 vec4::tqqq() const { return { t, q, q, q }; }
+inline vec4 vec4::tqqs() const { return { t, q, q, s }; }
+inline vec4 vec4::tqqt() const { return { t, q, q, t }; }
+inline vec4 vec4::tqqp() const { return { t, q, q, p }; }
+inline vec3 vec4::tqs() const { return { t, q, s }; }
+inline vec4 vec4::tqsq() const { return { t, q, s, q }; }
+inline vec4 vec4::tqss() const { return { t, q, s, s }; }
+inline vec4 vec4::tqst() const { return { t, q, s, t }; }
+inline vec4 vec4::tqsp() const { return { t, q, s, p }; }
+inline vec3 vec4::tqt() const { return { t, q, t }; }
+inline vec4 vec4::tqtq() const { return { t, q, t, q }; }
+inline vec4 vec4::tqts() const { return { t, q, t, s }; }
+inline vec4 vec4::tqtt() const { return { t, q, t, t }; }
+inline vec4 vec4::tqtp() const { return { t, q, t, p }; }
+inline vec3 vec4::tqp() const { return { t, q, p }; }
+inline vec4 vec4::tqpq() const { return { t, q, p, q }; }
+inline vec4 vec4::tqps() const { return { t, q, p, s }; }
+inline vec4 vec4::tqpt() const { return { t, q, p, t }; }
+inline vec4 vec4::tqpp() const { return { t, q, p, p }; }
+inline vec2 vec4::ts() const { return { t, s }; }
+inline vec3 vec4::tsq() const { return { t, s, q }; }
+inline vec4 vec4::tsqq() const { return { t, s, q, q }; }
+inline vec4 vec4::tsqs() const { return { t, s, q, s }; }
+inline vec4 vec4::tsqt() const { return { t, s, q, t }; }
+inline vec4 vec4::tsqp() const { return { t, s, q, p }; }
+inline vec3 vec4::tss() const { return { t, s, s }; }
+inline vec4 vec4::tssq() const { return { t, s, s, q }; }
+inline vec4 vec4::tsss() const { return { t, s, s, s }; }
+inline vec4 vec4::tsst() const { return { t, s, s, t }; }
+inline vec4 vec4::tssp() const { return { t, s, s, p }; }
+inline vec3 vec4::tst() const { return { t, s, t }; }
+inline vec4 vec4::tstq() const { return { t, s, t, q }; }
+inline vec4 vec4::tsts() const { return { t, s, t, s }; }
+inline vec4 vec4::tstt() const { return { t, s, t, t }; }
+inline vec4 vec4::tstp() const { return { t, s, t, p }; }
+inline vec3 vec4::tsp() const { return { t, s, p }; }
+inline vec4 vec4::tspq() const { return { t, s, p, q }; }
+inline vec4 vec4::tsps() const { return { t, s, p, s }; }
+inline vec4 vec4::tspt() const { return { t, s, p, t }; }
+inline vec4 vec4::tspp() const { return { t, s, p, p }; }
+inline vec2 vec4::tt() const { return { t, t }; }
+inline vec3 vec4::ttq() const { return { t, t, q }; }
+inline vec4 vec4::ttqq() const { return { t, t, q, q }; }
+inline vec4 vec4::ttqs() const { return { t, t, q, s }; }
+inline vec4 vec4::ttqt() const { return { t, t, q, t }; }
+inline vec4 vec4::ttqp() const { return { t, t, q, p }; }
+inline vec3 vec4::tts() const { return { t, t, s }; }
+inline vec4 vec4::ttsq() const { return { t, t, s, q }; }
+inline vec4 vec4::ttss() const { return { t, t, s, s }; }
+inline vec4 vec4::ttst() const { return { t, t, s, t }; }
+inline vec4 vec4::ttsp() const { return { t, t, s, p }; }
+inline vec3 vec4::ttt() const { return { t, t, t }; }
+inline vec4 vec4::tttq() const { return { t, t, t, q }; }
+inline vec4 vec4::ttts() const { return { t, t, t, s }; }
+inline vec4 vec4::tttt() const { return { t, t, t, t }; }
+inline vec4 vec4::tttp() const { return { t, t, t, p }; }
+inline vec3 vec4::ttp() const { return { t, t, p }; }
+inline vec4 vec4::ttpq() const { return { t, t, p, q }; }
+inline vec4 vec4::ttps() const { return { t, t, p, s }; }
+inline vec4 vec4::ttpt() const { return { t, t, p, t }; }
+inline vec4 vec4::ttpp() const { return { t, t, p, p }; }
+inline vec2 vec4::tp() const { return { t, p }; }
+inline vec3 vec4::tpq() const { return { t, p, q }; }
+inline vec4 vec4::tpqq() const { return { t, p, q, q }; }
+inline vec4 vec4::tpqs() const { return { t, p, q, s }; }
+inline vec4 vec4::tpqt() const { return { t, p, q, t }; }
+inline vec4 vec4::tpqp() const { return { t, p, q, p }; }
+inline vec3 vec4::tps() const { return { t, p, s }; }
+inline vec4 vec4::tpsq() const { return { t, p, s, q }; }
+inline vec4 vec4::tpss() const { return { t, p, s, s }; }
+inline vec4 vec4::tpst() const { return { t, p, s, t }; }
+inline vec4 vec4::tpsp() const { return { t, p, s, p }; }
+inline vec3 vec4::tpt() const { return { t, p, t }; }
+inline vec4 vec4::tptq() const { return { t, p, t, q }; }
+inline vec4 vec4::tpts() const { return { t, p, t, s }; }
+inline vec4 vec4::tptt() const { return { t, p, t, t }; }
+inline vec4 vec4::tptp() const { return { t, p, t, p }; }
+inline vec3 vec4::tpp() const { return { t, p, p }; }
+inline vec4 vec4::tppq() const { return { t, p, p, q }; }
+inline vec4 vec4::tpps() const { return { t, p, p, s }; }
+inline vec4 vec4::tppt() const { return { t, p, p, t }; }
+inline vec4 vec4::tppp() const { return { t, p, p, p }; }
+inline vec2 vec4::pq() const { return { p, q }; }
+inline vec3 vec4::pqq() const { return { p, q, q }; }
+inline vec4 vec4::pqqq() const { return { p, q, q, q }; }
+inline vec4 vec4::pqqs() const { return { p, q, q, s }; }
+inline vec4 vec4::pqqt() const { return { p, q, q, t }; }
+inline vec4 vec4::pqqp() const { return { p, q, q, p }; }
+inline vec3 vec4::pqs() const { return { p, q, s }; }
+inline vec4 vec4::pqsq() const { return { p, q, s, q }; }
+inline vec4 vec4::pqss() const { return { p, q, s, s }; }
+inline vec4 vec4::pqst() const { return { p, q, s, t }; }
+inline vec4 vec4::pqsp() const { return { p, q, s, p }; }
+inline vec3 vec4::pqt() const { return { p, q, t }; }
+inline vec4 vec4::pqtq() const { return { p, q, t, q }; }
+inline vec4 vec4::pqts() const { return { p, q, t, s }; }
+inline vec4 vec4::pqtt() const { return { p, q, t, t }; }
+inline vec4 vec4::pqtp() const { return { p, q, t, p }; }
+inline vec3 vec4::pqp() const { return { p, q, p }; }
+inline vec4 vec4::pqpq() const { return { p, q, p, q }; }
+inline vec4 vec4::pqps() const { return { p, q, p, s }; }
+inline vec4 vec4::pqpt() const { return { p, q, p, t }; }
+inline vec4 vec4::pqpp() const { return { p, q, p, p }; }
+inline vec2 vec4::ps() const { return { p, s }; }
+inline vec3 vec4::psq() const { return { p, s, q }; }
+inline vec4 vec4::psqq() const { return { p, s, q, q }; }
+inline vec4 vec4::psqs() const { return { p, s, q, s }; }
+inline vec4 vec4::psqt() const { return { p, s, q, t }; }
+inline vec4 vec4::psqp() const { return { p, s, q, p }; }
+inline vec3 vec4::pss() const { return { p, s, s }; }
+inline vec4 vec4::pssq() const { return { p, s, s, q }; }
+inline vec4 vec4::psss() const { return { p, s, s, s }; }
+inline vec4 vec4::psst() const { return { p, s, s, t }; }
+inline vec4 vec4::pssp() const { return { p, s, s, p }; }
+inline vec3 vec4::pst() const { return { p, s, t }; }
+inline vec4 vec4::pstq() const { return { p, s, t, q }; }
+inline vec4 vec4::psts() const { return { p, s, t, s }; }
+inline vec4 vec4::pstt() const { return { p, s, t, t }; }
+inline vec4 vec4::pstp() const { return { p, s, t, p }; }
+inline vec3 vec4::psp() const { return { p, s, p }; }
+inline vec4 vec4::pspq() const { return { p, s, p, q }; }
+inline vec4 vec4::psps() const { return { p, s, p, s }; }
+inline vec4 vec4::pspt() const { return { p, s, p, t }; }
+inline vec4 vec4::pspp() const { return { p, s, p, p }; }
+inline vec2 vec4::pt() const { return { p, t }; }
+inline vec3 vec4::ptq() const { return { p, t, q }; }
+inline vec4 vec4::ptqq() const { return { p, t, q, q }; }
+inline vec4 vec4::ptqs() const { return { p, t, q, s }; }
+inline vec4 vec4::ptqt() const { return { p, t, q, t }; }
+inline vec4 vec4::ptqp() const { return { p, t, q, p }; }
+inline vec3 vec4::pts() const { return { p, t, s }; }
+inline vec4 vec4::ptsq() const { return { p, t, s, q }; }
+inline vec4 vec4::ptss() const { return { p, t, s, s }; }
+inline vec4 vec4::ptst() const { return { p, t, s, t }; }
+inline vec4 vec4::ptsp() const { return { p, t, s, p }; }
+inline vec3 vec4::ptt() const { return { p, t, t }; }
+inline vec4 vec4::pttq() const { return { p, t, t, q }; }
+inline vec4 vec4::ptts() const { return { p, t, t, s }; }
+inline vec4 vec4::pttt() const { return { p, t, t, t }; }
+inline vec4 vec4::pttp() const { return { p, t, t, p }; }
+inline vec3 vec4::ptp() const { return { p, t, p }; }
+inline vec4 vec4::ptpq() const { return { p, t, p, q }; }
+inline vec4 vec4::ptps() const { return { p, t, p, s }; }
+inline vec4 vec4::ptpt() const { return { p, t, p, t }; }
+inline vec4 vec4::ptpp() const { return { p, t, p, p }; }
+inline vec2 vec4::pp() const { return { p, p }; }
+inline vec3 vec4::ppq() const { return { p, p, q }; }
+inline vec4 vec4::ppqq() const { return { p, p, q, q }; }
+inline vec4 vec4::ppqs() const { return { p, p, q, s }; }
+inline vec4 vec4::ppqt() const { return { p, p, q, t }; }
+inline vec4 vec4::ppqp() const { return { p, p, q, p }; }
+inline vec3 vec4::pps() const { return { p, p, s }; }
+inline vec4 vec4::ppsq() const { return { p, p, s, q }; }
+inline vec4 vec4::ppss() const { return { p, p, s, s }; }
+inline vec4 vec4::ppst() const { return { p, p, s, t }; }
+inline vec4 vec4::ppsp() const { return { p, p, s, p }; }
+inline vec3 vec4::ppt() const { return { p, p, t }; }
+inline vec4 vec4::pptq() const { return { p, p, t, q }; }
+inline vec4 vec4::ppts() const { return { p, p, t, s }; }
+inline vec4 vec4::pptt() const { return { p, p, t, t }; }
+inline vec4 vec4::pptp() const { return { p, p, t, p }; }
+inline vec3 vec4::ppp() const { return { p, p, p }; }
+inline vec4 vec4::pppq() const { return { p, p, p, q }; }
+inline vec4 vec4::ppps() const { return { p, p, p, s }; }
+inline vec4 vec4::pppt() const { return { p, p, p, t }; }
+inline vec4 vec4::pppp() const { return { p, p, p, p }; }
 inline vec2 vec4::ww() const { return { w, w }; }
 inline vec3 vec4::www() const { return { w, w, w }; }
 inline vec4 vec4::wwww() const { return { w, w, w, w }; }
@@ -10305,6 +13203,186 @@ inline void vec4::rgb(const simdfloat& _val) { r = _val; g = _val; b = _val; }
 inline void vec4::rgba(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { r = _val0; g = _val1; b = _val2; a = _val3; }
 inline void vec4::rgba(const vec4& _val) { r = _val.x; g = _val.y; b = _val.z; a = _val.w; }
 inline void vec4::rgba(const simdfloat& _val) { r = _val; g = _val; b = _val; a = _val; }
+inline void vec4::qs(const simdfloat& _val0, const simdfloat& _val1) { q = _val0; s = _val1; }
+inline void vec4::qs(const vec2& _val) { q = _val.s; s = _val.t; }
+inline void vec4::qs(const simdfloat& _val) { q = _val; s = _val; }
+inline void vec4::qst(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { q = _val0; s = _val1; t = _val2; }
+inline void vec4::qst(const vec3& _val) { q = _val.s; s = _val.t; t = _val.p; }
+inline void vec4::qst(const simdfloat& _val) { q = _val; s = _val; t = _val; }
+inline void vec4::qstp(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { q = _val0; s = _val1; t = _val2; p = _val3; }
+inline void vec4::qstp(const vec4& _val) { q = _val.s; s = _val.t; t = _val.p; p = _val.q; }
+inline void vec4::qstp(const simdfloat& _val) { q = _val; s = _val; t = _val; p = _val; }
+inline void vec4::qsp(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { q = _val0; s = _val1; p = _val2; }
+inline void vec4::qsp(const vec3& _val) { q = _val.s; s = _val.t; p = _val.p; }
+inline void vec4::qsp(const simdfloat& _val) { q = _val; s = _val; p = _val; }
+inline void vec4::qspt(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { q = _val0; s = _val1; p = _val2; t = _val3; }
+inline void vec4::qspt(const vec4& _val) { q = _val.s; s = _val.t; p = _val.p; t = _val.q; }
+inline void vec4::qspt(const simdfloat& _val) { q = _val; s = _val; p = _val; t = _val; }
+inline void vec4::qt(const simdfloat& _val0, const simdfloat& _val1) { q = _val0; t = _val1; }
+inline void vec4::qt(const vec2& _val) { q = _val.s; t = _val.t; }
+inline void vec4::qt(const simdfloat& _val) { q = _val; t = _val; }
+inline void vec4::qts(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { q = _val0; t = _val1; s = _val2; }
+inline void vec4::qts(const vec3& _val) { q = _val.s; t = _val.t; s = _val.p; }
+inline void vec4::qts(const simdfloat& _val) { q = _val; t = _val; s = _val; }
+inline void vec4::qtsp(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { q = _val0; t = _val1; s = _val2; p = _val3; }
+inline void vec4::qtsp(const vec4& _val) { q = _val.s; t = _val.t; s = _val.p; p = _val.q; }
+inline void vec4::qtsp(const simdfloat& _val) { q = _val; t = _val; s = _val; p = _val; }
+inline void vec4::qtp(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { q = _val0; t = _val1; p = _val2; }
+inline void vec4::qtp(const vec3& _val) { q = _val.s; t = _val.t; p = _val.p; }
+inline void vec4::qtp(const simdfloat& _val) { q = _val; t = _val; p = _val; }
+inline void vec4::qtps(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { q = _val0; t = _val1; p = _val2; s = _val3; }
+inline void vec4::qtps(const vec4& _val) { q = _val.s; t = _val.t; p = _val.p; s = _val.q; }
+inline void vec4::qtps(const simdfloat& _val) { q = _val; t = _val; p = _val; s = _val; }
+inline void vec4::qp(const simdfloat& _val0, const simdfloat& _val1) { q = _val0; p = _val1; }
+inline void vec4::qp(const vec2& _val) { q = _val.s; p = _val.t; }
+inline void vec4::qp(const simdfloat& _val) { q = _val; p = _val; }
+inline void vec4::qps(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { q = _val0; p = _val1; s = _val2; }
+inline void vec4::qps(const vec3& _val) { q = _val.s; p = _val.t; s = _val.p; }
+inline void vec4::qps(const simdfloat& _val) { q = _val; p = _val; s = _val; }
+inline void vec4::qpst(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { q = _val0; p = _val1; s = _val2; t = _val3; }
+inline void vec4::qpst(const vec4& _val) { q = _val.s; p = _val.t; s = _val.p; t = _val.q; }
+inline void vec4::qpst(const simdfloat& _val) { q = _val; p = _val; s = _val; t = _val; }
+inline void vec4::qpt(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { q = _val0; p = _val1; t = _val2; }
+inline void vec4::qpt(const vec3& _val) { q = _val.s; p = _val.t; t = _val.p; }
+inline void vec4::qpt(const simdfloat& _val) { q = _val; p = _val; t = _val; }
+inline void vec4::qpts(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { q = _val0; p = _val1; t = _val2; s = _val3; }
+inline void vec4::qpts(const vec4& _val) { q = _val.s; p = _val.t; t = _val.p; s = _val.q; }
+inline void vec4::qpts(const simdfloat& _val) { q = _val; p = _val; t = _val; s = _val; }
+inline void vec4::sq(const simdfloat& _val0, const simdfloat& _val1) { s = _val0; q = _val1; }
+inline void vec4::sq(const vec2& _val) { s = _val.s; q = _val.t; }
+inline void vec4::sq(const simdfloat& _val) { s = _val; q = _val; }
+inline void vec4::sqt(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { s = _val0; q = _val1; t = _val2; }
+inline void vec4::sqt(const vec3& _val) { s = _val.s; q = _val.t; t = _val.p; }
+inline void vec4::sqt(const simdfloat& _val) { s = _val; q = _val; t = _val; }
+inline void vec4::sqtp(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { s = _val0; q = _val1; t = _val2; p = _val3; }
+inline void vec4::sqtp(const vec4& _val) { s = _val.s; q = _val.t; t = _val.p; p = _val.q; }
+inline void vec4::sqtp(const simdfloat& _val) { s = _val; q = _val; t = _val; p = _val; }
+inline void vec4::sqp(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { s = _val0; q = _val1; p = _val2; }
+inline void vec4::sqp(const vec3& _val) { s = _val.s; q = _val.t; p = _val.p; }
+inline void vec4::sqp(const simdfloat& _val) { s = _val; q = _val; p = _val; }
+inline void vec4::sqpt(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { s = _val0; q = _val1; p = _val2; t = _val3; }
+inline void vec4::sqpt(const vec4& _val) { s = _val.s; q = _val.t; p = _val.p; t = _val.q; }
+inline void vec4::sqpt(const simdfloat& _val) { s = _val; q = _val; p = _val; t = _val; }
+inline void vec4::st(const simdfloat& _val0, const simdfloat& _val1) { s = _val0; t = _val1; }
+inline void vec4::st(const vec2& _val) { s = _val.s; t = _val.t; }
+inline void vec4::st(const simdfloat& _val) { s = _val; t = _val; }
+inline void vec4::stq(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { s = _val0; t = _val1; q = _val2; }
+inline void vec4::stq(const vec3& _val) { s = _val.s; t = _val.t; q = _val.p; }
+inline void vec4::stq(const simdfloat& _val) { s = _val; t = _val; q = _val; }
+inline void vec4::stqp(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { s = _val0; t = _val1; q = _val2; p = _val3; }
+inline void vec4::stqp(const vec4& _val) { s = _val.s; t = _val.t; q = _val.p; p = _val.q; }
+inline void vec4::stqp(const simdfloat& _val) { s = _val; t = _val; q = _val; p = _val; }
+inline void vec4::stp(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { s = _val0; t = _val1; p = _val2; }
+inline void vec4::stp(const vec3& _val) { s = _val.s; t = _val.t; p = _val.p; }
+inline void vec4::stp(const simdfloat& _val) { s = _val; t = _val; p = _val; }
+inline void vec4::stpq(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { s = _val0; t = _val1; p = _val2; q = _val3; }
+inline void vec4::stpq(const vec4& _val) { s = _val.s; t = _val.t; p = _val.p; q = _val.q; }
+inline void vec4::stpq(const simdfloat& _val) { s = _val; t = _val; p = _val; q = _val; }
+inline void vec4::sp(const simdfloat& _val0, const simdfloat& _val1) { s = _val0; p = _val1; }
+inline void vec4::sp(const vec2& _val) { s = _val.s; p = _val.t; }
+inline void vec4::sp(const simdfloat& _val) { s = _val; p = _val; }
+inline void vec4::spq(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { s = _val0; p = _val1; q = _val2; }
+inline void vec4::spq(const vec3& _val) { s = _val.s; p = _val.t; q = _val.p; }
+inline void vec4::spq(const simdfloat& _val) { s = _val; p = _val; q = _val; }
+inline void vec4::spqt(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { s = _val0; p = _val1; q = _val2; t = _val3; }
+inline void vec4::spqt(const vec4& _val) { s = _val.s; p = _val.t; q = _val.p; t = _val.q; }
+inline void vec4::spqt(const simdfloat& _val) { s = _val; p = _val; q = _val; t = _val; }
+inline void vec4::spt(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { s = _val0; p = _val1; t = _val2; }
+inline void vec4::spt(const vec3& _val) { s = _val.s; p = _val.t; t = _val.p; }
+inline void vec4::spt(const simdfloat& _val) { s = _val; p = _val; t = _val; }
+inline void vec4::sptq(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { s = _val0; p = _val1; t = _val2; q = _val3; }
+inline void vec4::sptq(const vec4& _val) { s = _val.s; p = _val.t; t = _val.p; q = _val.q; }
+inline void vec4::sptq(const simdfloat& _val) { s = _val; p = _val; t = _val; q = _val; }
+inline void vec4::tq(const simdfloat& _val0, const simdfloat& _val1) { t = _val0; q = _val1; }
+inline void vec4::tq(const vec2& _val) { t = _val.s; q = _val.t; }
+inline void vec4::tq(const simdfloat& _val) { t = _val; q = _val; }
+inline void vec4::tqs(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { t = _val0; q = _val1; s = _val2; }
+inline void vec4::tqs(const vec3& _val) { t = _val.s; q = _val.t; s = _val.p; }
+inline void vec4::tqs(const simdfloat& _val) { t = _val; q = _val; s = _val; }
+inline void vec4::tqsp(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { t = _val0; q = _val1; s = _val2; p = _val3; }
+inline void vec4::tqsp(const vec4& _val) { t = _val.s; q = _val.t; s = _val.p; p = _val.q; }
+inline void vec4::tqsp(const simdfloat& _val) { t = _val; q = _val; s = _val; p = _val; }
+inline void vec4::tqp(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { t = _val0; q = _val1; p = _val2; }
+inline void vec4::tqp(const vec3& _val) { t = _val.s; q = _val.t; p = _val.p; }
+inline void vec4::tqp(const simdfloat& _val) { t = _val; q = _val; p = _val; }
+inline void vec4::tqps(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { t = _val0; q = _val1; p = _val2; s = _val3; }
+inline void vec4::tqps(const vec4& _val) { t = _val.s; q = _val.t; p = _val.p; s = _val.q; }
+inline void vec4::tqps(const simdfloat& _val) { t = _val; q = _val; p = _val; s = _val; }
+inline void vec4::ts(const simdfloat& _val0, const simdfloat& _val1) { t = _val0; s = _val1; }
+inline void vec4::ts(const vec2& _val) { t = _val.s; s = _val.t; }
+inline void vec4::ts(const simdfloat& _val) { t = _val; s = _val; }
+inline void vec4::tsq(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { t = _val0; s = _val1; q = _val2; }
+inline void vec4::tsq(const vec3& _val) { t = _val.s; s = _val.t; q = _val.p; }
+inline void vec4::tsq(const simdfloat& _val) { t = _val; s = _val; q = _val; }
+inline void vec4::tsqp(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { t = _val0; s = _val1; q = _val2; p = _val3; }
+inline void vec4::tsqp(const vec4& _val) { t = _val.s; s = _val.t; q = _val.p; p = _val.q; }
+inline void vec4::tsqp(const simdfloat& _val) { t = _val; s = _val; q = _val; p = _val; }
+inline void vec4::tsp(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { t = _val0; s = _val1; p = _val2; }
+inline void vec4::tsp(const vec3& _val) { t = _val.s; s = _val.t; p = _val.p; }
+inline void vec4::tsp(const simdfloat& _val) { t = _val; s = _val; p = _val; }
+inline void vec4::tspq(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { t = _val0; s = _val1; p = _val2; q = _val3; }
+inline void vec4::tspq(const vec4& _val) { t = _val.s; s = _val.t; p = _val.p; q = _val.q; }
+inline void vec4::tspq(const simdfloat& _val) { t = _val; s = _val; p = _val; q = _val; }
+inline void vec4::tp(const simdfloat& _val0, const simdfloat& _val1) { t = _val0; p = _val1; }
+inline void vec4::tp(const vec2& _val) { t = _val.s; p = _val.t; }
+inline void vec4::tp(const simdfloat& _val) { t = _val; p = _val; }
+inline void vec4::tpq(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { t = _val0; p = _val1; q = _val2; }
+inline void vec4::tpq(const vec3& _val) { t = _val.s; p = _val.t; q = _val.p; }
+inline void vec4::tpq(const simdfloat& _val) { t = _val; p = _val; q = _val; }
+inline void vec4::tpqs(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { t = _val0; p = _val1; q = _val2; s = _val3; }
+inline void vec4::tpqs(const vec4& _val) { t = _val.s; p = _val.t; q = _val.p; s = _val.q; }
+inline void vec4::tpqs(const simdfloat& _val) { t = _val; p = _val; q = _val; s = _val; }
+inline void vec4::tps(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { t = _val0; p = _val1; s = _val2; }
+inline void vec4::tps(const vec3& _val) { t = _val.s; p = _val.t; s = _val.p; }
+inline void vec4::tps(const simdfloat& _val) { t = _val; p = _val; s = _val; }
+inline void vec4::tpsq(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { t = _val0; p = _val1; s = _val2; q = _val3; }
+inline void vec4::tpsq(const vec4& _val) { t = _val.s; p = _val.t; s = _val.p; q = _val.q; }
+inline void vec4::tpsq(const simdfloat& _val) { t = _val; p = _val; s = _val; q = _val; }
+inline void vec4::pq(const simdfloat& _val0, const simdfloat& _val1) { p = _val0; q = _val1; }
+inline void vec4::pq(const vec2& _val) { p = _val.s; q = _val.t; }
+inline void vec4::pq(const simdfloat& _val) { p = _val; q = _val; }
+inline void vec4::pqs(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { p = _val0; q = _val1; s = _val2; }
+inline void vec4::pqs(const vec3& _val) { p = _val.s; q = _val.t; s = _val.p; }
+inline void vec4::pqs(const simdfloat& _val) { p = _val; q = _val; s = _val; }
+inline void vec4::pqst(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { p = _val0; q = _val1; s = _val2; t = _val3; }
+inline void vec4::pqst(const vec4& _val) { p = _val.s; q = _val.t; s = _val.p; t = _val.q; }
+inline void vec4::pqst(const simdfloat& _val) { p = _val; q = _val; s = _val; t = _val; }
+inline void vec4::pqt(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { p = _val0; q = _val1; t = _val2; }
+inline void vec4::pqt(const vec3& _val) { p = _val.s; q = _val.t; t = _val.p; }
+inline void vec4::pqt(const simdfloat& _val) { p = _val; q = _val; t = _val; }
+inline void vec4::pqts(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { p = _val0; q = _val1; t = _val2; s = _val3; }
+inline void vec4::pqts(const vec4& _val) { p = _val.s; q = _val.t; t = _val.p; s = _val.q; }
+inline void vec4::pqts(const simdfloat& _val) { p = _val; q = _val; t = _val; s = _val; }
+inline void vec4::ps(const simdfloat& _val0, const simdfloat& _val1) { p = _val0; s = _val1; }
+inline void vec4::ps(const vec2& _val) { p = _val.s; s = _val.t; }
+inline void vec4::ps(const simdfloat& _val) { p = _val; s = _val; }
+inline void vec4::psq(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { p = _val0; s = _val1; q = _val2; }
+inline void vec4::psq(const vec3& _val) { p = _val.s; s = _val.t; q = _val.p; }
+inline void vec4::psq(const simdfloat& _val) { p = _val; s = _val; q = _val; }
+inline void vec4::psqt(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { p = _val0; s = _val1; q = _val2; t = _val3; }
+inline void vec4::psqt(const vec4& _val) { p = _val.s; s = _val.t; q = _val.p; t = _val.q; }
+inline void vec4::psqt(const simdfloat& _val) { p = _val; s = _val; q = _val; t = _val; }
+inline void vec4::pst(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { p = _val0; s = _val1; t = _val2; }
+inline void vec4::pst(const vec3& _val) { p = _val.s; s = _val.t; t = _val.p; }
+inline void vec4::pst(const simdfloat& _val) { p = _val; s = _val; t = _val; }
+inline void vec4::pstq(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { p = _val0; s = _val1; t = _val2; q = _val3; }
+inline void vec4::pstq(const vec4& _val) { p = _val.s; s = _val.t; t = _val.p; q = _val.q; }
+inline void vec4::pstq(const simdfloat& _val) { p = _val; s = _val; t = _val; q = _val; }
+inline void vec4::pt(const simdfloat& _val0, const simdfloat& _val1) { p = _val0; t = _val1; }
+inline void vec4::pt(const vec2& _val) { p = _val.s; t = _val.t; }
+inline void vec4::pt(const simdfloat& _val) { p = _val; t = _val; }
+inline void vec4::ptq(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { p = _val0; t = _val1; q = _val2; }
+inline void vec4::ptq(const vec3& _val) { p = _val.s; t = _val.t; q = _val.p; }
+inline void vec4::ptq(const simdfloat& _val) { p = _val; t = _val; q = _val; }
+inline void vec4::ptqs(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { p = _val0; t = _val1; q = _val2; s = _val3; }
+inline void vec4::ptqs(const vec4& _val) { p = _val.s; t = _val.t; q = _val.p; s = _val.q; }
+inline void vec4::ptqs(const simdfloat& _val) { p = _val; t = _val; q = _val; s = _val; }
+inline void vec4::pts(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { p = _val0; t = _val1; s = _val2; }
+inline void vec4::pts(const vec3& _val) { p = _val.s; t = _val.t; s = _val.p; }
+inline void vec4::pts(const simdfloat& _val) { p = _val; t = _val; s = _val; }
+inline void vec4::ptsq(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { p = _val0; t = _val1; s = _val2; q = _val3; }
+inline void vec4::ptsq(const vec4& _val) { p = _val.s; t = _val.t; s = _val.p; q = _val.q; }
+inline void vec4::ptsq(const simdfloat& _val) { p = _val; t = _val; s = _val; q = _val; }
 inline void vec4::wx(const simdfloat& _val0, const simdfloat& _val1) { w = _val0; x = _val1; }
 inline void vec4::wx(const vec2& _val) { w = _val.x; x = _val.y; }
 inline void vec4::wx(const simdfloat& _val) { w = _val; x = _val; }
@@ -10546,6 +13624,66 @@ inline void vec4::rga(const float& _val) { const simdfloat temp = simd_set1_floa
 inline void vec4::rgab(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; g = temp; a = temp; b = temp; }
 inline void vec4::rgb(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; g = temp; b = temp; }
 inline void vec4::rgba(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; g = temp; b = temp; a = temp; }
+inline void vec4::qs(const float& _val) { const simdfloat temp = simd_set1_float(_val); q = temp; s = temp; }
+inline void vec4::qst(const float& _val) { const simdfloat temp = simd_set1_float(_val); q = temp; s = temp; t = temp; }
+inline void vec4::qstp(const float& _val) { const simdfloat temp = simd_set1_float(_val); q = temp; s = temp; t = temp; p = temp; }
+inline void vec4::qsp(const float& _val) { const simdfloat temp = simd_set1_float(_val); q = temp; s = temp; p = temp; }
+inline void vec4::qspt(const float& _val) { const simdfloat temp = simd_set1_float(_val); q = temp; s = temp; p = temp; t = temp; }
+inline void vec4::qt(const float& _val) { const simdfloat temp = simd_set1_float(_val); q = temp; t = temp; }
+inline void vec4::qts(const float& _val) { const simdfloat temp = simd_set1_float(_val); q = temp; t = temp; s = temp; }
+inline void vec4::qtsp(const float& _val) { const simdfloat temp = simd_set1_float(_val); q = temp; t = temp; s = temp; p = temp; }
+inline void vec4::qtp(const float& _val) { const simdfloat temp = simd_set1_float(_val); q = temp; t = temp; p = temp; }
+inline void vec4::qtps(const float& _val) { const simdfloat temp = simd_set1_float(_val); q = temp; t = temp; p = temp; s = temp; }
+inline void vec4::qp(const float& _val) { const simdfloat temp = simd_set1_float(_val); q = temp; p = temp; }
+inline void vec4::qps(const float& _val) { const simdfloat temp = simd_set1_float(_val); q = temp; p = temp; s = temp; }
+inline void vec4::qpst(const float& _val) { const simdfloat temp = simd_set1_float(_val); q = temp; p = temp; s = temp; t = temp; }
+inline void vec4::qpt(const float& _val) { const simdfloat temp = simd_set1_float(_val); q = temp; p = temp; t = temp; }
+inline void vec4::qpts(const float& _val) { const simdfloat temp = simd_set1_float(_val); q = temp; p = temp; t = temp; s = temp; }
+inline void vec4::sq(const float& _val) { const simdfloat temp = simd_set1_float(_val); s = temp; q = temp; }
+inline void vec4::sqt(const float& _val) { const simdfloat temp = simd_set1_float(_val); s = temp; q = temp; t = temp; }
+inline void vec4::sqtp(const float& _val) { const simdfloat temp = simd_set1_float(_val); s = temp; q = temp; t = temp; p = temp; }
+inline void vec4::sqp(const float& _val) { const simdfloat temp = simd_set1_float(_val); s = temp; q = temp; p = temp; }
+inline void vec4::sqpt(const float& _val) { const simdfloat temp = simd_set1_float(_val); s = temp; q = temp; p = temp; t = temp; }
+inline void vec4::st(const float& _val) { const simdfloat temp = simd_set1_float(_val); s = temp; t = temp; }
+inline void vec4::stq(const float& _val) { const simdfloat temp = simd_set1_float(_val); s = temp; t = temp; q = temp; }
+inline void vec4::stqp(const float& _val) { const simdfloat temp = simd_set1_float(_val); s = temp; t = temp; q = temp; p = temp; }
+inline void vec4::stp(const float& _val) { const simdfloat temp = simd_set1_float(_val); s = temp; t = temp; p = temp; }
+inline void vec4::stpq(const float& _val) { const simdfloat temp = simd_set1_float(_val); s = temp; t = temp; p = temp; q = temp; }
+inline void vec4::sp(const float& _val) { const simdfloat temp = simd_set1_float(_val); s = temp; p = temp; }
+inline void vec4::spq(const float& _val) { const simdfloat temp = simd_set1_float(_val); s = temp; p = temp; q = temp; }
+inline void vec4::spqt(const float& _val) { const simdfloat temp = simd_set1_float(_val); s = temp; p = temp; q = temp; t = temp; }
+inline void vec4::spt(const float& _val) { const simdfloat temp = simd_set1_float(_val); s = temp; p = temp; t = temp; }
+inline void vec4::sptq(const float& _val) { const simdfloat temp = simd_set1_float(_val); s = temp; p = temp; t = temp; q = temp; }
+inline void vec4::tq(const float& _val) { const simdfloat temp = simd_set1_float(_val); t = temp; q = temp; }
+inline void vec4::tqs(const float& _val) { const simdfloat temp = simd_set1_float(_val); t = temp; q = temp; s = temp; }
+inline void vec4::tqsp(const float& _val) { const simdfloat temp = simd_set1_float(_val); t = temp; q = temp; s = temp; p = temp; }
+inline void vec4::tqp(const float& _val) { const simdfloat temp = simd_set1_float(_val); t = temp; q = temp; p = temp; }
+inline void vec4::tqps(const float& _val) { const simdfloat temp = simd_set1_float(_val); t = temp; q = temp; p = temp; s = temp; }
+inline void vec4::ts(const float& _val) { const simdfloat temp = simd_set1_float(_val); t = temp; s = temp; }
+inline void vec4::tsq(const float& _val) { const simdfloat temp = simd_set1_float(_val); t = temp; s = temp; q = temp; }
+inline void vec4::tsqp(const float& _val) { const simdfloat temp = simd_set1_float(_val); t = temp; s = temp; q = temp; p = temp; }
+inline void vec4::tsp(const float& _val) { const simdfloat temp = simd_set1_float(_val); t = temp; s = temp; p = temp; }
+inline void vec4::tspq(const float& _val) { const simdfloat temp = simd_set1_float(_val); t = temp; s = temp; p = temp; q = temp; }
+inline void vec4::tp(const float& _val) { const simdfloat temp = simd_set1_float(_val); t = temp; p = temp; }
+inline void vec4::tpq(const float& _val) { const simdfloat temp = simd_set1_float(_val); t = temp; p = temp; q = temp; }
+inline void vec4::tpqs(const float& _val) { const simdfloat temp = simd_set1_float(_val); t = temp; p = temp; q = temp; s = temp; }
+inline void vec4::tps(const float& _val) { const simdfloat temp = simd_set1_float(_val); t = temp; p = temp; s = temp; }
+inline void vec4::tpsq(const float& _val) { const simdfloat temp = simd_set1_float(_val); t = temp; p = temp; s = temp; q = temp; }
+inline void vec4::pq(const float& _val) { const simdfloat temp = simd_set1_float(_val); p = temp; q = temp; }
+inline void vec4::pqs(const float& _val) { const simdfloat temp = simd_set1_float(_val); p = temp; q = temp; s = temp; }
+inline void vec4::pqst(const float& _val) { const simdfloat temp = simd_set1_float(_val); p = temp; q = temp; s = temp; t = temp; }
+inline void vec4::pqt(const float& _val) { const simdfloat temp = simd_set1_float(_val); p = temp; q = temp; t = temp; }
+inline void vec4::pqts(const float& _val) { const simdfloat temp = simd_set1_float(_val); p = temp; q = temp; t = temp; s = temp; }
+inline void vec4::ps(const float& _val) { const simdfloat temp = simd_set1_float(_val); p = temp; s = temp; }
+inline void vec4::psq(const float& _val) { const simdfloat temp = simd_set1_float(_val); p = temp; s = temp; q = temp; }
+inline void vec4::psqt(const float& _val) { const simdfloat temp = simd_set1_float(_val); p = temp; s = temp; q = temp; t = temp; }
+inline void vec4::pst(const float& _val) { const simdfloat temp = simd_set1_float(_val); p = temp; s = temp; t = temp; }
+inline void vec4::pstq(const float& _val) { const simdfloat temp = simd_set1_float(_val); p = temp; s = temp; t = temp; q = temp; }
+inline void vec4::pt(const float& _val) { const simdfloat temp = simd_set1_float(_val); p = temp; t = temp; }
+inline void vec4::ptq(const float& _val) { const simdfloat temp = simd_set1_float(_val); p = temp; t = temp; q = temp; }
+inline void vec4::ptqs(const float& _val) { const simdfloat temp = simd_set1_float(_val); p = temp; t = temp; q = temp; s = temp; }
+inline void vec4::pts(const float& _val) { const simdfloat temp = simd_set1_float(_val); p = temp; t = temp; s = temp; }
+inline void vec4::ptsq(const float& _val) { const simdfloat temp = simd_set1_float(_val); p = temp; t = temp; s = temp; q = temp; }
 inline void vec4::wx(const float& _val) { const simdfloat temp = simd_set1_float(_val); w = temp; x = temp; }
 inline void vec4::wxy(const float& _val) { const simdfloat temp = simd_set1_float(_val); w = temp; x = temp; y = temp; }
 inline void vec4::wxyz(const float& _val) { const simdfloat temp = simd_set1_float(_val); w = temp; x = temp; y = temp; z = temp; }
@@ -10640,6 +13778,34 @@ inline dvec4 dvec2::rrgr() const { return { r, r, g, r }; }
 inline dvec3 dvec2::rrr() const { return { r, r, r }; }
 inline dvec4 dvec2::rrrg() const { return { r, r, r, g }; }
 inline dvec4 dvec2::rrrr() const { return { r, r, r, r }; }
+inline dvec2 dvec2::ss() const { return { s, s }; }
+inline dvec3 dvec2::sss() const { return { s, s, s }; }
+inline dvec4 dvec2::ssss() const { return { s, s, s, s }; }
+inline dvec4 dvec2::ssst() const { return { s, s, s, t }; }
+inline dvec3 dvec2::sst() const { return { s, s, t }; }
+inline dvec4 dvec2::ssts() const { return { s, s, t, s }; }
+inline dvec4 dvec2::sstt() const { return { s, s, t, t }; }
+inline dvec2 dvec2::st() const { return { s, t }; }
+inline dvec3 dvec2::sts() const { return { s, t, s }; }
+inline dvec4 dvec2::stss() const { return { s, t, s, s }; }
+inline dvec4 dvec2::stst() const { return { s, t, s, t }; }
+inline dvec3 dvec2::stt() const { return { s, t, t }; }
+inline dvec4 dvec2::stts() const { return { s, t, t, s }; }
+inline dvec4 dvec2::sttt() const { return { s, t, t, t }; }
+inline dvec2 dvec2::ts() const { return { t, s }; }
+inline dvec3 dvec2::tss() const { return { t, s, s }; }
+inline dvec4 dvec2::tsss() const { return { t, s, s, s }; }
+inline dvec4 dvec2::tsst() const { return { t, s, s, t }; }
+inline dvec3 dvec2::tst() const { return { t, s, t }; }
+inline dvec4 dvec2::tsts() const { return { t, s, t, s }; }
+inline dvec4 dvec2::tstt() const { return { t, s, t, t }; }
+inline dvec2 dvec2::tt() const { return { t, t }; }
+inline dvec3 dvec2::tts() const { return { t, t, s }; }
+inline dvec4 dvec2::ttss() const { return { t, t, s, s }; }
+inline dvec4 dvec2::ttst() const { return { t, t, s, t }; }
+inline dvec3 dvec2::ttt() const { return { t, t, t }; }
+inline dvec4 dvec2::ttts() const { return { t, t, t, s }; }
+inline dvec4 dvec2::tttt() const { return { t, t, t, t }; }
 inline dvec2 dvec2::xx() const { return { x, x }; }
 inline dvec3 dvec2::xxx() const { return { x, x, x }; }
 inline dvec4 dvec2::xxxx() const { return { x, x, x, x }; }
@@ -10674,6 +13840,12 @@ inline void dvec2::gr(const simddouble& _val) { g = _val; r = _val; }
 inline void dvec2::rg(const simddouble& _val0, const simddouble& _val1) { r = _val0; g = _val1; }
 inline void dvec2::rg(const dvec2& _val) { r = _val.x; g = _val.y; }
 inline void dvec2::rg(const simddouble& _val) { r = _val; g = _val; }
+inline void dvec2::st(const simddouble& _val0, const simddouble& _val1) { s = _val0; t = _val1; }
+inline void dvec2::st(const dvec2& _val) { s = _val.s; t = _val.t; }
+inline void dvec2::st(const simddouble& _val) { s = _val; t = _val; }
+inline void dvec2::ts(const simddouble& _val0, const simddouble& _val1) { t = _val0; s = _val1; }
+inline void dvec2::ts(const dvec2& _val) { t = _val.s; s = _val.t; }
+inline void dvec2::ts(const simddouble& _val) { t = _val; s = _val; }
 inline void dvec2::xy(const simddouble& _val0, const simddouble& _val1) { x = _val0; y = _val1; }
 inline void dvec2::xy(const dvec2& _val) { x = _val.x; y = _val.y; }
 inline void dvec2::xy(const simddouble& _val) { x = _val; y = _val; }
@@ -10683,6 +13855,8 @@ inline void dvec2::yx(const simddouble& _val) { y = _val; x = _val; }
 #ifndef USE_SCALAR
 inline void dvec2::gr(const double& _val) { const simddouble temp = simd_set1_double(_val); g = temp; r = temp; }
 inline void dvec2::rg(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; g = temp; }
+inline void dvec2::st(const double& _val) { const simddouble temp = simd_set1_double(_val); x = temp; y = temp; }
+inline void dvec2::ts(const double& _val) { const simddouble temp = simd_set1_double(_val); y = temp; x = temp; }
 inline void dvec2::xy(const double& _val) { const simddouble temp = simd_set1_double(_val); x = temp; y = temp; }
 inline void dvec2::yx(const double& _val) { const simddouble temp = simd_set1_double(_val); y = temp; x = temp; }
 #endif
@@ -10809,6 +13983,123 @@ inline dvec3 dvec3::rrr() const { return { r, r, r }; }
 inline dvec4 dvec3::rrrb() const { return { r, r, r, b }; }
 inline dvec4 dvec3::rrrg() const { return { r, r, r, g }; }
 inline dvec4 dvec3::rrrr() const { return { r, r, r, r }; }
+inline dvec2 dvec3::ss() const { return { s, s }; }
+inline dvec3 dvec3::sss() const { return { s, s, s }; }
+inline dvec4 dvec3::ssss() const { return { s, s, s, s }; }
+inline dvec4 dvec3::ssst() const { return { s, s, s, t }; }
+inline dvec4 dvec3::sssp() const { return { s, s, s, p }; }
+inline dvec3 dvec3::sst() const { return { s, s, t }; }
+inline dvec4 dvec3::ssts() const { return { s, s, t, s }; }
+inline dvec4 dvec3::sstt() const { return { s, s, t, t }; }
+inline dvec4 dvec3::sstp() const { return { s, s, t, p }; }
+inline dvec3 dvec3::ssp() const { return { s, s, p }; }
+inline dvec4 dvec3::ssps() const { return { s, s, p, s }; }
+inline dvec4 dvec3::sspt() const { return { s, s, p, t }; }
+inline dvec4 dvec3::sspp() const { return { s, s, p, p }; }
+inline dvec2 dvec3::st() const { return { s, t }; }
+inline dvec3 dvec3::sts() const { return { s, t, s }; }
+inline dvec4 dvec3::stss() const { return { s, t, s, s }; }
+inline dvec4 dvec3::stst() const { return { s, t, s, t }; }
+inline dvec4 dvec3::stsp() const { return { s, t, s, p }; }
+inline dvec3 dvec3::stt() const { return { s, t, t }; }
+inline dvec4 dvec3::stts() const { return { s, t, t, s }; }
+inline dvec4 dvec3::sttt() const { return { s, t, t, t }; }
+inline dvec4 dvec3::sttp() const { return { s, t, t, p }; }
+inline dvec3 dvec3::stp() const { return { s, t, p }; }
+inline dvec4 dvec3::stps() const { return { s, t, p, s }; }
+inline dvec4 dvec3::stpt() const { return { s, t, p, t }; }
+inline dvec4 dvec3::stpp() const { return { s, t, p, p }; }
+inline dvec2 dvec3::sp() const { return { s, p }; }
+inline dvec3 dvec3::sps() const { return { s, p, s }; }
+inline dvec4 dvec3::spss() const { return { s, p, s, s }; }
+inline dvec4 dvec3::spst() const { return { s, p, s, t }; }
+inline dvec4 dvec3::spsp() const { return { s, p, s, p }; }
+inline dvec3 dvec3::spt() const { return { s, p, t }; }
+inline dvec4 dvec3::spts() const { return { s, p, t, s }; }
+inline dvec4 dvec3::sptt() const { return { s, p, t, t }; }
+inline dvec4 dvec3::sptp() const { return { s, p, t, p }; }
+inline dvec3 dvec3::spp() const { return { s, p, p }; }
+inline dvec4 dvec3::spps() const { return { s, p, p, s }; }
+inline dvec4 dvec3::sppt() const { return { s, p, p, t }; }
+inline dvec4 dvec3::sppp() const { return { s, p, p, p }; }
+inline dvec2 dvec3::ts() const { return { t, s }; }
+inline dvec3 dvec3::tss() const { return { t, s, s }; }
+inline dvec4 dvec3::tsss() const { return { t, s, s, s }; }
+inline dvec4 dvec3::tsst() const { return { t, s, s, t }; }
+inline dvec4 dvec3::tssp() const { return { t, s, s, p }; }
+inline dvec3 dvec3::tst() const { return { t, s, t }; }
+inline dvec4 dvec3::tsts() const { return { t, s, t, s }; }
+inline dvec4 dvec3::tstt() const { return { t, s, t, t }; }
+inline dvec4 dvec3::tstp() const { return { t, s, t, p }; }
+inline dvec3 dvec3::tsp() const { return { t, s, p }; }
+inline dvec4 dvec3::tsps() const { return { t, s, p, s }; }
+inline dvec4 dvec3::tspt() const { return { t, s, p, t }; }
+inline dvec4 dvec3::tspp() const { return { t, s, p, p }; }
+inline dvec2 dvec3::tt() const { return { t, t }; }
+inline dvec3 dvec3::tts() const { return { t, t, s }; }
+inline dvec4 dvec3::ttss() const { return { t, t, s, s }; }
+inline dvec4 dvec3::ttst() const { return { t, t, s, t }; }
+inline dvec4 dvec3::ttsp() const { return { t, t, s, p }; }
+inline dvec3 dvec3::ttt() const { return { t, t, t }; }
+inline dvec4 dvec3::ttts() const { return { t, t, t, s }; }
+inline dvec4 dvec3::tttt() const { return { t, t, t, t }; }
+inline dvec4 dvec3::tttp() const { return { t, t, t, p }; }
+inline dvec3 dvec3::ttp() const { return { t, t, p }; }
+inline dvec4 dvec3::ttps() const { return { t, t, p, s }; }
+inline dvec4 dvec3::ttpt() const { return { t, t, p, t }; }
+inline dvec4 dvec3::ttpp() const { return { t, t, p, p }; }
+inline dvec2 dvec3::tp() const { return { t, p }; }
+inline dvec3 dvec3::tps() const { return { t, p, s }; }
+inline dvec4 dvec3::tpss() const { return { t, p, s, s }; }
+inline dvec4 dvec3::tpst() const { return { t, p, s, t }; }
+inline dvec4 dvec3::tpsp() const { return { t, p, s, p }; }
+inline dvec3 dvec3::tpt() const { return { t, p, t }; }
+inline dvec4 dvec3::tpts() const { return { t, p, t, s }; }
+inline dvec4 dvec3::tptt() const { return { t, p, t, t }; }
+inline dvec4 dvec3::tptp() const { return { t, p, t, p }; }
+inline dvec3 dvec3::tpp() const { return { t, p, p }; }
+inline dvec4 dvec3::tpps() const { return { t, p, p, s }; }
+inline dvec4 dvec3::tppt() const { return { t, p, p, t }; }
+inline dvec4 dvec3::tppp() const { return { t, p, p, p }; }
+inline dvec2 dvec3::ps() const { return { p, s }; }
+inline dvec3 dvec3::pss() const { return { p, s, s }; }
+inline dvec4 dvec3::psss() const { return { p, s, s, s }; }
+inline dvec4 dvec3::psst() const { return { p, s, s, t }; }
+inline dvec4 dvec3::pssp() const { return { p, s, s, p }; }
+inline dvec3 dvec3::pst() const { return { p, s, t }; }
+inline dvec4 dvec3::psts() const { return { p, s, t, s }; }
+inline dvec4 dvec3::pstt() const { return { p, s, t, t }; }
+inline dvec4 dvec3::pstp() const { return { p, s, t, p }; }
+inline dvec3 dvec3::psp() const { return { p, s, p }; }
+inline dvec4 dvec3::psps() const { return { p, s, p, s }; }
+inline dvec4 dvec3::pspt() const { return { p, s, p, t }; }
+inline dvec4 dvec3::pspp() const { return { p, s, p, p }; }
+inline dvec2 dvec3::pt() const { return { p, t }; }
+inline dvec3 dvec3::pts() const { return { p, t, s }; }
+inline dvec4 dvec3::ptss() const { return { p, t, s, s }; }
+inline dvec4 dvec3::ptst() const { return { p, t, s, t }; }
+inline dvec4 dvec3::ptsp() const { return { p, t, s, p }; }
+inline dvec3 dvec3::ptt() const { return { p, t, t }; }
+inline dvec4 dvec3::ptts() const { return { p, t, t, s }; }
+inline dvec4 dvec3::pttt() const { return { p, t, t, t }; }
+inline dvec4 dvec3::pttp() const { return { p, t, t, p }; }
+inline dvec3 dvec3::ptp() const { return { p, t, p }; }
+inline dvec4 dvec3::ptps() const { return { p, t, p, s }; }
+inline dvec4 dvec3::ptpt() const { return { p, t, p, t }; }
+inline dvec4 dvec3::ptpp() const { return { p, t, p, p }; }
+inline dvec2 dvec3::pp() const { return { p, p }; }
+inline dvec3 dvec3::pps() const { return { p, p, s }; }
+inline dvec4 dvec3::ppss() const { return { p, p, s, s }; }
+inline dvec4 dvec3::ppst() const { return { p, p, s, t }; }
+inline dvec4 dvec3::ppsp() const { return { p, p, s, p }; }
+inline dvec3 dvec3::ppt() const { return { p, p, t }; }
+inline dvec4 dvec3::ppts() const { return { p, p, t, s }; }
+inline dvec4 dvec3::pptt() const { return { p, p, t, t }; }
+inline dvec4 dvec3::pptp() const { return { p, p, t, p }; }
+inline dvec3 dvec3::ppp() const { return { p, p, p }; }
+inline dvec4 dvec3::ppps() const { return { p, p, p, s }; }
+inline dvec4 dvec3::pppt() const { return { p, p, p, t }; }
+inline dvec4 dvec3::pppp() const { return { p, p, p, p }; }
 inline dvec2 dvec3::xx() const { return { x, x }; }
 inline dvec3 dvec3::xxx() const { return { x, x, x }; }
 inline dvec4 dvec3::xxxx() const { return { x, x, x, x }; }
@@ -10962,6 +14253,42 @@ inline void dvec3::rg(const simddouble& _val) { r = _val; g = _val; }
 inline void dvec3::rgb(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { r = _val0; g = _val1; b = _val2; }
 inline void dvec3::rgb(const dvec3& _val) { r = _val.x; g = _val.y; b = _val.z; }
 inline void dvec3::rgb(const simddouble& _val) { r = _val; g = _val; b = _val; }
+inline void dvec3::st(const simddouble& _val0, const simddouble& _val1) { s = _val0; t = _val1; }
+inline void dvec3::st(const dvec2& _val) { s = _val.s; t = _val.t; }
+inline void dvec3::st(const simddouble& _val) { s = _val; t = _val; }
+inline void dvec3::stp(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { s = _val0; t = _val1; p = _val2; }
+inline void dvec3::stp(const dvec3& _val) { s = _val.s; t = _val.t; p = _val.p; }
+inline void dvec3::stp(const simddouble& _val) { s = _val; t = _val; p = _val; }
+inline void dvec3::sp(const simddouble& _val0, const simddouble& _val1) { s = _val0; p = _val1; }
+inline void dvec3::sp(const dvec2& _val) { s = _val.s; p = _val.t; }
+inline void dvec3::sp(const simddouble& _val) { s = _val; p = _val; }
+inline void dvec3::spt(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { s = _val0; p = _val1; t = _val2; }
+inline void dvec3::spt(const dvec3& _val) { s = _val.s; p = _val.t; t = _val.p; }
+inline void dvec3::spt(const simddouble& _val) { s = _val; p = _val; t = _val; }
+inline void dvec3::ts(const simddouble& _val0, const simddouble& _val1) { t = _val0; s = _val1; }
+inline void dvec3::ts(const dvec2& _val) { t = _val.s; s = _val.t; }
+inline void dvec3::ts(const simddouble& _val) { t = _val; s = _val; }
+inline void dvec3::tsp(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { t = _val0; s = _val1; p = _val2; }
+inline void dvec3::tsp(const dvec3& _val) { t = _val.s; s = _val.t; p = _val.p; }
+inline void dvec3::tsp(const simddouble& _val) { t = _val; s = _val; p = _val; }
+inline void dvec3::tp(const simddouble& _val0, const simddouble& _val1) { t = _val0; p = _val1; }
+inline void dvec3::tp(const dvec2& _val) { t = _val.s; p = _val.t; }
+inline void dvec3::tp(const simddouble& _val) { t = _val; p = _val; }
+inline void dvec3::tps(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { t = _val0; p = _val1; s = _val2; }
+inline void dvec3::tps(const dvec3& _val) { t = _val.s; p = _val.t; s = _val.p; }
+inline void dvec3::tps(const simddouble& _val) { t = _val; p = _val; s = _val; }
+inline void dvec3::ps(const simddouble& _val0, const simddouble& _val1) { p = _val0; s = _val1; }
+inline void dvec3::ps(const dvec2& _val) { p = _val.s; s = _val.t; }
+inline void dvec3::ps(const simddouble& _val) { p = _val; s = _val; }
+inline void dvec3::pst(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { p = _val0; s = _val1; t = _val2; }
+inline void dvec3::pst(const dvec3& _val) { p = _val.s; s = _val.t; t = _val.p; }
+inline void dvec3::pst(const simddouble& _val) { p = _val; s = _val; t = _val; }
+inline void dvec3::pt(const simddouble& _val0, const simddouble& _val1) { p = _val0; t = _val1; }
+inline void dvec3::pt(const dvec2& _val) { p = _val.s; t = _val.t; }
+inline void dvec3::pt(const simddouble& _val) { p = _val; t = _val; }
+inline void dvec3::pts(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { p = _val0; t = _val1; s = _val2; }
+inline void dvec3::pts(const dvec3& _val) { p = _val.s; t = _val.t; s = _val.p; }
+inline void dvec3::pts(const simddouble& _val) { p = _val; t = _val; s = _val; }
 inline void dvec3::xy(const simddouble& _val0, const simddouble& _val1) { x = _val0; y = _val1; }
 inline void dvec3::xy(const dvec2& _val) { x = _val.x; y = _val.y; }
 inline void dvec3::xy(const simddouble& _val) { x = _val; y = _val; }
@@ -11011,6 +14338,18 @@ inline void dvec3::rb(const double& _val) { const simddouble temp = simd_set1_do
 inline void dvec3::rbg(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; b = temp; g = temp; }
 inline void dvec3::rg(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; g = temp; }
 inline void dvec3::rgb(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; g = temp; b = temp; }
+inline void dvec3::st(const double& _val) { const simddouble temp = simd_set1_double(_val); s = temp; t = temp; }
+inline void dvec3::stp(const double& _val) { const simddouble temp = simd_set1_double(_val); s = temp; t = temp; p = temp; }
+inline void dvec3::sp(const double& _val) { const simddouble temp = simd_set1_double(_val); s = temp; p = temp; }
+inline void dvec3::spt(const double& _val) { const simddouble temp = simd_set1_double(_val); s = temp; p = temp; t = temp; }
+inline void dvec3::ts(const double& _val) { const simddouble temp = simd_set1_double(_val); t = temp; s = temp; }
+inline void dvec3::tsp(const double& _val) { const simddouble temp = simd_set1_double(_val); t = temp; s = temp; p = temp; }
+inline void dvec3::tp(const double& _val) { const simddouble temp = simd_set1_double(_val); t = temp; p = temp; }
+inline void dvec3::tps(const double& _val) { const simddouble temp = simd_set1_double(_val); t = temp; p = temp; s = temp; }
+inline void dvec3::ps(const double& _val) { const simddouble temp = simd_set1_double(_val); p = temp; s = temp; }
+inline void dvec3::pst(const double& _val) { const simddouble temp = simd_set1_double(_val); p = temp; s = temp; t = temp; }
+inline void dvec3::pt(const double& _val) { const simddouble temp = simd_set1_double(_val); p = temp; t = temp; }
+inline void dvec3::pts(const double& _val) { const simddouble temp = simd_set1_double(_val); p = temp; t = temp; s = temp; }
 inline void dvec3::xy(const double& _val) { const simddouble temp = simd_set1_double(_val); x = temp; y = temp; }
 inline void dvec3::xyz(const double& _val) { const simddouble temp = simd_set1_double(_val); x = temp; y = temp; z = temp; }
 inline void dvec3::xz(const double& _val) { const simddouble temp = simd_set1_double(_val); x = temp; z = temp; }
@@ -11366,6 +14705,342 @@ inline dvec4 dvec4::rrra() const { return { r, r, r, a }; }
 inline dvec4 dvec4::rrrb() const { return { r, r, r, b }; }
 inline dvec4 dvec4::rrrg() const { return { r, r, r, g }; }
 inline dvec4 dvec4::rrrr() const { return { r, r, r, r }; }
+inline dvec2 dvec4::qq() const { return { q, q }; }
+inline dvec3 dvec4::qqq() const { return { q, q, q }; }
+inline dvec4 dvec4::qqqq() const { return { q, q, q, q }; }
+inline dvec4 dvec4::qqqs() const { return { q, q, q, s }; }
+inline dvec4 dvec4::qqqt() const { return { q, q, q, t }; }
+inline dvec4 dvec4::qqqp() const { return { q, q, q, p }; }
+inline dvec3 dvec4::qqs() const { return { q, q, s }; }
+inline dvec4 dvec4::qqsq() const { return { q, q, s, q }; }
+inline dvec4 dvec4::qqss() const { return { q, q, s, s }; }
+inline dvec4 dvec4::qqst() const { return { q, q, s, t }; }
+inline dvec4 dvec4::qqsp() const { return { q, q, s, p }; }
+inline dvec3 dvec4::qqt() const { return { q, q, t }; }
+inline dvec4 dvec4::qqtq() const { return { q, q, t, q }; }
+inline dvec4 dvec4::qqts() const { return { q, q, t, s }; }
+inline dvec4 dvec4::qqtt() const { return { q, q, t, t }; }
+inline dvec4 dvec4::qqtp() const { return { q, q, t, p }; }
+inline dvec3 dvec4::qqp() const { return { q, q, p }; }
+inline dvec4 dvec4::qqpq() const { return { q, q, p, q }; }
+inline dvec4 dvec4::qqps() const { return { q, q, p, s }; }
+inline dvec4 dvec4::qqpt() const { return { q, q, p, t }; }
+inline dvec4 dvec4::qqpp() const { return { q, q, p, p }; }
+inline dvec2 dvec4::qs() const { return { q, s }; }
+inline dvec3 dvec4::qsq() const { return { q, s, q }; }
+inline dvec4 dvec4::qsqq() const { return { q, s, q, q }; }
+inline dvec4 dvec4::qsqs() const { return { q, s, q, s }; }
+inline dvec4 dvec4::qsqt() const { return { q, s, q, t }; }
+inline dvec4 dvec4::qsqp() const { return { q, s, q, p }; }
+inline dvec3 dvec4::qss() const { return { q, s, s }; }
+inline dvec4 dvec4::qssq() const { return { q, s, s, q }; }
+inline dvec4 dvec4::qsss() const { return { q, s, s, s }; }
+inline dvec4 dvec4::qsst() const { return { q, s, s, t }; }
+inline dvec4 dvec4::qssp() const { return { q, s, s, p }; }
+inline dvec3 dvec4::qst() const { return { q, s, t }; }
+inline dvec4 dvec4::qstq() const { return { q, s, t, q }; }
+inline dvec4 dvec4::qsts() const { return { q, s, t, s }; }
+inline dvec4 dvec4::qstt() const { return { q, s, t, t }; }
+inline dvec4 dvec4::qstp() const { return { q, s, t, p }; }
+inline dvec3 dvec4::qsp() const { return { q, s, p }; }
+inline dvec4 dvec4::qspq() const { return { q, s, p, q }; }
+inline dvec4 dvec4::qsps() const { return { q, s, p, s }; }
+inline dvec4 dvec4::qspt() const { return { q, s, p, t }; }
+inline dvec4 dvec4::qspp() const { return { q, s, p, p }; }
+inline dvec2 dvec4::qt() const { return { q, t }; }
+inline dvec3 dvec4::qtq() const { return { q, t, q }; }
+inline dvec4 dvec4::qtqq() const { return { q, t, q, q }; }
+inline dvec4 dvec4::qtqs() const { return { q, t, q, s }; }
+inline dvec4 dvec4::qtqt() const { return { q, t, q, t }; }
+inline dvec4 dvec4::qtqp() const { return { q, t, q, p }; }
+inline dvec3 dvec4::qts() const { return { q, t, s }; }
+inline dvec4 dvec4::qtsq() const { return { q, t, s, q }; }
+inline dvec4 dvec4::qtss() const { return { q, t, s, s }; }
+inline dvec4 dvec4::qtst() const { return { q, t, s, t }; }
+inline dvec4 dvec4::qtsp() const { return { q, t, s, p }; }
+inline dvec3 dvec4::qtt() const { return { q, t, t }; }
+inline dvec4 dvec4::qttq() const { return { q, t, t, q }; }
+inline dvec4 dvec4::qtts() const { return { q, t, t, s }; }
+inline dvec4 dvec4::qttt() const { return { q, t, t, t }; }
+inline dvec4 dvec4::qttp() const { return { q, t, t, p }; }
+inline dvec3 dvec4::qtp() const { return { q, t, p }; }
+inline dvec4 dvec4::qtpq() const { return { q, t, p, q }; }
+inline dvec4 dvec4::qtps() const { return { q, t, p, s }; }
+inline dvec4 dvec4::qtpt() const { return { q, t, p, t }; }
+inline dvec4 dvec4::qtpp() const { return { q, t, p, p }; }
+inline dvec2 dvec4::qp() const { return { q, p }; }
+inline dvec3 dvec4::qpq() const { return { q, p, q }; }
+inline dvec4 dvec4::qpqq() const { return { q, p, q, q }; }
+inline dvec4 dvec4::qpqs() const { return { q, p, q, s }; }
+inline dvec4 dvec4::qpqt() const { return { q, p, q, t }; }
+inline dvec4 dvec4::qpqp() const { return { q, p, q, p }; }
+inline dvec3 dvec4::qps() const { return { q, p, s }; }
+inline dvec4 dvec4::qpsq() const { return { q, p, s, q }; }
+inline dvec4 dvec4::qpss() const { return { q, p, s, s }; }
+inline dvec4 dvec4::qpst() const { return { q, p, s, t }; }
+inline dvec4 dvec4::qpsp() const { return { q, p, s, p }; }
+inline dvec3 dvec4::qpt() const { return { q, p, t }; }
+inline dvec4 dvec4::qptq() const { return { q, p, t, q }; }
+inline dvec4 dvec4::qpts() const { return { q, p, t, s }; }
+inline dvec4 dvec4::qptt() const { return { q, p, t, t }; }
+inline dvec4 dvec4::qptp() const { return { q, p, t, p }; }
+inline dvec3 dvec4::qpp() const { return { q, p, p }; }
+inline dvec4 dvec4::qppq() const { return { q, p, p, q }; }
+inline dvec4 dvec4::qpps() const { return { q, p, p, s }; }
+inline dvec4 dvec4::qppt() const { return { q, p, p, t }; }
+inline dvec4 dvec4::qppp() const { return { q, p, p, p }; }
+inline dvec2 dvec4::sq() const { return { s, q }; }
+inline dvec3 dvec4::sqq() const { return { s, q, q }; }
+inline dvec4 dvec4::sqqq() const { return { s, q, q, q }; }
+inline dvec4 dvec4::sqqs() const { return { s, q, q, s }; }
+inline dvec4 dvec4::sqqt() const { return { s, q, q, t }; }
+inline dvec4 dvec4::sqqp() const { return { s, q, q, p }; }
+inline dvec3 dvec4::sqs() const { return { s, q, s }; }
+inline dvec4 dvec4::sqsq() const { return { s, q, s, q }; }
+inline dvec4 dvec4::sqss() const { return { s, q, s, s }; }
+inline dvec4 dvec4::sqst() const { return { s, q, s, t }; }
+inline dvec4 dvec4::sqsp() const { return { s, q, s, p }; }
+inline dvec3 dvec4::sqt() const { return { s, q, t }; }
+inline dvec4 dvec4::sqtq() const { return { s, q, t, q }; }
+inline dvec4 dvec4::sqts() const { return { s, q, t, s }; }
+inline dvec4 dvec4::sqtt() const { return { s, q, t, t }; }
+inline dvec4 dvec4::sqtp() const { return { s, q, t, p }; }
+inline dvec3 dvec4::sqp() const { return { s, q, p }; }
+inline dvec4 dvec4::sqpq() const { return { s, q, p, q }; }
+inline dvec4 dvec4::sqps() const { return { s, q, p, s }; }
+inline dvec4 dvec4::sqpt() const { return { s, q, p, t }; }
+inline dvec4 dvec4::sqpp() const { return { s, q, p, p }; }
+inline dvec2 dvec4::ss() const { return { s, s }; }
+inline dvec3 dvec4::ssq() const { return { s, s, q }; }
+inline dvec4 dvec4::ssqq() const { return { s, s, q, q }; }
+inline dvec4 dvec4::ssqs() const { return { s, s, q, s }; }
+inline dvec4 dvec4::ssqt() const { return { s, s, q, t }; }
+inline dvec4 dvec4::ssqp() const { return { s, s, q, p }; }
+inline dvec3 dvec4::sss() const { return { s, s, s }; }
+inline dvec4 dvec4::sssq() const { return { s, s, s, q }; }
+inline dvec4 dvec4::ssss() const { return { s, s, s, s }; }
+inline dvec4 dvec4::ssst() const { return { s, s, s, t }; }
+inline dvec4 dvec4::sssp() const { return { s, s, s, p }; }
+inline dvec3 dvec4::sst() const { return { s, s, t }; }
+inline dvec4 dvec4::sstq() const { return { s, s, t, q }; }
+inline dvec4 dvec4::ssts() const { return { s, s, t, s }; }
+inline dvec4 dvec4::sstt() const { return { s, s, t, t }; }
+inline dvec4 dvec4::sstp() const { return { s, s, t, p }; }
+inline dvec3 dvec4::ssp() const { return { s, s, p }; }
+inline dvec4 dvec4::sspq() const { return { s, s, p, q }; }
+inline dvec4 dvec4::ssps() const { return { s, s, p, s }; }
+inline dvec4 dvec4::sspt() const { return { s, s, p, t }; }
+inline dvec4 dvec4::sspp() const { return { s, s, p, p }; }
+inline dvec2 dvec4::st() const { return { s, t }; }
+inline dvec3 dvec4::stq() const { return { s, t, q }; }
+inline dvec4 dvec4::stqq() const { return { s, t, q, q }; }
+inline dvec4 dvec4::stqs() const { return { s, t, q, s }; }
+inline dvec4 dvec4::stqt() const { return { s, t, q, t }; }
+inline dvec4 dvec4::stqp() const { return { s, t, q, p }; }
+inline dvec3 dvec4::sts() const { return { s, t, s }; }
+inline dvec4 dvec4::stsq() const { return { s, t, s, q }; }
+inline dvec4 dvec4::stss() const { return { s, t, s, s }; }
+inline dvec4 dvec4::stst() const { return { s, t, s, t }; }
+inline dvec4 dvec4::stsp() const { return { s, t, s, p }; }
+inline dvec3 dvec4::stt() const { return { s, t, t }; }
+inline dvec4 dvec4::sttq() const { return { s, t, t, q }; }
+inline dvec4 dvec4::stts() const { return { s, t, t, s }; }
+inline dvec4 dvec4::sttt() const { return { s, t, t, t }; }
+inline dvec4 dvec4::sttp() const { return { s, t, t, p }; }
+inline dvec3 dvec4::stp() const { return { s, t, p }; }
+inline dvec4 dvec4::stpq() const { return { s, t, p, q }; }
+inline dvec4 dvec4::stps() const { return { s, t, p, s }; }
+inline dvec4 dvec4::stpt() const { return { s, t, p, t }; }
+inline dvec4 dvec4::stpp() const { return { s, t, p, p }; }
+inline dvec2 dvec4::sp() const { return { s, p }; }
+inline dvec3 dvec4::spq() const { return { s, p, q }; }
+inline dvec4 dvec4::spqq() const { return { s, p, q, q }; }
+inline dvec4 dvec4::spqs() const { return { s, p, q, s }; }
+inline dvec4 dvec4::spqt() const { return { s, p, q, t }; }
+inline dvec4 dvec4::spqp() const { return { s, p, q, p }; }
+inline dvec3 dvec4::sps() const { return { s, p, s }; }
+inline dvec4 dvec4::spsq() const { return { s, p, s, q }; }
+inline dvec4 dvec4::spss() const { return { s, p, s, s }; }
+inline dvec4 dvec4::spst() const { return { s, p, s, t }; }
+inline dvec4 dvec4::spsp() const { return { s, p, s, p }; }
+inline dvec3 dvec4::spt() const { return { s, p, t }; }
+inline dvec4 dvec4::sptq() const { return { s, p, t, q }; }
+inline dvec4 dvec4::spts() const { return { s, p, t, s }; }
+inline dvec4 dvec4::sptt() const { return { s, p, t, t }; }
+inline dvec4 dvec4::sptp() const { return { s, p, t, p }; }
+inline dvec3 dvec4::spp() const { return { s, p, p }; }
+inline dvec4 dvec4::sppq() const { return { s, p, p, q }; }
+inline dvec4 dvec4::spps() const { return { s, p, p, s }; }
+inline dvec4 dvec4::sppt() const { return { s, p, p, t }; }
+inline dvec4 dvec4::sppp() const { return { s, p, p, p }; }
+inline dvec2 dvec4::tq() const { return { t, q }; }
+inline dvec3 dvec4::tqq() const { return { t, q, q }; }
+inline dvec4 dvec4::tqqq() const { return { t, q, q, q }; }
+inline dvec4 dvec4::tqqs() const { return { t, q, q, s }; }
+inline dvec4 dvec4::tqqt() const { return { t, q, q, t }; }
+inline dvec4 dvec4::tqqp() const { return { t, q, q, p }; }
+inline dvec3 dvec4::tqs() const { return { t, q, s }; }
+inline dvec4 dvec4::tqsq() const { return { t, q, s, q }; }
+inline dvec4 dvec4::tqss() const { return { t, q, s, s }; }
+inline dvec4 dvec4::tqst() const { return { t, q, s, t }; }
+inline dvec4 dvec4::tqsp() const { return { t, q, s, p }; }
+inline dvec3 dvec4::tqt() const { return { t, q, t }; }
+inline dvec4 dvec4::tqtq() const { return { t, q, t, q }; }
+inline dvec4 dvec4::tqts() const { return { t, q, t, s }; }
+inline dvec4 dvec4::tqtt() const { return { t, q, t, t }; }
+inline dvec4 dvec4::tqtp() const { return { t, q, t, p }; }
+inline dvec3 dvec4::tqp() const { return { t, q, p }; }
+inline dvec4 dvec4::tqpq() const { return { t, q, p, q }; }
+inline dvec4 dvec4::tqps() const { return { t, q, p, s }; }
+inline dvec4 dvec4::tqpt() const { return { t, q, p, t }; }
+inline dvec4 dvec4::tqpp() const { return { t, q, p, p }; }
+inline dvec2 dvec4::ts() const { return { t, s }; }
+inline dvec3 dvec4::tsq() const { return { t, s, q }; }
+inline dvec4 dvec4::tsqq() const { return { t, s, q, q }; }
+inline dvec4 dvec4::tsqs() const { return { t, s, q, s }; }
+inline dvec4 dvec4::tsqt() const { return { t, s, q, t }; }
+inline dvec4 dvec4::tsqp() const { return { t, s, q, p }; }
+inline dvec3 dvec4::tss() const { return { t, s, s }; }
+inline dvec4 dvec4::tssq() const { return { t, s, s, q }; }
+inline dvec4 dvec4::tsss() const { return { t, s, s, s }; }
+inline dvec4 dvec4::tsst() const { return { t, s, s, t }; }
+inline dvec4 dvec4::tssp() const { return { t, s, s, p }; }
+inline dvec3 dvec4::tst() const { return { t, s, t }; }
+inline dvec4 dvec4::tstq() const { return { t, s, t, q }; }
+inline dvec4 dvec4::tsts() const { return { t, s, t, s }; }
+inline dvec4 dvec4::tstt() const { return { t, s, t, t }; }
+inline dvec4 dvec4::tstp() const { return { t, s, t, p }; }
+inline dvec3 dvec4::tsp() const { return { t, s, p }; }
+inline dvec4 dvec4::tspq() const { return { t, s, p, q }; }
+inline dvec4 dvec4::tsps() const { return { t, s, p, s }; }
+inline dvec4 dvec4::tspt() const { return { t, s, p, t }; }
+inline dvec4 dvec4::tspp() const { return { t, s, p, p }; }
+inline dvec2 dvec4::tt() const { return { t, t }; }
+inline dvec3 dvec4::ttq() const { return { t, t, q }; }
+inline dvec4 dvec4::ttqq() const { return { t, t, q, q }; }
+inline dvec4 dvec4::ttqs() const { return { t, t, q, s }; }
+inline dvec4 dvec4::ttqt() const { return { t, t, q, t }; }
+inline dvec4 dvec4::ttqp() const { return { t, t, q, p }; }
+inline dvec3 dvec4::tts() const { return { t, t, s }; }
+inline dvec4 dvec4::ttsq() const { return { t, t, s, q }; }
+inline dvec4 dvec4::ttss() const { return { t, t, s, s }; }
+inline dvec4 dvec4::ttst() const { return { t, t, s, t }; }
+inline dvec4 dvec4::ttsp() const { return { t, t, s, p }; }
+inline dvec3 dvec4::ttt() const { return { t, t, t }; }
+inline dvec4 dvec4::tttq() const { return { t, t, t, q }; }
+inline dvec4 dvec4::ttts() const { return { t, t, t, s }; }
+inline dvec4 dvec4::tttt() const { return { t, t, t, t }; }
+inline dvec4 dvec4::tttp() const { return { t, t, t, p }; }
+inline dvec3 dvec4::ttp() const { return { t, t, p }; }
+inline dvec4 dvec4::ttpq() const { return { t, t, p, q }; }
+inline dvec4 dvec4::ttps() const { return { t, t, p, s }; }
+inline dvec4 dvec4::ttpt() const { return { t, t, p, t }; }
+inline dvec4 dvec4::ttpp() const { return { t, t, p, p }; }
+inline dvec2 dvec4::tp() const { return { t, p }; }
+inline dvec3 dvec4::tpq() const { return { t, p, q }; }
+inline dvec4 dvec4::tpqq() const { return { t, p, q, q }; }
+inline dvec4 dvec4::tpqs() const { return { t, p, q, s }; }
+inline dvec4 dvec4::tpqt() const { return { t, p, q, t }; }
+inline dvec4 dvec4::tpqp() const { return { t, p, q, p }; }
+inline dvec3 dvec4::tps() const { return { t, p, s }; }
+inline dvec4 dvec4::tpsq() const { return { t, p, s, q }; }
+inline dvec4 dvec4::tpss() const { return { t, p, s, s }; }
+inline dvec4 dvec4::tpst() const { return { t, p, s, t }; }
+inline dvec4 dvec4::tpsp() const { return { t, p, s, p }; }
+inline dvec3 dvec4::tpt() const { return { t, p, t }; }
+inline dvec4 dvec4::tptq() const { return { t, p, t, q }; }
+inline dvec4 dvec4::tpts() const { return { t, p, t, s }; }
+inline dvec4 dvec4::tptt() const { return { t, p, t, t }; }
+inline dvec4 dvec4::tptp() const { return { t, p, t, p }; }
+inline dvec3 dvec4::tpp() const { return { t, p, p }; }
+inline dvec4 dvec4::tppq() const { return { t, p, p, q }; }
+inline dvec4 dvec4::tpps() const { return { t, p, p, s }; }
+inline dvec4 dvec4::tppt() const { return { t, p, p, t }; }
+inline dvec4 dvec4::tppp() const { return { t, p, p, p }; }
+inline dvec2 dvec4::pq() const { return { p, q }; }
+inline dvec3 dvec4::pqq() const { return { p, q, q }; }
+inline dvec4 dvec4::pqqq() const { return { p, q, q, q }; }
+inline dvec4 dvec4::pqqs() const { return { p, q, q, s }; }
+inline dvec4 dvec4::pqqt() const { return { p, q, q, t }; }
+inline dvec4 dvec4::pqqp() const { return { p, q, q, p }; }
+inline dvec3 dvec4::pqs() const { return { p, q, s }; }
+inline dvec4 dvec4::pqsq() const { return { p, q, s, q }; }
+inline dvec4 dvec4::pqss() const { return { p, q, s, s }; }
+inline dvec4 dvec4::pqst() const { return { p, q, s, t }; }
+inline dvec4 dvec4::pqsp() const { return { p, q, s, p }; }
+inline dvec3 dvec4::pqt() const { return { p, q, t }; }
+inline dvec4 dvec4::pqtq() const { return { p, q, t, q }; }
+inline dvec4 dvec4::pqts() const { return { p, q, t, s }; }
+inline dvec4 dvec4::pqtt() const { return { p, q, t, t }; }
+inline dvec4 dvec4::pqtp() const { return { p, q, t, p }; }
+inline dvec3 dvec4::pqp() const { return { p, q, p }; }
+inline dvec4 dvec4::pqpq() const { return { p, q, p, q }; }
+inline dvec4 dvec4::pqps() const { return { p, q, p, s }; }
+inline dvec4 dvec4::pqpt() const { return { p, q, p, t }; }
+inline dvec4 dvec4::pqpp() const { return { p, q, p, p }; }
+inline dvec2 dvec4::ps() const { return { p, s }; }
+inline dvec3 dvec4::psq() const { return { p, s, q }; }
+inline dvec4 dvec4::psqq() const { return { p, s, q, q }; }
+inline dvec4 dvec4::psqs() const { return { p, s, q, s }; }
+inline dvec4 dvec4::psqt() const { return { p, s, q, t }; }
+inline dvec4 dvec4::psqp() const { return { p, s, q, p }; }
+inline dvec3 dvec4::pss() const { return { p, s, s }; }
+inline dvec4 dvec4::pssq() const { return { p, s, s, q }; }
+inline dvec4 dvec4::psss() const { return { p, s, s, s }; }
+inline dvec4 dvec4::psst() const { return { p, s, s, t }; }
+inline dvec4 dvec4::pssp() const { return { p, s, s, p }; }
+inline dvec3 dvec4::pst() const { return { p, s, t }; }
+inline dvec4 dvec4::pstq() const { return { p, s, t, q }; }
+inline dvec4 dvec4::psts() const { return { p, s, t, s }; }
+inline dvec4 dvec4::pstt() const { return { p, s, t, t }; }
+inline dvec4 dvec4::pstp() const { return { p, s, t, p }; }
+inline dvec3 dvec4::psp() const { return { p, s, p }; }
+inline dvec4 dvec4::pspq() const { return { p, s, p, q }; }
+inline dvec4 dvec4::psps() const { return { p, s, p, s }; }
+inline dvec4 dvec4::pspt() const { return { p, s, p, t }; }
+inline dvec4 dvec4::pspp() const { return { p, s, p, p }; }
+inline dvec2 dvec4::pt() const { return { p, t }; }
+inline dvec3 dvec4::ptq() const { return { p, t, q }; }
+inline dvec4 dvec4::ptqq() const { return { p, t, q, q }; }
+inline dvec4 dvec4::ptqs() const { return { p, t, q, s }; }
+inline dvec4 dvec4::ptqt() const { return { p, t, q, t }; }
+inline dvec4 dvec4::ptqp() const { return { p, t, q, p }; }
+inline dvec3 dvec4::pts() const { return { p, t, s }; }
+inline dvec4 dvec4::ptsq() const { return { p, t, s, q }; }
+inline dvec4 dvec4::ptss() const { return { p, t, s, s }; }
+inline dvec4 dvec4::ptst() const { return { p, t, s, t }; }
+inline dvec4 dvec4::ptsp() const { return { p, t, s, p }; }
+inline dvec3 dvec4::ptt() const { return { p, t, t }; }
+inline dvec4 dvec4::pttq() const { return { p, t, t, q }; }
+inline dvec4 dvec4::ptts() const { return { p, t, t, s }; }
+inline dvec4 dvec4::pttt() const { return { p, t, t, t }; }
+inline dvec4 dvec4::pttp() const { return { p, t, t, p }; }
+inline dvec3 dvec4::ptp() const { return { p, t, p }; }
+inline dvec4 dvec4::ptpq() const { return { p, t, p, q }; }
+inline dvec4 dvec4::ptps() const { return { p, t, p, s }; }
+inline dvec4 dvec4::ptpt() const { return { p, t, p, t }; }
+inline dvec4 dvec4::ptpp() const { return { p, t, p, p }; }
+inline dvec2 dvec4::pp() const { return { p, p }; }
+inline dvec3 dvec4::ppq() const { return { p, p, q }; }
+inline dvec4 dvec4::ppqq() const { return { p, p, q, q }; }
+inline dvec4 dvec4::ppqs() const { return { p, p, q, s }; }
+inline dvec4 dvec4::ppqt() const { return { p, p, q, t }; }
+inline dvec4 dvec4::ppqp() const { return { p, p, q, p }; }
+inline dvec3 dvec4::pps() const { return { p, p, s }; }
+inline dvec4 dvec4::ppsq() const { return { p, p, s, q }; }
+inline dvec4 dvec4::ppss() const { return { p, p, s, s }; }
+inline dvec4 dvec4::ppst() const { return { p, p, s, t }; }
+inline dvec4 dvec4::ppsp() const { return { p, p, s, p }; }
+inline dvec3 dvec4::ppt() const { return { p, p, t }; }
+inline dvec4 dvec4::pptq() const { return { p, p, t, q }; }
+inline dvec4 dvec4::ppts() const { return { p, p, t, s }; }
+inline dvec4 dvec4::pptt() const { return { p, p, t, t }; }
+inline dvec4 dvec4::pptp() const { return { p, p, t, p }; }
+inline dvec3 dvec4::ppp() const { return { p, p, p }; }
+inline dvec4 dvec4::pppq() const { return { p, p, p, q }; }
+inline dvec4 dvec4::ppps() const { return { p, p, p, s }; }
+inline dvec4 dvec4::pppt() const { return { p, p, p, t }; }
+inline dvec4 dvec4::pppp() const { return { p, p, p, p }; }
 inline dvec2 dvec4::ww() const { return { w, w }; }
 inline dvec3 dvec4::www() const { return { w, w, w }; }
 inline dvec4 dvec4::wwww() const { return { w, w, w, w }; }
@@ -11882,6 +15557,186 @@ inline void dvec4::rgb(const simddouble& _val) { r = _val; g = _val; b = _val; }
 inline void dvec4::rgba(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { r = _val0; g = _val1; b = _val2; a = _val3; }
 inline void dvec4::rgba(const dvec4& _val) { r = _val.x; g = _val.y; b = _val.z; a = _val.w; }
 inline void dvec4::rgba(const simddouble& _val) { r = _val; g = _val; b = _val; a = _val; }
+inline void dvec4::qs(const simddouble& _val0, const simddouble& _val1) { q = _val0; s = _val1; }
+inline void dvec4::qs(const dvec2& _val) { q = _val.s; s = _val.t; }
+inline void dvec4::qs(const simddouble& _val) { q = _val; s = _val; }
+inline void dvec4::qst(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { q = _val0; s = _val1; t = _val2; }
+inline void dvec4::qst(const dvec3& _val) { q = _val.s; s = _val.t; t = _val.p; }
+inline void dvec4::qst(const simddouble& _val) { q = _val; s = _val; t = _val; }
+inline void dvec4::qstp(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { q = _val0; s = _val1; t = _val2; p = _val3; }
+inline void dvec4::qstp(const dvec4& _val) { q = _val.s; s = _val.t; t = _val.p; p = _val.q; }
+inline void dvec4::qstp(const simddouble& _val) { q = _val; s = _val; t = _val; p = _val; }
+inline void dvec4::qsp(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { q = _val0; s = _val1; p = _val2; }
+inline void dvec4::qsp(const dvec3& _val) { q = _val.s; s = _val.t; p = _val.p; }
+inline void dvec4::qsp(const simddouble& _val) { q = _val; s = _val; p = _val; }
+inline void dvec4::qspt(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { q = _val0; s = _val1; p = _val2; t = _val3; }
+inline void dvec4::qspt(const dvec4& _val) { q = _val.s; s = _val.t; p = _val.p; t = _val.q; }
+inline void dvec4::qspt(const simddouble& _val) { q = _val; s = _val; p = _val; t = _val; }
+inline void dvec4::qt(const simddouble& _val0, const simddouble& _val1) { q = _val0; t = _val1; }
+inline void dvec4::qt(const dvec2& _val) { q = _val.s; t = _val.t; }
+inline void dvec4::qt(const simddouble& _val) { q = _val; t = _val; }
+inline void dvec4::qts(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { q = _val0; t = _val1; s = _val2; }
+inline void dvec4::qts(const dvec3& _val) { q = _val.s; t = _val.t; s = _val.p; }
+inline void dvec4::qts(const simddouble& _val) { q = _val; t = _val; s = _val; }
+inline void dvec4::qtsp(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { q = _val0; t = _val1; s = _val2; p = _val3; }
+inline void dvec4::qtsp(const dvec4& _val) { q = _val.s; t = _val.t; s = _val.p; p = _val.q; }
+inline void dvec4::qtsp(const simddouble& _val) { q = _val; t = _val; s = _val; p = _val; }
+inline void dvec4::qtp(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { q = _val0; t = _val1; p = _val2; }
+inline void dvec4::qtp(const dvec3& _val) { q = _val.s; t = _val.t; p = _val.p; }
+inline void dvec4::qtp(const simddouble& _val) { q = _val; t = _val; p = _val; }
+inline void dvec4::qtps(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { q = _val0; t = _val1; p = _val2; s = _val3; }
+inline void dvec4::qtps(const dvec4& _val) { q = _val.s; t = _val.t; p = _val.p; s = _val.q; }
+inline void dvec4::qtps(const simddouble& _val) { q = _val; t = _val; p = _val; s = _val; }
+inline void dvec4::qp(const simddouble& _val0, const simddouble& _val1) { q = _val0; p = _val1; }
+inline void dvec4::qp(const dvec2& _val) { q = _val.s; p = _val.t; }
+inline void dvec4::qp(const simddouble& _val) { q = _val; p = _val; }
+inline void dvec4::qps(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { q = _val0; p = _val1; s = _val2; }
+inline void dvec4::qps(const dvec3& _val) { q = _val.s; p = _val.t; s = _val.p; }
+inline void dvec4::qps(const simddouble& _val) { q = _val; p = _val; s = _val; }
+inline void dvec4::qpst(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { q = _val0; p = _val1; s = _val2; t = _val3; }
+inline void dvec4::qpst(const dvec4& _val) { q = _val.s; p = _val.t; s = _val.p; t = _val.q; }
+inline void dvec4::qpst(const simddouble& _val) { q = _val; p = _val; s = _val; t = _val; }
+inline void dvec4::qpt(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { q = _val0; p = _val1; t = _val2; }
+inline void dvec4::qpt(const dvec3& _val) { q = _val.s; p = _val.t; t = _val.p; }
+inline void dvec4::qpt(const simddouble& _val) { q = _val; p = _val; t = _val; }
+inline void dvec4::qpts(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { q = _val0; p = _val1; t = _val2; s = _val3; }
+inline void dvec4::qpts(const dvec4& _val) { q = _val.s; p = _val.t; t = _val.p; s = _val.q; }
+inline void dvec4::qpts(const simddouble& _val) { q = _val; p = _val; t = _val; s = _val; }
+inline void dvec4::sq(const simddouble& _val0, const simddouble& _val1) { s = _val0; q = _val1; }
+inline void dvec4::sq(const dvec2& _val) { s = _val.s; q = _val.t; }
+inline void dvec4::sq(const simddouble& _val) { s = _val; q = _val; }
+inline void dvec4::sqt(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { s = _val0; q = _val1; t = _val2; }
+inline void dvec4::sqt(const dvec3& _val) { s = _val.s; q = _val.t; t = _val.p; }
+inline void dvec4::sqt(const simddouble& _val) { s = _val; q = _val; t = _val; }
+inline void dvec4::sqtp(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { s = _val0; q = _val1; t = _val2; p = _val3; }
+inline void dvec4::sqtp(const dvec4& _val) { s = _val.s; q = _val.t; t = _val.p; p = _val.q; }
+inline void dvec4::sqtp(const simddouble& _val) { s = _val; q = _val; t = _val; p = _val; }
+inline void dvec4::sqp(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { s = _val0; q = _val1; p = _val2; }
+inline void dvec4::sqp(const dvec3& _val) { s = _val.s; q = _val.t; p = _val.p; }
+inline void dvec4::sqp(const simddouble& _val) { s = _val; q = _val; p = _val; }
+inline void dvec4::sqpt(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { s = _val0; q = _val1; p = _val2; t = _val3; }
+inline void dvec4::sqpt(const dvec4& _val) { s = _val.s; q = _val.t; p = _val.p; t = _val.q; }
+inline void dvec4::sqpt(const simddouble& _val) { s = _val; q = _val; p = _val; t = _val; }
+inline void dvec4::st(const simddouble& _val0, const simddouble& _val1) { s = _val0; t = _val1; }
+inline void dvec4::st(const dvec2& _val) { s = _val.s; t = _val.t; }
+inline void dvec4::st(const simddouble& _val) { s = _val; t = _val; }
+inline void dvec4::stq(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { s = _val0; t = _val1; q = _val2; }
+inline void dvec4::stq(const dvec3& _val) { s = _val.s; t = _val.t; q = _val.p; }
+inline void dvec4::stq(const simddouble& _val) { s = _val; t = _val; q = _val; }
+inline void dvec4::stqp(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { s = _val0; t = _val1; q = _val2; p = _val3; }
+inline void dvec4::stqp(const dvec4& _val) { s = _val.s; t = _val.t; q = _val.p; p = _val.q; }
+inline void dvec4::stqp(const simddouble& _val) { s = _val; t = _val; q = _val; p = _val; }
+inline void dvec4::stp(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { s = _val0; t = _val1; p = _val2; }
+inline void dvec4::stp(const dvec3& _val) { s = _val.s; t = _val.t; p = _val.p; }
+inline void dvec4::stp(const simddouble& _val) { s = _val; t = _val; p = _val; }
+inline void dvec4::stpq(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { s = _val0; t = _val1; p = _val2; q = _val3; }
+inline void dvec4::stpq(const dvec4& _val) { s = _val.s; t = _val.t; p = _val.p; q = _val.q; }
+inline void dvec4::stpq(const simddouble& _val) { s = _val; t = _val; p = _val; q = _val; }
+inline void dvec4::sp(const simddouble& _val0, const simddouble& _val1) { s = _val0; p = _val1; }
+inline void dvec4::sp(const dvec2& _val) { s = _val.s; p = _val.t; }
+inline void dvec4::sp(const simddouble& _val) { s = _val; p = _val; }
+inline void dvec4::spq(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { s = _val0; p = _val1; q = _val2; }
+inline void dvec4::spq(const dvec3& _val) { s = _val.s; p = _val.t; q = _val.p; }
+inline void dvec4::spq(const simddouble& _val) { s = _val; p = _val; q = _val; }
+inline void dvec4::spqt(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { s = _val0; p = _val1; q = _val2; t = _val3; }
+inline void dvec4::spqt(const dvec4& _val) { s = _val.s; p = _val.t; q = _val.p; t = _val.q; }
+inline void dvec4::spqt(const simddouble& _val) { s = _val; p = _val; q = _val; t = _val; }
+inline void dvec4::spt(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { s = _val0; p = _val1; t = _val2; }
+inline void dvec4::spt(const dvec3& _val) { s = _val.s; p = _val.t; t = _val.p; }
+inline void dvec4::spt(const simddouble& _val) { s = _val; p = _val; t = _val; }
+inline void dvec4::sptq(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { s = _val0; p = _val1; t = _val2; q = _val3; }
+inline void dvec4::sptq(const dvec4& _val) { s = _val.s; p = _val.t; t = _val.p; q = _val.q; }
+inline void dvec4::sptq(const simddouble& _val) { s = _val; p = _val; t = _val; q = _val; }
+inline void dvec4::tq(const simddouble& _val0, const simddouble& _val1) { t = _val0; q = _val1; }
+inline void dvec4::tq(const dvec2& _val) { t = _val.s; q = _val.t; }
+inline void dvec4::tq(const simddouble& _val) { t = _val; q = _val; }
+inline void dvec4::tqs(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { t = _val0; q = _val1; s = _val2; }
+inline void dvec4::tqs(const dvec3& _val) { t = _val.s; q = _val.t; s = _val.p; }
+inline void dvec4::tqs(const simddouble& _val) { t = _val; q = _val; s = _val; }
+inline void dvec4::tqsp(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { t = _val0; q = _val1; s = _val2; p = _val3; }
+inline void dvec4::tqsp(const dvec4& _val) { t = _val.s; q = _val.t; s = _val.p; p = _val.q; }
+inline void dvec4::tqsp(const simddouble& _val) { t = _val; q = _val; s = _val; p = _val; }
+inline void dvec4::tqp(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { t = _val0; q = _val1; p = _val2; }
+inline void dvec4::tqp(const dvec3& _val) { t = _val.s; q = _val.t; p = _val.p; }
+inline void dvec4::tqp(const simddouble& _val) { t = _val; q = _val; p = _val; }
+inline void dvec4::tqps(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { t = _val0; q = _val1; p = _val2; s = _val3; }
+inline void dvec4::tqps(const dvec4& _val) { t = _val.s; q = _val.t; p = _val.p; s = _val.q; }
+inline void dvec4::tqps(const simddouble& _val) { t = _val; q = _val; p = _val; s = _val; }
+inline void dvec4::ts(const simddouble& _val0, const simddouble& _val1) { t = _val0; s = _val1; }
+inline void dvec4::ts(const dvec2& _val) { t = _val.s; s = _val.t; }
+inline void dvec4::ts(const simddouble& _val) { t = _val; s = _val; }
+inline void dvec4::tsq(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { t = _val0; s = _val1; q = _val2; }
+inline void dvec4::tsq(const dvec3& _val) { t = _val.s; s = _val.t; q = _val.p; }
+inline void dvec4::tsq(const simddouble& _val) { t = _val; s = _val; q = _val; }
+inline void dvec4::tsqp(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { t = _val0; s = _val1; q = _val2; p = _val3; }
+inline void dvec4::tsqp(const dvec4& _val) { t = _val.s; s = _val.t; q = _val.p; p = _val.q; }
+inline void dvec4::tsqp(const simddouble& _val) { t = _val; s = _val; q = _val; p = _val; }
+inline void dvec4::tsp(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { t = _val0; s = _val1; p = _val2; }
+inline void dvec4::tsp(const dvec3& _val) { t = _val.s; s = _val.t; p = _val.p; }
+inline void dvec4::tsp(const simddouble& _val) { t = _val; s = _val; p = _val; }
+inline void dvec4::tspq(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { t = _val0; s = _val1; p = _val2; q = _val3; }
+inline void dvec4::tspq(const dvec4& _val) { t = _val.s; s = _val.t; p = _val.p; q = _val.q; }
+inline void dvec4::tspq(const simddouble& _val) { t = _val; s = _val; p = _val; q = _val; }
+inline void dvec4::tp(const simddouble& _val0, const simddouble& _val1) { t = _val0; p = _val1; }
+inline void dvec4::tp(const dvec2& _val) { t = _val.s; p = _val.t; }
+inline void dvec4::tp(const simddouble& _val) { t = _val; p = _val; }
+inline void dvec4::tpq(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { t = _val0; p = _val1; q = _val2; }
+inline void dvec4::tpq(const dvec3& _val) { t = _val.s; p = _val.t; q = _val.p; }
+inline void dvec4::tpq(const simddouble& _val) { t = _val; p = _val; q = _val; }
+inline void dvec4::tpqs(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { t = _val0; p = _val1; q = _val2; s = _val3; }
+inline void dvec4::tpqs(const dvec4& _val) { t = _val.s; p = _val.t; q = _val.p; s = _val.q; }
+inline void dvec4::tpqs(const simddouble& _val) { t = _val; p = _val; q = _val; s = _val; }
+inline void dvec4::tps(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { t = _val0; p = _val1; s = _val2; }
+inline void dvec4::tps(const dvec3& _val) { t = _val.s; p = _val.t; s = _val.p; }
+inline void dvec4::tps(const simddouble& _val) { t = _val; p = _val; s = _val; }
+inline void dvec4::tpsq(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { t = _val0; p = _val1; s = _val2; q = _val3; }
+inline void dvec4::tpsq(const dvec4& _val) { t = _val.s; p = _val.t; s = _val.p; q = _val.q; }
+inline void dvec4::tpsq(const simddouble& _val) { t = _val; p = _val; s = _val; q = _val; }
+inline void dvec4::pq(const simddouble& _val0, const simddouble& _val1) { p = _val0; q = _val1; }
+inline void dvec4::pq(const dvec2& _val) { p = _val.s; q = _val.t; }
+inline void dvec4::pq(const simddouble& _val) { p = _val; q = _val; }
+inline void dvec4::pqs(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { p = _val0; q = _val1; s = _val2; }
+inline void dvec4::pqs(const dvec3& _val) { p = _val.s; q = _val.t; s = _val.p; }
+inline void dvec4::pqs(const simddouble& _val) { p = _val; q = _val; s = _val; }
+inline void dvec4::pqst(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { p = _val0; q = _val1; s = _val2; t = _val3; }
+inline void dvec4::pqst(const dvec4& _val) { p = _val.s; q = _val.t; s = _val.p; t = _val.q; }
+inline void dvec4::pqst(const simddouble& _val) { p = _val; q = _val; s = _val; t = _val; }
+inline void dvec4::pqt(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { p = _val0; q = _val1; t = _val2; }
+inline void dvec4::pqt(const dvec3& _val) { p = _val.s; q = _val.t; t = _val.p; }
+inline void dvec4::pqt(const simddouble& _val) { p = _val; q = _val; t = _val; }
+inline void dvec4::pqts(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { p = _val0; q = _val1; t = _val2; s = _val3; }
+inline void dvec4::pqts(const dvec4& _val) { p = _val.s; q = _val.t; t = _val.p; s = _val.q; }
+inline void dvec4::pqts(const simddouble& _val) { p = _val; q = _val; t = _val; s = _val; }
+inline void dvec4::ps(const simddouble& _val0, const simddouble& _val1) { p = _val0; s = _val1; }
+inline void dvec4::ps(const dvec2& _val) { p = _val.s; s = _val.t; }
+inline void dvec4::ps(const simddouble& _val) { p = _val; s = _val; }
+inline void dvec4::psq(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { p = _val0; s = _val1; q = _val2; }
+inline void dvec4::psq(const dvec3& _val) { p = _val.s; s = _val.t; q = _val.p; }
+inline void dvec4::psq(const simddouble& _val) { p = _val; s = _val; q = _val; }
+inline void dvec4::psqt(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { p = _val0; s = _val1; q = _val2; t = _val3; }
+inline void dvec4::psqt(const dvec4& _val) { p = _val.s; s = _val.t; q = _val.p; t = _val.q; }
+inline void dvec4::psqt(const simddouble& _val) { p = _val; s = _val; q = _val; t = _val; }
+inline void dvec4::pst(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { p = _val0; s = _val1; t = _val2; }
+inline void dvec4::pst(const dvec3& _val) { p = _val.s; s = _val.t; t = _val.p; }
+inline void dvec4::pst(const simddouble& _val) { p = _val; s = _val; t = _val; }
+inline void dvec4::pstq(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { p = _val0; s = _val1; t = _val2; q = _val3; }
+inline void dvec4::pstq(const dvec4& _val) { p = _val.s; s = _val.t; t = _val.p; q = _val.q; }
+inline void dvec4::pstq(const simddouble& _val) { p = _val; s = _val; t = _val; q = _val; }
+inline void dvec4::pt(const simddouble& _val0, const simddouble& _val1) { p = _val0; t = _val1; }
+inline void dvec4::pt(const dvec2& _val) { p = _val.s; t = _val.t; }
+inline void dvec4::pt(const simddouble& _val) { p = _val; t = _val; }
+inline void dvec4::ptq(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { p = _val0; t = _val1; q = _val2; }
+inline void dvec4::ptq(const dvec3& _val) { p = _val.s; t = _val.t; q = _val.p; }
+inline void dvec4::ptq(const simddouble& _val) { p = _val; t = _val; q = _val; }
+inline void dvec4::ptqs(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { p = _val0; t = _val1; q = _val2; s = _val3; }
+inline void dvec4::ptqs(const dvec4& _val) { p = _val.s; t = _val.t; q = _val.p; s = _val.q; }
+inline void dvec4::ptqs(const simddouble& _val) { p = _val; t = _val; q = _val; s = _val; }
+inline void dvec4::pts(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { p = _val0; t = _val1; s = _val2; }
+inline void dvec4::pts(const dvec3& _val) { p = _val.s; t = _val.t; s = _val.p; }
+inline void dvec4::pts(const simddouble& _val) { p = _val; t = _val; s = _val; }
+inline void dvec4::ptsq(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { p = _val0; t = _val1; s = _val2; q = _val3; }
+inline void dvec4::ptsq(const dvec4& _val) { p = _val.s; t = _val.t; s = _val.p; q = _val.q; }
+inline void dvec4::ptsq(const simddouble& _val) { p = _val; t = _val; s = _val; q = _val; }
 inline void dvec4::wx(const simddouble& _val0, const simddouble& _val1) { w = _val0; x = _val1; }
 inline void dvec4::wx(const dvec2& _val) { w = _val.x; x = _val.y; }
 inline void dvec4::wx(const simddouble& _val) { w = _val; x = _val; }
@@ -12123,6 +15978,66 @@ inline void dvec4::rga(const double& _val) { const simddouble temp = simd_set1_d
 inline void dvec4::rgab(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; g = temp; a = temp; b = temp; }
 inline void dvec4::rgb(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; g = temp; b = temp; }
 inline void dvec4::rgba(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; g = temp; b = temp; a = temp; }
+inline void dvec4::qs(const double& _val) { const simddouble temp = simd_set1_double(_val); q = temp; s = temp; }
+inline void dvec4::qst(const double& _val) { const simddouble temp = simd_set1_double(_val); q = temp; s = temp; t = temp; }
+inline void dvec4::qstp(const double& _val) { const simddouble temp = simd_set1_double(_val); q = temp; s = temp; t = temp; p = temp; }
+inline void dvec4::qsp(const double& _val) { const simddouble temp = simd_set1_double(_val); q = temp; s = temp; p = temp; }
+inline void dvec4::qspt(const double& _val) { const simddouble temp = simd_set1_double(_val); q = temp; s = temp; p = temp; t = temp; }
+inline void dvec4::qt(const double& _val) { const simddouble temp = simd_set1_double(_val); q = temp; t = temp; }
+inline void dvec4::qts(const double& _val) { const simddouble temp = simd_set1_double(_val); q = temp; t = temp; s = temp; }
+inline void dvec4::qtsp(const double& _val) { const simddouble temp = simd_set1_double(_val); q = temp; t = temp; s = temp; p = temp; }
+inline void dvec4::qtp(const double& _val) { const simddouble temp = simd_set1_double(_val); q = temp; t = temp; p = temp; }
+inline void dvec4::qtps(const double& _val) { const simddouble temp = simd_set1_double(_val); q = temp; t = temp; p = temp; s = temp; }
+inline void dvec4::qp(const double& _val) { const simddouble temp = simd_set1_double(_val); q = temp; p = temp; }
+inline void dvec4::qps(const double& _val) { const simddouble temp = simd_set1_double(_val); q = temp; p = temp; s = temp; }
+inline void dvec4::qpst(const double& _val) { const simddouble temp = simd_set1_double(_val); q = temp; p = temp; s = temp; t = temp; }
+inline void dvec4::qpt(const double& _val) { const simddouble temp = simd_set1_double(_val); q = temp; p = temp; t = temp; }
+inline void dvec4::qpts(const double& _val) { const simddouble temp = simd_set1_double(_val); q = temp; p = temp; t = temp; s = temp; }
+inline void dvec4::sq(const double& _val) { const simddouble temp = simd_set1_double(_val); s = temp; q = temp; }
+inline void dvec4::sqt(const double& _val) { const simddouble temp = simd_set1_double(_val); s = temp; q = temp; t = temp; }
+inline void dvec4::sqtp(const double& _val) { const simddouble temp = simd_set1_double(_val); s = temp; q = temp; t = temp; p = temp; }
+inline void dvec4::sqp(const double& _val) { const simddouble temp = simd_set1_double(_val); s = temp; q = temp; p = temp; }
+inline void dvec4::sqpt(const double& _val) { const simddouble temp = simd_set1_double(_val); s = temp; q = temp; p = temp; t = temp; }
+inline void dvec4::st(const double& _val) { const simddouble temp = simd_set1_double(_val); s = temp; t = temp; }
+inline void dvec4::stq(const double& _val) { const simddouble temp = simd_set1_double(_val); s = temp; t = temp; q = temp; }
+inline void dvec4::stqp(const double& _val) { const simddouble temp = simd_set1_double(_val); s = temp; t = temp; q = temp; p = temp; }
+inline void dvec4::stp(const double& _val) { const simddouble temp = simd_set1_double(_val); s = temp; t = temp; p = temp; }
+inline void dvec4::stpq(const double& _val) { const simddouble temp = simd_set1_double(_val); s = temp; t = temp; p = temp; q = temp; }
+inline void dvec4::sp(const double& _val) { const simddouble temp = simd_set1_double(_val); s = temp; p = temp; }
+inline void dvec4::spq(const double& _val) { const simddouble temp = simd_set1_double(_val); s = temp; p = temp; q = temp; }
+inline void dvec4::spqt(const double& _val) { const simddouble temp = simd_set1_double(_val); s = temp; p = temp; q = temp; t = temp; }
+inline void dvec4::spt(const double& _val) { const simddouble temp = simd_set1_double(_val); s = temp; p = temp; t = temp; }
+inline void dvec4::sptq(const double& _val) { const simddouble temp = simd_set1_double(_val); s = temp; p = temp; t = temp; q = temp; }
+inline void dvec4::tq(const double& _val) { const simddouble temp = simd_set1_double(_val); t = temp; q = temp; }
+inline void dvec4::tqs(const double& _val) { const simddouble temp = simd_set1_double(_val); t = temp; q = temp; s = temp; }
+inline void dvec4::tqsp(const double& _val) { const simddouble temp = simd_set1_double(_val); t = temp; q = temp; s = temp; p = temp; }
+inline void dvec4::tqp(const double& _val) { const simddouble temp = simd_set1_double(_val); t = temp; q = temp; p = temp; }
+inline void dvec4::tqps(const double& _val) { const simddouble temp = simd_set1_double(_val); t = temp; q = temp; p = temp; s = temp; }
+inline void dvec4::ts(const double& _val) { const simddouble temp = simd_set1_double(_val); t = temp; s = temp; }
+inline void dvec4::tsq(const double& _val) { const simddouble temp = simd_set1_double(_val); t = temp; s = temp; q = temp; }
+inline void dvec4::tsqp(const double& _val) { const simddouble temp = simd_set1_double(_val); t = temp; s = temp; q = temp; p = temp; }
+inline void dvec4::tsp(const double& _val) { const simddouble temp = simd_set1_double(_val); t = temp; s = temp; p = temp; }
+inline void dvec4::tspq(const double& _val) { const simddouble temp = simd_set1_double(_val); t = temp; s = temp; p = temp; q = temp; }
+inline void dvec4::tp(const double& _val) { const simddouble temp = simd_set1_double(_val); t = temp; p = temp; }
+inline void dvec4::tpq(const double& _val) { const simddouble temp = simd_set1_double(_val); t = temp; p = temp; q = temp; }
+inline void dvec4::tpqs(const double& _val) { const simddouble temp = simd_set1_double(_val); t = temp; p = temp; q = temp; s = temp; }
+inline void dvec4::tps(const double& _val) { const simddouble temp = simd_set1_double(_val); t = temp; p = temp; s = temp; }
+inline void dvec4::tpsq(const double& _val) { const simddouble temp = simd_set1_double(_val); t = temp; p = temp; s = temp; q = temp; }
+inline void dvec4::pq(const double& _val) { const simddouble temp = simd_set1_double(_val); p = temp; q = temp; }
+inline void dvec4::pqs(const double& _val) { const simddouble temp = simd_set1_double(_val); p = temp; q = temp; s = temp; }
+inline void dvec4::pqst(const double& _val) { const simddouble temp = simd_set1_double(_val); p = temp; q = temp; s = temp; t = temp; }
+inline void dvec4::pqt(const double& _val) { const simddouble temp = simd_set1_double(_val); p = temp; q = temp; t = temp; }
+inline void dvec4::pqts(const double& _val) { const simddouble temp = simd_set1_double(_val); p = temp; q = temp; t = temp; s = temp; }
+inline void dvec4::ps(const double& _val) { const simddouble temp = simd_set1_double(_val); p = temp; s = temp; }
+inline void dvec4::psq(const double& _val) { const simddouble temp = simd_set1_double(_val); p = temp; s = temp; q = temp; }
+inline void dvec4::psqt(const double& _val) { const simddouble temp = simd_set1_double(_val); p = temp; s = temp; q = temp; t = temp; }
+inline void dvec4::pst(const double& _val) { const simddouble temp = simd_set1_double(_val); p = temp; s = temp; t = temp; }
+inline void dvec4::pstq(const double& _val) { const simddouble temp = simd_set1_double(_val); p = temp; s = temp; t = temp; q = temp; }
+inline void dvec4::pt(const double& _val) { const simddouble temp = simd_set1_double(_val); p = temp; t = temp; }
+inline void dvec4::ptq(const double& _val) { const simddouble temp = simd_set1_double(_val); p = temp; t = temp; q = temp; }
+inline void dvec4::ptqs(const double& _val) { const simddouble temp = simd_set1_double(_val); p = temp; t = temp; q = temp; s = temp; }
+inline void dvec4::pts(const double& _val) { const simddouble temp = simd_set1_double(_val); p = temp; t = temp; s = temp; }
+inline void dvec4::ptsq(const double& _val) { const simddouble temp = simd_set1_double(_val); p = temp; t = temp; s = temp; q = temp; }
 inline void dvec4::wx(const double& _val) { const simddouble temp = simd_set1_double(_val); w = temp; x = temp; }
 inline void dvec4::wxy(const double& _val) { const simddouble temp = simd_set1_double(_val); w = temp; x = temp; y = temp; }
 inline void dvec4::wxyz(const double& _val) { const simddouble temp = simd_set1_double(_val); w = temp; x = temp; y = temp; z = temp; }
@@ -12217,6 +16132,34 @@ inline ivec4 ivec2::rrgr() const { return { r, r, g, r }; }
 inline ivec3 ivec2::rrr() const { return { r, r, r }; }
 inline ivec4 ivec2::rrrg() const { return { r, r, r, g }; }
 inline ivec4 ivec2::rrrr() const { return { r, r, r, r }; }
+inline ivec2 ivec2::ss() const { return { s, s }; }
+inline ivec3 ivec2::sss() const { return { s, s, s }; }
+inline ivec4 ivec2::ssss() const { return { s, s, s, s }; }
+inline ivec4 ivec2::ssst() const { return { s, s, s, t }; }
+inline ivec3 ivec2::sst() const { return { s, s, t }; }
+inline ivec4 ivec2::ssts() const { return { s, s, t, s }; }
+inline ivec4 ivec2::sstt() const { return { s, s, t, t }; }
+inline ivec2 ivec2::st() const { return { s, t }; }
+inline ivec3 ivec2::sts() const { return { s, t, s }; }
+inline ivec4 ivec2::stss() const { return { s, t, s, s }; }
+inline ivec4 ivec2::stst() const { return { s, t, s, t }; }
+inline ivec3 ivec2::stt() const { return { s, t, t }; }
+inline ivec4 ivec2::stts() const { return { s, t, t, s }; }
+inline ivec4 ivec2::sttt() const { return { s, t, t, t }; }
+inline ivec2 ivec2::ts() const { return { t, s }; }
+inline ivec3 ivec2::tss() const { return { t, s, s }; }
+inline ivec4 ivec2::tsss() const { return { t, s, s, s }; }
+inline ivec4 ivec2::tsst() const { return { t, s, s, t }; }
+inline ivec3 ivec2::tst() const { return { t, s, t }; }
+inline ivec4 ivec2::tsts() const { return { t, s, t, s }; }
+inline ivec4 ivec2::tstt() const { return { t, s, t, t }; }
+inline ivec2 ivec2::tt() const { return { t, t }; }
+inline ivec3 ivec2::tts() const { return { t, t, s }; }
+inline ivec4 ivec2::ttss() const { return { t, t, s, s }; }
+inline ivec4 ivec2::ttst() const { return { t, t, s, t }; }
+inline ivec3 ivec2::ttt() const { return { t, t, t }; }
+inline ivec4 ivec2::ttts() const { return { t, t, t, s }; }
+inline ivec4 ivec2::tttt() const { return { t, t, t, t }; }
 inline ivec2 ivec2::xx() const { return { x, x }; }
 inline ivec3 ivec2::xxx() const { return { x, x, x }; }
 inline ivec4 ivec2::xxxx() const { return { x, x, x, x }; }
@@ -12251,6 +16194,12 @@ inline void ivec2::gr(const simdint& _val) { g = _val; r = _val; }
 inline void ivec2::rg(const simdint& _val0, const simdint& _val1) { r = _val0; g = _val1; }
 inline void ivec2::rg(const ivec2& _val) { r = _val.x; g = _val.y; }
 inline void ivec2::rg(const simdint& _val) { r = _val; g = _val; }
+inline void ivec2::st(const simdint& _val0, const simdint& _val1) { s = _val0; t = _val1; }
+inline void ivec2::st(const ivec2& _val) { s = _val.s; t = _val.t; }
+inline void ivec2::st(const simdint& _val) { s = _val; t = _val; }
+inline void ivec2::ts(const simdint& _val0, const simdint& _val1) { t = _val0; s = _val1; }
+inline void ivec2::ts(const ivec2& _val) { t = _val.s; s = _val.t; }
+inline void ivec2::ts(const simdint& _val) { t = _val; s = _val; }
 inline void ivec2::xy(const simdint& _val0, const simdint& _val1) { x = _val0; y = _val1; }
 inline void ivec2::xy(const ivec2& _val) { x = _val.x; y = _val.y; }
 inline void ivec2::xy(const simdint& _val) { x = _val; y = _val; }
@@ -12260,6 +16209,8 @@ inline void ivec2::yx(const simdint& _val) { y = _val; x = _val; }
 #ifndef USE_SCALAR
 inline void ivec2::gr(const int& _val) { const simdint temp = simd_set1_int(_val); g = temp; r = temp; }
 inline void ivec2::rg(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; g = temp; }
+inline void ivec2::st(const int& _val) { const simdint temp = simd_set1_int(_val); x = temp; y = temp; }
+inline void ivec2::ts(const int& _val) { const simdint temp = simd_set1_int(_val); y = temp; x = temp; }
 inline void ivec2::xy(const int& _val) { const simdint temp = simd_set1_int(_val); x = temp; y = temp; }
 inline void ivec2::yx(const int& _val) { const simdint temp = simd_set1_int(_val); y = temp; x = temp; }
 #endif
@@ -12386,6 +16337,123 @@ inline ivec3 ivec3::rrr() const { return { r, r, r }; }
 inline ivec4 ivec3::rrrb() const { return { r, r, r, b }; }
 inline ivec4 ivec3::rrrg() const { return { r, r, r, g }; }
 inline ivec4 ivec3::rrrr() const { return { r, r, r, r }; }
+inline ivec2 ivec3::ss() const { return { s, s }; }
+inline ivec3 ivec3::sss() const { return { s, s, s }; }
+inline ivec4 ivec3::ssss() const { return { s, s, s, s }; }
+inline ivec4 ivec3::ssst() const { return { s, s, s, t }; }
+inline ivec4 ivec3::sssp() const { return { s, s, s, p }; }
+inline ivec3 ivec3::sst() const { return { s, s, t }; }
+inline ivec4 ivec3::ssts() const { return { s, s, t, s }; }
+inline ivec4 ivec3::sstt() const { return { s, s, t, t }; }
+inline ivec4 ivec3::sstp() const { return { s, s, t, p }; }
+inline ivec3 ivec3::ssp() const { return { s, s, p }; }
+inline ivec4 ivec3::ssps() const { return { s, s, p, s }; }
+inline ivec4 ivec3::sspt() const { return { s, s, p, t }; }
+inline ivec4 ivec3::sspp() const { return { s, s, p, p }; }
+inline ivec2 ivec3::st() const { return { s, t }; }
+inline ivec3 ivec3::sts() const { return { s, t, s }; }
+inline ivec4 ivec3::stss() const { return { s, t, s, s }; }
+inline ivec4 ivec3::stst() const { return { s, t, s, t }; }
+inline ivec4 ivec3::stsp() const { return { s, t, s, p }; }
+inline ivec3 ivec3::stt() const { return { s, t, t }; }
+inline ivec4 ivec3::stts() const { return { s, t, t, s }; }
+inline ivec4 ivec3::sttt() const { return { s, t, t, t }; }
+inline ivec4 ivec3::sttp() const { return { s, t, t, p }; }
+inline ivec3 ivec3::stp() const { return { s, t, p }; }
+inline ivec4 ivec3::stps() const { return { s, t, p, s }; }
+inline ivec4 ivec3::stpt() const { return { s, t, p, t }; }
+inline ivec4 ivec3::stpp() const { return { s, t, p, p }; }
+inline ivec2 ivec3::sp() const { return { s, p }; }
+inline ivec3 ivec3::sps() const { return { s, p, s }; }
+inline ivec4 ivec3::spss() const { return { s, p, s, s }; }
+inline ivec4 ivec3::spst() const { return { s, p, s, t }; }
+inline ivec4 ivec3::spsp() const { return { s, p, s, p }; }
+inline ivec3 ivec3::spt() const { return { s, p, t }; }
+inline ivec4 ivec3::spts() const { return { s, p, t, s }; }
+inline ivec4 ivec3::sptt() const { return { s, p, t, t }; }
+inline ivec4 ivec3::sptp() const { return { s, p, t, p }; }
+inline ivec3 ivec3::spp() const { return { s, p, p }; }
+inline ivec4 ivec3::spps() const { return { s, p, p, s }; }
+inline ivec4 ivec3::sppt() const { return { s, p, p, t }; }
+inline ivec4 ivec3::sppp() const { return { s, p, p, p }; }
+inline ivec2 ivec3::ts() const { return { t, s }; }
+inline ivec3 ivec3::tss() const { return { t, s, s }; }
+inline ivec4 ivec3::tsss() const { return { t, s, s, s }; }
+inline ivec4 ivec3::tsst() const { return { t, s, s, t }; }
+inline ivec4 ivec3::tssp() const { return { t, s, s, p }; }
+inline ivec3 ivec3::tst() const { return { t, s, t }; }
+inline ivec4 ivec3::tsts() const { return { t, s, t, s }; }
+inline ivec4 ivec3::tstt() const { return { t, s, t, t }; }
+inline ivec4 ivec3::tstp() const { return { t, s, t, p }; }
+inline ivec3 ivec3::tsp() const { return { t, s, p }; }
+inline ivec4 ivec3::tsps() const { return { t, s, p, s }; }
+inline ivec4 ivec3::tspt() const { return { t, s, p, t }; }
+inline ivec4 ivec3::tspp() const { return { t, s, p, p }; }
+inline ivec2 ivec3::tt() const { return { t, t }; }
+inline ivec3 ivec3::tts() const { return { t, t, s }; }
+inline ivec4 ivec3::ttss() const { return { t, t, s, s }; }
+inline ivec4 ivec3::ttst() const { return { t, t, s, t }; }
+inline ivec4 ivec3::ttsp() const { return { t, t, s, p }; }
+inline ivec3 ivec3::ttt() const { return { t, t, t }; }
+inline ivec4 ivec3::ttts() const { return { t, t, t, s }; }
+inline ivec4 ivec3::tttt() const { return { t, t, t, t }; }
+inline ivec4 ivec3::tttp() const { return { t, t, t, p }; }
+inline ivec3 ivec3::ttp() const { return { t, t, p }; }
+inline ivec4 ivec3::ttps() const { return { t, t, p, s }; }
+inline ivec4 ivec3::ttpt() const { return { t, t, p, t }; }
+inline ivec4 ivec3::ttpp() const { return { t, t, p, p }; }
+inline ivec2 ivec3::tp() const { return { t, p }; }
+inline ivec3 ivec3::tps() const { return { t, p, s }; }
+inline ivec4 ivec3::tpss() const { return { t, p, s, s }; }
+inline ivec4 ivec3::tpst() const { return { t, p, s, t }; }
+inline ivec4 ivec3::tpsp() const { return { t, p, s, p }; }
+inline ivec3 ivec3::tpt() const { return { t, p, t }; }
+inline ivec4 ivec3::tpts() const { return { t, p, t, s }; }
+inline ivec4 ivec3::tptt() const { return { t, p, t, t }; }
+inline ivec4 ivec3::tptp() const { return { t, p, t, p }; }
+inline ivec3 ivec3::tpp() const { return { t, p, p }; }
+inline ivec4 ivec3::tpps() const { return { t, p, p, s }; }
+inline ivec4 ivec3::tppt() const { return { t, p, p, t }; }
+inline ivec4 ivec3::tppp() const { return { t, p, p, p }; }
+inline ivec2 ivec3::ps() const { return { p, s }; }
+inline ivec3 ivec3::pss() const { return { p, s, s }; }
+inline ivec4 ivec3::psss() const { return { p, s, s, s }; }
+inline ivec4 ivec3::psst() const { return { p, s, s, t }; }
+inline ivec4 ivec3::pssp() const { return { p, s, s, p }; }
+inline ivec3 ivec3::pst() const { return { p, s, t }; }
+inline ivec4 ivec3::psts() const { return { p, s, t, s }; }
+inline ivec4 ivec3::pstt() const { return { p, s, t, t }; }
+inline ivec4 ivec3::pstp() const { return { p, s, t, p }; }
+inline ivec3 ivec3::psp() const { return { p, s, p }; }
+inline ivec4 ivec3::psps() const { return { p, s, p, s }; }
+inline ivec4 ivec3::pspt() const { return { p, s, p, t }; }
+inline ivec4 ivec3::pspp() const { return { p, s, p, p }; }
+inline ivec2 ivec3::pt() const { return { p, t }; }
+inline ivec3 ivec3::pts() const { return { p, t, s }; }
+inline ivec4 ivec3::ptss() const { return { p, t, s, s }; }
+inline ivec4 ivec3::ptst() const { return { p, t, s, t }; }
+inline ivec4 ivec3::ptsp() const { return { p, t, s, p }; }
+inline ivec3 ivec3::ptt() const { return { p, t, t }; }
+inline ivec4 ivec3::ptts() const { return { p, t, t, s }; }
+inline ivec4 ivec3::pttt() const { return { p, t, t, t }; }
+inline ivec4 ivec3::pttp() const { return { p, t, t, p }; }
+inline ivec3 ivec3::ptp() const { return { p, t, p }; }
+inline ivec4 ivec3::ptps() const { return { p, t, p, s }; }
+inline ivec4 ivec3::ptpt() const { return { p, t, p, t }; }
+inline ivec4 ivec3::ptpp() const { return { p, t, p, p }; }
+inline ivec2 ivec3::pp() const { return { p, p }; }
+inline ivec3 ivec3::pps() const { return { p, p, s }; }
+inline ivec4 ivec3::ppss() const { return { p, p, s, s }; }
+inline ivec4 ivec3::ppst() const { return { p, p, s, t }; }
+inline ivec4 ivec3::ppsp() const { return { p, p, s, p }; }
+inline ivec3 ivec3::ppt() const { return { p, p, t }; }
+inline ivec4 ivec3::ppts() const { return { p, p, t, s }; }
+inline ivec4 ivec3::pptt() const { return { p, p, t, t }; }
+inline ivec4 ivec3::pptp() const { return { p, p, t, p }; }
+inline ivec3 ivec3::ppp() const { return { p, p, p }; }
+inline ivec4 ivec3::ppps() const { return { p, p, p, s }; }
+inline ivec4 ivec3::pppt() const { return { p, p, p, t }; }
+inline ivec4 ivec3::pppp() const { return { p, p, p, p }; }
 inline ivec2 ivec3::xx() const { return { x, x }; }
 inline ivec3 ivec3::xxx() const { return { x, x, x }; }
 inline ivec4 ivec3::xxxx() const { return { x, x, x, x }; }
@@ -12539,6 +16607,42 @@ inline void ivec3::rg(const simdint& _val) { r = _val; g = _val; }
 inline void ivec3::rgb(const simdint& _val0, const simdint& _val1, const simdint& _val2) { r = _val0; g = _val1; b = _val2; }
 inline void ivec3::rgb(const ivec3& _val) { r = _val.x; g = _val.y; b = _val.z; }
 inline void ivec3::rgb(const simdint& _val) { r = _val; g = _val; b = _val; }
+inline void ivec3::st(const simdint& _val0, const simdint& _val1) { s = _val0; t = _val1; }
+inline void ivec3::st(const ivec2& _val) { s = _val.s; t = _val.t; }
+inline void ivec3::st(const simdint& _val) { s = _val; t = _val; }
+inline void ivec3::stp(const simdint& _val0, const simdint& _val1, const simdint& _val2) { s = _val0; t = _val1; p = _val2; }
+inline void ivec3::stp(const ivec3& _val) { s = _val.s; t = _val.t; p = _val.p; }
+inline void ivec3::stp(const simdint& _val) { s = _val; t = _val; p = _val; }
+inline void ivec3::sp(const simdint& _val0, const simdint& _val1) { s = _val0; p = _val1; }
+inline void ivec3::sp(const ivec2& _val) { s = _val.s; p = _val.t; }
+inline void ivec3::sp(const simdint& _val) { s = _val; p = _val; }
+inline void ivec3::spt(const simdint& _val0, const simdint& _val1, const simdint& _val2) { s = _val0; p = _val1; t = _val2; }
+inline void ivec3::spt(const ivec3& _val) { s = _val.s; p = _val.t; t = _val.p; }
+inline void ivec3::spt(const simdint& _val) { s = _val; p = _val; t = _val; }
+inline void ivec3::ts(const simdint& _val0, const simdint& _val1) { t = _val0; s = _val1; }
+inline void ivec3::ts(const ivec2& _val) { t = _val.s; s = _val.t; }
+inline void ivec3::ts(const simdint& _val) { t = _val; s = _val; }
+inline void ivec3::tsp(const simdint& _val0, const simdint& _val1, const simdint& _val2) { t = _val0; s = _val1; p = _val2; }
+inline void ivec3::tsp(const ivec3& _val) { t = _val.s; s = _val.t; p = _val.p; }
+inline void ivec3::tsp(const simdint& _val) { t = _val; s = _val; p = _val; }
+inline void ivec3::tp(const simdint& _val0, const simdint& _val1) { t = _val0; p = _val1; }
+inline void ivec3::tp(const ivec2& _val) { t = _val.s; p = _val.t; }
+inline void ivec3::tp(const simdint& _val) { t = _val; p = _val; }
+inline void ivec3::tps(const simdint& _val0, const simdint& _val1, const simdint& _val2) { t = _val0; p = _val1; s = _val2; }
+inline void ivec3::tps(const ivec3& _val) { t = _val.s; p = _val.t; s = _val.p; }
+inline void ivec3::tps(const simdint& _val) { t = _val; p = _val; s = _val; }
+inline void ivec3::ps(const simdint& _val0, const simdint& _val1) { p = _val0; s = _val1; }
+inline void ivec3::ps(const ivec2& _val) { p = _val.s; s = _val.t; }
+inline void ivec3::ps(const simdint& _val) { p = _val; s = _val; }
+inline void ivec3::pst(const simdint& _val0, const simdint& _val1, const simdint& _val2) { p = _val0; s = _val1; t = _val2; }
+inline void ivec3::pst(const ivec3& _val) { p = _val.s; s = _val.t; t = _val.p; }
+inline void ivec3::pst(const simdint& _val) { p = _val; s = _val; t = _val; }
+inline void ivec3::pt(const simdint& _val0, const simdint& _val1) { p = _val0; t = _val1; }
+inline void ivec3::pt(const ivec2& _val) { p = _val.s; t = _val.t; }
+inline void ivec3::pt(const simdint& _val) { p = _val; t = _val; }
+inline void ivec3::pts(const simdint& _val0, const simdint& _val1, const simdint& _val2) { p = _val0; t = _val1; s = _val2; }
+inline void ivec3::pts(const ivec3& _val) { p = _val.s; t = _val.t; s = _val.p; }
+inline void ivec3::pts(const simdint& _val) { p = _val; t = _val; s = _val; }
 inline void ivec3::xy(const simdint& _val0, const simdint& _val1) { x = _val0; y = _val1; }
 inline void ivec3::xy(const ivec2& _val) { x = _val.x; y = _val.y; }
 inline void ivec3::xy(const simdint& _val) { x = _val; y = _val; }
@@ -12588,6 +16692,18 @@ inline void ivec3::rb(const int& _val) { const simdint temp = simd_set1_int(_val
 inline void ivec3::rbg(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; b = temp; g = temp; }
 inline void ivec3::rg(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; g = temp; }
 inline void ivec3::rgb(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; g = temp; b = temp; }
+inline void ivec3::st(const int& _val) { const simdint temp = simd_set1_int(_val); s = temp; t = temp; }
+inline void ivec3::stp(const int& _val) { const simdint temp = simd_set1_int(_val); s = temp; t = temp; p = temp; }
+inline void ivec3::sp(const int& _val) { const simdint temp = simd_set1_int(_val); s = temp; p = temp; }
+inline void ivec3::spt(const int& _val) { const simdint temp = simd_set1_int(_val); s = temp; p = temp; t = temp; }
+inline void ivec3::ts(const int& _val) { const simdint temp = simd_set1_int(_val); t = temp; s = temp; }
+inline void ivec3::tsp(const int& _val) { const simdint temp = simd_set1_int(_val); t = temp; s = temp; p = temp; }
+inline void ivec3::tp(const int& _val) { const simdint temp = simd_set1_int(_val); t = temp; p = temp; }
+inline void ivec3::tps(const int& _val) { const simdint temp = simd_set1_int(_val); t = temp; p = temp; s = temp; }
+inline void ivec3::ps(const int& _val) { const simdint temp = simd_set1_int(_val); p = temp; s = temp; }
+inline void ivec3::pst(const int& _val) { const simdint temp = simd_set1_int(_val); p = temp; s = temp; t = temp; }
+inline void ivec3::pt(const int& _val) { const simdint temp = simd_set1_int(_val); p = temp; t = temp; }
+inline void ivec3::pts(const int& _val) { const simdint temp = simd_set1_int(_val); p = temp; t = temp; s = temp; }
 inline void ivec3::xy(const int& _val) { const simdint temp = simd_set1_int(_val); x = temp; y = temp; }
 inline void ivec3::xyz(const int& _val) { const simdint temp = simd_set1_int(_val); x = temp; y = temp; z = temp; }
 inline void ivec3::xz(const int& _val) { const simdint temp = simd_set1_int(_val); x = temp; z = temp; }
@@ -12943,6 +17059,342 @@ inline ivec4 ivec4::rrra() const { return { r, r, r, a }; }
 inline ivec4 ivec4::rrrb() const { return { r, r, r, b }; }
 inline ivec4 ivec4::rrrg() const { return { r, r, r, g }; }
 inline ivec4 ivec4::rrrr() const { return { r, r, r, r }; }
+inline ivec2 ivec4::qq() const { return { q, q }; }
+inline ivec3 ivec4::qqq() const { return { q, q, q }; }
+inline ivec4 ivec4::qqqq() const { return { q, q, q, q }; }
+inline ivec4 ivec4::qqqs() const { return { q, q, q, s }; }
+inline ivec4 ivec4::qqqt() const { return { q, q, q, t }; }
+inline ivec4 ivec4::qqqp() const { return { q, q, q, p }; }
+inline ivec3 ivec4::qqs() const { return { q, q, s }; }
+inline ivec4 ivec4::qqsq() const { return { q, q, s, q }; }
+inline ivec4 ivec4::qqss() const { return { q, q, s, s }; }
+inline ivec4 ivec4::qqst() const { return { q, q, s, t }; }
+inline ivec4 ivec4::qqsp() const { return { q, q, s, p }; }
+inline ivec3 ivec4::qqt() const { return { q, q, t }; }
+inline ivec4 ivec4::qqtq() const { return { q, q, t, q }; }
+inline ivec4 ivec4::qqts() const { return { q, q, t, s }; }
+inline ivec4 ivec4::qqtt() const { return { q, q, t, t }; }
+inline ivec4 ivec4::qqtp() const { return { q, q, t, p }; }
+inline ivec3 ivec4::qqp() const { return { q, q, p }; }
+inline ivec4 ivec4::qqpq() const { return { q, q, p, q }; }
+inline ivec4 ivec4::qqps() const { return { q, q, p, s }; }
+inline ivec4 ivec4::qqpt() const { return { q, q, p, t }; }
+inline ivec4 ivec4::qqpp() const { return { q, q, p, p }; }
+inline ivec2 ivec4::qs() const { return { q, s }; }
+inline ivec3 ivec4::qsq() const { return { q, s, q }; }
+inline ivec4 ivec4::qsqq() const { return { q, s, q, q }; }
+inline ivec4 ivec4::qsqs() const { return { q, s, q, s }; }
+inline ivec4 ivec4::qsqt() const { return { q, s, q, t }; }
+inline ivec4 ivec4::qsqp() const { return { q, s, q, p }; }
+inline ivec3 ivec4::qss() const { return { q, s, s }; }
+inline ivec4 ivec4::qssq() const { return { q, s, s, q }; }
+inline ivec4 ivec4::qsss() const { return { q, s, s, s }; }
+inline ivec4 ivec4::qsst() const { return { q, s, s, t }; }
+inline ivec4 ivec4::qssp() const { return { q, s, s, p }; }
+inline ivec3 ivec4::qst() const { return { q, s, t }; }
+inline ivec4 ivec4::qstq() const { return { q, s, t, q }; }
+inline ivec4 ivec4::qsts() const { return { q, s, t, s }; }
+inline ivec4 ivec4::qstt() const { return { q, s, t, t }; }
+inline ivec4 ivec4::qstp() const { return { q, s, t, p }; }
+inline ivec3 ivec4::qsp() const { return { q, s, p }; }
+inline ivec4 ivec4::qspq() const { return { q, s, p, q }; }
+inline ivec4 ivec4::qsps() const { return { q, s, p, s }; }
+inline ivec4 ivec4::qspt() const { return { q, s, p, t }; }
+inline ivec4 ivec4::qspp() const { return { q, s, p, p }; }
+inline ivec2 ivec4::qt() const { return { q, t }; }
+inline ivec3 ivec4::qtq() const { return { q, t, q }; }
+inline ivec4 ivec4::qtqq() const { return { q, t, q, q }; }
+inline ivec4 ivec4::qtqs() const { return { q, t, q, s }; }
+inline ivec4 ivec4::qtqt() const { return { q, t, q, t }; }
+inline ivec4 ivec4::qtqp() const { return { q, t, q, p }; }
+inline ivec3 ivec4::qts() const { return { q, t, s }; }
+inline ivec4 ivec4::qtsq() const { return { q, t, s, q }; }
+inline ivec4 ivec4::qtss() const { return { q, t, s, s }; }
+inline ivec4 ivec4::qtst() const { return { q, t, s, t }; }
+inline ivec4 ivec4::qtsp() const { return { q, t, s, p }; }
+inline ivec3 ivec4::qtt() const { return { q, t, t }; }
+inline ivec4 ivec4::qttq() const { return { q, t, t, q }; }
+inline ivec4 ivec4::qtts() const { return { q, t, t, s }; }
+inline ivec4 ivec4::qttt() const { return { q, t, t, t }; }
+inline ivec4 ivec4::qttp() const { return { q, t, t, p }; }
+inline ivec3 ivec4::qtp() const { return { q, t, p }; }
+inline ivec4 ivec4::qtpq() const { return { q, t, p, q }; }
+inline ivec4 ivec4::qtps() const { return { q, t, p, s }; }
+inline ivec4 ivec4::qtpt() const { return { q, t, p, t }; }
+inline ivec4 ivec4::qtpp() const { return { q, t, p, p }; }
+inline ivec2 ivec4::qp() const { return { q, p }; }
+inline ivec3 ivec4::qpq() const { return { q, p, q }; }
+inline ivec4 ivec4::qpqq() const { return { q, p, q, q }; }
+inline ivec4 ivec4::qpqs() const { return { q, p, q, s }; }
+inline ivec4 ivec4::qpqt() const { return { q, p, q, t }; }
+inline ivec4 ivec4::qpqp() const { return { q, p, q, p }; }
+inline ivec3 ivec4::qps() const { return { q, p, s }; }
+inline ivec4 ivec4::qpsq() const { return { q, p, s, q }; }
+inline ivec4 ivec4::qpss() const { return { q, p, s, s }; }
+inline ivec4 ivec4::qpst() const { return { q, p, s, t }; }
+inline ivec4 ivec4::qpsp() const { return { q, p, s, p }; }
+inline ivec3 ivec4::qpt() const { return { q, p, t }; }
+inline ivec4 ivec4::qptq() const { return { q, p, t, q }; }
+inline ivec4 ivec4::qpts() const { return { q, p, t, s }; }
+inline ivec4 ivec4::qptt() const { return { q, p, t, t }; }
+inline ivec4 ivec4::qptp() const { return { q, p, t, p }; }
+inline ivec3 ivec4::qpp() const { return { q, p, p }; }
+inline ivec4 ivec4::qppq() const { return { q, p, p, q }; }
+inline ivec4 ivec4::qpps() const { return { q, p, p, s }; }
+inline ivec4 ivec4::qppt() const { return { q, p, p, t }; }
+inline ivec4 ivec4::qppp() const { return { q, p, p, p }; }
+inline ivec2 ivec4::sq() const { return { s, q }; }
+inline ivec3 ivec4::sqq() const { return { s, q, q }; }
+inline ivec4 ivec4::sqqq() const { return { s, q, q, q }; }
+inline ivec4 ivec4::sqqs() const { return { s, q, q, s }; }
+inline ivec4 ivec4::sqqt() const { return { s, q, q, t }; }
+inline ivec4 ivec4::sqqp() const { return { s, q, q, p }; }
+inline ivec3 ivec4::sqs() const { return { s, q, s }; }
+inline ivec4 ivec4::sqsq() const { return { s, q, s, q }; }
+inline ivec4 ivec4::sqss() const { return { s, q, s, s }; }
+inline ivec4 ivec4::sqst() const { return { s, q, s, t }; }
+inline ivec4 ivec4::sqsp() const { return { s, q, s, p }; }
+inline ivec3 ivec4::sqt() const { return { s, q, t }; }
+inline ivec4 ivec4::sqtq() const { return { s, q, t, q }; }
+inline ivec4 ivec4::sqts() const { return { s, q, t, s }; }
+inline ivec4 ivec4::sqtt() const { return { s, q, t, t }; }
+inline ivec4 ivec4::sqtp() const { return { s, q, t, p }; }
+inline ivec3 ivec4::sqp() const { return { s, q, p }; }
+inline ivec4 ivec4::sqpq() const { return { s, q, p, q }; }
+inline ivec4 ivec4::sqps() const { return { s, q, p, s }; }
+inline ivec4 ivec4::sqpt() const { return { s, q, p, t }; }
+inline ivec4 ivec4::sqpp() const { return { s, q, p, p }; }
+inline ivec2 ivec4::ss() const { return { s, s }; }
+inline ivec3 ivec4::ssq() const { return { s, s, q }; }
+inline ivec4 ivec4::ssqq() const { return { s, s, q, q }; }
+inline ivec4 ivec4::ssqs() const { return { s, s, q, s }; }
+inline ivec4 ivec4::ssqt() const { return { s, s, q, t }; }
+inline ivec4 ivec4::ssqp() const { return { s, s, q, p }; }
+inline ivec3 ivec4::sss() const { return { s, s, s }; }
+inline ivec4 ivec4::sssq() const { return { s, s, s, q }; }
+inline ivec4 ivec4::ssss() const { return { s, s, s, s }; }
+inline ivec4 ivec4::ssst() const { return { s, s, s, t }; }
+inline ivec4 ivec4::sssp() const { return { s, s, s, p }; }
+inline ivec3 ivec4::sst() const { return { s, s, t }; }
+inline ivec4 ivec4::sstq() const { return { s, s, t, q }; }
+inline ivec4 ivec4::ssts() const { return { s, s, t, s }; }
+inline ivec4 ivec4::sstt() const { return { s, s, t, t }; }
+inline ivec4 ivec4::sstp() const { return { s, s, t, p }; }
+inline ivec3 ivec4::ssp() const { return { s, s, p }; }
+inline ivec4 ivec4::sspq() const { return { s, s, p, q }; }
+inline ivec4 ivec4::ssps() const { return { s, s, p, s }; }
+inline ivec4 ivec4::sspt() const { return { s, s, p, t }; }
+inline ivec4 ivec4::sspp() const { return { s, s, p, p }; }
+inline ivec2 ivec4::st() const { return { s, t }; }
+inline ivec3 ivec4::stq() const { return { s, t, q }; }
+inline ivec4 ivec4::stqq() const { return { s, t, q, q }; }
+inline ivec4 ivec4::stqs() const { return { s, t, q, s }; }
+inline ivec4 ivec4::stqt() const { return { s, t, q, t }; }
+inline ivec4 ivec4::stqp() const { return { s, t, q, p }; }
+inline ivec3 ivec4::sts() const { return { s, t, s }; }
+inline ivec4 ivec4::stsq() const { return { s, t, s, q }; }
+inline ivec4 ivec4::stss() const { return { s, t, s, s }; }
+inline ivec4 ivec4::stst() const { return { s, t, s, t }; }
+inline ivec4 ivec4::stsp() const { return { s, t, s, p }; }
+inline ivec3 ivec4::stt() const { return { s, t, t }; }
+inline ivec4 ivec4::sttq() const { return { s, t, t, q }; }
+inline ivec4 ivec4::stts() const { return { s, t, t, s }; }
+inline ivec4 ivec4::sttt() const { return { s, t, t, t }; }
+inline ivec4 ivec4::sttp() const { return { s, t, t, p }; }
+inline ivec3 ivec4::stp() const { return { s, t, p }; }
+inline ivec4 ivec4::stpq() const { return { s, t, p, q }; }
+inline ivec4 ivec4::stps() const { return { s, t, p, s }; }
+inline ivec4 ivec4::stpt() const { return { s, t, p, t }; }
+inline ivec4 ivec4::stpp() const { return { s, t, p, p }; }
+inline ivec2 ivec4::sp() const { return { s, p }; }
+inline ivec3 ivec4::spq() const { return { s, p, q }; }
+inline ivec4 ivec4::spqq() const { return { s, p, q, q }; }
+inline ivec4 ivec4::spqs() const { return { s, p, q, s }; }
+inline ivec4 ivec4::spqt() const { return { s, p, q, t }; }
+inline ivec4 ivec4::spqp() const { return { s, p, q, p }; }
+inline ivec3 ivec4::sps() const { return { s, p, s }; }
+inline ivec4 ivec4::spsq() const { return { s, p, s, q }; }
+inline ivec4 ivec4::spss() const { return { s, p, s, s }; }
+inline ivec4 ivec4::spst() const { return { s, p, s, t }; }
+inline ivec4 ivec4::spsp() const { return { s, p, s, p }; }
+inline ivec3 ivec4::spt() const { return { s, p, t }; }
+inline ivec4 ivec4::sptq() const { return { s, p, t, q }; }
+inline ivec4 ivec4::spts() const { return { s, p, t, s }; }
+inline ivec4 ivec4::sptt() const { return { s, p, t, t }; }
+inline ivec4 ivec4::sptp() const { return { s, p, t, p }; }
+inline ivec3 ivec4::spp() const { return { s, p, p }; }
+inline ivec4 ivec4::sppq() const { return { s, p, p, q }; }
+inline ivec4 ivec4::spps() const { return { s, p, p, s }; }
+inline ivec4 ivec4::sppt() const { return { s, p, p, t }; }
+inline ivec4 ivec4::sppp() const { return { s, p, p, p }; }
+inline ivec2 ivec4::tq() const { return { t, q }; }
+inline ivec3 ivec4::tqq() const { return { t, q, q }; }
+inline ivec4 ivec4::tqqq() const { return { t, q, q, q }; }
+inline ivec4 ivec4::tqqs() const { return { t, q, q, s }; }
+inline ivec4 ivec4::tqqt() const { return { t, q, q, t }; }
+inline ivec4 ivec4::tqqp() const { return { t, q, q, p }; }
+inline ivec3 ivec4::tqs() const { return { t, q, s }; }
+inline ivec4 ivec4::tqsq() const { return { t, q, s, q }; }
+inline ivec4 ivec4::tqss() const { return { t, q, s, s }; }
+inline ivec4 ivec4::tqst() const { return { t, q, s, t }; }
+inline ivec4 ivec4::tqsp() const { return { t, q, s, p }; }
+inline ivec3 ivec4::tqt() const { return { t, q, t }; }
+inline ivec4 ivec4::tqtq() const { return { t, q, t, q }; }
+inline ivec4 ivec4::tqts() const { return { t, q, t, s }; }
+inline ivec4 ivec4::tqtt() const { return { t, q, t, t }; }
+inline ivec4 ivec4::tqtp() const { return { t, q, t, p }; }
+inline ivec3 ivec4::tqp() const { return { t, q, p }; }
+inline ivec4 ivec4::tqpq() const { return { t, q, p, q }; }
+inline ivec4 ivec4::tqps() const { return { t, q, p, s }; }
+inline ivec4 ivec4::tqpt() const { return { t, q, p, t }; }
+inline ivec4 ivec4::tqpp() const { return { t, q, p, p }; }
+inline ivec2 ivec4::ts() const { return { t, s }; }
+inline ivec3 ivec4::tsq() const { return { t, s, q }; }
+inline ivec4 ivec4::tsqq() const { return { t, s, q, q }; }
+inline ivec4 ivec4::tsqs() const { return { t, s, q, s }; }
+inline ivec4 ivec4::tsqt() const { return { t, s, q, t }; }
+inline ivec4 ivec4::tsqp() const { return { t, s, q, p }; }
+inline ivec3 ivec4::tss() const { return { t, s, s }; }
+inline ivec4 ivec4::tssq() const { return { t, s, s, q }; }
+inline ivec4 ivec4::tsss() const { return { t, s, s, s }; }
+inline ivec4 ivec4::tsst() const { return { t, s, s, t }; }
+inline ivec4 ivec4::tssp() const { return { t, s, s, p }; }
+inline ivec3 ivec4::tst() const { return { t, s, t }; }
+inline ivec4 ivec4::tstq() const { return { t, s, t, q }; }
+inline ivec4 ivec4::tsts() const { return { t, s, t, s }; }
+inline ivec4 ivec4::tstt() const { return { t, s, t, t }; }
+inline ivec4 ivec4::tstp() const { return { t, s, t, p }; }
+inline ivec3 ivec4::tsp() const { return { t, s, p }; }
+inline ivec4 ivec4::tspq() const { return { t, s, p, q }; }
+inline ivec4 ivec4::tsps() const { return { t, s, p, s }; }
+inline ivec4 ivec4::tspt() const { return { t, s, p, t }; }
+inline ivec4 ivec4::tspp() const { return { t, s, p, p }; }
+inline ivec2 ivec4::tt() const { return { t, t }; }
+inline ivec3 ivec4::ttq() const { return { t, t, q }; }
+inline ivec4 ivec4::ttqq() const { return { t, t, q, q }; }
+inline ivec4 ivec4::ttqs() const { return { t, t, q, s }; }
+inline ivec4 ivec4::ttqt() const { return { t, t, q, t }; }
+inline ivec4 ivec4::ttqp() const { return { t, t, q, p }; }
+inline ivec3 ivec4::tts() const { return { t, t, s }; }
+inline ivec4 ivec4::ttsq() const { return { t, t, s, q }; }
+inline ivec4 ivec4::ttss() const { return { t, t, s, s }; }
+inline ivec4 ivec4::ttst() const { return { t, t, s, t }; }
+inline ivec4 ivec4::ttsp() const { return { t, t, s, p }; }
+inline ivec3 ivec4::ttt() const { return { t, t, t }; }
+inline ivec4 ivec4::tttq() const { return { t, t, t, q }; }
+inline ivec4 ivec4::ttts() const { return { t, t, t, s }; }
+inline ivec4 ivec4::tttt() const { return { t, t, t, t }; }
+inline ivec4 ivec4::tttp() const { return { t, t, t, p }; }
+inline ivec3 ivec4::ttp() const { return { t, t, p }; }
+inline ivec4 ivec4::ttpq() const { return { t, t, p, q }; }
+inline ivec4 ivec4::ttps() const { return { t, t, p, s }; }
+inline ivec4 ivec4::ttpt() const { return { t, t, p, t }; }
+inline ivec4 ivec4::ttpp() const { return { t, t, p, p }; }
+inline ivec2 ivec4::tp() const { return { t, p }; }
+inline ivec3 ivec4::tpq() const { return { t, p, q }; }
+inline ivec4 ivec4::tpqq() const { return { t, p, q, q }; }
+inline ivec4 ivec4::tpqs() const { return { t, p, q, s }; }
+inline ivec4 ivec4::tpqt() const { return { t, p, q, t }; }
+inline ivec4 ivec4::tpqp() const { return { t, p, q, p }; }
+inline ivec3 ivec4::tps() const { return { t, p, s }; }
+inline ivec4 ivec4::tpsq() const { return { t, p, s, q }; }
+inline ivec4 ivec4::tpss() const { return { t, p, s, s }; }
+inline ivec4 ivec4::tpst() const { return { t, p, s, t }; }
+inline ivec4 ivec4::tpsp() const { return { t, p, s, p }; }
+inline ivec3 ivec4::tpt() const { return { t, p, t }; }
+inline ivec4 ivec4::tptq() const { return { t, p, t, q }; }
+inline ivec4 ivec4::tpts() const { return { t, p, t, s }; }
+inline ivec4 ivec4::tptt() const { return { t, p, t, t }; }
+inline ivec4 ivec4::tptp() const { return { t, p, t, p }; }
+inline ivec3 ivec4::tpp() const { return { t, p, p }; }
+inline ivec4 ivec4::tppq() const { return { t, p, p, q }; }
+inline ivec4 ivec4::tpps() const { return { t, p, p, s }; }
+inline ivec4 ivec4::tppt() const { return { t, p, p, t }; }
+inline ivec4 ivec4::tppp() const { return { t, p, p, p }; }
+inline ivec2 ivec4::pq() const { return { p, q }; }
+inline ivec3 ivec4::pqq() const { return { p, q, q }; }
+inline ivec4 ivec4::pqqq() const { return { p, q, q, q }; }
+inline ivec4 ivec4::pqqs() const { return { p, q, q, s }; }
+inline ivec4 ivec4::pqqt() const { return { p, q, q, t }; }
+inline ivec4 ivec4::pqqp() const { return { p, q, q, p }; }
+inline ivec3 ivec4::pqs() const { return { p, q, s }; }
+inline ivec4 ivec4::pqsq() const { return { p, q, s, q }; }
+inline ivec4 ivec4::pqss() const { return { p, q, s, s }; }
+inline ivec4 ivec4::pqst() const { return { p, q, s, t }; }
+inline ivec4 ivec4::pqsp() const { return { p, q, s, p }; }
+inline ivec3 ivec4::pqt() const { return { p, q, t }; }
+inline ivec4 ivec4::pqtq() const { return { p, q, t, q }; }
+inline ivec4 ivec4::pqts() const { return { p, q, t, s }; }
+inline ivec4 ivec4::pqtt() const { return { p, q, t, t }; }
+inline ivec4 ivec4::pqtp() const { return { p, q, t, p }; }
+inline ivec3 ivec4::pqp() const { return { p, q, p }; }
+inline ivec4 ivec4::pqpq() const { return { p, q, p, q }; }
+inline ivec4 ivec4::pqps() const { return { p, q, p, s }; }
+inline ivec4 ivec4::pqpt() const { return { p, q, p, t }; }
+inline ivec4 ivec4::pqpp() const { return { p, q, p, p }; }
+inline ivec2 ivec4::ps() const { return { p, s }; }
+inline ivec3 ivec4::psq() const { return { p, s, q }; }
+inline ivec4 ivec4::psqq() const { return { p, s, q, q }; }
+inline ivec4 ivec4::psqs() const { return { p, s, q, s }; }
+inline ivec4 ivec4::psqt() const { return { p, s, q, t }; }
+inline ivec4 ivec4::psqp() const { return { p, s, q, p }; }
+inline ivec3 ivec4::pss() const { return { p, s, s }; }
+inline ivec4 ivec4::pssq() const { return { p, s, s, q }; }
+inline ivec4 ivec4::psss() const { return { p, s, s, s }; }
+inline ivec4 ivec4::psst() const { return { p, s, s, t }; }
+inline ivec4 ivec4::pssp() const { return { p, s, s, p }; }
+inline ivec3 ivec4::pst() const { return { p, s, t }; }
+inline ivec4 ivec4::pstq() const { return { p, s, t, q }; }
+inline ivec4 ivec4::psts() const { return { p, s, t, s }; }
+inline ivec4 ivec4::pstt() const { return { p, s, t, t }; }
+inline ivec4 ivec4::pstp() const { return { p, s, t, p }; }
+inline ivec3 ivec4::psp() const { return { p, s, p }; }
+inline ivec4 ivec4::pspq() const { return { p, s, p, q }; }
+inline ivec4 ivec4::psps() const { return { p, s, p, s }; }
+inline ivec4 ivec4::pspt() const { return { p, s, p, t }; }
+inline ivec4 ivec4::pspp() const { return { p, s, p, p }; }
+inline ivec2 ivec4::pt() const { return { p, t }; }
+inline ivec3 ivec4::ptq() const { return { p, t, q }; }
+inline ivec4 ivec4::ptqq() const { return { p, t, q, q }; }
+inline ivec4 ivec4::ptqs() const { return { p, t, q, s }; }
+inline ivec4 ivec4::ptqt() const { return { p, t, q, t }; }
+inline ivec4 ivec4::ptqp() const { return { p, t, q, p }; }
+inline ivec3 ivec4::pts() const { return { p, t, s }; }
+inline ivec4 ivec4::ptsq() const { return { p, t, s, q }; }
+inline ivec4 ivec4::ptss() const { return { p, t, s, s }; }
+inline ivec4 ivec4::ptst() const { return { p, t, s, t }; }
+inline ivec4 ivec4::ptsp() const { return { p, t, s, p }; }
+inline ivec3 ivec4::ptt() const { return { p, t, t }; }
+inline ivec4 ivec4::pttq() const { return { p, t, t, q }; }
+inline ivec4 ivec4::ptts() const { return { p, t, t, s }; }
+inline ivec4 ivec4::pttt() const { return { p, t, t, t }; }
+inline ivec4 ivec4::pttp() const { return { p, t, t, p }; }
+inline ivec3 ivec4::ptp() const { return { p, t, p }; }
+inline ivec4 ivec4::ptpq() const { return { p, t, p, q }; }
+inline ivec4 ivec4::ptps() const { return { p, t, p, s }; }
+inline ivec4 ivec4::ptpt() const { return { p, t, p, t }; }
+inline ivec4 ivec4::ptpp() const { return { p, t, p, p }; }
+inline ivec2 ivec4::pp() const { return { p, p }; }
+inline ivec3 ivec4::ppq() const { return { p, p, q }; }
+inline ivec4 ivec4::ppqq() const { return { p, p, q, q }; }
+inline ivec4 ivec4::ppqs() const { return { p, p, q, s }; }
+inline ivec4 ivec4::ppqt() const { return { p, p, q, t }; }
+inline ivec4 ivec4::ppqp() const { return { p, p, q, p }; }
+inline ivec3 ivec4::pps() const { return { p, p, s }; }
+inline ivec4 ivec4::ppsq() const { return { p, p, s, q }; }
+inline ivec4 ivec4::ppss() const { return { p, p, s, s }; }
+inline ivec4 ivec4::ppst() const { return { p, p, s, t }; }
+inline ivec4 ivec4::ppsp() const { return { p, p, s, p }; }
+inline ivec3 ivec4::ppt() const { return { p, p, t }; }
+inline ivec4 ivec4::pptq() const { return { p, p, t, q }; }
+inline ivec4 ivec4::ppts() const { return { p, p, t, s }; }
+inline ivec4 ivec4::pptt() const { return { p, p, t, t }; }
+inline ivec4 ivec4::pptp() const { return { p, p, t, p }; }
+inline ivec3 ivec4::ppp() const { return { p, p, p }; }
+inline ivec4 ivec4::pppq() const { return { p, p, p, q }; }
+inline ivec4 ivec4::ppps() const { return { p, p, p, s }; }
+inline ivec4 ivec4::pppt() const { return { p, p, p, t }; }
+inline ivec4 ivec4::pppp() const { return { p, p, p, p }; }
 inline ivec2 ivec4::ww() const { return { w, w }; }
 inline ivec3 ivec4::www() const { return { w, w, w }; }
 inline ivec4 ivec4::wwww() const { return { w, w, w, w }; }
@@ -13459,6 +17911,186 @@ inline void ivec4::rgb(const simdint& _val) { r = _val; g = _val; b = _val; }
 inline void ivec4::rgba(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { r = _val0; g = _val1; b = _val2; a = _val3; }
 inline void ivec4::rgba(const ivec4& _val) { r = _val.x; g = _val.y; b = _val.z; a = _val.w; }
 inline void ivec4::rgba(const simdint& _val) { r = _val; g = _val; b = _val; a = _val; }
+inline void ivec4::qs(const simdint& _val0, const simdint& _val1) { q = _val0; s = _val1; }
+inline void ivec4::qs(const ivec2& _val) { q = _val.s; s = _val.t; }
+inline void ivec4::qs(const simdint& _val) { q = _val; s = _val; }
+inline void ivec4::qst(const simdint& _val0, const simdint& _val1, const simdint& _val2) { q = _val0; s = _val1; t = _val2; }
+inline void ivec4::qst(const ivec3& _val) { q = _val.s; s = _val.t; t = _val.p; }
+inline void ivec4::qst(const simdint& _val) { q = _val; s = _val; t = _val; }
+inline void ivec4::qstp(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { q = _val0; s = _val1; t = _val2; p = _val3; }
+inline void ivec4::qstp(const ivec4& _val) { q = _val.s; s = _val.t; t = _val.p; p = _val.q; }
+inline void ivec4::qstp(const simdint& _val) { q = _val; s = _val; t = _val; p = _val; }
+inline void ivec4::qsp(const simdint& _val0, const simdint& _val1, const simdint& _val2) { q = _val0; s = _val1; p = _val2; }
+inline void ivec4::qsp(const ivec3& _val) { q = _val.s; s = _val.t; p = _val.p; }
+inline void ivec4::qsp(const simdint& _val) { q = _val; s = _val; p = _val; }
+inline void ivec4::qspt(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { q = _val0; s = _val1; p = _val2; t = _val3; }
+inline void ivec4::qspt(const ivec4& _val) { q = _val.s; s = _val.t; p = _val.p; t = _val.q; }
+inline void ivec4::qspt(const simdint& _val) { q = _val; s = _val; p = _val; t = _val; }
+inline void ivec4::qt(const simdint& _val0, const simdint& _val1) { q = _val0; t = _val1; }
+inline void ivec4::qt(const ivec2& _val) { q = _val.s; t = _val.t; }
+inline void ivec4::qt(const simdint& _val) { q = _val; t = _val; }
+inline void ivec4::qts(const simdint& _val0, const simdint& _val1, const simdint& _val2) { q = _val0; t = _val1; s = _val2; }
+inline void ivec4::qts(const ivec3& _val) { q = _val.s; t = _val.t; s = _val.p; }
+inline void ivec4::qts(const simdint& _val) { q = _val; t = _val; s = _val; }
+inline void ivec4::qtsp(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { q = _val0; t = _val1; s = _val2; p = _val3; }
+inline void ivec4::qtsp(const ivec4& _val) { q = _val.s; t = _val.t; s = _val.p; p = _val.q; }
+inline void ivec4::qtsp(const simdint& _val) { q = _val; t = _val; s = _val; p = _val; }
+inline void ivec4::qtp(const simdint& _val0, const simdint& _val1, const simdint& _val2) { q = _val0; t = _val1; p = _val2; }
+inline void ivec4::qtp(const ivec3& _val) { q = _val.s; t = _val.t; p = _val.p; }
+inline void ivec4::qtp(const simdint& _val) { q = _val; t = _val; p = _val; }
+inline void ivec4::qtps(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { q = _val0; t = _val1; p = _val2; s = _val3; }
+inline void ivec4::qtps(const ivec4& _val) { q = _val.s; t = _val.t; p = _val.p; s = _val.q; }
+inline void ivec4::qtps(const simdint& _val) { q = _val; t = _val; p = _val; s = _val; }
+inline void ivec4::qp(const simdint& _val0, const simdint& _val1) { q = _val0; p = _val1; }
+inline void ivec4::qp(const ivec2& _val) { q = _val.s; p = _val.t; }
+inline void ivec4::qp(const simdint& _val) { q = _val; p = _val; }
+inline void ivec4::qps(const simdint& _val0, const simdint& _val1, const simdint& _val2) { q = _val0; p = _val1; s = _val2; }
+inline void ivec4::qps(const ivec3& _val) { q = _val.s; p = _val.t; s = _val.p; }
+inline void ivec4::qps(const simdint& _val) { q = _val; p = _val; s = _val; }
+inline void ivec4::qpst(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { q = _val0; p = _val1; s = _val2; t = _val3; }
+inline void ivec4::qpst(const ivec4& _val) { q = _val.s; p = _val.t; s = _val.p; t = _val.q; }
+inline void ivec4::qpst(const simdint& _val) { q = _val; p = _val; s = _val; t = _val; }
+inline void ivec4::qpt(const simdint& _val0, const simdint& _val1, const simdint& _val2) { q = _val0; p = _val1; t = _val2; }
+inline void ivec4::qpt(const ivec3& _val) { q = _val.s; p = _val.t; t = _val.p; }
+inline void ivec4::qpt(const simdint& _val) { q = _val; p = _val; t = _val; }
+inline void ivec4::qpts(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { q = _val0; p = _val1; t = _val2; s = _val3; }
+inline void ivec4::qpts(const ivec4& _val) { q = _val.s; p = _val.t; t = _val.p; s = _val.q; }
+inline void ivec4::qpts(const simdint& _val) { q = _val; p = _val; t = _val; s = _val; }
+inline void ivec4::sq(const simdint& _val0, const simdint& _val1) { s = _val0; q = _val1; }
+inline void ivec4::sq(const ivec2& _val) { s = _val.s; q = _val.t; }
+inline void ivec4::sq(const simdint& _val) { s = _val; q = _val; }
+inline void ivec4::sqt(const simdint& _val0, const simdint& _val1, const simdint& _val2) { s = _val0; q = _val1; t = _val2; }
+inline void ivec4::sqt(const ivec3& _val) { s = _val.s; q = _val.t; t = _val.p; }
+inline void ivec4::sqt(const simdint& _val) { s = _val; q = _val; t = _val; }
+inline void ivec4::sqtp(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { s = _val0; q = _val1; t = _val2; p = _val3; }
+inline void ivec4::sqtp(const ivec4& _val) { s = _val.s; q = _val.t; t = _val.p; p = _val.q; }
+inline void ivec4::sqtp(const simdint& _val) { s = _val; q = _val; t = _val; p = _val; }
+inline void ivec4::sqp(const simdint& _val0, const simdint& _val1, const simdint& _val2) { s = _val0; q = _val1; p = _val2; }
+inline void ivec4::sqp(const ivec3& _val) { s = _val.s; q = _val.t; p = _val.p; }
+inline void ivec4::sqp(const simdint& _val) { s = _val; q = _val; p = _val; }
+inline void ivec4::sqpt(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { s = _val0; q = _val1; p = _val2; t = _val3; }
+inline void ivec4::sqpt(const ivec4& _val) { s = _val.s; q = _val.t; p = _val.p; t = _val.q; }
+inline void ivec4::sqpt(const simdint& _val) { s = _val; q = _val; p = _val; t = _val; }
+inline void ivec4::st(const simdint& _val0, const simdint& _val1) { s = _val0; t = _val1; }
+inline void ivec4::st(const ivec2& _val) { s = _val.s; t = _val.t; }
+inline void ivec4::st(const simdint& _val) { s = _val; t = _val; }
+inline void ivec4::stq(const simdint& _val0, const simdint& _val1, const simdint& _val2) { s = _val0; t = _val1; q = _val2; }
+inline void ivec4::stq(const ivec3& _val) { s = _val.s; t = _val.t; q = _val.p; }
+inline void ivec4::stq(const simdint& _val) { s = _val; t = _val; q = _val; }
+inline void ivec4::stqp(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { s = _val0; t = _val1; q = _val2; p = _val3; }
+inline void ivec4::stqp(const ivec4& _val) { s = _val.s; t = _val.t; q = _val.p; p = _val.q; }
+inline void ivec4::stqp(const simdint& _val) { s = _val; t = _val; q = _val; p = _val; }
+inline void ivec4::stp(const simdint& _val0, const simdint& _val1, const simdint& _val2) { s = _val0; t = _val1; p = _val2; }
+inline void ivec4::stp(const ivec3& _val) { s = _val.s; t = _val.t; p = _val.p; }
+inline void ivec4::stp(const simdint& _val) { s = _val; t = _val; p = _val; }
+inline void ivec4::stpq(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { s = _val0; t = _val1; p = _val2; q = _val3; }
+inline void ivec4::stpq(const ivec4& _val) { s = _val.s; t = _val.t; p = _val.p; q = _val.q; }
+inline void ivec4::stpq(const simdint& _val) { s = _val; t = _val; p = _val; q = _val; }
+inline void ivec4::sp(const simdint& _val0, const simdint& _val1) { s = _val0; p = _val1; }
+inline void ivec4::sp(const ivec2& _val) { s = _val.s; p = _val.t; }
+inline void ivec4::sp(const simdint& _val) { s = _val; p = _val; }
+inline void ivec4::spq(const simdint& _val0, const simdint& _val1, const simdint& _val2) { s = _val0; p = _val1; q = _val2; }
+inline void ivec4::spq(const ivec3& _val) { s = _val.s; p = _val.t; q = _val.p; }
+inline void ivec4::spq(const simdint& _val) { s = _val; p = _val; q = _val; }
+inline void ivec4::spqt(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { s = _val0; p = _val1; q = _val2; t = _val3; }
+inline void ivec4::spqt(const ivec4& _val) { s = _val.s; p = _val.t; q = _val.p; t = _val.q; }
+inline void ivec4::spqt(const simdint& _val) { s = _val; p = _val; q = _val; t = _val; }
+inline void ivec4::spt(const simdint& _val0, const simdint& _val1, const simdint& _val2) { s = _val0; p = _val1; t = _val2; }
+inline void ivec4::spt(const ivec3& _val) { s = _val.s; p = _val.t; t = _val.p; }
+inline void ivec4::spt(const simdint& _val) { s = _val; p = _val; t = _val; }
+inline void ivec4::sptq(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { s = _val0; p = _val1; t = _val2; q = _val3; }
+inline void ivec4::sptq(const ivec4& _val) { s = _val.s; p = _val.t; t = _val.p; q = _val.q; }
+inline void ivec4::sptq(const simdint& _val) { s = _val; p = _val; t = _val; q = _val; }
+inline void ivec4::tq(const simdint& _val0, const simdint& _val1) { t = _val0; q = _val1; }
+inline void ivec4::tq(const ivec2& _val) { t = _val.s; q = _val.t; }
+inline void ivec4::tq(const simdint& _val) { t = _val; q = _val; }
+inline void ivec4::tqs(const simdint& _val0, const simdint& _val1, const simdint& _val2) { t = _val0; q = _val1; s = _val2; }
+inline void ivec4::tqs(const ivec3& _val) { t = _val.s; q = _val.t; s = _val.p; }
+inline void ivec4::tqs(const simdint& _val) { t = _val; q = _val; s = _val; }
+inline void ivec4::tqsp(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { t = _val0; q = _val1; s = _val2; p = _val3; }
+inline void ivec4::tqsp(const ivec4& _val) { t = _val.s; q = _val.t; s = _val.p; p = _val.q; }
+inline void ivec4::tqsp(const simdint& _val) { t = _val; q = _val; s = _val; p = _val; }
+inline void ivec4::tqp(const simdint& _val0, const simdint& _val1, const simdint& _val2) { t = _val0; q = _val1; p = _val2; }
+inline void ivec4::tqp(const ivec3& _val) { t = _val.s; q = _val.t; p = _val.p; }
+inline void ivec4::tqp(const simdint& _val) { t = _val; q = _val; p = _val; }
+inline void ivec4::tqps(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { t = _val0; q = _val1; p = _val2; s = _val3; }
+inline void ivec4::tqps(const ivec4& _val) { t = _val.s; q = _val.t; p = _val.p; s = _val.q; }
+inline void ivec4::tqps(const simdint& _val) { t = _val; q = _val; p = _val; s = _val; }
+inline void ivec4::ts(const simdint& _val0, const simdint& _val1) { t = _val0; s = _val1; }
+inline void ivec4::ts(const ivec2& _val) { t = _val.s; s = _val.t; }
+inline void ivec4::ts(const simdint& _val) { t = _val; s = _val; }
+inline void ivec4::tsq(const simdint& _val0, const simdint& _val1, const simdint& _val2) { t = _val0; s = _val1; q = _val2; }
+inline void ivec4::tsq(const ivec3& _val) { t = _val.s; s = _val.t; q = _val.p; }
+inline void ivec4::tsq(const simdint& _val) { t = _val; s = _val; q = _val; }
+inline void ivec4::tsqp(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { t = _val0; s = _val1; q = _val2; p = _val3; }
+inline void ivec4::tsqp(const ivec4& _val) { t = _val.s; s = _val.t; q = _val.p; p = _val.q; }
+inline void ivec4::tsqp(const simdint& _val) { t = _val; s = _val; q = _val; p = _val; }
+inline void ivec4::tsp(const simdint& _val0, const simdint& _val1, const simdint& _val2) { t = _val0; s = _val1; p = _val2; }
+inline void ivec4::tsp(const ivec3& _val) { t = _val.s; s = _val.t; p = _val.p; }
+inline void ivec4::tsp(const simdint& _val) { t = _val; s = _val; p = _val; }
+inline void ivec4::tspq(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { t = _val0; s = _val1; p = _val2; q = _val3; }
+inline void ivec4::tspq(const ivec4& _val) { t = _val.s; s = _val.t; p = _val.p; q = _val.q; }
+inline void ivec4::tspq(const simdint& _val) { t = _val; s = _val; p = _val; q = _val; }
+inline void ivec4::tp(const simdint& _val0, const simdint& _val1) { t = _val0; p = _val1; }
+inline void ivec4::tp(const ivec2& _val) { t = _val.s; p = _val.t; }
+inline void ivec4::tp(const simdint& _val) { t = _val; p = _val; }
+inline void ivec4::tpq(const simdint& _val0, const simdint& _val1, const simdint& _val2) { t = _val0; p = _val1; q = _val2; }
+inline void ivec4::tpq(const ivec3& _val) { t = _val.s; p = _val.t; q = _val.p; }
+inline void ivec4::tpq(const simdint& _val) { t = _val; p = _val; q = _val; }
+inline void ivec4::tpqs(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { t = _val0; p = _val1; q = _val2; s = _val3; }
+inline void ivec4::tpqs(const ivec4& _val) { t = _val.s; p = _val.t; q = _val.p; s = _val.q; }
+inline void ivec4::tpqs(const simdint& _val) { t = _val; p = _val; q = _val; s = _val; }
+inline void ivec4::tps(const simdint& _val0, const simdint& _val1, const simdint& _val2) { t = _val0; p = _val1; s = _val2; }
+inline void ivec4::tps(const ivec3& _val) { t = _val.s; p = _val.t; s = _val.p; }
+inline void ivec4::tps(const simdint& _val) { t = _val; p = _val; s = _val; }
+inline void ivec4::tpsq(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { t = _val0; p = _val1; s = _val2; q = _val3; }
+inline void ivec4::tpsq(const ivec4& _val) { t = _val.s; p = _val.t; s = _val.p; q = _val.q; }
+inline void ivec4::tpsq(const simdint& _val) { t = _val; p = _val; s = _val; q = _val; }
+inline void ivec4::pq(const simdint& _val0, const simdint& _val1) { p = _val0; q = _val1; }
+inline void ivec4::pq(const ivec2& _val) { p = _val.s; q = _val.t; }
+inline void ivec4::pq(const simdint& _val) { p = _val; q = _val; }
+inline void ivec4::pqs(const simdint& _val0, const simdint& _val1, const simdint& _val2) { p = _val0; q = _val1; s = _val2; }
+inline void ivec4::pqs(const ivec3& _val) { p = _val.s; q = _val.t; s = _val.p; }
+inline void ivec4::pqs(const simdint& _val) { p = _val; q = _val; s = _val; }
+inline void ivec4::pqst(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { p = _val0; q = _val1; s = _val2; t = _val3; }
+inline void ivec4::pqst(const ivec4& _val) { p = _val.s; q = _val.t; s = _val.p; t = _val.q; }
+inline void ivec4::pqst(const simdint& _val) { p = _val; q = _val; s = _val; t = _val; }
+inline void ivec4::pqt(const simdint& _val0, const simdint& _val1, const simdint& _val2) { p = _val0; q = _val1; t = _val2; }
+inline void ivec4::pqt(const ivec3& _val) { p = _val.s; q = _val.t; t = _val.p; }
+inline void ivec4::pqt(const simdint& _val) { p = _val; q = _val; t = _val; }
+inline void ivec4::pqts(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { p = _val0; q = _val1; t = _val2; s = _val3; }
+inline void ivec4::pqts(const ivec4& _val) { p = _val.s; q = _val.t; t = _val.p; s = _val.q; }
+inline void ivec4::pqts(const simdint& _val) { p = _val; q = _val; t = _val; s = _val; }
+inline void ivec4::ps(const simdint& _val0, const simdint& _val1) { p = _val0; s = _val1; }
+inline void ivec4::ps(const ivec2& _val) { p = _val.s; s = _val.t; }
+inline void ivec4::ps(const simdint& _val) { p = _val; s = _val; }
+inline void ivec4::psq(const simdint& _val0, const simdint& _val1, const simdint& _val2) { p = _val0; s = _val1; q = _val2; }
+inline void ivec4::psq(const ivec3& _val) { p = _val.s; s = _val.t; q = _val.p; }
+inline void ivec4::psq(const simdint& _val) { p = _val; s = _val; q = _val; }
+inline void ivec4::psqt(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { p = _val0; s = _val1; q = _val2; t = _val3; }
+inline void ivec4::psqt(const ivec4& _val) { p = _val.s; s = _val.t; q = _val.p; t = _val.q; }
+inline void ivec4::psqt(const simdint& _val) { p = _val; s = _val; q = _val; t = _val; }
+inline void ivec4::pst(const simdint& _val0, const simdint& _val1, const simdint& _val2) { p = _val0; s = _val1; t = _val2; }
+inline void ivec4::pst(const ivec3& _val) { p = _val.s; s = _val.t; t = _val.p; }
+inline void ivec4::pst(const simdint& _val) { p = _val; s = _val; t = _val; }
+inline void ivec4::pstq(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { p = _val0; s = _val1; t = _val2; q = _val3; }
+inline void ivec4::pstq(const ivec4& _val) { p = _val.s; s = _val.t; t = _val.p; q = _val.q; }
+inline void ivec4::pstq(const simdint& _val) { p = _val; s = _val; t = _val; q = _val; }
+inline void ivec4::pt(const simdint& _val0, const simdint& _val1) { p = _val0; t = _val1; }
+inline void ivec4::pt(const ivec2& _val) { p = _val.s; t = _val.t; }
+inline void ivec4::pt(const simdint& _val) { p = _val; t = _val; }
+inline void ivec4::ptq(const simdint& _val0, const simdint& _val1, const simdint& _val2) { p = _val0; t = _val1; q = _val2; }
+inline void ivec4::ptq(const ivec3& _val) { p = _val.s; t = _val.t; q = _val.p; }
+inline void ivec4::ptq(const simdint& _val) { p = _val; t = _val; q = _val; }
+inline void ivec4::ptqs(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { p = _val0; t = _val1; q = _val2; s = _val3; }
+inline void ivec4::ptqs(const ivec4& _val) { p = _val.s; t = _val.t; q = _val.p; s = _val.q; }
+inline void ivec4::ptqs(const simdint& _val) { p = _val; t = _val; q = _val; s = _val; }
+inline void ivec4::pts(const simdint& _val0, const simdint& _val1, const simdint& _val2) { p = _val0; t = _val1; s = _val2; }
+inline void ivec4::pts(const ivec3& _val) { p = _val.s; t = _val.t; s = _val.p; }
+inline void ivec4::pts(const simdint& _val) { p = _val; t = _val; s = _val; }
+inline void ivec4::ptsq(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { p = _val0; t = _val1; s = _val2; q = _val3; }
+inline void ivec4::ptsq(const ivec4& _val) { p = _val.s; t = _val.t; s = _val.p; q = _val.q; }
+inline void ivec4::ptsq(const simdint& _val) { p = _val; t = _val; s = _val; q = _val; }
 inline void ivec4::wx(const simdint& _val0, const simdint& _val1) { w = _val0; x = _val1; }
 inline void ivec4::wx(const ivec2& _val) { w = _val.x; x = _val.y; }
 inline void ivec4::wx(const simdint& _val) { w = _val; x = _val; }
@@ -13700,6 +18332,66 @@ inline void ivec4::rga(const int& _val) { const simdint temp = simd_set1_int(_va
 inline void ivec4::rgab(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; g = temp; a = temp; b = temp; }
 inline void ivec4::rgb(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; g = temp; b = temp; }
 inline void ivec4::rgba(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; g = temp; b = temp; a = temp; }
+inline void ivec4::qs(const int& _val) { const simdint temp = simd_set1_int(_val); q = temp; s = temp; }
+inline void ivec4::qst(const int& _val) { const simdint temp = simd_set1_int(_val); q = temp; s = temp; t = temp; }
+inline void ivec4::qstp(const int& _val) { const simdint temp = simd_set1_int(_val); q = temp; s = temp; t = temp; p = temp; }
+inline void ivec4::qsp(const int& _val) { const simdint temp = simd_set1_int(_val); q = temp; s = temp; p = temp; }
+inline void ivec4::qspt(const int& _val) { const simdint temp = simd_set1_int(_val); q = temp; s = temp; p = temp; t = temp; }
+inline void ivec4::qt(const int& _val) { const simdint temp = simd_set1_int(_val); q = temp; t = temp; }
+inline void ivec4::qts(const int& _val) { const simdint temp = simd_set1_int(_val); q = temp; t = temp; s = temp; }
+inline void ivec4::qtsp(const int& _val) { const simdint temp = simd_set1_int(_val); q = temp; t = temp; s = temp; p = temp; }
+inline void ivec4::qtp(const int& _val) { const simdint temp = simd_set1_int(_val); q = temp; t = temp; p = temp; }
+inline void ivec4::qtps(const int& _val) { const simdint temp = simd_set1_int(_val); q = temp; t = temp; p = temp; s = temp; }
+inline void ivec4::qp(const int& _val) { const simdint temp = simd_set1_int(_val); q = temp; p = temp; }
+inline void ivec4::qps(const int& _val) { const simdint temp = simd_set1_int(_val); q = temp; p = temp; s = temp; }
+inline void ivec4::qpst(const int& _val) { const simdint temp = simd_set1_int(_val); q = temp; p = temp; s = temp; t = temp; }
+inline void ivec4::qpt(const int& _val) { const simdint temp = simd_set1_int(_val); q = temp; p = temp; t = temp; }
+inline void ivec4::qpts(const int& _val) { const simdint temp = simd_set1_int(_val); q = temp; p = temp; t = temp; s = temp; }
+inline void ivec4::sq(const int& _val) { const simdint temp = simd_set1_int(_val); s = temp; q = temp; }
+inline void ivec4::sqt(const int& _val) { const simdint temp = simd_set1_int(_val); s = temp; q = temp; t = temp; }
+inline void ivec4::sqtp(const int& _val) { const simdint temp = simd_set1_int(_val); s = temp; q = temp; t = temp; p = temp; }
+inline void ivec4::sqp(const int& _val) { const simdint temp = simd_set1_int(_val); s = temp; q = temp; p = temp; }
+inline void ivec4::sqpt(const int& _val) { const simdint temp = simd_set1_int(_val); s = temp; q = temp; p = temp; t = temp; }
+inline void ivec4::st(const int& _val) { const simdint temp = simd_set1_int(_val); s = temp; t = temp; }
+inline void ivec4::stq(const int& _val) { const simdint temp = simd_set1_int(_val); s = temp; t = temp; q = temp; }
+inline void ivec4::stqp(const int& _val) { const simdint temp = simd_set1_int(_val); s = temp; t = temp; q = temp; p = temp; }
+inline void ivec4::stp(const int& _val) { const simdint temp = simd_set1_int(_val); s = temp; t = temp; p = temp; }
+inline void ivec4::stpq(const int& _val) { const simdint temp = simd_set1_int(_val); s = temp; t = temp; p = temp; q = temp; }
+inline void ivec4::sp(const int& _val) { const simdint temp = simd_set1_int(_val); s = temp; p = temp; }
+inline void ivec4::spq(const int& _val) { const simdint temp = simd_set1_int(_val); s = temp; p = temp; q = temp; }
+inline void ivec4::spqt(const int& _val) { const simdint temp = simd_set1_int(_val); s = temp; p = temp; q = temp; t = temp; }
+inline void ivec4::spt(const int& _val) { const simdint temp = simd_set1_int(_val); s = temp; p = temp; t = temp; }
+inline void ivec4::sptq(const int& _val) { const simdint temp = simd_set1_int(_val); s = temp; p = temp; t = temp; q = temp; }
+inline void ivec4::tq(const int& _val) { const simdint temp = simd_set1_int(_val); t = temp; q = temp; }
+inline void ivec4::tqs(const int& _val) { const simdint temp = simd_set1_int(_val); t = temp; q = temp; s = temp; }
+inline void ivec4::tqsp(const int& _val) { const simdint temp = simd_set1_int(_val); t = temp; q = temp; s = temp; p = temp; }
+inline void ivec4::tqp(const int& _val) { const simdint temp = simd_set1_int(_val); t = temp; q = temp; p = temp; }
+inline void ivec4::tqps(const int& _val) { const simdint temp = simd_set1_int(_val); t = temp; q = temp; p = temp; s = temp; }
+inline void ivec4::ts(const int& _val) { const simdint temp = simd_set1_int(_val); t = temp; s = temp; }
+inline void ivec4::tsq(const int& _val) { const simdint temp = simd_set1_int(_val); t = temp; s = temp; q = temp; }
+inline void ivec4::tsqp(const int& _val) { const simdint temp = simd_set1_int(_val); t = temp; s = temp; q = temp; p = temp; }
+inline void ivec4::tsp(const int& _val) { const simdint temp = simd_set1_int(_val); t = temp; s = temp; p = temp; }
+inline void ivec4::tspq(const int& _val) { const simdint temp = simd_set1_int(_val); t = temp; s = temp; p = temp; q = temp; }
+inline void ivec4::tp(const int& _val) { const simdint temp = simd_set1_int(_val); t = temp; p = temp; }
+inline void ivec4::tpq(const int& _val) { const simdint temp = simd_set1_int(_val); t = temp; p = temp; q = temp; }
+inline void ivec4::tpqs(const int& _val) { const simdint temp = simd_set1_int(_val); t = temp; p = temp; q = temp; s = temp; }
+inline void ivec4::tps(const int& _val) { const simdint temp = simd_set1_int(_val); t = temp; p = temp; s = temp; }
+inline void ivec4::tpsq(const int& _val) { const simdint temp = simd_set1_int(_val); t = temp; p = temp; s = temp; q = temp; }
+inline void ivec4::pq(const int& _val) { const simdint temp = simd_set1_int(_val); p = temp; q = temp; }
+inline void ivec4::pqs(const int& _val) { const simdint temp = simd_set1_int(_val); p = temp; q = temp; s = temp; }
+inline void ivec4::pqst(const int& _val) { const simdint temp = simd_set1_int(_val); p = temp; q = temp; s = temp; t = temp; }
+inline void ivec4::pqt(const int& _val) { const simdint temp = simd_set1_int(_val); p = temp; q = temp; t = temp; }
+inline void ivec4::pqts(const int& _val) { const simdint temp = simd_set1_int(_val); p = temp; q = temp; t = temp; s = temp; }
+inline void ivec4::ps(const int& _val) { const simdint temp = simd_set1_int(_val); p = temp; s = temp; }
+inline void ivec4::psq(const int& _val) { const simdint temp = simd_set1_int(_val); p = temp; s = temp; q = temp; }
+inline void ivec4::psqt(const int& _val) { const simdint temp = simd_set1_int(_val); p = temp; s = temp; q = temp; t = temp; }
+inline void ivec4::pst(const int& _val) { const simdint temp = simd_set1_int(_val); p = temp; s = temp; t = temp; }
+inline void ivec4::pstq(const int& _val) { const simdint temp = simd_set1_int(_val); p = temp; s = temp; t = temp; q = temp; }
+inline void ivec4::pt(const int& _val) { const simdint temp = simd_set1_int(_val); p = temp; t = temp; }
+inline void ivec4::ptq(const int& _val) { const simdint temp = simd_set1_int(_val); p = temp; t = temp; q = temp; }
+inline void ivec4::ptqs(const int& _val) { const simdint temp = simd_set1_int(_val); p = temp; t = temp; q = temp; s = temp; }
+inline void ivec4::pts(const int& _val) { const simdint temp = simd_set1_int(_val); p = temp; t = temp; s = temp; }
+inline void ivec4::ptsq(const int& _val) { const simdint temp = simd_set1_int(_val); p = temp; t = temp; s = temp; q = temp; }
 inline void ivec4::wx(const int& _val) { const simdint temp = simd_set1_int(_val); w = temp; x = temp; }
 inline void ivec4::wxy(const int& _val) { const simdint temp = simd_set1_int(_val); w = temp; x = temp; y = temp; }
 inline void ivec4::wxyz(const int& _val) { const simdint temp = simd_set1_int(_val); w = temp; x = temp; y = temp; z = temp; }
