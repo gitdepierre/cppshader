@@ -32,10 +32,6 @@
 #define USE_SSE41      // 4 lanes (4 floats/2 doubles), requires SSE4.1
 //#define USE_SCALAR   // 1 lane (1 float/1 double), no intrinsics
 
-#ifdef __GNUC__
-//#define GCC_FASTCOS // Uncomment to get faster (but imprecise) sine and cosine functions
-#endif
-
 #include <iostream>
 #include <cmath>
 
@@ -750,12 +746,12 @@ inline const int scalar_sub_epi32(const int& a, const int& b) { return a - b; }
 inline const int scalar_mul_epi32(const int& a, const int& b) { return a * b; }
 inline const int scalar_min_epi32(const int& a, const int& b) { return a < b ? a : b; }
 inline const int scalar_max_epi32(const int& a, const int& b) { return a > b ? a : b; }
-inline const simdfloat scalar_blendv_epi32(const simdint& a, const simdint& b, const simdint& testmask) { return (testmask != 0) ? b : a; }
+inline const simdint scalar_blendv_epi32(const simdint& a, const simdint& b, const simdint& testmask) { return (testmask != 0) ? b : a; }
 inline const simdint scalar_set1_epi32(const int& a) { return a; }
 inline const simdint scalar_abs_epi32(const simdint& _a) { return std::abs(_a); }
 inline const simdint scalar_set_epi32(const int& _i) { return _i; }
 inline const simdint scalar_cvtps_epi32(const simdfloat& _a) { return static_cast<int>(_a); }
-inline const simdint scalar_cvtepi32_ps(const simdint& _a) { return static_cast<float>(_a); }
+inline const simdfloat scalar_cvtepi32_ps(const simdint& _a) { return static_cast<float>(_a); }
 inline const simdint scalar_and_si128(const simdint& a, const simdint& b) { return a & b; }
 inline const simdint scalar_castps_si128(const simdfloat& _a) { return static_cast<int>(_a); }
 inline const simdint scalar_or_si128(const simdint& a, const simdint& b) { return a | b; }
@@ -7311,7 +7307,7 @@ inline simddmask operator||(const simddmask& _a, const simddmask& _b) {
 #pragma endregion simd comparison operators
 
 
-#pragma region vectot operators
+#pragma region vector operators
 
 #ifndef USE_SCALAR
 // Unary negation
@@ -13795,14 +13791,6 @@ inline simdfloat acosh(const simdfloat& _x)
 #endif
 }
 
-/**
- * @brief Computes the inverse hyperbolic cosine of each component.
- * @param _x The input value or vector.
- */
-inline simdfloat acosh(const float& _x)
-{
-	return simd_set1_float(std::acosh(_x));
-}
 #endif
 
 /**
@@ -13855,14 +13843,6 @@ inline simdfloat asinh(const simdfloat& _x)
 #endif
 }
 
-/**
- * @brief Computes the inverse hyperbolic sine of each component.
- * @param _x The input value or vector.
- */
-inline simdfloat asinh(const float& _x)
-{
-	return simd_set1_float(std::asinh(_x));
-}
 #endif
 
 /**
@@ -13913,14 +13893,6 @@ inline simdfloat atan(const simdfloat& _x)
 #endif
 }
 
-/**
- * @brief Computes the inverse tangent.
- * @param _x The input value or vector.
- */
-inline simdfloat atan(const float& _x)
-{
-	return simd_set1_float(std::atan(_x));
-}
 #endif
 
 /**
@@ -14036,14 +14008,6 @@ inline simdfloat atanh(const simdfloat& _x)
 #endif
 }
 
-/**
- * @brief Computes the inverse hyperbolic tangent of each component.
- * @param _x The input value or vector.
- */
-inline simdfloat atanh(const float& _x)
-{
-	return simd_set1_float(std::atanh(_x));
-}
 #endif
 
 /**
@@ -14076,61 +14040,97 @@ inline vec4 atanh(const vec4& _x)
 // blendv functions
 /**
  * @brief Blends two values based on a mask.
- * @param _false_val The value to use when the mask is false.
- * @param _true_val The value to use when the mask is true.
+ * @param _falseval The value to use when the mask is false.
+ * @param _trueval The value to use when the mask is true.
  * @param _mask The selection mask.
  */
-inline simdfloat blendv(const simdfloat& _false_val, const simdfloat& _true_val, const simdmask& _mask)
+inline simdfloat blendv(const simdfloat& _falseval, const simdfloat& _trueval, const simdmask& _mask)
 {
 #ifdef USE_AVX512
-	return _mm512_mask_blend_ps(_mask, _false_val, _true_val);
+	return _mm512_mask_blend_ps(_mask, _falseval, _trueval);
 #else
-	return simd_blendv_float(_false_val, _true_val, _mask);
+	return simd_blendv_float(_falseval, _trueval, _mask);
 #endif
 }
 
+#ifndef USE_SCALAR
 /**
  * @brief Blends two values based on a mask.
- * @param _false_val The value to use when the mask is false.
- * @param _true_val The value to use when the mask is true.
+ * @param _falseval The value to use when the mask is false.
+ * @param _trueval The value to use when the mask is true.
  * @param _mask The selection mask.
  */
-inline vec2 blendv(const vec2& _false_val, const vec2& _true_val, const simdmask& _mask)
+inline simdfloat blendv(const float& _falseval, const float& _trueval, const simdmask& _mask)
+{
+	return blendv(simd_set1_float(_falseval), simd_set1_float(_trueval), _mask);
+}
+
+/**
+ * @brief Blends two values based on a mask.
+ * @param _falseval The value to use when the mask is false.
+ * @param _trueval The value to use when the mask is true.
+ * @param _mask The selection mask.
+ */
+inline simdfloat blendv(const simdfloat& _falseval, const float& _trueval, const simdmask& _mask)
+{
+	return blendv(_falseval, simd_set1_float(_trueval), _mask);
+}
+
+/**
+ * @brief Blends two values based on a mask.
+ * @param _falseval The value to use when the mask is false.
+ * @param _trueval The value to use when the mask is true.
+ * @param _mask The selection mask.
+ */
+inline simdfloat blendv(const float& _falseval, const simdfloat& _trueval, const simdmask& _mask)
+{
+	return blendv(simd_set1_float(_falseval), _trueval, _mask);
+}
+#endif
+
+
+/**
+ * @brief Blends two values based on a mask.
+ * @param _falseval The value to use when the mask is false.
+ * @param _trueval The value to use when the mask is true.
+ * @param _mask The selection mask.
+ */
+inline vec2 blendv(const vec2& _falseval, const vec2& _trueval, const simdmask& _mask)
 {
 	return {
-		blendv(_false_val.x, _true_val.x, _mask),
-		blendv(_false_val.y, _true_val.y, _mask)
+		blendv(_falseval.x, _trueval.x, _mask),
+		blendv(_falseval.y, _trueval.y, _mask)
 	};
 }
 
 /**
  * @brief Blends two values based on a mask.
- * @param _false_val The value to use when the mask is false.
- * @param _true_val The value to use when the mask is true.
+ * @param _falseval The value to use when the mask is false.
+ * @param _trueval The value to use when the mask is true.
  * @param _mask The selection mask.
  */
-inline vec3 blendv(const vec3& _false_val, const vec3& _true_val, const simdmask& _mask)
+inline vec3 blendv(const vec3& _falseval, const vec3& _trueval, const simdmask& _mask)
 {
 	return {
-		blendv(_false_val.x, _true_val.x, _mask),
-		blendv(_false_val.y, _true_val.y, _mask),
-		blendv(_false_val.z, _true_val.z, _mask)
+		blendv(_falseval.x, _trueval.x, _mask),
+		blendv(_falseval.y, _trueval.y, _mask),
+		blendv(_falseval.z, _trueval.z, _mask)
 	};
 }
 
 /**
  * @brief Blends two values based on a mask.
- * @param _false_val The value to use when the mask is false.
- * @param _true_val The value to use when the mask is true.
+ * @param _falseval The value to use when the mask is false.
+ * @param _trueval The value to use when the mask is true.
  * @param _mask The selection mask.
  */
-inline vec4 blendv(const vec4& _false_val, const vec4& _true_val, const simdmask& _mask)
+inline vec4 blendv(const vec4& _falseval, const vec4& _trueval, const simdmask& _mask)
 {
 	return {
-		blendv(_false_val.x, _true_val.x, _mask),
-		blendv(_false_val.y, _true_val.y, _mask),
-		blendv(_false_val.z, _true_val.z, _mask),
-		blendv(_false_val.w, _true_val.w, _mask)
+		blendv(_falseval.x, _trueval.x, _mask),
+		blendv(_falseval.y, _trueval.y, _mask),
+		blendv(_falseval.z, _trueval.z, _mask),
+		blendv(_falseval.w, _trueval.w, _mask)
 	};
 }
 
@@ -14143,17 +14143,6 @@ inline vec4 blendv(const vec4& _false_val, const vec4& _true_val, const simdmask
 inline simdfloat abs(const simdfloat& _x)
 {
 	return blendv(_x, -_x, _x < 0);
-}
-#endif
-
-#ifndef USE_SCALAR
-/**
- * @brief Computes the absolute value of each component.
- * @param _x The input value or vector.
- */
-inline simdfloat abs(const float& _x)
-{
-	return simd_set1_float(std::fabs(_x));
 }
 #endif
 
@@ -14195,14 +14184,6 @@ inline simdfloat ceil(const simdfloat& _x)
 	return simd_ceil_float(_x);
 }
 
-/**
- * @brief Rounds each component up to the nearest integer.
- * @param _x The input value or vector.
- */
-inline simdfloat ceil(const float& _x)
-{
-	return simd_set1_float(std::ceil(_x));
-}
 #endif
 
 /**
@@ -14262,6 +14243,16 @@ inline simdfloat max(const simdfloat& _val1, const float& _val2)
 inline simdfloat max(const float& _val1, const simdfloat& _val2)
 {
 	return max(simd_set1_float(_val1), _val2);
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simdfloat max(const float& _val1, const float& _val2)
+{
+	return max(simd_set1_float(_val1), simd_set1_float(_val2));
 }
 #endif
 
@@ -14512,6 +14503,16 @@ inline simdfloat min(const float& _val1, const simdfloat& _val2)
 {
 	return min(simd_set1_float(_val1), _val2);
 }
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simdfloat min(const float& _val1, const float& _val2)
+{
+	return min(simd_set1_float(_val1), simd_set1_float(_val2));
+}
 #endif
 
 /**
@@ -14734,122 +14735,105 @@ inline vec4 min(const vec4& _val1, const vec4& _val2)
 /**
  * @brief Clamps a value between a minimum and maximum value.
  * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
  */
-inline float clamp(const float& _x, const float& _min_val, const float& _max_val)
+inline simdfloat clamp(const simdfloat& _x, const simdfloat& _minval, const simdfloat& _maxval)
 {
-	return std::max(std::min(_x, _max_val), _min_val);
-}
-#ifndef USE_SCALAR
-/**
- * @brief Clamps a value between a minimum and maximum value.
- * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
- */
-inline simdfloat clamp(const simdfloat& _x, const simdfloat& _min_val, const simdfloat& _max_val)
-{
-	return max(min(_x, _max_val), _min_val);
-}
-
-/**
- * @brief Clamps a value between a minimum and maximum value.
- * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
- */
-inline simdfloat clamp(const simdfloat& _x, const float& _min_val, const float& _max_val)
-{
-	return clamp(_x, simd_set1_float(_min_val), simd_set1_float(_max_val));
-}
-
-/**
- * @brief Clamps a value between a minimum and maximum value.
- * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
- */
-inline vec2 clamp(const vec2& _x, const simdfloat& _min_val, const simdfloat& _max_val)
-{
-	return {
-		clamp(_x.x, _min_val, _max_val),
-		clamp(_x.y, _min_val, _max_val)
-	};
-}
-#endif
-
-/**
- * @brief Clamps a value between a minimum and maximum value.
- * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
- */
-inline vec2 clamp(const vec2& _x, const float& _min_val, const float& _max_val)
-{
-	return {
-		clamp(_x.x, _min_val, _max_val),
-		clamp(_x.y, _min_val, _max_val)
-	};
-}
-
-/**
- * @brief Clamps a value between a minimum and maximum value.
- * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
- */
-inline vec2 clamp(const vec2& _x, const vec2& _min_val, const vec2& _max_val)
-{
-	return {
-		clamp(_x.x, _min_val.x, _max_val.x),
-		clamp(_x.y, _min_val.y, _max_val.y)
-	};
+	return max(min(_x, _maxval), _minval);
 }
 
 #ifndef USE_SCALAR
 /**
  * @brief Clamps a value between a minimum and maximum value.
  * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
  */
-inline vec3 clamp(const vec3& _x, const simdfloat& _min_val, const simdfloat& _max_val)
+inline simdfloat clamp(const float& _x, const float& _minval, const float& _maxval)
 {
-	return {
-		clamp(_x.x, _min_val, _max_val),
-		clamp(_x.y, _min_val, _max_val),
-		clamp(_x.z, _min_val, _max_val)
-	};
-}
-#endif
-/**
- * @brief Clamps a value between a minimum and maximum value.
- * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
- */
-inline vec3 clamp(const vec3& _x, const float& _min_val, const float& _max_val)
-{
-	return {
-		clamp(_x.x, _min_val, _max_val),
-		clamp(_x.y, _min_val, _max_val),
-		clamp(_x.z, _min_val, _max_val)
-	};
+	return clamp(simd_set1_float(_x), simd_set1_float(_minval), simd_set1_float(_maxval));
 }
 
 /**
  * @brief Clamps a value between a minimum and maximum value.
  * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
  */
-inline vec3 clamp(const vec3& _x, const vec3& _min_val, const vec3& _max_val)
+inline simdfloat clamp(const float& _x, const float& _minval, const simdfloat& _maxval)
+{
+	return clamp(simd_set1_float(_x), simd_set1_float(_minval), _maxval);
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline simdfloat clamp(const float& _x, const simdfloat& _minval, const float& _maxval)
+{
+	return clamp(simd_set1_float(_x), _minval, simd_set1_float(_maxval));
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline simdfloat clamp(const float& _x, const simdfloat& _minval, const simdfloat& _maxval)
+{
+	return clamp(simd_set1_float(_x), _minval, _maxval);
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline simdfloat clamp(const simdfloat& _x, const float& _minval, const float& _maxval)
+{
+	return clamp(_x, simd_set1_float(_minval), simd_set1_float(_maxval));
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline simdfloat clamp(const simdfloat& _x, const float& _minval, const simdfloat& _maxval)
+{
+	return clamp(_x, simd_set1_float(_minval), _maxval);
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline simdfloat clamp(const simdfloat& _x, const simdfloat& _minval, const float& _maxval)
+{
+	return clamp(_x, _minval, simd_set1_float(_maxval));
+}
+
+#endif
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline vec2 clamp(const vec2& _x, const simdfloat& _minval, const simdfloat& _maxval)
 {
 	return {
-		clamp(_x.x, _min_val.x, _max_val.x),
-		clamp(_x.y, _min_val.y, _max_val.y),
-		clamp(_x.z, _min_val.z, _max_val.z)
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval)
 	};
 }
 
@@ -14857,49 +14841,222 @@ inline vec3 clamp(const vec3& _x, const vec3& _min_val, const vec3& _max_val)
 /**
  * @brief Clamps a value between a minimum and maximum value.
  * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
  */
-inline vec4 clamp(const vec4& _x, const simdfloat& _min_val, const simdfloat& _max_val)
+inline vec2 clamp(const vec2& _x, const float& _minval, const float& _maxval)
 {
 	return {
-		clamp(_x.x, _min_val, _max_val),
-		clamp(_x.y, _min_val, _max_val),
-		clamp(_x.z, _min_val, _max_val),
-		clamp(_x.w, _min_val, _max_val)
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline vec2 clamp(const vec2& _x, const simdfloat& _minval, const float& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline vec2 clamp(const vec2& _x, const float& _minval, const simdfloat& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval)
+	};
+}
+
+#endif
+
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline vec2 clamp(const vec2& _x, const vec2& _minval, const vec2& _maxval)
+{
+	return {
+		clamp(_x.x, _minval.x, _maxval.x),
+		clamp(_x.y, _minval.y, _maxval.y)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline vec3 clamp(const vec3& _x, const simdfloat& _minval, const simdfloat& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval),
+		clamp(_x.z, _minval, _maxval)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline vec3 clamp(const vec3& _x, const float& _minval, const float& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval),
+		clamp(_x.z, _minval, _maxval)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline vec3 clamp(const vec3& _x, const simdfloat& _minval, const float& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval),
+		clamp(_x.z, _minval, _maxval)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline vec3 clamp(const vec3& _x, const float& _minval, const simdfloat& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval),
+		clamp(_x.z, _minval, _maxval)
 	};
 }
 #endif
 
+
 /**
  * @brief Clamps a value between a minimum and maximum value.
  * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
  */
-inline vec4 clamp(const vec4& _x, const float& _min_val, const float& _max_val)
+inline vec3 clamp(const vec3& _x, const vec3& _minval, const vec3& _maxval)
 {
 	return {
-		clamp(_x.x, _min_val, _max_val),
-		clamp(_x.y, _min_val, _max_val),
-		clamp(_x.z, _min_val, _max_val),
-		clamp(_x.w, _min_val, _max_val)
+		clamp(_x.x, _minval.x, _maxval.x),
+		clamp(_x.y, _minval.y, _maxval.y),
+		clamp(_x.z, _minval.z, _maxval.z)
 	};
 }
 
 /**
  * @brief Clamps a value between a minimum and maximum value.
  * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
  */
-inline vec4 clamp(const vec4& _x, const vec4& _min_val, const vec4& _max_val)
+inline vec4 clamp(const vec4& _x, const simdfloat& _minval, const simdfloat& _maxval)
 {
 	return {
-		clamp(_x.x, _min_val.x, _max_val.x),
-		clamp(_x.y, _min_val.y, _max_val.y),
-		clamp(_x.z, _min_val.z, _max_val.z),
-		clamp(_x.w, _min_val.w, _max_val.w)
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval),
+		clamp(_x.z, _minval, _maxval),
+		clamp(_x.w, _minval, _maxval)
+	};
+}
+
+#ifndef USE_SCALAR
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline vec4 clamp(const vec4& _x, const float& _minval, const float& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval),
+		clamp(_x.z, _minval, _maxval),
+		clamp(_x.w, _minval, _maxval)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline vec4 clamp(const vec4& _x, const simdfloat& _minval, const float& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval),
+		clamp(_x.z, _minval, _maxval),
+		clamp(_x.w, _minval, _maxval)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline vec4 clamp(const vec4& _x, const float& _minval, const simdfloat& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval),
+		clamp(_x.z, _minval, _maxval),
+		clamp(_x.w, _minval, _maxval)
+	};
+}
+
+#endif
+
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline vec4 clamp(const vec4& _x, const vec4& _minval, const vec4& _maxval)
+{
+	return {
+		clamp(_x.x, _minval.x, _maxval.x),
+		clamp(_x.y, _minval.y, _maxval.y),
+		clamp(_x.z, _minval.z, _maxval.z),
+		clamp(_x.w, _minval.w, _maxval.w)
 	};
 }
 
@@ -14915,7 +15072,6 @@ inline simdfloat acos(const simdfloat& _x)
 #ifndef __GNUC__
 	return simd_acos_float(_x);
 #else
-#ifndef GCC_FASTCOS
 	alignas(64) float tempTab[simdwidth];
 	simd_store_float(tempTab, _x);
 	for (int i = 0; i < simdwidth; i++)
@@ -14923,32 +15079,7 @@ inline simdfloat acos(const simdfloat& _x)
 		tempTab[i] = std::acos(tempTab[i]);
 	}
 	return simd_load_float(tempTab);
-#else
-	// Clamp input
-	simdfloat x = clamp(_x, 1.0f, -1.0f);
-
-	simdfloat x2 = x * x;
-	simdfloat x3 = x2 * x;
-	simdfloat x4 = x2 * x2;
-	simdfloat x5 = x3 * x2;
-
-	return SIMDHALFPI
-		- x * 1.0f
-		- x3 * 0.16666586685f
-		- x5 * 0.074953002686f;
 #endif
-#endif
-}
-#endif
-
-#ifndef USE_SCALAR
-/**
- * @brief Computes the inverse cosine of each component.
- * @param _x The input value or vector.
- */
-inline simdfloat acos(const float& _x)
-{
-	return simd_set1_float(std::acos(_x));
 }
 #endif
 
@@ -14990,7 +15121,6 @@ inline simdfloat asin(const simdfloat& _x)
 #ifndef __GNUC__
 	return simd_asin_float(_x);
 #else
-#ifndef GCC_FASTCOS
 	alignas(64) float tempTab[simdwidth];
 	simd_store_float(tempTab, _x);
 	for (int i = 0; i < simdwidth; i++)
@@ -14998,21 +15128,8 @@ inline simdfloat asin(const simdfloat& _x)
 		tempTab[i] = std::asin(tempTab[i]);
 	}
 	return simd_load_float(tempTab);
-#else
-	return acos(_x - SIMDHALFPI);
-#endif
-#endif
-}
-#endif
 
-#ifndef USE_SCALAR
-/**
- * @brief Computes the inverse sine of each component.
- * @param _x The input value or vector.
- */
-inline simdfloat asin(const float& _x)
-{
-	return simd_set1_float(std::asin(_x));
+#endif
 }
 #endif
 
@@ -15054,14 +15171,6 @@ inline simdfloat floor(const simdfloat& _x)
 	return simd_floor_float(_x);
 }
 
-/**
- * @brief Rounds each component down to the nearest integer.
- * @param _x The input value or vector.
- */
-inline simdfloat floor(const float& _x)
-{
-	return simd_set1_float(std::floor(_x));
-}
 #endif
 
 /**
@@ -15175,7 +15284,6 @@ inline simdfloat cos(const simdfloat& _x)
 #ifndef __GNUC__
 	return simd_cos_float(_x);
 #else
-#ifndef GCC_FASTCOS
 	alignas(64) float tabVal[simdwidth];
 	simd_store_float(tabVal, _x);
 
@@ -15186,40 +15294,7 @@ inline simdfloat cos(const simdfloat& _x)
 	}
 
 	return simd_load_float(tabResult);
-#else
-	simdfloat moda = mod(_x, SIMDTWOPI);
-	moda = blendv(moda, moda + SIMDTWOPI, moda < -SIMDPI);
-	moda = blendv(moda, moda - SIMDTWOPI,  moda > SIMDPI);
-
-	moda = abs(moda);
-
-	simdmask mask1 = moda > SIMDHALFPI;
-	moda = blendv(moda, SIMDPI - moda, mask1);
-	simdfloat sign = blendv(simd_set1_float(1.0f), simd_set1_float(-1.0f),  mask1);
-
-	simdfloat x2 = moda * moda;
-	simdfloat x4 = x2 * x2;
-	simdfloat x6 = x4 * x2;
-	simdfloat x8 = x6 * x2;
-
-	return (1.0f
-		- 0.5f * x2
-		+ 0.0416666666666666666667f * x4
-		- 0.00138888888888888888889f * x6
-		+ 2.4801588e-5f * x8) * sign;
 #endif
-#endif
-}
-#endif
-
-#ifndef USE_SCALAR
-/**
- * @brief Computes the cosine of each component.
- * @param _x The input value or vector.
- */
-inline simdfloat cos(const float& _x)
-{
-	return simd_set1_float(std::cos(_x));
 }
 #endif
 
@@ -15271,14 +15346,6 @@ inline simdfloat cosh(const simdfloat& _x)
 #endif
 }
 
-/**
- * @brief Computes the hyperbolic cosine of each component.
- * @param _x The input value or vector.
- */
-inline simdfloat cosh(const float& _x)
-{
-	return simd_set1_float(std::cosh(_x));
-}
 #endif
 
 /**
@@ -15370,57 +15437,119 @@ inline vec4 degrees(const vec4& _x)
 // distance functions
 /**
  * @brief Computes the distance between two points.
- * @param _point_a The first point.
- * @param _point_b The second point.
+ * @param _a The first point.
+ * @param _b The second point.
  */
-inline simdfloat distance(const simdfloat& _point_a, const simdfloat& _point_b)
+inline simdfloat distance(const simdfloat& _a, const simdfloat& _b)
 {
-	return simd_sqrt_float(simd_mul_float(simd_sub_float(_point_a, _point_b), simd_sub_float(_point_a, _point_b)));
+	return simd_sqrt_float(simd_mul_float(simd_sub_float(_a, _b), simd_sub_float(_a, _b)));
 }
 
 #ifndef USE_SCALAR
 /**
  * @brief Computes the distance between two points.
- * @param _point_a The first point.
- * @param _point_b The second point.
+ * @param _a The first point.
+ * @param _b The second point.
  */
-inline simdfloat distance(const float& _point_a, const float& _point_b)
+inline simdfloat distance(const float& _a, const float& _b)
 {
-	return simd_set1_float(std::sqrt((_point_a - _point_b) * (_point_a - _point_b)));
+	return std::abs(_a - _b);
+}
+
+/**
+ * @brief Computes the distance between two points.
+ * @param _a The first point.
+ * @param _b The second point.
+ */
+inline simdfloat distance(const simdfloat& _a, const float& _b)
+{
+	return distance(_a, simd_set1_float(_b));
+}
+
+/**
+ * @brief Computes the distance between two points.
+ * @param _a The first point.
+ * @param _b The second point.
+ */
+inline simdfloat distance(const float& _a, const simdfloat& _b)
+{
+	return distance(simd_set1_float(_a), _b);
 }
 #endif
 
 /**
  * @brief Computes the distance between two points.
- * @param _point_a The first point.
- * @param _point_b The second point.
+ * @param _a The first point.
+ * @param _b The second point.
  */
-inline simdfloat distance(const vec2& _point_a, const vec2& _point_b)
+inline simdfloat distance(const vec2& _a, const vec2& _b)
 {
-	return simd_sqrt_float(simd_add_float(simd_mul_float(simd_sub_float(_point_a.x, _point_b.x), simd_sub_float(_point_a.x, _point_b.x)), simd_mul_float(simd_sub_float(_point_a.y, _point_b.y), simd_sub_float(_point_a.y, _point_b.y))));
+	return simd_sqrt_float(simd_add_float(simd_mul_float(simd_sub_float(_a.x, _b.x), simd_sub_float(_a.x, _b.x)), simd_mul_float(simd_sub_float(_a.y, _b.y), simd_sub_float(_a.y, _b.y))));
 }
 
 /**
  * @brief Computes the distance between two points.
- * @param _point_a The first point.
- * @param _point_b The second point.
+ * @param _a The first point.
+ * @param _b The second point.
  */
-inline simdfloat distance(const vec3& _point_a, const vec3& _point_b)
+inline simdfloat distance(const vec3& _a, const vec3& _b)
 {
-	return simd_sqrt_float(simd_add_float(simd_add_float(simd_mul_float(simd_sub_float(_point_a.x, _point_b.x), simd_sub_float(_point_a.x, _point_b.x)), simd_mul_float(simd_sub_float(_point_a.y, _point_b.y), simd_sub_float(_point_a.y, _point_b.y))), simd_mul_float(simd_sub_float(_point_a.z, _point_b.z), simd_sub_float(_point_a.z, _point_b.z))));
+	return simd_sqrt_float(simd_add_float(simd_add_float(simd_mul_float(simd_sub_float(_a.x, _b.x), simd_sub_float(_a.x, _b.x)), simd_mul_float(simd_sub_float(_a.y, _b.y), simd_sub_float(_a.y, _b.y))), simd_mul_float(simd_sub_float(_a.z, _b.z), simd_sub_float(_a.z, _b.z))));
 }
 
 /**
  * @brief Computes the distance between two points.
- * @param _point_a The first point.
- * @param _point_b The second point.
+ * @param _a The first point.
+ * @param _b The second point.
  */
-inline simdfloat distance(const vec4& _point_a, const vec4& _point_b)
+inline simdfloat distance(const vec4& _a, const vec4& _b)
 {
-	return simd_sqrt_float(simd_add_float(simd_add_float(simd_add_float(simd_mul_float(simd_sub_float(_point_a.x, _point_b.x), simd_sub_float(_point_a.x, _point_b.x)), simd_mul_float(simd_sub_float(_point_a.y, _point_b.y), simd_sub_float(_point_a.y, _point_b.y))), simd_mul_float(simd_sub_float(_point_a.z, _point_b.z), simd_sub_float(_point_a.z, _point_b.z))), simd_mul_float(simd_sub_float(_point_a.w, _point_b.w), simd_sub_float(_point_a.w, _point_b.w))));
+	return simd_sqrt_float(simd_add_float(simd_add_float(simd_add_float(simd_mul_float(simd_sub_float(_a.x, _b.x), simd_sub_float(_a.x, _b.x)), simd_mul_float(simd_sub_float(_a.y, _b.y), simd_sub_float(_a.y, _b.y))), simd_mul_float(simd_sub_float(_a.z, _b.z), simd_sub_float(_a.z, _b.z))), simd_mul_float(simd_sub_float(_a.w, _b.w), simd_sub_float(_a.w, _b.w))));
 }
 
 // dot functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the dot product of two vectors.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simdfloat dot(const float& _val1, const float& _val2)
+{
+	return _val1 * _val2;
+}
+
+/**
+ * @brief Computes the dot product of two vectors.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simdfloat dot(const simdfloat& _val1, const float& _val2)
+{
+	return _val1 * _val2;
+}
+
+/**
+ * @brief Computes the dot product of two vectors.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simdfloat dot(const float& _val1, const simdfloat& _val2)
+{
+	return _val1 * _val2;
+}
+#endif
+
+/**
+ * @brief Computes the dot product of two vectors.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simdfloat dot(const simdfloat& _val1, const simdfloat& _val2)
+{
+	return _val1 * _val2;
+}
+
 /**
  * @brief Computes the dot product of two vectors.
  * @param _val1 The left-hand side operand.
@@ -15473,17 +15602,6 @@ inline simdfloat exp(const simdfloat& _x)
 }
 #endif
 
-#ifndef USE_SCALAR
-/**
- * @brief Computes the base-e exponential of each component.
- * @param _x The input value or vector.
- */
-inline simdfloat exp(const float& _x)
-{
-	return simd_set1_float(std::exp(_x));
-}
-#endif
-
 /**
  * @brief Computes the base-e exponential of each component.
  * @param _x The input value or vector.
@@ -15532,14 +15650,6 @@ inline simdfloat exp2(const simdfloat& _x)
 #endif
 }
 
-/**
- * @brief Computes the base-2 exponential of each component.
- * @param _x The input value or vector.
- */
-inline simdfloat exp2(const float& _x)
-{
-	return simd_set1_float(exp2f(_x));
-}
 #endif
 
 /**
@@ -15580,17 +15690,6 @@ inline vec4 exp2(const vec4& _x)
 inline simdfloat fma(const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _addend)
 {
 	return simd_add_float(simd_mul_float(_val1, _val2), _addend);
-}
-
-/**
- * @brief Computes fused multiply-add (a * b + c).
- * @param _val1 The first factor for multiplication.
- * @param _val2 The second factor for multiplication.
- * @param _addend The value to add.
- */
-inline simdfloat fma(const float& _val1, const float& _val2, const float& _addend)
-{
-	return simd_set1_float(_val1 * _val2 + _addend);
 }
 #endif
 
@@ -15748,6 +15847,16 @@ inline simdfloat ldexp(const simdfloat& _mantissa, const float& _exponent)
 {
 	return simd_mul_float(_mantissa, exp2(simd_set1_float(_exponent)));
 }
+
+/**
+ * @brief Computes mantissa * 2^exponent.
+ * @param _mantissa The mantissa (significand).
+ * @param _exponent The exponent value.
+ */
+inline simdfloat ldexp(const float& _mantissa, const simdfloat& _exponent)
+{
+	return simd_mul_float(simd_set1_float(_mantissa), exp2(_exponent));
+}
 #endif
 
 /**
@@ -15781,13 +15890,25 @@ inline vec4 ldexp(const vec4& _mantissa, const vec4& _exponent)
 }
 
 // length functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the length of a vector.
+ * @param _vec The input vector.
+ */
+inline simdfloat length(const float& _vec)
+{
+	return simd_set1_float(_vec);
+}
+
+#endif
+
 /**
  * @brief Computes the length of a vector.
  * @param _vec The input vector.
  */
 inline simdfloat length(const simdfloat& _vec)
 {
-	return simd_sqrt_float(_vec * _vec);
+	return _vec;
 }
 
 /**
@@ -15908,6 +16029,29 @@ inline simdfloat lerp(const float& _from, const float& _to, const float& _t)
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
  */
+inline vec2 lerp(const vec2& _from, const vec2& _to, const simdfloat& _t)
+{
+	return { lerp(_from.x, _to.x, _t), lerp(_from.y, _to.y, _t) };
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline vec2 lerp(const vec2& _from, const vec2& _to, const float& _t)
+{
+	return { lerp(_from.x, _to.x, _t), lerp(_from.y, _to.y, _t) };
+}
+#endif
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
 inline vec2 lerp(const vec2& _from, const vec2& _to, const vec2& _t)
 {
 	return { lerp(_from.x, _to.x, _t.x), lerp(_from.y, _to.y, _t.y) };
@@ -15919,10 +16063,58 @@ inline vec2 lerp(const vec2& _from, const vec2& _to, const vec2& _t)
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
  */
+inline vec3 lerp(const vec3& _from, const vec3& _to, const simdfloat& _t)
+{
+	return { lerp(_from.x, _to.x, _t), lerp(_from.y, _to.y, _t), lerp(_from.z, _to.z, _t) };
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline vec3 lerp(const vec3& _from, const vec3& _to, const float& _t)
+{
+	return { lerp(_from.x, _to.x, _t), lerp(_from.y, _to.y, _t), lerp(_from.z, _to.z, _t) };
+}
+#endif
+
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
 inline vec3 lerp(const vec3& _from, const vec3& _to, const vec3& _t)
 {
 	return { lerp(_from.x, _to.x, _t.x), lerp(_from.y, _to.y, _t.y), lerp(_from.z, _to.z, _t.z) };
 }
+
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline vec4 lerp(const vec4& _from, const vec4& _to, const simdfloat& _t)
+{
+	return { lerp(_from.x, _to.x, _t), lerp(_from.y, _to.y, _t), lerp(_from.z, _to.z, _t), lerp(_from.w, _to.w, _t) };
+}
+
+#ifndef USE_SCALAR	
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline vec4 lerp(const vec4& _from, const vec4& _to, const float& _t)
+{
+	return { lerp(_from.x, _to.x, _t), lerp(_from.y, _to.y, _t), lerp(_from.z, _to.z, _t), lerp(_from.w, _to.w, _t) };
+}
+#endif
 
 /**
  * @brief Performs linear interpolation.
@@ -15956,14 +16148,6 @@ inline simdfloat log(const simdfloat& _x)
 #endif
 }
 
-/**
- * @brief Computes the natural (base-e) logarithm of each component.
- * @param _x The input value or vector.
- */
-inline simdfloat log(const float& _x)
-{
-	return simd_set1_float(logf(_x));
-}
 #endif
 
 /**
@@ -16014,14 +16198,6 @@ inline simdfloat log2(const simdfloat& _x)
 #endif
 }
 
-/**
- * @brief Computes the base-2 logarithm of each component.
- * @param _x The input value or vector.
- */
-inline simdfloat log2(const float& _x)
-{
-	return simd_set1_float(log2f(_x));
-}
 #endif
 
 /**
@@ -16053,7 +16229,7 @@ inline vec4 log2(const vec4& _x)
 
 // mix functions
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -16065,7 +16241,7 @@ inline simdfloat mix(const simdfloat& _from, const simdfloat& _to, const simdflo
 
 #ifndef USE_SCALAR
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -16075,7 +16251,7 @@ inline simdfloat mix(const simdfloat& _from, const simdfloat& _to, const float& 
 	return _from + _t * (_to - _from);
 }
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -16085,7 +16261,7 @@ inline simdfloat mix(const simdfloat& _from, const float& _to, const simdfloat& 
 	return _from + _t * (_to - _from);
 }
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -16095,7 +16271,7 @@ inline simdfloat mix(const simdfloat& _from, const float& _to, const float& _t)
 	return _from + _t * (_to - _from);
 }
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -16105,7 +16281,7 @@ inline simdfloat mix(const float& _from, const simdfloat& _to, const simdfloat& 
 	return _from + _t * (_to - _from);
 }
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -16115,7 +16291,7 @@ inline simdfloat mix(const float& _from, const simdfloat& _to, const float& _t)
 	return _from + _t * (_to - _from);
 }
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -16125,7 +16301,7 @@ inline simdfloat mix(const float& _from, const float& _to, const simdfloat& _t)
 	return _from + _t * (_to - _from);
 }
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -16134,11 +16310,10 @@ inline simdfloat mix(const float& _from, const float& _to, const float& _t)
 {
 	return simd_set1_float(_from + _t * (_to - _from));
 }
-
 #endif
 
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -16150,7 +16325,7 @@ inline vec2 mix(const vec2& _from, const vec2& _to, const simdfloat& _t)
 
 #ifndef USE_SCALAR
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -16160,9 +16335,8 @@ inline vec2 mix(const vec2& _from, const vec2& _to, const float& _t)
 	return { mix(_from.x, _to.x, _t), mix(_from.y, _to.y, _t) };
 }
 #endif
-
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -16173,7 +16347,7 @@ inline vec2 mix(const vec2& _from, const vec2& _to, const vec2& _t)
 }
 
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -16185,7 +16359,7 @@ inline vec3 mix(const vec3& _from, const vec3& _to, const simdfloat& _t)
 
 #ifndef USE_SCALAR
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -16197,7 +16371,7 @@ inline vec3 mix(const vec3& _from, const vec3& _to, const float& _t)
 #endif
 
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -16208,7 +16382,7 @@ inline vec3 mix(const vec3& _from, const vec3& _to, const vec3& _t)
 }
 
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -16218,9 +16392,9 @@ inline vec4 mix(const vec4& _from, const vec4& _to, const simdfloat& _t)
 	return { mix(_from.x, _to.x, _t), mix(_from.y, _to.y, _t), mix(_from.z, _to.z, _t), mix(_from.w, _to.w, _t) };
 }
 
-#ifndef USE_SCALAR
+#ifndef USE_SCALAR	
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -16232,7 +16406,7 @@ inline vec4 mix(const vec4& _from, const vec4& _to, const float& _t)
 #endif
 
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -16241,7 +16415,6 @@ inline vec4 mix(const vec4& _from, const vec4& _to, const vec4& _t)
 {
 	return { mix(_from.x, _to.x, _t.x), mix(_from.y, _to.y, _t.y), mix(_from.z, _to.z, _t.z), mix(_from.w, _to.w, _t.w) };
 }
-
 
 // modf functions
 /**
@@ -16262,7 +16435,49 @@ inline simdfloat modf(const simdfloat& _value, const simdfloat& _modulus)
  */
 inline simdfloat modf(const float& _value, const float& _modulus)
 {
-	return simd_set1_float(_value - floorf(_value / _modulus) * _modulus);
+	return simd_set1_float(_value - std::floor(_value / _modulus) * _modulus);
+}
+
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline simdfloat modf(const simdfloat& _value, const float& _modulus)
+{
+	return modf(_value, simd_set1_float(_modulus));
+}
+
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline simdfloat modf(const float& _value, const simdfloat& _modulus)
+{
+	return modf(simd_set1_float(_value), _modulus);
+}
+#endif
+
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline vec2 modf(const vec2& _value, const simdfloat& _modulus)
+{
+	return { modf(_value.x, _modulus), modf(_value.y, _modulus) };
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline vec2 modf(const vec2& _value, const float& _modulus)
+{
+	return { modf(_value.x, _modulus), modf(_value.y, _modulus) };
 }
 #endif
 
@@ -16281,10 +16496,55 @@ inline vec2 modf(const vec2& _value, const vec2& _modulus)
  * @param _value The value to be modulated.
  * @param _modulus The modulus.
  */
+inline vec3 modf(const vec3& _value, const simdfloat& _modulus)
+{
+	return { modf(_value.x, _modulus), modf(_value.y, _modulus), modf(_value.z, _modulus) };
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline vec3 modf(const vec3& _value, const float& _modulus)
+{
+	return { modf(_value.x, _modulus), modf(_value.y, _modulus), modf(_value.z, _modulus) };
+}
+
+#endif
+
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
 inline vec3 modf(const vec3& _value, const vec3& _modulus)
 {
 	return { modf(_value.x, _modulus.x), modf(_value.y, _modulus.y), modf(_value.z, _modulus.z) };
 }
+
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline vec4 modf(const vec4& _value, const simdfloat& _modulus)
+{
+	return { modf(_value.x, _modulus), modf(_value.y, _modulus), modf(_value.z, _modulus), modf(_value.w, _modulus) };
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline vec4 modf(const vec4& _value, const float& _modulus)
+{
+	return { modf(_value.x, _modulus), modf(_value.y, _modulus), modf(_value.z, _modulus), modf(_value.w, _modulus) };
+}
+#endif
 
 /**
  * @brief Computes the component-wise floating-point remainder.
@@ -16296,7 +16556,29 @@ inline vec4 modf(const vec4& _value, const vec4& _modulus)
 	return { modf(_value.x, _modulus.x), modf(_value.y, _modulus.y), modf(_value.z, _modulus.z), modf(_value.w, _modulus.w) };
 }
 
+
 // normalize functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the normalized vector (unit vector).
+ * @param _x The input value.
+ */
+inline simdfloat normalize(const float& _x)
+{
+	if (_x == 0.0f) return simd_set1_float(0.0f);
+	else return simd_set1_float(1.0f);
+}
+#endif
+
+/**
+ * @brief Computes the normalized vector (unit vector).
+ * @param _x The input value.
+ */
+inline simdfloat normalize(const simdfloat& _x)
+{
+	return blendv(1.0f, 0.0f, _x == 0.0f);
+}
+
 /**
  * @brief Computes the normalized vector (unit vector).
  * @param _vec The input vector.
@@ -16541,6 +16823,29 @@ inline vec4 radians(const vec4& _x)
 }
 
 // reflect functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the reflection vector.
+ * @param _incident The incident vector.
+ * @param _normal The normal vector.
+ */
+inline simdfloat reflect(const float& _incident, const float& _normal)
+{
+	return _incident - 2.0f * dot(_normal, _incident) * _normal;
+}
+
+#endif
+
+/**
+ * @brief Computes the reflection vector.
+ * @param _incident The incident vector.
+ * @param _normal The normal vector.
+ */
+inline simdfloat reflect(const simdfloat& _incident, const simdfloat& _normal)
+{
+	return _incident - 2.0f * dot(_normal, _incident) * _normal;
+}
+
 /**
  * @brief Computes the reflection vector.
  * @param _incident The incident vector.
@@ -16660,14 +16965,6 @@ inline simdfloat round(const simdfloat& _x)
 
 }
 
-/**
- * @brief Rounds each component to the nearest integer.
- * @param _x The input value or vector.
- */
-inline simdfloat round(const float& _x)
-{
-	return simd_set1_float(roundf(_x));
-}
 #endif
 
 /**
@@ -16757,7 +17054,6 @@ inline simdfloat sin(const simdfloat& _x)
 #ifndef __GNUC__
 	return simd_sin_float(_x);
 #else
-#ifndef GCC_FASTCOS
 	alignas(64) float tempTab[simdwidth];
 	simd_store_float(tempTab, _x);
 	for (int i = 0; i < simdwidth; i++)
@@ -16765,21 +17061,7 @@ inline simdfloat sin(const simdfloat& _x)
 		tempTab[i] = sinf(tempTab[i]);
 	}
 	return simd_load_float(tempTab);
-#else
-	return cos(_x - SIMDHALFPI);
 #endif
-#endif
-}
-#endif
-
-#ifndef USE_SCALAR
-/**
- * @brief Computes the sine of each component.
- * @param _x The input value or vector.
- */
-inline simdfloat sin(const float& _x)
-{
-	return simd_set1_float(sinf(_x));
 }
 #endif
 
@@ -16831,14 +17113,6 @@ inline simdfloat sinh(const simdfloat& _x)
 #endif
 }
 
-/**
- * @brief Computes the hyperbolic sine of each component.
- * @param _x The input value or vector.
- */
-inline simdfloat sinh(const float& _x)
-{
-	return simd_set1_float(sinhf(_x));
-}
 #endif
 
 /**
@@ -16902,6 +17176,51 @@ inline simdfloat smoothstep(const float& _edge0, const float& _edge1, const floa
 {
 	return smoothstep(simd_set1_float(_edge0), simd_set1_float(_edge1), simd_set1_float(_x));
 }
+
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline simdfloat smoothstep(const simdfloat& _edge0, const float& _edge1, const simdfloat& _x)
+{
+	return smoothstep(_edge0, simd_set1_float(_edge1), _x);
+}
+
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline simdfloat smoothstep(const float& _edge0, const simdfloat& _edge1, const simdfloat& _x)
+{
+	return smoothstep(simd_set1_float(_edge0), _edge1, _x);
+}
+
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline simdfloat smoothstep(const simdfloat& _edge0, const float& _edge1, const float& _x)
+{
+	return smoothstep(_edge0, simd_set1_float(_edge1), simd_set1_float(_x));
+}
+
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline simdfloat smoothstep(const float& _edge0, const simdfloat& _edge1, const float& _x)
+{
+	return smoothstep(simd_set1_float(_edge0), _edge1, simd_set1_float(_x));
+}
+
 #endif
 
 /**
@@ -17043,6 +17362,16 @@ inline simdfloat step(const simdfloat& _edge, const simdfloat& _x)
 }
 
 #ifndef USE_SCALAR
+/**
+ * @brief Generates a step function by comparing two values.
+ * @param _edge The edge of the step function.
+ * @param _x The input value or vector.
+ */
+inline simdfloat step(const float& _edge, const float& _x)
+{
+	return step(simd_set1_float(_edge), simd_set1_float(_x));
+}
+
 /**
  * @brief Generates a step function by comparing two values.
  * @param _edge The edge of the step function.
@@ -17202,17 +17531,6 @@ inline simdfloat sqrt(const simdfloat& _x)
 }
 #endif
 
-#ifndef USE_SCALAR
-/**
- * @brief Computes the square root of each component.
- * @param _x The input value or vector.
- */
-inline simdfloat sqrt(const float& _x)
-{
-	return simd_set1_float(sqrtf(_x));
-}
-#endif
-
 /**
  * @brief Computes the square root of each component.
  * @param _x The input value or vector.
@@ -17339,17 +17657,6 @@ inline simdfloat tan(const simdfloat& _x)
 }
 #endif
 
-#ifndef USE_SCALAR
-/**
- * @brief Computes the tangent of each component.
- * @param _x The input value or vector.
- */
-inline simdfloat tan(const float& _x)
-{
-	return simd_set1_float(tanf(_x));
-}
-#endif
-
 /**
  * @brief Computes the tangent of each component.
  * @param _x The input value or vector.
@@ -17410,14 +17717,6 @@ inline simdfloat tanh(const simdfloat& _x)
 #endif
 }
 
-/**
- * @brief Computes the hyperbolic tangent of each component.
- * @param _x The input value or vector.
- */
-inline simdfloat tanh(const float& _x)
-{
-	return simd_set1_float(tanhf(_x));
-}
 #endif
 
 /**
@@ -18288,57 +18587,6 @@ inline mat4 transpose(const mat4& _mat)
 #pragma endregion float functions
 
 #pragma region double functions
-// abs functions
-#ifndef USE_SCALAR
-/**
- * @brief Computes the absolute value of each component.
- * @param _x The input value or vector.
- */
-inline simddouble abs(const simddouble& _x)
-{
-	return simd_and_double(simd_castsi_double(simd_set1_int(0x7FFFFFFF)), _x);
-}
-#endif
-
-#ifndef USE_SCALAR
-/**
- * @brief Computes the absolute value of each component.
- * @param _x The input value or vector.
- */
-inline simddouble abs(const double& _x)
-{
-	return simd_set1_double(std::abs(_x));
-}
-#endif
-
-/**
- * @brief Computes the absolute value of each component.
- * @param _x The input value or vector.
- */
-inline dvec2 abs(const dvec2& _x)
-{
-	return { abs(_x.x), abs(_x.y) };
-}
-
-/**
- * @brief Computes the absolute value of each component.
- * @param _x The input value or vector.
- */
-inline dvec3 abs(const dvec3& _x)
-{
-	return { abs(_x.x), abs(_x.y), abs(_x.z) };
-}
-
-/**
- * @brief Computes the absolute value of each component.
- * @param _x The input value or vector.
- */
-inline dvec4 abs(const dvec4& _x)
-{
-	return { abs(_x.x), abs(_x.y), abs(_x.z), abs(_x.w) };
-}
-
-
 
 // acosh functions
 #ifndef USE_SCALAR
@@ -18362,14 +18610,6 @@ inline simddouble acosh(const simddouble& _x)
 #endif
 }
 
-/**
- * @brief Computes the inverse hyperbolic cosine of each component.
- * @param _x The input value or vector.
- */
-inline simddouble acosh(const double& _x)
-{
-	return simd_set1_double(std::acosh(_x));
-}
 #endif
 
 /**
@@ -18422,14 +18662,6 @@ inline simddouble asinh(const simddouble& _x)
 #endif
 }
 
-/**
- * @brief Computes the inverse hyperbolic sine of each component.
- * @param _x The input value or vector.
- */
-inline simddouble asinh(const double& _x)
-{
-	return simd_set1_double(std::asinh(_x));
-}
 #endif
 
 /**
@@ -18480,14 +18712,6 @@ inline simddouble atan(const simddouble& _x)
 #endif
 }
 
-/**
- * @brief Computes the inverse tangent.
- * @param _x The input value or vector.
- */
-inline simddouble atan(const double& _x)
-{
-	return simd_set1_double(std::atan(_x));
-}
 #endif
 
 /**
@@ -18605,14 +18829,6 @@ inline simddouble atanh(const simddouble& _x)
 #endif
 }
 
-/**
- * @brief Computes the inverse hyperbolic tangent of each component.
- * @param _x The input value or vector.
- */
-inline simddouble atanh(const double& _x)
-{
-	return simd_set1_double(std::atanh(_x));
-}
 #endif
 
 /**
@@ -18645,62 +18861,138 @@ inline dvec4 atanh(const dvec4& _x)
 // blendv functions
 /**
  * @brief Blends two values based on a mask.
- * @param _false_val The value to use when the mask is false.
- * @param _true_val The value to use when the mask is true.
+ * @param _falseval The value to use when the mask is false.
+ * @param _trueval The value to use when the mask is true.
  * @param _mask The selection mask.
  */
-inline simddouble blendv(const simddouble& _false_val, const simddouble& _true_val, const simddmask& _mask)
+inline simddouble blendv(const simddouble& _falseval, const simddouble& _trueval, const simddmask& _mask)
 {
 #ifdef USE_AVX512
-	return _mm512_mask_blend_pd(_mask, _false_val, _true_val);
+	return _mm512_mask_blend_pd(_mask, _falseval, _trueval);
 #else
-	return simd_blendv_double(_false_val, _true_val, _mask);
+	return simd_blendv_double(_falseval, _trueval, _mask);
 #endif
 }
 
+#ifndef USE_SCALAR
 /**
  * @brief Blends two values based on a mask.
- * @param _false_val The value to use when the mask is false.
- * @param _true_val The value to use when the mask is true.
+ * @param _falseval The value to use when the mask is false.
+ * @param _trueval The value to use when the mask is true.
  * @param _mask The selection mask.
  */
-inline dvec2 blendv(const dvec2& _false_val, const dvec2& _true_val, const simddmask& _mask)
+inline simddouble blendv(const double& _falseval, const double& _trueval, const simddmask& _mask)
+{
+	return blendv(simd_set1_double(_falseval), simd_set1_double(_trueval), _mask);
+}
+
+/**
+ * @brief Blends two values based on a mask.
+ * @param _falseval The value to use when the mask is false.
+ * @param _trueval The value to use when the mask is true.
+ * @param _mask The selection mask.
+ */
+inline simddouble blendv(const simddouble& _falseval, const double& _trueval, const simddmask& _mask)
+{
+	return blendv(_falseval, simd_set1_double(_trueval), _mask);
+
+}
+
+/**
+ * @brief Blends two values based on a mask.
+ * @param _falseval The value to use when the mask is false.
+ * @param _trueval The value to use when the mask is true.
+ * @param _mask The selection mask.
+ */
+inline simddouble blendv(const double& _falseval, const simddouble& _trueval, const simddmask& _mask)
+{
+	return blendv(simd_set1_double(_falseval), _trueval, _mask);
+
+}
+#endif
+
+/**
+ * @brief Blends two values based on a mask.
+ * @param _falseval The value to use when the mask is false.
+ * @param _trueval The value to use when the mask is true.
+ * @param _mask The selection mask.
+ */
+inline dvec2 blendv(const dvec2& _falseval, const dvec2& _trueval, const simddmask& _mask)
 {
 	return {
-		blendv(_false_val.x, _true_val.x, _mask),
-		blendv(_false_val.y, _true_val.y, _mask)
+		blendv(_falseval.x, _trueval.x, _mask),
+		blendv(_falseval.y, _trueval.y, _mask)
 	};
 }
 
 /**
  * @brief Blends two values based on a mask.
- * @param _false_val The value to use when the mask is false.
- * @param _true_val The value to use when the mask is true.
+ * @param _falseval The value to use when the mask is false.
+ * @param _trueval The value to use when the mask is true.
  * @param _mask The selection mask.
  */
-inline dvec3 blendv(const dvec3& _false_val, const dvec3& _true_val, const simddmask& _mask)
+inline dvec3 blendv(const dvec3& _falseval, const dvec3& _trueval, const simddmask& _mask)
 {
 	return {
-		blendv(_false_val.x, _true_val.x, _mask),
-		blendv(_false_val.y, _true_val.y, _mask),
-		blendv(_false_val.z, _true_val.z, _mask)
+		blendv(_falseval.x, _trueval.x, _mask),
+		blendv(_falseval.y, _trueval.y, _mask),
+		blendv(_falseval.z, _trueval.z, _mask)
 	};
 }
 
 /**
  * @brief Blends two values based on a mask.
- * @param _false_val The value to use when the mask is false.
- * @param _true_val The value to use when the mask is true.
+ * @param _falseval The value to use when the mask is false.
+ * @param _trueval The value to use when the mask is true.
  * @param _mask The selection mask.
  */
-inline dvec4 blendv(const dvec4& _false_val, const dvec4& _true_val, const simddmask& _mask)
+inline dvec4 blendv(const dvec4& _falseval, const dvec4& _trueval, const simddmask& _mask)
 {
 	return {
-		blendv(_false_val.x, _true_val.x, _mask),
-		blendv(_false_val.y, _true_val.y, _mask),
-		blendv(_false_val.z, _true_val.z, _mask),
-		blendv(_false_val.w, _true_val.w, _mask)
+		blendv(_falseval.x, _trueval.x, _mask),
+		blendv(_falseval.y, _trueval.y, _mask),
+		blendv(_falseval.z, _trueval.z, _mask),
+		blendv(_falseval.w, _trueval.w, _mask)
 	};
+}
+
+// abs functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the absolute value of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble abs(const simddouble& _x)
+{
+	return blendv(_x, -_x, _x < 0.0);
+}
+#endif
+
+/**
+ * @brief Computes the absolute value of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec2 abs(const dvec2& _x)
+{
+	return { abs(_x.x), abs(_x.y) };
+}
+
+/**
+ * @brief Computes the absolute value of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec3 abs(const dvec3& _x)
+{
+	return { abs(_x.x), abs(_x.y), abs(_x.z) };
+}
+
+/**
+ * @brief Computes the absolute value of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec4 abs(const dvec4& _x)
+{
+	return { abs(_x.x), abs(_x.y), abs(_x.z), abs(_x.w) };
 }
 
 // ceil functions
@@ -18714,14 +19006,6 @@ inline simddouble ceil(const simddouble& _x)
 	return simd_ceil_double(_x);
 }
 
-/**
- * @brief Rounds each component up to the nearest integer.
- * @param _x The input value or vector.
- */
-inline simddouble ceil(const double& _x)
-{
-	return simd_set1_double(std::ceil(_x));
-}
 #endif
 
 /**
@@ -18781,6 +19065,16 @@ inline simddouble max(const simddouble& _val1, const double& _val2)
 inline simddouble max(const double& _val1, const simddouble& _val2)
 {
 	return max(simd_set1_double(_val1), _val2);
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simddouble max(const double& _val1, const double& _val2)
+{
+	return max(simd_set1_double(_val1), simd_set1_double(_val2));
 }
 #endif
 
@@ -19031,6 +19325,16 @@ inline simddouble min(const double& _val1, const simddouble& _val2)
 {
 	return min(simd_set1_double(_val1), _val2);
 }
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simddouble min(const double& _val1, const double& _val2)
+{
+	return min(simd_set1_double(_val1), simd_set1_double(_val2));
+}
 #endif
 
 /**
@@ -19253,122 +19557,105 @@ inline dvec4 min(const dvec4& _val1, const dvec4& _val2)
 /**
  * @brief Clamps a value between a minimum and maximum value.
  * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
  */
-inline double clamp(const double& _x, const double& _min_val, const double& _max_val)
+inline simddouble clamp(const simddouble& _x, const simddouble& _minval, const simddouble& _maxval)
 {
-	return std::max(std::min(_x, _max_val), _min_val);
-}
-#ifndef USE_SCALAR
-/**
- * @brief Clamps a value between a minimum and maximum value.
- * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
- */
-inline simddouble clamp(const simddouble& _x, const simddouble& _min_val, const simddouble& _max_val)
-{
-	return max(min(_x, _max_val), _min_val);
-}
-
-/**
- * @brief Clamps a value between a minimum and maximum value.
- * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
- */
-inline simddouble clamp(const simddouble& _x, const double& _min_val, const double& _max_val)
-{
-	return clamp(_x, simd_set1_double(_min_val), simd_set1_double(_max_val));
-}
-
-/**
- * @brief Clamps a value between a minimum and maximum value.
- * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
- */
-inline dvec2 clamp(const dvec2& _x, const simddouble& _min_val, const simddouble& _max_val)
-{
-	return {
-		clamp(_x.x, _min_val, _max_val),
-		clamp(_x.y, _min_val, _max_val)
-	};
-}
-#endif
-
-/**
- * @brief Clamps a value between a minimum and maximum value.
- * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
- */
-inline dvec2 clamp(const dvec2& _x, const double& _min_val, const double& _max_val)
-{
-	return {
-		clamp(_x.x, _min_val, _max_val),
-		clamp(_x.y, _min_val, _max_val)
-	};
-}
-
-/**
- * @brief Clamps a value between a minimum and maximum value.
- * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
- */
-inline dvec2 clamp(const dvec2& _x, const dvec2& _min_val, const dvec2& _max_val)
-{
-	return {
-		clamp(_x.x, _min_val.x, _max_val.x),
-		clamp(_x.y, _min_val.y, _max_val.y)
-	};
+	return max(min(_x, _maxval), _minval);
 }
 
 #ifndef USE_SCALAR
 /**
  * @brief Clamps a value between a minimum and maximum value.
  * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
  */
-inline dvec3 clamp(const dvec3& _x, const simddouble& _min_val, const simddouble& _max_val)
+inline simddouble clamp(const double& _x, const double& _minval, const double& _maxval)
 {
-	return {
-		clamp(_x.x, _min_val, _max_val),
-		clamp(_x.y, _min_val, _max_val),
-		clamp(_x.z, _min_val, _max_val)
-	};
-}
-#endif
-/**
- * @brief Clamps a value between a minimum and maximum value.
- * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
- */
-inline dvec3 clamp(const dvec3& _x, const double& _min_val, const double& _max_val)
-{
-	return {
-		clamp(_x.x, _min_val, _max_val),
-		clamp(_x.y, _min_val, _max_val),
-		clamp(_x.z, _min_val, _max_val)
-	};
+	return clamp(simd_set1_double(_x), simd_set1_double(_minval), simd_set1_double(_maxval));
 }
 
 /**
  * @brief Clamps a value between a minimum and maximum value.
  * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
  */
-inline dvec3 clamp(const dvec3& _x, const dvec3& _min_val, const dvec3& _max_val)
+inline simddouble clamp(const double& _x, const double& _minval, const simddouble& _maxval)
+{
+	return clamp(simd_set1_double(_x), simd_set1_double(_minval), _maxval);
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline simddouble clamp(const double& _x, const simddouble& _minval, const double& _maxval)
+{
+	return clamp(simd_set1_double(_x), _minval, simd_set1_double(_maxval));
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline simddouble clamp(const double& _x, const simddouble& _minval, const simddouble& _maxval)
+{
+	return clamp(simd_set1_double(_x), _minval, _maxval);
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline simddouble clamp(const simddouble& _x, const double& _minval, const double& _maxval)
+{
+	return clamp(_x, simd_set1_double(_minval), simd_set1_double(_maxval));
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline simddouble clamp(const simddouble& _x, const double& _minval, const simddouble& _maxval)
+{
+	return clamp(_x, simd_set1_double(_minval), _maxval);
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline simddouble clamp(const simddouble& _x, const simddouble& _minval, const double& _maxval)
+{
+	return clamp(_x, _minval, simd_set1_double(_maxval));
+}
+
+#endif
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline dvec2 clamp(const dvec2& _x, const simddouble& _minval, const simddouble& _maxval)
 {
 	return {
-		clamp(_x.x, _min_val.x, _max_val.x),
-		clamp(_x.y, _min_val.y, _max_val.y),
-		clamp(_x.z, _min_val.z, _max_val.z)
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval)
 	};
 }
 
@@ -19376,51 +19663,225 @@ inline dvec3 clamp(const dvec3& _x, const dvec3& _min_val, const dvec3& _max_val
 /**
  * @brief Clamps a value between a minimum and maximum value.
  * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
  */
-inline dvec4 clamp(const dvec4& _x, const simddouble& _min_val, const simddouble& _max_val)
+inline dvec2 clamp(const dvec2& _x, const double& _minval, const double& _maxval)
 {
 	return {
-		clamp(_x.x, _min_val, _max_val),
-		clamp(_x.y, _min_val, _max_val),
-		clamp(_x.z, _min_val, _max_val),
-		clamp(_x.w, _min_val, _max_val)
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline dvec2 clamp(const dvec2& _x, const simddouble& _minval, const double& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline dvec2 clamp(const dvec2& _x, const double& _minval, const simddouble& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval)
+	};
+}
+
+#endif
+
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline dvec2 clamp(const dvec2& _x, const dvec2& _minval, const dvec2& _maxval)
+{
+	return {
+		clamp(_x.x, _minval.x, _maxval.x),
+		clamp(_x.y, _minval.y, _maxval.y)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline dvec3 clamp(const dvec3& _x, const simddouble& _minval, const simddouble& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval),
+		clamp(_x.z, _minval, _maxval)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline dvec3 clamp(const dvec3& _x, const double& _minval, const double& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval),
+		clamp(_x.z, _minval, _maxval)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline dvec3 clamp(const dvec3& _x, const simddouble& _minval, const double& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval),
+		clamp(_x.z, _minval, _maxval)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline dvec3 clamp(const dvec3& _x, const double& _minval, const simddouble& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval),
+		clamp(_x.z, _minval, _maxval)
 	};
 }
 #endif
 
+
 /**
  * @brief Clamps a value between a minimum and maximum value.
  * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
  */
-inline dvec4 clamp(const dvec4& _x, const double& _min_val, const double& _max_val)
+inline dvec3 clamp(const dvec3& _x, const dvec3& _minval, const dvec3& _maxval)
 {
 	return {
-		clamp(_x.x, _min_val, _max_val),
-		clamp(_x.y, _min_val, _max_val),
-		clamp(_x.z, _min_val, _max_val),
-		clamp(_x.w, _min_val, _max_val)
+		clamp(_x.x, _minval.x, _maxval.x),
+		clamp(_x.y, _minval.y, _maxval.y),
+		clamp(_x.z, _minval.z, _maxval.z)
 	};
 }
 
 /**
  * @brief Clamps a value between a minimum and maximum value.
  * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
  */
-inline dvec4 clamp(const dvec4& _x, const dvec4& _min_val, const dvec4& _max_val)
+inline dvec4 clamp(const dvec4& _x, const simddouble& _minval, const simddouble& _maxval)
 {
 	return {
-		clamp(_x.x, _min_val.x, _max_val.x),
-		clamp(_x.y, _min_val.y, _max_val.y),
-		clamp(_x.z, _min_val.z, _max_val.z),
-		clamp(_x.w, _min_val.w, _max_val.w)
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval),
+		clamp(_x.z, _minval, _maxval),
+		clamp(_x.w, _minval, _maxval)
 	};
 }
+
+#ifndef USE_SCALAR
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline dvec4 clamp(const dvec4& _x, const double& _minval, const double& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval),
+		clamp(_x.z, _minval, _maxval),
+		clamp(_x.w, _minval, _maxval)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline dvec4 clamp(const dvec4& _x, const simddouble& _minval, const double& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval),
+		clamp(_x.z, _minval, _maxval),
+		clamp(_x.w, _minval, _maxval)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline dvec4 clamp(const dvec4& _x, const double& _minval, const simddouble& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval),
+		clamp(_x.z, _minval, _maxval),
+		clamp(_x.w, _minval, _maxval)
+	};
+}
+
+#endif
+
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline dvec4 clamp(const dvec4& _x, const dvec4& _minval, const dvec4& _maxval)
+{
+	return {
+		clamp(_x.x, _minval.x, _maxval.x),
+		clamp(_x.y, _minval.y, _maxval.y),
+		clamp(_x.z, _minval.z, _maxval.z),
+		clamp(_x.w, _minval.w, _maxval.w)
+	};
+}
+
 
 // acos functions
 #ifndef USE_SCALAR
@@ -19433,7 +19894,6 @@ inline simddouble acos(const simddouble& _x)
 #ifndef __GNUC__
 	return simd_acos_double(_x);
 #else
-#ifndef GCC_FASTCOS
 	alignas(64) double tempTab[halfsimdwidth];
 	simd_store_double(tempTab, _x);
 	for (int i = 0; i < halfsimdwidth; i++)
@@ -19441,32 +19901,7 @@ inline simddouble acos(const simddouble& _x)
 		tempTab[i] = std::acos(tempTab[i]);
 	}
 	return simd_load_double(tempTab);
-#else
-	// Clamp input
-	simddouble x = clamp(_x, 1.0, -1.0);
-
-	simddouble x2 = x * x;
-	simddouble x3 = x2 * x;
-	simddouble x4 = x2 * x2;
-	simddouble x5 = x3 * x2;
-
-	return SIMDDHALFPI
-		- x * 1.0
-		- x3 * 0.16666586685
-		- x5 * 0.074953002686;
 #endif
-#endif
-}
-#endif
-
-#ifndef USE_SCALAR
-/**
- * @brief Computes the inverse cosine of each component.
- * @param _x The input value or vector.
- */
-inline simddouble acos(const double& _x)
-{
-	return simd_set1_double(std::acos(_x));
 }
 #endif
 
@@ -19508,7 +19943,6 @@ inline simddouble asin(const simddouble& _x)
 #ifndef __GNUC__
 	return simd_asin_double(_x);
 #else
-#ifndef GCC_FASTCOS
 	alignas(64) double tempTab[halfsimdwidth];
 	simd_store_double(tempTab, _x);
 	for (int i = 0; i < halfsimdwidth; i++)
@@ -19516,21 +19950,7 @@ inline simddouble asin(const simddouble& _x)
 		tempTab[i] = asinf(tempTab[i]);
 	}
 	return simd_load_double(tempTab);
-#else
-	return acos(_x - SIMDDHALFPI);
 #endif
-#endif
-}
-#endif
-
-#ifndef USE_SCALAR
-/**
- * @brief Computes the inverse sine of each component.
- * @param _x The input value or vector.
- */
-inline simddouble asin(const double& _x)
-{
-	return simd_set1_double(std::asin(_x));
 }
 #endif
 
@@ -19572,14 +19992,6 @@ inline simddouble floor(const simddouble& _x)
 	return simd_floor_double(_x);
 }
 
-/**
- * @brief Rounds each component down to the nearest integer.
- * @param _x The input value or vector.
- */
-inline simddouble floor(const double& _x)
-{
-	return simd_set1_double(std::floor(_x));
-}
 #endif
 
 /**
@@ -19693,7 +20105,6 @@ inline simddouble cos(const simddouble& _x)
 #ifndef __GNUC__
 	return simd_cos_double(_x);
 #else
-#ifndef GCC_FASTCOS
 	alignas(64) double tabIndex[halfsimdwidth];
 	simd_store_double(tabIndex, _x);
 
@@ -19705,40 +20116,7 @@ inline simddouble cos(const simddouble& _x)
 	}
 
 	return simd_load_double(tabResult);
-#else
-	simddouble moda = mod(_x, SIMDDTWOPI);
-	moda = blendv(moda, moda + SIMDDTWOPI, moda < -SIMDDPI);
-	moda = blendv(moda, moda - SIMDDTWOPI, moda > SIMDDPI);
-
-	moda = abs(moda);
-
-	simddmask mask1 = moda > SIMDDHALFPI;
-	moda = blendv(moda, SIMDDPI - moda, mask1);
-	simddouble sign = blendv(simd_set1_double(1.0), simd_set1_double(-1.0), mask1);
-
-	simddouble x2 = moda * moda;
-	simddouble x4 = x2 * x2;
-	simddouble x6 = x4 * x2;
-	simddouble x8 = x6 * x2;
-
-	return (1.0
-		- 0.5 * x2
-		+ 0.0416666666666666666667 * x4
-		- 0.00138888888888888888889 * x6
-		+ 2.48015873015873e-5 * x8) * sign;
 #endif
-#endif
-}
-#endif
-
-#ifndef USE_SCALAR
-/**
- * @brief Computes the cosine of each component.
- * @param _x The input value or vector.
- */
-inline simddouble cos(const double& _x)
-{
-	return simd_set1_double(std::cos(_x));
 }
 #endif
 
@@ -19790,14 +20168,6 @@ inline simddouble cosh(const simddouble& _x)
 #endif
 }
 
-/**
- * @brief Computes the hyperbolic cosine of each component.
- * @param _x The input value or vector.
- */
-inline simddouble cosh(const double& _x)
-{
-	return simd_set1_double(std::cosh(_x));
-}
 #endif
 
 /**
@@ -19889,57 +20259,121 @@ inline dvec4 degrees(const dvec4& _x)
 // distance functions
 /**
  * @brief Computes the distance between two points.
- * @param _point_a The first point.
- * @param _point_b The second point.
+ * @param _a The first point.
+ * @param _b The second point.
  */
-inline simddouble distance(const simddouble& _point_a, const simddouble& _point_b)
+inline simddouble distance(const simddouble& _a, const simddouble& _b)
 {
-	return simd_sqrt_double(simd_mul_double(simd_sub_double(_point_a, _point_b), simd_sub_double(_point_a, _point_b)));
+	return simd_sqrt_double(simd_mul_double(simd_sub_double(_a, _b), simd_sub_double(_a, _b)));
 }
 
 #ifndef USE_SCALAR
 /**
  * @brief Computes the distance between two points.
- * @param _point_a The first point.
- * @param _point_b The second point.
+ * @param _a The first point.
+ * @param _b The second point.
  */
-inline simddouble distance(const double& _point_a, const double& _point_b)
+inline simddouble distance(const double& _a, const double& _b)
 {
-	return simd_set1_double(std::sqrt((_point_a - _point_b) * (_point_a - _point_b)));
+	return std::abs(_a - _b);
 }
+
+/**
+ * @brief Computes the distance between two points.
+ * @param _a The first point.
+ * @param _b The second point.
+ */
+inline simddouble distance(const simddouble& _a, const double& _b)
+{
+	return distance(_a, simd_set1_double(_b));
+}
+
+/**
+ * @brief Computes the distance between two points.
+ * @param _a The first point.
+ * @param _b The second point.
+ */
+inline simddouble distance(const double& _a, const simddouble& _b)
+{
+	return distance(simd_set1_double(_a), _b);
+}
+
 #endif
 
 /**
  * @brief Computes the distance between two points.
- * @param _point_a The first point.
- * @param _point_b The second point.
+ * @param _a The first point.
+ * @param _b The second point.
  */
-inline simddouble distance(const dvec2& _point_a, const dvec2& _point_b)
+inline simddouble distance(const dvec2& _a, const dvec2& _b)
 {
-	return simd_sqrt_double(simd_add_double(simd_mul_double(simd_sub_double(_point_a.x, _point_b.x), simd_sub_double(_point_a.x, _point_b.x)), simd_mul_double(simd_sub_double(_point_a.y, _point_b.y), simd_sub_double(_point_a.y, _point_b.y))));
+	return simd_sqrt_double(simd_add_double(simd_mul_double(simd_sub_double(_a.x, _b.x), simd_sub_double(_a.x, _b.x)), simd_mul_double(simd_sub_double(_a.y, _b.y), simd_sub_double(_a.y, _b.y))));
 }
 
 /**
  * @brief Computes the distance between two points.
- * @param _point_a The first point.
- * @param _point_b The second point.
+ * @param _a The first point.
+ * @param _b The second point.
  */
-inline simddouble distance(const dvec3& _point_a, const dvec3& _point_b)
+inline simddouble distance(const dvec3& _a, const dvec3& _b)
 {
-	return simd_sqrt_double(simd_add_double(simd_add_double(simd_mul_double(simd_sub_double(_point_a.x, _point_b.x), simd_sub_double(_point_a.x, _point_b.x)), simd_mul_double(simd_sub_double(_point_a.y, _point_b.y), simd_sub_double(_point_a.y, _point_b.y))), simd_mul_double(simd_sub_double(_point_a.z, _point_b.z), simd_sub_double(_point_a.z, _point_b.z))));
+	return simd_sqrt_double(simd_add_double(simd_add_double(simd_mul_double(simd_sub_double(_a.x, _b.x), simd_sub_double(_a.x, _b.x)), simd_mul_double(simd_sub_double(_a.y, _b.y), simd_sub_double(_a.y, _b.y))), simd_mul_double(simd_sub_double(_a.z, _b.z), simd_sub_double(_a.z, _b.z))));
 }
 
 /**
  * @brief Computes the distance between two points.
- * @param _point_a The first point.
- * @param _point_b The second point.
+ * @param _a The first point.
+ * @param _b The second point.
  */
-inline simddouble distance(const dvec4& _point_a, const dvec4& _point_b)
+inline simddouble distance(const dvec4& _a, const dvec4& _b)
 {
-	return simd_sqrt_double(simd_add_double(simd_add_double(simd_add_double(simd_mul_double(simd_sub_double(_point_a.x, _point_b.x), simd_sub_double(_point_a.x, _point_b.x)), simd_mul_double(simd_sub_double(_point_a.y, _point_b.y), simd_sub_double(_point_a.y, _point_b.y))), simd_mul_double(simd_sub_double(_point_a.z, _point_b.z), simd_sub_double(_point_a.z, _point_b.z))), simd_mul_double(simd_sub_double(_point_a.w, _point_b.w), simd_sub_double(_point_a.w, _point_b.w))));
+	return simd_sqrt_double(simd_add_double(simd_add_double(simd_add_double(simd_mul_double(simd_sub_double(_a.x, _b.x), simd_sub_double(_a.x, _b.x)), simd_mul_double(simd_sub_double(_a.y, _b.y), simd_sub_double(_a.y, _b.y))), simd_mul_double(simd_sub_double(_a.z, _b.z), simd_sub_double(_a.z, _b.z))), simd_mul_double(simd_sub_double(_a.w, _b.w), simd_sub_double(_a.w, _b.w))));
 }
 
 // dot functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the dot product of two vectors.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simddouble dot(const double& _val1, const double& _val2)
+{
+	return _val1 * _val2;
+}
+
+/**
+ * @brief Computes the dot product of two vectors.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simddouble dot(const simddouble& _val1, const double& _val2)
+{
+	return _val1 * _val2;
+}
+
+/**
+ * @brief Computes the dot product of two vectors.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simddouble dot(const double& _val1, const simddouble& _val2)
+{
+	return _val1 * _val2;
+}
+
+#endif
+
+/**
+ * @brief Computes the dot product of two vectors.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simddouble dot(const simddouble& _val1, const simddouble& _val2)
+{
+	return _val1 * _val2;
+}
+
 /**
  * @brief Computes the dot product of two vectors.
  * @param _val1 The left-hand side operand.
@@ -19992,17 +20426,6 @@ inline simddouble exp(const simddouble& _x)
 }
 #endif
 
-#ifndef USE_SCALAR
-/**
- * @brief Computes the base-e exponential of each component.
- * @param _x The input value or vector.
- */
-inline simddouble exp(const double& _x)
-{
-	return simd_set1_double(std::exp(_x));
-}
-#endif
-
 /**
  * @brief Computes the base-e exponential of each component.
  * @param _x The input value or vector.
@@ -20052,14 +20475,6 @@ inline simddouble exp2(const simddouble& _x)
 #endif
 }
 
-/**
- * @brief Computes the base-2 exponential of each component.
- * @param _x The input value or vector.
- */
-inline simddouble exp2(const double& _x)
-{
-	return simd_set1_double(std::exp2(_x));
-}
 #endif
 
 /**
@@ -20102,16 +20517,6 @@ inline simddouble fma(const simddouble& _val1, const simddouble& _val2, const si
 	return simd_add_double(simd_mul_double(_val1, _val2), _addend);
 }
 
-/**
- * @brief Computes fused multiply-add (a * b + c).
- * @param _val1 The first factor for multiplication.
- * @param _val2 The second factor for multiplication.
- * @param _addend The value to add.
- */
-inline simddouble fma(const double& _val1, const double& _val2, const double& _addend)
-{
-	return simd_set1_double(_val1 * _val2 + _addend);
-}
 #endif
 
 /**
@@ -20271,6 +20676,18 @@ inline simddouble ldexp(const simddouble& _mantissa, const double& _exponent)
 {
 	return simd_mul_double(_mantissa, exp2(simd_set1_double(_exponent)));
 }
+
+/**
+ * @brief Computes mantissa * 2^exponent.
+ * @param _mantissa The mantissa (significand).
+ * @param _exponent The exponent value.
+ */
+inline simddouble ldexp(const double& _mantissa, const simddouble& _exponent)
+{
+	return simd_mul_double(simd_set1_double(_mantissa), exp2(_exponent));
+}
+
+
 #endif
 
 /**
@@ -20304,13 +20721,24 @@ inline dvec4 ldexp(const dvec4& _mantissa, const dvec4& _exponent)
 }
 
 // length functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the length of a vector.
+ * @param _vec The input vector.
+ */
+inline simddouble length(const double& _vec)
+{
+	return simd_set1_double(_vec);
+}
+#endif
+
 /**
  * @brief Computes the length of a vector.
  * @param _vec The input vector.
  */
 inline simddouble length(const simddouble& _vec)
 {
-	return simd_sqrt_double(_vec * _vec);
+	return _vec;
 }
 
 /**
@@ -20431,6 +20859,29 @@ inline simddouble lerp(const double& _from, const double& _to, const double& _t)
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
  */
+inline dvec2 lerp(const dvec2& _from, const dvec2& _to, const simddouble& _t)
+{
+	return { lerp(_from.x, _to.x, _t), lerp(_from.y, _to.y, _t) };
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline dvec2 lerp(const dvec2& _from, const dvec2& _to, const double& _t)
+{
+	return { lerp(_from.x, _to.x, _t), lerp(_from.y, _to.y, _t) };
+}
+#endif
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
 inline dvec2 lerp(const dvec2& _from, const dvec2& _to, const dvec2& _t)
 {
 	return { lerp(_from.x, _to.x, _t.x), lerp(_from.y, _to.y, _t.y) };
@@ -20442,10 +20893,58 @@ inline dvec2 lerp(const dvec2& _from, const dvec2& _to, const dvec2& _t)
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
  */
+inline dvec3 lerp(const dvec3& _from, const dvec3& _to, const simddouble& _t)
+{
+	return { lerp(_from.x, _to.x, _t), lerp(_from.y, _to.y, _t), lerp(_from.z, _to.z, _t) };
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline dvec3 lerp(const dvec3& _from, const dvec3& _to, const double& _t)
+{
+	return { lerp(_from.x, _to.x, _t), lerp(_from.y, _to.y, _t), lerp(_from.z, _to.z, _t) };
+}
+#endif
+
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
 inline dvec3 lerp(const dvec3& _from, const dvec3& _to, const dvec3& _t)
 {
 	return { lerp(_from.x, _to.x, _t.x), lerp(_from.y, _to.y, _t.y), lerp(_from.z, _to.z, _t.z) };
 }
+
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline dvec4 lerp(const dvec4& _from, const dvec4& _to, const simddouble& _t)
+{
+	return { lerp(_from.x, _to.x, _t), lerp(_from.y, _to.y, _t), lerp(_from.z, _to.z, _t), lerp(_from.w, _to.w, _t) };
+}
+
+#ifndef USE_SCALAR	
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline dvec4 lerp(const dvec4& _from, const dvec4& _to, const double& _t)
+{
+	return { lerp(_from.x, _to.x, _t), lerp(_from.y, _to.y, _t), lerp(_from.z, _to.z, _t), lerp(_from.w, _to.w, _t) };
+}
+#endif
 
 /**
  * @brief Performs linear interpolation.
@@ -20479,14 +20978,6 @@ inline simddouble log(const simddouble& _x)
 #endif
 }
 
-/**
- * @brief Computes the natural (base-e) logarithm of each component.
- * @param _x The input value or vector.
- */
-inline simddouble log(const double& _x)
-{
-	return simd_set1_double(std::log(_x));
-}
 #endif
 
 /**
@@ -20537,14 +21028,6 @@ inline simddouble log2(const simddouble& _x)
 #endif
 }
 
-/**
- * @brief Computes the base-2 logarithm of each component.
- * @param _x The input value or vector.
- */
-inline simddouble log2(const double& _x)
-{
-	return simd_set1_double(std::log2(_x));
-}
 #endif
 
 /**
@@ -20576,7 +21059,7 @@ inline dvec4 log2(const dvec4& _x)
 
 // mix functions
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -20588,7 +21071,7 @@ inline simddouble mix(const simddouble& _from, const simddouble& _to, const simd
 
 #ifndef USE_SCALAR
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -20598,7 +21081,7 @@ inline simddouble mix(const simddouble& _from, const simddouble& _to, const doub
 	return _from + _t * (_to - _from);
 }
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -20608,7 +21091,7 @@ inline simddouble mix(const simddouble& _from, const double& _to, const simddoub
 	return _from + _t * (_to - _from);
 }
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -20618,7 +21101,7 @@ inline simddouble mix(const simddouble& _from, const double& _to, const double& 
 	return _from + _t * (_to - _from);
 }
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -20628,7 +21111,7 @@ inline simddouble mix(const double& _from, const simddouble& _to, const simddoub
 	return _from + _t * (_to - _from);
 }
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -20638,7 +21121,7 @@ inline simddouble mix(const double& _from, const simddouble& _to, const double& 
 	return _from + _t * (_to - _from);
 }
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -20648,7 +21131,7 @@ inline simddouble mix(const double& _from, const double& _to, const simddouble& 
 	return _from + _t * (_to - _from);
 }
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -20657,11 +21140,10 @@ inline simddouble mix(const double& _from, const double& _to, const double& _t)
 {
 	return simd_set1_double(_from + _t * (_to - _from));
 }
-
 #endif
 
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -20673,7 +21155,7 @@ inline dvec2 mix(const dvec2& _from, const dvec2& _to, const simddouble& _t)
 
 #ifndef USE_SCALAR
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -20683,9 +21165,8 @@ inline dvec2 mix(const dvec2& _from, const dvec2& _to, const double& _t)
 	return { mix(_from.x, _to.x, _t), mix(_from.y, _to.y, _t) };
 }
 #endif
-
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -20696,7 +21177,7 @@ inline dvec2 mix(const dvec2& _from, const dvec2& _to, const dvec2& _t)
 }
 
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -20708,7 +21189,7 @@ inline dvec3 mix(const dvec3& _from, const dvec3& _to, const simddouble& _t)
 
 #ifndef USE_SCALAR
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -20720,7 +21201,7 @@ inline dvec3 mix(const dvec3& _from, const dvec3& _to, const double& _t)
 #endif
 
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -20731,7 +21212,7 @@ inline dvec3 mix(const dvec3& _from, const dvec3& _to, const dvec3& _t)
 }
 
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -20741,9 +21222,9 @@ inline dvec4 mix(const dvec4& _from, const dvec4& _to, const simddouble& _t)
 	return { mix(_from.x, _to.x, _t), mix(_from.y, _to.y, _t), mix(_from.z, _to.z, _t), mix(_from.w, _to.w, _t) };
 }
 
-#ifndef USE_SCALAR
+#ifndef USE_SCALAR	
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -20755,7 +21236,7 @@ inline dvec4 mix(const dvec4& _from, const dvec4& _to, const double& _t)
 #endif
 
 /**
- * @brief Performs linear interpolation (equivalent to lerp).
+ * @brief Performs linear interpolation.
  * @param _from The start value for interpolation.
  * @param _to The end value for interpolation.
  * @param _t The interpolation factor.
@@ -20786,6 +21267,48 @@ inline simddouble modf(const double& _value, const double& _modulus)
 {
 	return simd_set1_double(_value - std::floor(_value / _modulus) * _modulus);
 }
+
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline simddouble modf(const simddouble& _value, const double& _modulus)
+{
+	return modf(_value, simd_set1_double(_modulus));	
+}
+
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline simddouble modf(const double& _value, const simddouble& _modulus)
+{
+	return modf(simd_set1_double(_value), _modulus);
+}
+#endif
+
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline dvec2 modf(const dvec2& _value, const simddouble& _modulus)
+{
+	return { modf(_value.x, _modulus), modf(_value.y, _modulus) };
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline dvec2 modf(const dvec2& _value, const double& _modulus)
+{
+	return { modf(_value.x, _modulus), modf(_value.y, _modulus) };
+}
 #endif
 
 /**
@@ -20803,10 +21326,55 @@ inline dvec2 modf(const dvec2& _value, const dvec2& _modulus)
  * @param _value The value to be modulated.
  * @param _modulus The modulus.
  */
+inline dvec3 modf(const dvec3& _value, const simddouble& _modulus)
+{
+	return { modf(_value.x, _modulus), modf(_value.y, _modulus), modf(_value.z, _modulus) };
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline dvec3 modf(const dvec3& _value, const double& _modulus)
+{
+	return { modf(_value.x, _modulus), modf(_value.y, _modulus), modf(_value.z, _modulus) };
+}
+
+#endif
+
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
 inline dvec3 modf(const dvec3& _value, const dvec3& _modulus)
 {
 	return { modf(_value.x, _modulus.x), modf(_value.y, _modulus.y), modf(_value.z, _modulus.z) };
 }
+
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline dvec4 modf(const dvec4& _value, const simddouble& _modulus)
+{
+	return { modf(_value.x, _modulus), modf(_value.y, _modulus), modf(_value.z, _modulus), modf(_value.w, _modulus) };
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline dvec4 modf(const dvec4& _value, const double& _modulus)
+{
+	return { modf(_value.x, _modulus), modf(_value.y, _modulus), modf(_value.z, _modulus), modf(_value.w, _modulus) };
+}
+#endif
 
 /**
  * @brief Computes the component-wise floating-point remainder.
@@ -20819,6 +21387,27 @@ inline dvec4 modf(const dvec4& _value, const dvec4& _modulus)
 }
 
 // normalize functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the normalized vector (unit vector).
+ * @param _x The input value.
+ */
+inline simddouble normalize(const double& _x)
+{
+	if (_x == 0.0) return simd_set1_double(0.0);
+	else return simd_set1_double(1.0);
+}
+#endif
+
+/**
+ * @brief Computes the normalized vector (unit vector).
+ * @param _x The input value.
+ */
+inline simddouble normalize(const simddouble& _x)
+{
+	return blendv(1.0, 0.0, _x == 0.0);
+}
+
 /**
  * @brief Computes the normalized vector (unit vector).
  * @param _vec The input vector.
@@ -21063,6 +21652,28 @@ inline dvec4 radians(const dvec4& _x)
 }
 
 // reflect functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the reflection vector.
+ * @param _incident The incident vector.
+ * @param _normal The normal vector.
+ */
+inline simddouble reflect(const double& _incident, const double& _normal)
+{
+	return _incident - 2.0 * dot(_normal, _incident) * _normal;
+}
+#endif
+
+/**
+ * @brief Computes the reflection vector.
+ * @param _incident The incident vector.
+ * @param _normal The normal vector.
+ */
+inline simddouble reflect(const simddouble& _incident, const simddouble& _normal)
+{
+	return _incident - 2.0 * dot(_normal, _incident) * _normal;
+}
+
 /**
  * @brief Computes the reflection vector.
  * @param _incident The incident vector.
@@ -21181,14 +21792,6 @@ inline simddouble round(const simddouble& _x)
 #endif
 }
 
-/**
- * @brief Rounds each component to the nearest integer.
- * @param _x The input value or vector.
- */
-inline simddouble round(const double& _x)
-{
-	return simd_set1_double(std::round(_x));
-}
 #endif
 
 /**
@@ -21279,7 +21882,6 @@ inline simddouble sin(const simddouble& _x)
 #ifndef __GNUC__
 	return simd_sin_double(_x);
 #else
-#ifndef GCC_FASTCOS
 	alignas(64) double tempTab[halfsimdwidth];
 	simd_store_double(tempTab, _x);
 	for (int i = 0; i < halfsimdwidth; i++)
@@ -21287,21 +21889,7 @@ inline simddouble sin(const simddouble& _x)
 		tempTab[i] = sinf(tempTab[i]);
 	}
 	return simd_load_double(tempTab);
-#else
-	return cos(_x - SIMDDHALFPI);
 #endif
-#endif
-}
-#endif
-
-#ifndef USE_SCALAR
-/**
- * @brief Computes the sine of each component.
- * @param _x The input value or vector.
- */
-inline simddouble sin(const double& _x)
-{
-	return simd_set1_double(std::sin(_x));
 }
 #endif
 
@@ -21353,14 +21941,6 @@ inline simddouble sinh(const simddouble& _x)
 #endif
 }
 
-/**
- * @brief Computes the hyperbolic sine of each component.
- * @param _x The input value or vector.
- */
-inline simddouble sinh(const double& _x)
-{
-	return simd_set1_double(std::sinh(_x));
-}
 #endif
 
 /**
@@ -21423,6 +22003,50 @@ inline simddouble smoothstep(const double& _edge0, const double& _edge1, const s
 inline simddouble smoothstep(const double& _edge0, const double& _edge1, const double& _x)
 {
 	return smoothstep(simd_set1_double(_edge0), simd_set1_double(_edge1), simd_set1_double(_x));
+}
+
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline simddouble smoothstep(const simddouble& _edge0, const double& _edge1, const simddouble& _x)
+{
+	return smoothstep(_edge0, simd_set1_double(_edge1), _x);
+}
+
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline simddouble smoothstep(const simddouble& _edge0, const double& _edge1, const double& _x)
+{
+	return smoothstep(_edge0, simd_set1_double(_edge1), simd_set1_double(_x));
+}
+
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline simddouble smoothstep(const double& _edge0, const simddouble& _edge1, const simddouble& _x)
+{
+	return smoothstep(simd_set1_double(_edge0), _edge1, _x);
+}
+
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline simddouble smoothstep(const double& _edge0, const simddouble& _edge1, const double& _x)
+{
+	return smoothstep(simd_set1_double(_edge0), _edge1, simd_set1_double(_x));
 }
 #endif
 
@@ -21565,6 +22189,16 @@ inline simddouble step(const simddouble& _edge, const simddouble& _x)
 }
 
 #ifndef USE_SCALAR
+/**
+ * @brief Generates a step function by comparing two values.
+ * @param _edge The edge of the step function.
+ * @param _x The input value or vector.
+ */
+inline simddouble step(const double& _edge, const double& _x)
+{
+	return step(simd_set1_double(_edge), simd_set1_double(_x));
+}
+
 /**
  * @brief Generates a step function by comparing two values.
  * @param _edge The edge of the step function.
@@ -21724,17 +22358,6 @@ inline simddouble sqrt(const simddouble& _x)
 }
 #endif
 
-#ifndef USE_SCALAR
-/**
- * @brief Computes the square root of each component.
- * @param _x The input value or vector.
- */
-inline simddouble sqrt(const double& _x)
-{
-	return simd_set1_double(std::sqrt(_x));
-}
-#endif
-
 /**
  * @brief Computes the square root of each component.
  * @param _x The input value or vector.
@@ -21861,17 +22484,6 @@ inline simddouble tan(const simddouble& _x)
 }
 #endif
 
-#ifndef USE_SCALAR
-/**
- * @brief Computes the tangent of each component.
- * @param _x The input value or vector.
- */
-inline simddouble tan(const double& _x)
-{
-	return simd_set1_double(std::tan(_x));
-}
-#endif
-
 /**
  * @brief Computes the tangent of each component.
  * @param _x The input value or vector.
@@ -21932,14 +22544,6 @@ inline simddouble tanh(const simddouble& _x)
 #endif
 }
 
-/**
- * @brief Computes the hyperbolic tangent of each component.
- * @param _x The input value or vector.
- */
-inline simddouble tanh(const double& _x)
-{
-	return simd_set1_double(std::tanh(_x));
-}
 #endif
 
 /**
@@ -22826,14 +23430,6 @@ inline simdint abs(const simdint& _x)
 	return simd_abs_int(_x);
 }
 
-/**
- * @brief Computes the absolute value of each component.
- * @param _x The input value or vector.
- */
-inline simdint abs(const int& _x)
-{
-	return simd_set1_int(std::abs(_x));
-}
 #endif
 
 /**
@@ -22866,61 +23462,100 @@ inline ivec4 abs(const ivec4& _x)
 // blendv functions
 /**
  * @brief Blends two values based on a mask.
- * @param _false_val The value to use when the mask is false.
- * @param _true_val The value to use when the mask is true.
+ * @param _falseval The value to use when the mask is false.
+ * @param _trueval The value to use when the mask is true.
  * @param _mask The selection mask.
  */
-inline simdint blendv(const simdint& _false_val, const simdint& _true_val, const simdimask& _mask)
+inline simdint blendv(const simdint& _falseval, const simdint& _trueval, const simdimask& _mask)
 {
 #ifdef USE_AVX512
-	return _mm512_mask_blend_epi32(_mask, _false_val, _true_val);
+	return _mm512_mask_blend_epi32(_mask, _falseval, _trueval);
 #else
-	return simd_blendv_int(_false_val, _true_val, _mask);
+	return simd_blendv_int(_falseval, _trueval, _mask);
 #endif
 }
 
+#ifndef USE_SCALAR
 /**
  * @brief Blends two values based on a mask.
- * @param _false_val The value to use when the mask is false.
- * @param _true_val The value to use when the mask is true.
+ * @param _falseval The value to use when the mask is false.
+ * @param _trueval The value to use when the mask is true.
  * @param _mask The selection mask.
  */
-inline ivec2 blendv(const ivec2& _false_val, const ivec2& _true_val, const simdimask& _mask)
+inline simdint blendv(const int& _falseval, const int& _trueval, const simdimask& _mask)
+{
+	blendv(simd_set1_int(_falseval), simd_set1_int(_trueval), _mask);
+}
+
+/**
+ * @brief Blends two values based on a mask.
+ * @param _falseval The value to use when the mask is false.
+ * @param _trueval The value to use when the mask is true.
+ * @param _mask The selection mask.
+ */
+inline simdint blendv(const simdint& _falseval, const int& _trueval, const simdimask& _mask)
+{
+	blendv(_falseval, simd_set1_int(_trueval), _mask);
+}
+
+/**
+ * @brief Blends two values based on a mask.
+ * @param _falseval The value to use when the mask is false.
+ * @param _trueval The value to use when the mask is true.
+ * @param _mask The selection mask.
+ */
+inline simdint blendv(const int& _falseval, const simdint& _trueval, const simdimask& _mask)
+{
+	blendv(simd_set1_int(_falseval), _trueval, _mask);
+}
+
+
+#endif
+
+
+
+/**
+ * @brief Blends two values based on a mask.
+ * @param _falseval The value to use when the mask is false.
+ * @param _trueval The value to use when the mask is true.
+ * @param _mask The selection mask.
+ */
+inline ivec2 blendv(const ivec2& _falseval, const ivec2& _trueval, const simdimask& _mask)
 {
 	return {
-		blendv(_false_val.x, _true_val.x, _mask),
-		blendv(_false_val.y, _true_val.y, _mask)
+		blendv(_falseval.x, _trueval.x, _mask),
+		blendv(_falseval.y, _trueval.y, _mask)
 	};
 }
 
 /**
  * @brief Blends two values based on a mask.
- * @param _false_val The value to use when the mask is false.
- * @param _true_val The value to use when the mask is true.
+ * @param _falseval The value to use when the mask is false.
+ * @param _trueval The value to use when the mask is true.
  * @param _mask The selection mask.
  */
-inline ivec3 blendv(const ivec3& _false_val, const ivec3& _true_val, const simdimask& _mask)
+inline ivec3 blendv(const ivec3& _falseval, const ivec3& _trueval, const simdimask& _mask)
 {
 	return {
-		blendv(_false_val.x, _true_val.x, _mask),
-		blendv(_false_val.y, _true_val.y, _mask),
-		blendv(_false_val.z, _true_val.z, _mask)
+		blendv(_falseval.x, _trueval.x, _mask),
+		blendv(_falseval.y, _trueval.y, _mask),
+		blendv(_falseval.z, _trueval.z, _mask)
 	};
 }
 
 /**
  * @brief Blends two values based on a mask.
- * @param _false_val The value to use when the mask is false.
- * @param _true_val The value to use when the mask is true.
+ * @param _falseval The value to use when the mask is false.
+ * @param _trueval The value to use when the mask is true.
  * @param _mask The selection mask.
  */
-inline ivec4 blendv(const ivec4& _false_val, const ivec4& _true_val, const simdimask& _mask)
+inline ivec4 blendv(const ivec4& _falseval, const ivec4& _trueval, const simdimask& _mask)
 {
 	return {
-		blendv(_false_val.x, _true_val.x, _mask),
-		blendv(_false_val.y, _true_val.y, _mask),
-		blendv(_false_val.z, _true_val.z, _mask),
-		blendv(_false_val.w, _true_val.w, _mask)
+		blendv(_falseval.x, _trueval.x, _mask),
+		blendv(_falseval.y, _trueval.y, _mask),
+		blendv(_falseval.z, _trueval.z, _mask),
+		blendv(_falseval.w, _trueval.w, _mask)
 	};
 }
 
@@ -22954,6 +23589,16 @@ inline simdint max(const simdint& _val1, const int& _val2)
 inline simdint max(const int& _val1, const simdint& _val2)
 {
 	return max(simd_set1_int(_val1), _val2);
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simdint max(const int& _val1, const int& _val2)
+{
+	return max(simd_set1_int(_val1), simd_set1_int(_val2));
 }
 #endif
 
@@ -23204,6 +23849,17 @@ inline simdint min(const int& _val1, const simdint& _val2)
 {
 	return min(simd_set1_int(_val1), _val2);
 }
+
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simdint min(const int& _val1, const int& _val2)
+{
+	return min(simd_set1_int(_val1), simd_set1_int(_val2));
+}
 #endif
 
 /**
@@ -23426,122 +24082,105 @@ inline ivec4 min(const ivec4& _val1, const ivec4& _val2)
 /**
  * @brief Clamps a value between a minimum and maximum value.
  * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
  */
-inline int clamp(const int& _x, const int& _min_val, const int& _max_val)
+inline simdint clamp(const simdint& _x, const simdint& _minval, const simdint& _maxval)
 {
-	return std::max(std::min(_x, _max_val), _min_val);
-}
-#ifndef USE_SCALAR
-/**
- * @brief Clamps a value between a minimum and maximum value.
- * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
- */
-inline simdint clamp(const simdint& _x, const simdint& _min_val, const simdint& _max_val)
-{
-	return max(min(_x, _max_val), _min_val);
-}
-
-/**
- * @brief Clamps a value between a minimum and maximum value.
- * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
- */
-inline simdint clamp(const simdint& _x, const int& _min_val, const int& _max_val)
-{
-	return clamp(_x, simd_set1_int(_min_val), simd_set1_int(_max_val));
-}
-
-/**
- * @brief Clamps a value between a minimum and maximum value.
- * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
- */
-inline ivec2 clamp(const ivec2& _x, const simdint& _min_val, const simdint& _max_val)
-{
-	return {
-		clamp(_x.x, _min_val, _max_val),
-		clamp(_x.y, _min_val, _max_val)
-	};
-}
-#endif
-
-/**
- * @brief Clamps a value between a minimum and maximum value.
- * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
- */
-inline ivec2 clamp(const ivec2& _x, const int& _min_val, const int& _max_val)
-{
-	return {
-		clamp(_x.x, _min_val, _max_val),
-		clamp(_x.y, _min_val, _max_val)
-	};
-}
-
-/**
- * @brief Clamps a value between a minimum and maximum value.
- * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
- */
-inline ivec2 clamp(const ivec2& _x, const ivec2& _min_val, const ivec2& _max_val)
-{
-	return {
-		clamp(_x.x, _min_val.x, _max_val.x),
-		clamp(_x.y, _min_val.y, _max_val.y)
-	};
+	return max(min(_x, _maxval), _minval);
 }
 
 #ifndef USE_SCALAR
 /**
  * @brief Clamps a value between a minimum and maximum value.
  * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
  */
-inline ivec3 clamp(const ivec3& _x, const simdint& _min_val, const simdint& _max_val)
+inline simdint clamp(const int& _x, const int& _minval, const int& _maxval)
 {
-	return {
-		clamp(_x.x, _min_val, _max_val),
-		clamp(_x.y, _min_val, _max_val),
-		clamp(_x.z, _min_val, _max_val)
-	};
-}
-#endif
-/**
- * @brief Clamps a value between a minimum and maximum value.
- * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
- */
-inline ivec3 clamp(const ivec3& _x, const int& _min_val, const int& _max_val)
-{
-	return {
-		clamp(_x.x, _min_val, _max_val),
-		clamp(_x.y, _min_val, _max_val),
-		clamp(_x.z, _min_val, _max_val)
-	};
+	return clamp(simd_set1_int(_x), simd_set1_int(_minval), simd_set1_int(_maxval));
 }
 
 /**
  * @brief Clamps a value between a minimum and maximum value.
  * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
  */
-inline ivec3 clamp(const ivec3& _x, const ivec3& _min_val, const ivec3& _max_val)
+inline simdint clamp(const int& _x, const int& _minval, const simdint& _maxval)
+{
+	return clamp(simd_set1_int(_x), simd_set1_int(_minval), _maxval);
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline simdint clamp(const int& _x, const simdint& _minval, const int& _maxval)
+{
+	return clamp(simd_set1_int(_x), _minval, simd_set1_int(_maxval));
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline simdint clamp(const int& _x, const simdint& _minval, const simdint& _maxval)
+{
+	return clamp(simd_set1_int(_x), _minval, _maxval);
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline simdint clamp(const simdint& _x, const int& _minval, const int& _maxval)
+{
+	return clamp(_x, simd_set1_int(_minval), simd_set1_int(_maxval));
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline simdint clamp(const simdint& _x, const int& _minval, const simdint& _maxval)
+{
+	return clamp(_x, simd_set1_int(_minval), _maxval);
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline simdint clamp(const simdint& _x, const simdint& _minval, const int& _maxval)
+{
+	return clamp(_x, _minval, simd_set1_int(_maxval));
+}
+
+#endif
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline ivec2 clamp(const ivec2& _x, const simdint& _minval, const simdint& _maxval)
 {
 	return {
-		clamp(_x.x, _min_val.x, _max_val.x),
-		clamp(_x.y, _min_val.y, _max_val.y),
-		clamp(_x.z, _min_val.z, _max_val.z)
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval)
 	};
 }
 
@@ -23549,52 +24188,224 @@ inline ivec3 clamp(const ivec3& _x, const ivec3& _min_val, const ivec3& _max_val
 /**
  * @brief Clamps a value between a minimum and maximum value.
  * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
  */
-inline ivec4 clamp(const ivec4& _x, const simdint& _min_val, const simdint& _max_val)
+inline ivec2 clamp(const ivec2& _x, const int& _minval, const int& _maxval)
 {
 	return {
-		clamp(_x.x, _min_val, _max_val),
-		clamp(_x.y, _min_val, _max_val),
-		clamp(_x.z, _min_val, _max_val),
-		clamp(_x.w, _min_val, _max_val)
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline ivec2 clamp(const ivec2& _x, const simdint& _minval, const int& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline ivec2 clamp(const ivec2& _x, const int& _minval, const simdint& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval)
+	};
+}
+
+#endif
+
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline ivec2 clamp(const ivec2& _x, const ivec2& _minval, const ivec2& _maxval)
+{
+	return {
+		clamp(_x.x, _minval.x, _maxval.x),
+		clamp(_x.y, _minval.y, _maxval.y)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline ivec3 clamp(const ivec3& _x, const simdint& _minval, const simdint& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval),
+		clamp(_x.z, _minval, _maxval)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline ivec3 clamp(const ivec3& _x, const int& _minval, const int& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval),
+		clamp(_x.z, _minval, _maxval)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline ivec3 clamp(const ivec3& _x, const simdint& _minval, const int& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval),
+		clamp(_x.z, _minval, _maxval)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline ivec3 clamp(const ivec3& _x, const int& _minval, const simdint& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval),
+		clamp(_x.z, _minval, _maxval)
 	};
 }
 #endif
 
+
 /**
  * @brief Clamps a value between a minimum and maximum value.
  * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
  */
-inline ivec4 clamp(const ivec4& _x, const int& _min_val, const int& _max_val)
+inline ivec3 clamp(const ivec3& _x, const ivec3& _minval, const ivec3& _maxval)
 {
 	return {
-		clamp(_x.x, _min_val, _max_val),
-		clamp(_x.y, _min_val, _max_val),
-		clamp(_x.z, _min_val, _max_val),
-		clamp(_x.w, _min_val, _max_val)
+		clamp(_x.x, _minval.x, _maxval.x),
+		clamp(_x.y, _minval.y, _maxval.y),
+		clamp(_x.z, _minval.z, _maxval.z)
 	};
 }
 
 /**
  * @brief Clamps a value between a minimum and maximum value.
  * @param _x The input value or vector.
- * @param _min_val The minimum value.
- * @param _max_val The maximum value.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
  */
-inline ivec4 clamp(const ivec4& _x, const ivec4& _min_val, const ivec4& _max_val)
+inline ivec4 clamp(const ivec4& _x, const simdint& _minval, const simdint& _maxval)
 {
 	return {
-		clamp(_x.x, _min_val.x, _max_val.x),
-		clamp(_x.y, _min_val.y, _max_val.y),
-		clamp(_x.z, _min_val.z, _max_val.z),
-		clamp(_x.w, _min_val.w, _max_val.w)
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval),
+		clamp(_x.z, _minval, _maxval),
+		clamp(_x.w, _minval, _maxval)
 	};
 }
 
+#ifndef USE_SCALAR
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline ivec4 clamp(const ivec4& _x, const int& _minval, const int& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval),
+		clamp(_x.z, _minval, _maxval),
+		clamp(_x.w, _minval, _maxval)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline ivec4 clamp(const ivec4& _x, const simdint& _minval, const int& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval),
+		clamp(_x.z, _minval, _maxval),
+		clamp(_x.w, _minval, _maxval)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline ivec4 clamp(const ivec4& _x, const int& _minval, const simdint& _maxval)
+{
+	return {
+		clamp(_x.x, _minval, _maxval),
+		clamp(_x.y, _minval, _maxval),
+		clamp(_x.z, _minval, _maxval),
+		clamp(_x.w, _minval, _maxval)
+	};
+}
+
+#endif
+
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _minval The minimum value.
+ * @param _maxval The maximum value.
+ */
+inline ivec4 clamp(const ivec4& _x, const ivec4& _minval, const ivec4& _maxval)
+{
+	return {
+		clamp(_x.x, _minval.x, _maxval.x),
+		clamp(_x.y, _minval.y, _maxval.y),
+		clamp(_x.z, _minval.z, _maxval.z),
+		clamp(_x.w, _minval.w, _maxval.w)
+	};
+}
 
 // sign functions
 /**
@@ -23658,7 +24469,7 @@ inline ivec4 sign(const ivec4& _x)
  * @brief Return 1 if every mask component is True, 0 otherwise.
  * @param _mask The selection mask.
  */
-inline int maskAll(const simdmask& _mask) // Mask full of 1s
+inline int maskAll(const simdmask& _mask)
 {
 #ifdef USE_AVX2
 	int maxmask = 0xFF;
@@ -23675,7 +24486,7 @@ inline int maskAll(const simdmask& _mask) // Mask full of 1s
  * @brief Return 1 if every mask component is False, 0 otherwise.
  * @param _mask The selection mask.
  */
-inline int maskNone(const simdmask& _mask) // Mask full of 0s
+inline int maskNone(const simdmask& _mask)
 {
 	if (simd_movemask_float(_mask) == 0)
 		return 1;
@@ -23687,7 +24498,7 @@ inline int maskNone(const simdmask& _mask) // Mask full of 0s
  * @brief Return 1 if every mask component is True, 0 otherwise.
  * @param _mask The selection mask.
  */
-inline int maskAll(const simddmask& _mask) // Mask full of 1s
+inline int maskAll(const simddmask& _mask)
 {
 #ifdef USE_AVX2
 	int maxmask = 0xF;
@@ -23704,7 +24515,7 @@ inline int maskAll(const simddmask& _mask) // Mask full of 1s
  * @brief Return 1 if every mask component is False, 0 otherwise.
  * @param _mask The selection mask.
  */
-inline int maskNone(const simddmask& _mask) // Mask full of 0s
+inline int maskNone(const simddmask& _mask)
 {
 	if (simd_movemask_double(_mask) == 0)
 		return 1;
@@ -23717,7 +24528,7 @@ inline int maskNone(const simddmask& _mask) // Mask full of 0s
  * @brief Return 1 if every mask component is True, 0 otherwise.
  * @param _mask The selection mask.
  */
-inline int maskAll(const simdimask& _mask) // Mask full of 1s
+inline int maskAll(const simdimask& _mask)
 {
 #ifdef USE_AVX2
 	int maxmask = 0xFF;
@@ -23734,7 +24545,7 @@ inline int maskAll(const simdimask& _mask) // Mask full of 1s
  * @brief Return 1 if every mask component is False, 0 otherwise.
  * @param _mask The selection mask.
  */
-inline int maskNone(const simdimask& _mask) // Mask full of 0s
+inline int maskNone(const simdimask& _mask)
 {
 	if (simd_movemask_epi8(_mask) == 0)
 		return 1;
@@ -23747,7 +24558,7 @@ inline int maskNone(const simdimask& _mask) // Mask full of 0s
  * @brief Return 1 if every mask component is True, 0 otherwise.
  * @param _mask The selection mask.
  */
-inline int maskAll(const simdmask& _mask) // Mask full of 1s
+inline int maskAll(const simdmask& _mask)
 {
 	if (_mask == 0xFFFF)
 		return 1;
@@ -23759,7 +24570,7 @@ inline int maskAll(const simdmask& _mask) // Mask full of 1s
  * @brief Return 1 if every mask component is False, 0 otherwise.
  * @param _mask The selection mask.
  */
-inline int maskNone(const simdmask& _mask) // Mask full of 0s
+inline int maskNone(const simdmask& _mask)
 {
 	if (_mask == 0x0000)
 		return 1;
@@ -23771,7 +24582,7 @@ inline int maskNone(const simdmask& _mask) // Mask full of 0s
  * @brief Return 1 if every mask component is True, 0 otherwise.
  * @param _mask The selection mask.
  */
-inline int maskAll(const simddmask& _mask) // Mask full of 1s
+inline int maskAll(const simddmask& _mask)
 {
 	if (_mask == 0xFF)
 		return 1;
@@ -23783,7 +24594,7 @@ inline int maskAll(const simddmask& _mask) // Mask full of 1s
  * @brief Return 1 if every mask component is False, 0 otherwise.
  * @param _mask The selection mask.
  */
-inline int maskNone(const simddmask& _mask) // Mask full of 0s
+inline int maskNone(const simddmask& _mask)
 {
 	if (_mask == 0x0000)
 		return 1;
@@ -23796,7 +24607,7 @@ inline int maskNone(const simddmask& _mask) // Mask full of 0s
  * @brief Return 1 if every mask component is True, 0 otherwise.
  * @param _mask The selection mask.
  */
-inline int maskAll(const int& _mask) // Mask full of 1s
+inline int maskAll(const int& _mask)
 {
 	return _mask;
 }
@@ -23805,7 +24616,7 @@ inline int maskAll(const int& _mask) // Mask full of 1s
  * @brief Return 1 if every mask component is False, 0 otherwise.
  * @param _mask The selection mask.
  */
-inline int maskNone(const int& _mask) // Mask full of 0s
+inline int maskNone(const int& _mask)
 {
 	return !_mask;
 }

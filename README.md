@@ -107,7 +107,7 @@ Useful broadcast constants are also provided:
 static const simdfloat SIMDZERO = 0.0f;
 static const simdfloat SIMDONE = 1.0f;
 static const simdfloat SIMDPI = 3.1415927f;
-// Search for "useful constants" in cppshader.h to see the rest.
+// search for "useful constants" in cppshader.h to see the rest.
 ```
 
 When using SIMD internal types, operations are parallelized at the instruction
@@ -175,29 +175,29 @@ cppshader also provides square matrix types following GLSL naming conventions.
 | `mat4` | 4 x `vec4` |
 
 ```cpp
-// Identity matrix
+// identity matrix
 mat3 I(1.0f);
 
-// Construct from column vectors
+// construct from column vectors
 vec3 col0(1, 0, 0);
 vec3 col1(0, 1, 0);
 vec3 col2(0, 0, 1);
 mat3 M(col0, col1, col2);
 
-// Access a column
+// access a column
 vec3 first_col = M[0];
 
-// Access an element
+// access an element
 simdfloat val = M[1][2];
 
-// Access an element with M(row, col)
+// access an element with M(row, col)
 simdfloat elem = M(1, 2);
 
-// Matrix * vector
+// matrix * vector
 vec3 v(1, 2, 3);
 vec3 result = M * v;
 
-// Matrix * matrix
+// matrix * matrix
 mat3 product = M * M;
 ```
 
@@ -220,7 +220,7 @@ call.
 ```cpp
 vec3 v(1.0f, 2.0f, 3.0f);
 
-// Read swizzles: return a new vector
+// read swizzles: return a new vector
 vec2 a = v.xy();
 vec2 b = v.yx();
 vec3 c = v.zyx();
@@ -291,7 +291,7 @@ Create arrays, then transfer data to and from `simdfloat`, `simddouble`, or
 ```cpp
 alignas(64) float tab[simdwidth];
 for (int k = 0; k < simdwidth; ++k)
-    tab[k] = static_cast<float>(i + k);
+    tab[k] = static_cast<float>(k);
 
 simdfloat value = simd_load_float(tab);
 ```
