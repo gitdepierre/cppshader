@@ -125,9 +125,9 @@ component is a `simdfloat`, so a `vec3` stores three SIMD values at once.
 
 | Type | Aliases | Components |
 |---|---|---|
-| `vec2` | - | `x, y` or `r, g` |
-| `vec3` | - | `x, y, z` or `r, g, b` |
-| `vec4` | - | `x, y, z, w` or `r, g, b, a` |
+| `vec2` | - | `x, y`, `r, g`, or `s, t` |
+| `vec3` | - | `x, y, z`, `r, g, b`, or `s, t, p` |
+| `vec4` | - | `x, y, z, w`, `r, g, b, a`, or `s, t, p, q` |
 | `dvec2/3/4` | - | same layout, double precision |
 | `ivec2/3/4` | - | same layout, integer |
 
