@@ -1,6 +1,6 @@
 # Cppshader
 
-**Bringing the fun of GLSL to native C++**
+## Bringing the fun of GLSL to native C++
 
 cppshader is a header-only C++ library that brings much of GLSL syntax and its
 programming model into regular C++ code. It reimplements many GLSL features in
