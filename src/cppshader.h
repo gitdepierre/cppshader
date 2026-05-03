@@ -1,0 +1,23925 @@
+﻿#ifndef _CPP_SHADER__H
+#define _CPP_SHADER__H
+
+/*
+ * MIT License
+ *
+ * Copyright 2026 Pierre GEISSLER
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+
+// Uncomment one of those lines to chose your SIMD width
+//#define USE_AVX512   // 16 lanes (16 floats/8 doubles), requires AVX-512
+//#define USE_AVX2        // 8 lanes (8 floats/4 doubles), requires AVX2
+#define USE_SSE41      // 4 lanes (4 floats/2 doubles), requires SSE4.1
+//#define USE_SCALAR   // 1 lane (1 float/1 double), no intrinsics
+
+#ifdef __GNUC__
+//#define GCC_FASTCOS // Uncomment to get faster (but imprecise) sine and cosine functions
+#endif
+
+#include <iostream>
+#include <cmath>
+
+#ifndef USE_SCALAR
+#include <immintrin.h>
+#endif
+
+#ifdef USE_AVX512
+#define simdfloat_internal __m512
+#define simddouble_internal __m512d
+#define simdint_internal __m512i
+#define simdwidth 16
+#define halfsimdwidth 8
+
+// Float functions
+#define simd_set1_float _mm512_set1_ps
+#define simd_set_float _mm512_set_ps
+#define simd_add_float _mm512_add_ps
+#define simd_sub_float _mm512_sub_ps
+#define simd_mul_float _mm512_mul_ps
+#define simd_div_float _mm512_div_ps
+#define simd_cmp_float _mm512_cmp_ps_mask
+// #define simd_blendv_float _mm512_blendv_float // Doesn't exist
+#define simd_store_float _mm512_store_ps
+#define simd_load_float _mm512_load_ps
+#define simd_and_float _mm512_and_ps
+#define simd_or_float _mm512_or_ps
+#define simd_andnot_float _mm512_andnot_ps
+// #define simd_movemask_float _mm512_movemask_ps
+#define simd_castsi_float _mm512_castsi512_ps
+#define simd_set1_int _mm512_set1_epi32
+#define simd_acos_float _mm512_acos_ps
+#define simd_acosh_float _mm512_acosh_ps
+#define simd_asin_float _mm512_asin_ps
+#define simd_asinh_float _mm512_asinh_ps
+#define simd_atan_float _mm512_atan_ps
+#define simd_atan2_float _mm512_atan2_ps
+#define simd_atanh_float _mm512_atanh_ps
+#define simd_ceil_float _mm512_ceil_ps
+#define simd_cos_float _mm512_cos_ps
+#define simd_cosh_float _mm512_cosh_ps
+#define simd_exp_float _mm512_exp_ps
+#define simd_exp2_float _mm512_exp2_ps
+#define simd_floor_float _mm512_floor_ps
+#define simd_fma_float _mm512_fmadd_ps
+// #define simd_rsqrt_float _mm512_rsqrt_float // Doesn't exist
+#define simd_log_float _mm512_log_ps
+#define simd_log2_float _mm512_log2_ps
+#define simd_max_float _mm512_max_ps
+#define simd_min_float _mm512_min_ps
+#define simd_mod_float _mm512_fmod_ps
+#define simd_pow_float _mm512_pow_ps
+// #define simd_round_float _mm512_round_float // Doesn't exist
+#define simd_sin_float _mm512_sin_ps
+#define simd_sinh_float _mm512_sinh_ps
+#define simd_sqrt_float _mm512_sqrt_ps
+#define simd_tan_float _mm512_tan_ps
+#define simd_tanh_float _mm512_tanh_ps
+
+
+// Double functions
+#define simd_set1_double _mm512_set1_pd
+#define simd_set_double _mm512_set_pd
+#define simd_add_double _mm512_add_pd
+#define simd_sub_double _mm512_sub_pd
+#define simd_mul_double _mm512_mul_pd
+#define simd_div_double _mm512_div_pd
+#define simd_cmp_double _mm512_cmp_pd_mask
+// #define simd_blendv_float _mm512_blendv_float // Doesn't exist
+#define simd_store_double _mm512_store_pd
+#define simd_load_double _mm512_load_pd
+#define simd_and_double _mm512_and_pd
+#define simd_or_double _mm512_or_pd
+#define simd_andnot_double _mm512_andnot_pd
+// #define simd_movemask_double _mm512_movemask_double // Doesn't exist
+#define simd_castsi_double _mm512_castsi512_pd
+#define simd_set1_int _mm512_set1_epi32
+#define simd_acos_double _mm512_acos_pd
+#define simd_acosh_double _mm512_acosh_pd
+#define simd_asin_double _mm512_asin_pd
+#define simd_asinh_double _mm512_asinh_pd
+#define simd_atan_double _mm512_atan_pd
+#define simd_atan2_double _mm512_atan2_pd
+#define simd_atanh_double _mm512_atanh_pd
+#define simd_ceil_double _mm512_ceil_pd
+#define simd_cos_double _mm512_cos_pd
+#define simd_cosh_double _mm512_cosh_pd
+#define simd_exp_double _mm512_exp_pd
+#define simd_exp2_double _mm512_exp2_pd
+#define simd_floor_double _mm512_floor_pd
+#define simd_fma_double _mm512_fmadd_pd
+// #define simd_rsqrt_double _mm512_rsqrt_double // Doesn't exist
+#define simd_log_double _mm512_log_pd
+#define simd_log2_double _mm512_log2_pd
+#define simd_max_double _mm512_max_pd
+#define simd_min_double _mm512_min_pd
+#define simd_mod_double _mm512_fmod_pd
+#define simd_pow_double _mm512_pow_pd
+// #define simd_round_double _mm512_round_double // Doesn't exist
+#define simd_sin_double _mm512_sin_pd
+#define simd_sinh_double _mm512_sinh_pd
+#define simd_sqrt_double _mm512_sqrt_pd
+#define simd_tan_double _mm512_tan_pd
+#define simd_tanh_double _mm512_tanh_pd
+
+// Integer functions
+#define simd_add_int _mm512_add_epi32
+#define simd_sub_int _mm512_sub_epi32
+#define simd_mul_int _mm512_mullo_epi32
+#define simd_min_int _mm512_min_epi32
+#define simd_max_int _mm512_max_epi32
+#define simd_abs_int _mm512_abs_epi32
+#define simd_set1_int _mm512_set1_epi32
+#define simd_set_int _mm512_set_epi32
+#define simd_cvtps_int _mm512_cvtps_epi32
+#define simd_cvtepi32_float _mm512_cvtepi32_ps
+#define simd_and_si512 _mm512_and_si512
+#define simd_i32gather_float _mm512_i32gather_ps
+#define simd_castps_si _mm512_castps_si512
+#define simd_and_int _mm512_and_si512
+#define simd_or_int _mm512_or_si512
+#define simd_xor_int _mm512_xor_si512
+#define simd_andnot_int _mm512_andnot_si512
+#define simd_slli_int _mm512_slli_epi32
+#define simd_srli_int _mm512_srli_epi32
+#define simd_srai_int _mm512_srai_epi32
+#define simd_cmpeq_int _mm512_cmpeq_epi32_mask
+#define simd_cmplt_int _mm512_cmplt_epi32_mask
+#define simd_cmpgt_int _mm512_cmpgt_epi32_mask
+#define simd_load_int avx512_load_int
+#define simd_store_int avx512_store_int
+#define simd_abs_int _mm512_abs_epi32
+// #define simd_movemask_epi8 _mm512_movemask_epi8 // Doesn't exist
+
+inline void avx512_store_int(int* _ptr, __m512i _value) { _mm512_store_si512((__m512i*)_ptr, _value); }
+inline __m512i avx512_load_int(const int* _ptr) { return _mm512_load_si512((__m512i*)_ptr); }
+
+
+struct simdmask
+{
+	__mmask16 value;
+
+	simdmask() : value(0) {}
+	simdmask(const __mmask16& _m) : value(_m) {}
+	simdmask(const int& _i) : value(static_cast<__mmask16>(_i)) {}
+	simdmask(const float& _f) : value(static_cast<__mmask16>(_f)) {}
+	simdmask(const double& _d) : value(static_cast<__mmask16>(_d)) {}
+
+	simdmask& operator=(const __mmask16& _m) { value = _m; return *this; }
+	simdmask& operator=(const int& _i) { value = static_cast<__mmask16>(_i); return *this; }
+
+	operator __mmask16() const { return value; }
+};
+
+struct simddmask
+{
+	__mmask8 value;
+
+	simddmask() : value(0) {}
+	simddmask(const __mmask8& _m) : value(_m) {}
+	simddmask(const int& _i) : value(static_cast<__mmask8>(_i)) {}
+	simddmask(const float& _f) : value(static_cast<__mmask8>(_f)) {}
+	simddmask(const double& _d) : value(static_cast<__mmask8>(_d)) {}
+
+	simddmask& operator=(const __mmask8& _m) { value = _m; return *this; }
+	simddmask& operator=(const int& _i) { value = static_cast<__mmask8>(_i); return *this; }
+
+	operator __mmask8() const { return value; }
+};
+
+struct simdimask
+{
+	__mmask16 value;
+
+	simdimask() : value(0) {}
+	simdimask(const __mmask16& _m) : value(_m) {}
+	simdimask(const int& _i) : value(static_cast<__mmask16>(_i)) {}
+	simdimask(const float& _f) : value(static_cast<__mmask16>(_f)) {}
+	simdimask(const double& _d) : value(static_cast<__mmask16>(_d)) {}
+	simdimask& operator=(const __mmask16& _m) { value = _m; return *this; }
+	simdimask& operator=(const int& _i) { value = static_cast<__mmask16>(_i); return *this; }
+
+	operator __mmask16() const { return value; }
+};
+
+
+
+#elif defined(USE_AVX2)
+#define simdfloat_internal __m256
+#define simddouble_internal __m256d
+#define simdint_internal __m256i
+#define simdmask_internal __m256
+#define simddmask_internal __m256d
+#define simdimask_internal __m256i
+#define simdwidth 8
+#define halfsimdwidth 4
+
+// Float functions
+#define simd_set1_float _mm256_set1_ps
+#define simd_set_float _mm256_set_ps
+#define simd_add_float _mm256_add_ps
+#define simd_sub_float _mm256_sub_ps
+#define simd_mul_float _mm256_mul_ps
+#define simd_div_float _mm256_div_ps
+#define simd_cmp_float _mm256_cmp_ps
+#define simd_blendv_float _mm256_blendv_ps
+#define simd_store_float _mm256_store_ps
+#define simd_load_float _mm256_load_ps
+#define simd_and_float _mm256_and_ps
+#define simd_or_float _mm256_or_ps
+#define simd_andnot_float _mm256_andnot_ps
+#define simd_movemask_float _mm256_movemask_ps
+#define simd_castsi_float _mm256_castsi256_ps
+#define simd_set1_int _mm256_set1_epi32
+#define simd_acos_float _mm256_acos_ps
+#define simd_acosh_float _mm256_acosh_ps
+#define simd_asin_float _mm256_asin_ps
+#define simd_asinh_float _mm256_asinh_ps
+#define simd_atan_float _mm256_atan_ps
+#define simd_atan2_float _mm256_atan2_ps
+#define simd_atanh_float _mm256_atanh_ps
+#define simd_ceil_float _mm256_ceil_ps
+#define simd_cos_float _mm256_cos_ps
+#define simd_cosh_float _mm256_cosh_ps
+#define simd_exp_float _mm256_exp_ps
+#define simd_exp2_float _mm256_exp2_ps
+#define simd_floor_float _mm256_floor_ps
+#define simd_fma_float _mm256_fmadd_ps
+#define simd_rsqrt_float _mm256_rsqrt_ps
+#define simd_log_float _mm256_log_ps
+#define simd_log2_float _mm256_log2_ps
+#define simd_max_float _mm256_max_ps
+#define simd_min_float _mm256_min_ps
+#define simd_mod_float _mm256_fmod_ps
+#define simd_pow_float _mm256_pow_ps
+#define simd_round_float _mm256_round_ps
+#define simd_sin_float _mm256_sin_ps
+#define simd_sinh_float _mm256_sinh_ps
+#define simd_sqrt_float _mm256_sqrt_ps
+#define simd_tan_float _mm256_tan_ps
+#define simd_tanh_float _mm256_tanh_ps
+
+
+// Double functions
+#define simd_set1_double _mm256_set1_pd
+#define simd_set_double _mm256_set_pd
+#define simd_add_double _mm256_add_pd
+#define simd_sub_double _mm256_sub_pd
+#define simd_mul_double _mm256_mul_pd
+#define simd_div_double _mm256_div_pd
+#define simd_cmp_double _mm256_cmp_pd
+#define simd_blendv_double _mm256_blendv_pd
+#define simd_store_double _mm256_store_pd
+#define simd_load_double _mm256_load_pd
+#define simd_and_double _mm256_and_pd
+#define simd_or_double _mm256_or_pd
+#define simd_andnot_double _mm256_andnot_pd
+#define simd_movemask_double _mm256_movemask_pd
+#define simd_castsi_double _mm256_castsi256_pd
+#define simd_set1_int _mm256_set1_epi32
+#define simd_acos_double _mm256_acos_pd
+#define simd_acosh_double _mm256_acosh_pd
+#define simd_asin_double _mm256_asin_pd
+#define simd_asinh_double _mm256_asinh_pd
+#define simd_atan_double _mm256_atan_pd
+#define simd_atan2_double _mm256_atan2_pd
+#define simd_atanh_double _mm256_atanh_pd
+#define simd_ceil_double _mm256_ceil_pd
+#define simd_cos_double _mm256_cos_pd
+#define simd_cosh_double _mm256_cosh_pd
+#define simd_exp_double _mm256_exp_pd
+#define simd_exp2_double _mm256_exp2_pd
+#define simd_floor_double _mm256_floor_pd
+#define simd_fma_double _mm256_fmadd_pd
+// #define simd_rsqrt_double _mm256_rsqrt_double // Doesn't exist
+#define simd_log_double _mm256_log_pd
+#define simd_log2_double _mm256_log2_pd
+#define simd_max_double _mm256_max_pd
+#define simd_min_double _mm256_min_pd
+#define simd_mod_double _mm256_fmod_pd
+#define simd_pow_double _mm256_pow_pd
+#define simd_round_double _mm256_round_pd
+#define simd_sin_double _mm256_sin_pd
+#define simd_sinh_double _mm256_sinh_pd
+#define simd_sqrt_double _mm256_sqrt_pd
+#define simd_tan_double _mm256_tan_pd
+#define simd_tanh_double _mm256_tanh_pd
+
+// Integer functions
+#define simd_add_int _mm256_add_epi32
+#define simd_sub_int _mm256_sub_epi32
+#define simd_mul_int _mm256_mullo_epi32
+#define simd_min_int _mm256_min_epi32
+#define simd_max_int _mm256_max_epi32
+#define simd_blendv_int _mm256_blendv_epi8
+#define simd_abs_int _mm256_abs_epi32
+#define simd_set1_int _mm256_set1_epi32
+#define simd_set_int _mm256_set_epi32
+#define simd_cvtps_int _mm256_cvtps_epi32
+#define simd_cvtepi32_float _mm256_cvtepi32_ps
+#define simd_and_si256 _mm256_and_si256
+#define simd_i32gather_float _mm256_i32gather_ps
+#define simd_castps_si _mm256_castps_si256
+#define simd_and_int _mm256_and_si256
+#define simd_or_int _mm256_or_si256
+#define simd_xor_int _mm256_xor_si256
+#define simd_andnot_int _mm256_andnot_si256
+#define simd_slli_int _mm256_slli_epi32
+#define simd_srli_int _mm256_srli_epi32
+#define simd_srai_int _mm256_srai_epi32
+#define simd_cmpeq_int _mm256_cmpeq_epi32
+#define simd_cmpgt_int _mm256_cmpgt_epi32
+#define simd_load_int avx_load_int
+#define simd_store_int avx_store_int
+#define simd_abs_int _mm256_abs_epi32
+#define simd_movemask_epi8 _mm256_movemask_epi8
+
+inline void avx_store_int(int* _ptr, __m256i _value) { _mm256_store_si256((__m256i*)_ptr, _value); }
+inline __m256i avx_load_int(const int* _ptr) { return _mm256_load_si256((__m256i*)_ptr); }
+
+#elif defined(USE_SSE41)
+#define simdfloat_internal __m128
+#define simddouble_internal __m128d
+#define simdint_internal __m128i
+#define simdmask_internal __m128
+#define simddmask_internal __m128d
+#define simdimask_internal __m128i
+#define simdwidth 4
+#define halfsimdwidth 2
+// Float functions
+#define simd_set1_float _mm_set1_ps
+#define simd_set_float _mm_set_ps
+#define simd_add_float _mm_add_ps
+#define simd_sub_float _mm_sub_ps
+#define simd_mul_float _mm_mul_ps
+#define simd_div_float _mm_div_ps
+#define simd_cmp_float sse_cmp_float// _mm_cmp_ps // AVX
+#define simd_blendv_float _mm_blendv_ps
+#define simd_store_float _mm_store_ps
+#define simd_load_float _mm_load_ps
+#define simd_and_float _mm_and_ps
+#define simd_or_float _mm_or_ps
+#define simd_andnot_float _mm_andnot_ps
+#define simd_movemask_float _mm_movemask_ps
+#define simd_castsi_float _mm_castsi128_ps
+#define simd_set1_int _mm_set1_epi32
+#define simd_acos_float _mm_acos_ps
+#define simd_acosh_float _mm_acosh_ps
+#define simd_asin_float _mm_asin_ps
+#define simd_asinh_float _mm_asinh_ps
+#define simd_atan_float _mm_atan_ps
+#define simd_atan2_float _mm_atan2_ps
+#define simd_atanh_float _mm_atanh_ps
+#define simd_ceil_float _mm_ceil_ps
+#define simd_cos_float _mm_cos_ps
+#define simd_cosh_float _mm_cosh_ps
+#define simd_exp_float _mm_exp_ps
+#define simd_exp2_float _mm_exp2_ps
+#define simd_floor_float _mm_floor_ps
+#define simd_fma_float _mm_fmadd_ps
+#define simd_rsqrt_float _mm_rsqrt_ps
+#define simd_log_float _mm_log_ps
+#define simd_log2_float _mm_log2_ps
+#define simd_max_float _mm_max_ps
+#define simd_min_float _mm_min_ps
+#define simd_mod_float _mm_fmod_ps
+#define simd_pow_float _mm_pow_ps
+#define simd_round_float _mm_round_ps // SSE 4.1
+#define simd_sin_float _mm_sin_ps
+#define simd_sinh_float _mm_sinh_ps
+#define simd_sqrt_float _mm_sqrt_ps
+#define simd_tan_float _mm_tan_ps
+#define simd_tanh_float _mm_tanh_ps
+
+// Double functions
+#define simd_set1_double _mm_set1_pd
+#define simd_set_double _mm_set_pd
+#define simd_add_double _mm_add_pd
+#define simd_sub_double _mm_sub_pd
+#define simd_mul_double _mm_mul_pd
+#define simd_div_double _mm_div_pd
+#define simd_cmp_double sse_cmp_double // _mm_cmp_pd // AVX
+#define simd_blendv_double _mm_blendv_pd
+#define simd_store_double _mm_store_pd
+#define simd_load_double _mm_load_pd
+#define simd_and_double _mm_and_pd
+#define simd_or_double _mm_or_pd
+#define simd_andnot_double _mm_andnot_pd
+#define simd_movemask_double _mm_movemask_pd
+#define simd_castsi_double _mm_castsi128_pd
+#define simd_set1_int _mm_set1_epi32
+#define simd_acos_double _mm_acos_pd
+#define simd_acosh_double _mm_acosh_pd
+#define simd_asin_double _mm_asin_pd
+#define simd_asinh_double _mm_asinh_pd
+#define simd_atan_double _mm_atan_pd
+#define simd_atan2_double _mm_atan2_pd
+#define simd_atanh_double _mm_atanh_pd
+#define simd_ceil_double _mm_ceil_pd
+#define simd_cos_double _mm_cos_pd
+#define simd_cosh_double _mm_cosh_pd
+#define simd_exp_double _mm_exp_pd
+#define simd_exp2_double _mm_exp2_pd
+#define simd_floor_double _mm_floor_pd
+#define simd_fma_double _mm_fmadd_pd
+// #define simd_rsqrt_double _mm_rsqrt_double // Doesn't exist
+#define simd_log_double _mm_log_pd
+#define simd_log2_double _mm_log2_pd
+#define simd_max_double _mm_max_pd
+#define simd_min_double _mm_min_pd
+#define simd_mod_double _mm_fmod_pd
+#define simd_pow_double _mm_pow_pd
+#define simd_round_double _mm_round_pd // SSE4.1
+#define simd_sin_double _mm_sin_pd
+#define simd_sinh_double _mm_sinh_pd
+#define simd_sqrt_double _mm_sqrt_pd
+#define simd_tan_double _mm_tan_pd
+#define simd_tanh_double _mm_tanh_pd
+
+// Integer functions
+#define simd_add_int _mm_add_epi32
+#define simd_sub_int _mm_sub_epi32
+#define simd_mul_int _mm_mullo_epi32
+#define simd_min_int _mm_min_epi32
+#define simd_max_int _mm_max_epi32
+#define simd_blendv_int _mm_blendv_epi8
+#define simd_abs_int _mm_abs_epi32
+#define simd_set1_int _mm_set1_epi32
+#define simd_set_int _mm_set_epi32
+#define simd_cvtps_int _mm_cvtps_epi32
+#define simd_cvtepi32_float _mm_cvtepi32_ps
+#define simd_and_si256 _mm_and_si128
+#define simd_i32gather_float _mm_i32gather_ps
+#define simd_castps_si _mm_castps_si128
+#define simd_and_int _mm_and_si128
+#define simd_or_int _mm_or_si128
+#define simd_xor_int _mm_xor_si128
+#define simd_andnot_int _mm_andnot_si128
+#define simd_slli_int _mm_slli_epi32
+#define simd_srli_int _mm_srli_epi32
+#define simd_srai_int _mm_srai_epi32
+#define simd_cmpeq_int _mm_cmpeq_epi32
+#define simd_cmpgt_int _mm_cmpgt_epi32
+#define simd_load_int sse_load_int
+#define simd_store_int sse_store_int
+#define simd_abs_int _mm_abs_epi32
+#define simd_movemask_epi8 _mm_movemask_epi8
+
+inline void sse_store_int(int* _ptr, __m128i _value) { _mm_store_si128((__m128i*)_ptr, _value); }
+inline __m128i sse_load_int(const int* _ptr) { return _mm_load_si128((__m128i*)_ptr); }
+
+
+#elif defined(USE_SCALAR)
+#define simdfloat float
+#define simddouble double
+#define simdint int
+#define simdfloat_internal float
+#define simddouble_internal double
+#define simdint_internal int
+#define simdmask int
+#define simddmask int
+#define simdimask int
+#define simdmask_internal int
+#define simddmask_internal int
+#define simdimask_internal int
+#define simdwidth 1
+#define halfsimdwidth 1
+
+#define _CMP_EQ_OQ 0x00
+#define _CMP_LT_OQ 0x11
+#define _CMP_LE_OQ 0x12
+#define _CMP_GT_OQ 0x1E
+#define _CMP_GE_OQ 0x1D
+
+#define	simd_set1_float
+#define	simd_set_float scalar_set_ps
+#define	simd_add_float scalar_add_ps
+#define	simd_sub_float scalar_sub_ps
+#define	simd_mul_float scalar_mul_ps
+#define	simd_div_float scalar_div_ps
+#define	simd_cmp_float scalar_cmp_ps
+#define	simd_blendv_float scalar_blendv_ps
+#define	simd_store_float scalar_store_ps
+#define	simd_load_float scalar_load_ps
+#define	simd_movemask_float scalar_movemask_ps
+#define	simd_andnot_float scalar_andnot_ps
+#define simd_and_float scalar_and_ps
+#define simd_or_float scalar_or_ps
+#define simd_castsi_float scalar_castsi_ps
+#define simd_set1_int scalar_set1_epi32
+#define	simd_acos_float scalar_acos_ps
+#define	simd_acosh_float scalar_acosh_ps
+#define	simd_asin_float scalar_asin_ps
+#define	simd_asinh_float scalar_asinh_ps
+#define	simd_atan_float scalar_atan_ps
+#define simd_atan2_float scalar_atan2_ps
+#define	simd_atanh_float scalar_atanh_ps
+#define	simd_ceil_float scalar_ceil_ps
+#define	simd_cos_float scalar_cos_ps
+#define	simd_cosh_float scalar_cosh_ps
+#define	simd_exp_float scalar_exp_ps
+#define	simd_exp2_float scalar_exp2_ps
+#define	simd_floor_float scalar_floor_ps
+#define	simd_fma_float scalar_fmadd_ps
+#define	simd_rsqrt_float scalar_rsqrt_ps
+#define	simd_log_float scalar_log_ps
+#define	simd_log2_float scalar_log2_ps
+#define	simd_max_float scalar_max_ps
+#define	simd_min_float scalar_min_ps
+#define	simd_mod_float scalar_fmod_ps
+#define	simd_pow_float scalar_pow_ps
+#define	simd_round_float scalar_round_ps
+#define	simd_sin_float scalar_sin_ps
+#define	simd_sinh_float scalar_sinh_ps
+#define	simd_sqrt_float scalar_sqrt_ps
+#define	simd_tan_float scalar_tan_ps
+#define	simd_tanh_float scalar_tanh_ps
+
+#define	simd_set1_double
+#define	simd_set_double scalar_set_pd
+#define	simd_add_double scalar_add_pd
+#define	simd_sub_double scalar_sub_pd
+#define	simd_mul_double scalar_mul_pd
+#define	simd_div_double scalar_div_pd
+#define	simd_cmp_double scalar_cmp_pd
+#define	simd_blendv_double scalar_blendv_pd
+#define	simd_store_double scalar_store_pd
+#define	simd_load_double scalar_load_pd
+#define	simd_movemask_double scalar_movemask_pd
+#define	simd_andnot_double scalar_andnot_pd
+#define simd_and_double scalar_and_pd
+#define simd_castsi_double scalar_castsi_pd
+#define simd_set1_int scalar_set1_epi32
+#define	simd_acos_double scalar_acos_pd
+#define	simd_acosh_double scalar_acosh_pd
+#define	simd_asin_double scalar_asin_pd
+#define	simd_asinh_double scalar_asinh_pd
+#define	simd_atan_double scalar_atan_pd
+#define simd_atan2_double scalar_atan2_pd
+#define	simd_atanh_double scalar_atanh_pd
+#define	simd_ceil_double scalar_ceil_pd
+#define	simd_cos_double scalar_cos_pd
+#define	simd_cosh_double scalar_cosh_pd
+#define	simd_exp_double scalar_exp_pd
+#define	simd_exp2_double scalar_exp2_pd
+#define	simd_floor_double scalar_floor_pd
+#define	simd_fma_double scalar_fmadd_pd
+#define	simd_rsqrt_double scalar_rsqrt_pd
+#define	simd_log_double scalar_log_pd
+#define	simd_log2_double scalar_log2_pd
+#define	simd_max_double scalar_max_pd
+#define	simd_min_double scalar_min_pd
+#define	simd_mod_double scalar_fmod_pd
+#define	simd_pow_double scalar_pow_pd
+#define	simd_round_double scalar_round_pd
+#define	simd_sin_double scalar_sin_pd
+#define	simd_sinh_double scalar_sinh_pd
+#define	simd_sqrt_double scalar_sqrt_pd
+#define	simd_tan_double scalar_tan_pd
+#define	simd_tanh_double scalar_tanh_pd
+
+#define simd_add_int scalar_add_epi32
+#define simd_sub_int scalar_sub_epi32
+#define simd_mul_int scalar_mul_epi32
+#define simd_min_int scalar_min_epi32
+#define simd_max_int scalar_max_epi32
+#define simd_blendv_int scalar_blendv_epi32
+#define simd_abs_int scalar_abs_epi32
+#define simd_set1_int scalar_set1_epi32
+#define simd_set_int scalar_set_epi32
+#define simd_cvtps_int scalar_cvtps_epi32
+#define simd_cvtepi32_float scalar_cvtepi32_ps
+
+#define simd_and_si256 scalar_and_si128
+#define simd_castps_si scalar_castps_si128
+#define simd_and_int scalar_and_si128
+#define simd_or_int scalar_or_si128
+#define simd_xor_int scalar_xor_si128
+#define simd_andnot_int scalar_andnot_si128
+#define simd_slli_int scalar_slli_epi32
+#define simd_srli_int scalar_srli_epi32
+#define simd_srai_int scalar_srai_epi32
+#define simd_cmpeq_int scalar_cmpeq_epi32
+#define simd_cmpgt_int scalar_cmpgt_epi32
+#define simd_load_int scalar_load_si128
+#define simd_store_int scalar_store_si128
+#define simd_abs_int scalar_abs_epi32
+#define simd_movemask_epi8 scalar_movemask_epi8
+
+// Float functions
+inline const simdfloat scalar_add_ps(const simdfloat& a, const simdfloat& b) { return a + b; }
+inline const simdfloat scalar_sub_ps(const simdfloat& a, const simdfloat& b) { return a - b; }
+inline const simdfloat scalar_mul_ps(const simdfloat& a, const simdfloat& b) { return a * b; }
+inline const simdfloat scalar_div_ps(const simdfloat& a, const simdfloat& b) { return a / b; }
+inline const simdfloat scalar_floor_ps(const simdfloat& a) { return std::floorf(a); }
+inline const simdfloat scalar_cos_ps(const simdfloat& a) { return std::cosf(a); }
+inline const simdfloat scalar_acos_ps(const simdfloat& a) { return std::acosf(a); }
+inline const simdfloat scalar_sin_ps(const simdfloat& a) { return std::sinf(a); }
+inline const simdfloat scalar_exp_ps(const simdfloat& a) { return std::expf(a); }
+inline const simdfloat scalar_pow_ps(const simdfloat& a, const simdfloat& b) { return std::powf(a, b); }
+inline const simdfloat scalar_tanh_ps(const simdfloat& a) { return std::tanhf(a); }
+inline const simdfloat scalar_min_ps(const simdfloat& a, const simdfloat& b) { return a < b ? a : b; }
+inline const simdfloat scalar_max_ps(const simdfloat& a, const simdfloat& b) { return a > b ? a : b; }
+inline const simdfloat scalar_and_ps(const simdfloat& a, const simdfloat& b) { return a * b; }
+inline const simdfloat scalar_andnot_ps(const simdfloat& a, const simdfloat& b) { return (1.0f - a) * b; }
+inline const simdfloat scalar_castsi_ps(const int& a) { return static_cast<float>(a); }
+inline const simdfloat scalar_acosh_ps(const simdfloat& a) { return std::acoshf(a); }
+inline const simdfloat scalar_asin_ps(const simdfloat& a) { return std::asinf(a); }
+inline const simdfloat scalar_asinh_ps(const simdfloat& a) { return std::asinhf(a); }
+inline const simdfloat scalar_atan_ps(const simdfloat& a) { return std::atanf(a); }
+inline const simdfloat scalar_atan2_ps(const simdfloat& a, const simdfloat& b) { return std::atan2f(a, b); }
+inline const simdfloat scalar_atanh_ps(const simdfloat& a) { return std::atanhf(a); }
+inline const simdfloat scalar_ceil_ps(const simdfloat& a) { return std::ceilf(a); }
+inline const simdfloat scalar_cosh_ps(const simdfloat& a) { return std::coshf(a); }
+inline const simdfloat scalar_sinh_ps(const simdfloat& a) { return std::sinhf(a); }
+inline const simdfloat scalar_rsqrt_ps(const simdfloat& a) { return 1.0f / std::sqrtf(a); }
+inline const simdfloat scalar_log_ps(const simdfloat& a) { return std::logf(a); }
+inline const simdfloat scalar_log2_ps(const simdfloat& a) { return std::log2f(a); }
+inline const simdfloat scalar_fmod_ps(const simdfloat& a, const simdfloat& b) { return std::fmodf(a, b); }
+inline const simdfloat scalar_fmadd_ps(const simdfloat& a, const simdfloat& b, const simdfloat& c) { return a * b + c; }
+inline const simdfloat scalar_round_ps(const simdfloat& a) { return std::roundf(a); }
+inline const simdfloat scalar_tan_ps(const simdfloat& a) { return std::tanf(a); }
+inline const simdfloat scalar_exp2_ps(const simdfloat& a) { return std::exp2f(a); }
+inline const simdfloat scalar_sqrt_ps(const simdfloat& a) { return std::sqrtf(a); }
+inline const simdfloat scalar_blendv_ps(const simdfloat& a, const simdfloat& b, const simdmask& testmask) { return (testmask != 0) ? b : a; }
+inline const simdfloat scalar_store_ps(float* ptr, const simdfloat& a) { *ptr = a;	return a; }
+inline const simdfloat scalar_load_ps(const float* ptr) { return *ptr; }
+inline const simdfloat scalar_movemask_ps(const simdfloat& a) { return (a > 0) ? 1.0f : 0.0f; }
+inline const simdfloat scalar_set_ps(const float& f) { return f; }
+inline const simdfloat scalar_cmp_ps(const simdfloat& a, const simdfloat& b, int imm)
+{
+	switch (imm)
+	{
+	case _CMP_EQ_OQ:
+		return a == b ? 1.0f : 0.0f;
+	case _CMP_LT_OQ:
+		return a < b ? 1.0f : 0.0f;
+	case _CMP_LE_OQ:
+		return a <= b ? 1.0f : 0.0f;
+	case _CMP_GT_OQ:
+		return a > b ? 1.0f : 0.0f;
+	case _CMP_GE_OQ:
+		return a >= b ? 1.0f : 0.0f;
+	default:
+		throw std::invalid_argument("Invalid comparison mode");
+	}
+}
+
+// Double functions
+inline const simddouble scalar_add_pd(const simddouble& a, const simddouble& b) { return a + b; }
+inline const simddouble scalar_sub_pd(const simddouble& a, const simddouble& b) { return a - b; }
+inline const simddouble scalar_mul_pd(const simddouble& a, const simddouble& b) { return a * b; }
+inline const simddouble scalar_div_pd(const simddouble& a, const simddouble& b) { return a / b; }
+inline const simddouble scalar_floor_pd(const simddouble& a) { return std::floor(a); }
+inline const simddouble scalar_cos_pd(const simddouble& a) { return std::cos(a); }
+inline const simddouble scalar_acos_pd(const simddouble& a) { return std::acos(a); }
+inline const simddouble scalar_sin_pd(const simddouble& a) { return std::sin(a); }
+inline const simddouble scalar_exp_pd(const simddouble& a) { return std::exp(a); }
+inline const simddouble scalar_pow_pd(const simddouble& a, const simddouble& b) { return std::pow(a, b); }
+inline const simddouble scalar_tanh_pd(const simddouble& a) { return std::tanh(a); }
+inline const simddouble scalar_min_pd(const simddouble& a, const simddouble& b) { return a < b ? a : b; }
+inline const simddouble scalar_max_pd(const simddouble& a, const simddouble& b) { return a > b ? a : b; }
+inline const simddouble scalar_and_pd(const simddouble& a, const simddouble& b) { return a * b; }
+inline const simddouble scalar_andnot_pd(const simddouble& a, const simddouble& b) { return (1.0 - a) * b; }
+inline const simddouble scalar_castsi_pd(const int& a) { return static_cast<double>(a); }
+inline const simddouble scalar_acosh_pd(const simddouble& a) { return std::acosh(a); }
+inline const simddouble scalar_asin_pd(const simddouble& a) { return std::asin(a); }
+inline const simddouble scalar_asinh_pd(const simddouble& a) { return std::asinh(a); }
+inline const simddouble scalar_atan_pd(const simddouble& a) { return std::atan(a); }
+inline const simddouble scalar_atan2_pd(const simddouble& a, const simddouble& b) { return std::atan2(a, b); }
+inline const simddouble scalar_atanh_pd(const simddouble& a) { return std::atanh(a); }
+inline const simddouble scalar_ceil_pd(const simddouble& a) { return std::ceil(a); }
+inline const simddouble scalar_cosh_pd(const simddouble& a) { return std::cosh(a); }
+inline const simddouble scalar_sinh_pd(const simddouble& a) { return std::sinh(a); }
+inline const simddouble scalar_rsqrt_pd(const simddouble& a) { return 1.0f / std::sqrt(a); }
+inline const simddouble scalar_log_pd(const simddouble& a) { return std::log(a); }
+inline const simddouble scalar_log2_pd(const simddouble& a) { return std::log2(a); }
+inline const simddouble scalar_fmod_pd(const simddouble& a, const simddouble& b) { return std::fmod(a, b); }
+inline const simddouble scalar_fmadd_pd(const simddouble& a, const simddouble& b, const simddouble& c) { return a * b + c; }
+inline const simddouble scalar_round_pd(const simddouble& a) { return std::round(a); }
+inline const simddouble scalar_tan_pd(const simddouble& a) { return std::tan(a); }
+inline const simddouble scalar_exp2_pd(const simddouble& a) { return std::exp2(a); }
+inline const simddouble scalar_sqrt_pd(const simddouble& a) { return std::sqrt(a); }
+inline const simddouble scalar_blendv_pd(const simddouble& a, const simddouble& b, const simddouble& testmask) { return (testmask != 0) ? b : a; }
+inline const simddouble scalar_store_pd(double* ptr, const simddouble& a) { *ptr = a;	return a; }
+inline const simddouble scalar_load_pd(const double* ptr) { return *ptr; }
+inline const simddouble scalar_movemask_pd(const simddouble& a) { return (a > 0) ? 1.0 : 0.0; }
+inline const simddouble scalar_set_pd(const double& f) { return f; }
+inline const simddouble scalar_cmp_pd(const simddouble& a, const simddouble& b, int imm)
+{
+	switch (imm)
+	{
+	case _CMP_EQ_OQ:
+		return a == b ? 1.0 : 0.0;
+	case _CMP_LT_OQ:
+		return a < b ? 1.0 : 0.0;
+	case _CMP_LE_OQ:
+		return a <= b ? 1.0 : 0.0;
+	case _CMP_GT_OQ:
+		return a > b ? 1.0 : 0.0;
+	case _CMP_GE_OQ:
+		return a >= b ? 1.0 : 0.0;
+	default:
+		throw std::invalid_argument("Invalid comparison mode");
+	}
+}
+
+
+// Integer functions
+inline const int scalar_add_epi32(const int& a, const int& b) { return a + b; }
+inline const int scalar_sub_epi32(const int& a, const int& b) { return a - b; }
+inline const int scalar_mul_epi32(const int& a, const int& b) { return a * b; }
+inline const int scalar_min_epi32(const int& a, const int& b) { return a < b ? a : b; }
+inline const int scalar_max_epi32(const int& a, const int& b) { return a > b ? a : b; }
+inline const simdfloat scalar_blendv_epi32(const simdint& a, const simdint& b, const simdint& testmask) { return (testmask != 0) ? b : a; }
+inline const simdint scalar_set1_epi32(const int& a) { return a; }
+inline const simdint scalar_abs_epi32(const simdint& _a) { return std::abs(_a); }
+inline const simdint scalar_set_epi32(const int& _i) { return _i; }
+inline const simdint scalar_cvtps_epi32(const simdfloat& _a) { return static_cast<int>(_a); }
+inline const simdint scalar_cvtepi32_ps(const simdint& _a) { return static_cast<float>(_a); }
+inline const simdint scalar_and_si128(const simdint& a, const simdint& b) { return a & b; }
+inline const simdint scalar_castps_si128(const simdfloat& _a) { return static_cast<int>(_a); }
+inline const simdint scalar_or_si128(const simdint& a, const simdint& b) { return a | b; }
+inline const simdint scalar_xor_si128(const simdint& a, const simdint& b) { return a ^ b; }
+inline const simdint scalar_andnot_si128(const simdint& a, const simdint& b) { return (~a) & b; }
+inline const simdint scalar_slli_epi32(const simdint& a, const int imm) { return a << imm; }
+inline const simdint scalar_srli_epi32(const simdint& a, const int imm) { return static_cast<unsigned int>(a) >> imm; }
+inline const simdint scalar_srai_epi32(const simdint& a, const int imm) { return a >> imm; }
+inline const simdint scalar_cmpeq_epi32(const simdint& a, const simdint& b) { return a == b ? 1 : 0; }
+inline const simdint scalar_cmpgt_epi32(const simdint& a, const simdint& b) { return a > b ? 1 : 0; }
+inline const simdint scalar_load_si128(const int* ptr) { return *ptr; }
+inline const simdint scalar_store_si128(int* ptr, const simdint& a) { *ptr = a; return a; }
+inline const simdint scalar_movemask_epi8(const simdint& a) { return (a != 0) ? 1 : 0; }
+
+#endif
+
+#ifndef USE_SCALAR
+struct simdfloat
+{
+	simdfloat_internal value;
+
+	simdfloat() { value = simd_set1_float(0.0f); }
+	simdfloat(const int& _i) : value(simd_set1_float(static_cast<float>(_i))) {}
+	simdfloat(const float& _f) : value(simd_set1_float(_f)) {}
+	simdfloat(const double& _d) : value(simd_set1_float(static_cast<float>(_d))) {}
+	simdfloat(const simdfloat_internal& _sv) : value(_sv) {}
+
+	simdfloat& operator=(const int& _i) { value = simd_set1_float(static_cast<float>(_i)); return *this; }
+	simdfloat& operator=(const float& _f) { value = simd_set1_float(_f); return *this; }
+	simdfloat& operator=(const double& _d) { value = simd_set1_float(static_cast<float>(_d)); return *this; }
+	simdfloat& operator=(const simdfloat& _sv) { value = _sv.value; return *this; }
+
+	simdfloat& operator=(const simdfloat_internal& _sv) { value = _sv; return *this; }
+	operator simdfloat_internal() const { return value; }
+};
+
+struct simddouble
+{
+	simddouble_internal value;
+
+	simddouble() { value = simd_set1_double(0.0); }
+	simddouble(const int& _i) : value(simd_set1_double(static_cast<double>(_i))) {}
+	simddouble(const float& _f) : value(simd_set1_double(static_cast<double>(_f))) {}
+	simddouble(const double& _d) : value(simd_set1_double(_d)) {}
+	simddouble(const simddouble_internal& _sv) : value(_sv) {}
+
+	simddouble& operator=(const int& _i) { value = simd_set1_double(static_cast<double>(_i)); return *this; }
+	simddouble& operator=(const float& _f) { value = simd_set1_double(static_cast<double>(_f)); return *this; }
+	simddouble& operator=(const double& _d) { value = simd_set1_double(_d); return *this; }
+	simddouble& operator=(const simddouble& _sv) { value = _sv.value; return *this; }
+
+	simddouble& operator=(const simddouble_internal& _sv) { value = _sv; return *this; }
+	operator simddouble_internal() const { return value; }
+};
+
+struct simdint
+{
+	simdint_internal value;
+
+	simdint() { value = simd_set1_int(0); }
+	simdint(const int& _i) : value(simd_set1_int(_i)) {}
+	simdint(const float& _f) : value(simd_set1_int(static_cast<int>(_f))) {}
+	simdint(const double& _d) : value(simd_set1_int(static_cast<int>(_d))) {}
+	simdint(const simdint_internal& _sv) : value(_sv) {}
+
+	simdint& operator=(const int& _i) { value = simd_set1_int(_i); return *this; }
+	simdint& operator=(const float& _f) { value = simd_set1_int(static_cast<int>(_f)); return *this; }
+	simdint& operator=(const double& _d) { value = simd_set1_int(static_cast<int>(_d)); return *this; }
+	simdint& operator=(const simdint& _sv) { value = _sv.value; return *this; }
+
+	simdint& operator=(const simdint_internal& _sv) { value = _sv; return *this; }
+	operator simdint_internal() const { return value; }
+};
+
+#ifndef USE_AVX512
+struct simdmask
+{
+	simdmask_internal value;
+
+	simdmask() { value = simd_set1_float(0.0f); }
+	simdmask(const int& _i) : value(simd_set1_float(static_cast<float>(_i))) {}
+	simdmask(const float& _f) : value(simd_set1_float(_f)) {}
+	simdmask(const double& _d) : value(simd_set1_float(static_cast<float>(_d))) {}
+	simdmask(const simdmask_internal& _sv) : value(_sv) {}
+
+	simdmask& operator=(const int& _i) { value = simd_set1_float(static_cast<float>(_i)); return *this; }
+	simdmask& operator=(const float& _f) { value = simd_set1_float(_f); return *this; }
+	simdmask& operator=(const double& _d) { value = simd_set1_float(static_cast<float>(_d)); return *this; }
+	simdmask& operator=(const simdfloat& _sv) { value = _sv.value; return *this; }
+
+	simdmask& operator=(const simdmask_internal& _sv) { value = _sv; return *this; }
+	operator simdmask_internal() const { return value; }
+};
+
+struct simddmask
+{
+	simddmask_internal value;
+
+	simddmask() { value = simd_set1_double(0.0); }
+	simddmask(const int& _i) : value(simd_set1_double(static_cast<double>(_i))) {}
+	simddmask(const float& _f) : value(simd_set1_double(static_cast<double>(_f))) {}
+	simddmask(const double& _d) : value(simd_set1_double(_d)) {}
+	simddmask(const simddmask_internal& _sv) : value(_sv) {}
+
+	simddmask& operator=(const int& _i) { value = simd_set1_double(static_cast<double>(_i)); return *this; }
+	simddmask& operator=(const float& _f) { value = simd_set1_double(static_cast<double>(_f)); return *this; }
+	simddmask& operator=(const double& _d) { value = simd_set1_double(_d); return *this; }
+	simddmask& operator=(const simddmask& _sv) { value = _sv.value; return *this; }
+
+	simddmask& operator=(const simddmask_internal& _sv) { value = _sv; return *this; }
+	operator simddmask_internal() const { return value; }
+};
+
+struct simdimask
+{
+	simdimask_internal value;
+
+	simdimask() { value = simd_set1_int(0); }
+	simdimask(const int& _i) : value(simd_set1_int(_i)) {}
+	simdimask(const float& _f) : value(simd_set1_int(static_cast<int>(_f))) {}
+	simdimask(const double& _d) : value(simd_set1_int(static_cast<int>(_d))) {}
+	simdimask(const simdimask_internal& _sv) : value(_sv) {}
+
+	simdimask& operator=(const int& _i) { value = simd_set1_int(_i); return *this; }
+	simdimask& operator=(const float& _f) { value = simd_set1_int(static_cast<int>(_f)); return *this; }
+	simdimask& operator=(const double& _d) { value = simd_set1_int(static_cast<int>(_d)); return *this; }
+	simdimask& operator=(const simdint& _sv) { value = _sv.value; return *this; }
+
+	simdimask& operator=(const simdimask_internal& _sv) { value = _sv; return *this; }
+	operator simdimask_internal() const { return value; }
+};
+
+#endif
+#endif
+
+#ifdef USE_SSE41
+inline simdmask_internal sse_cmp_float(const simdfloat& _a, const simdfloat& _b, const int& flag)
+{
+	switch (flag)
+	{
+	case _CMP_EQ_OQ: return _mm_cmpeq_ps(_a, _b);
+	case _CMP_LT_OQ: return _mm_cmplt_ps(_a, _b);
+	case _CMP_LE_OQ: return _mm_cmple_ps(_a, _b);
+	case _CMP_GT_OQ: return _mm_cmpgt_ps(_a, _b);
+	case _CMP_GE_OQ: return _mm_cmpge_ps(_a, _b);
+	default: return _mm_cmpeq_ps(_a, _b);
+	}
+}
+
+inline simddmask_internal sse_cmp_double(const simddouble& _a, const simddouble& _b, const int& flag)
+{
+	switch (flag)
+	{
+	case _CMP_EQ_OQ: return _mm_cmpeq_pd(_a, _b);
+	case _CMP_LT_OQ: return _mm_cmplt_pd(_a, _b);
+	case _CMP_LE_OQ: return _mm_cmple_pd(_a, _b);
+	case _CMP_GT_OQ: return _mm_cmpgt_pd(_a, _b);
+	case _CMP_GE_OQ: return _mm_cmpge_pd(_a, _b);
+	default: return _mm_cmpeq_pd(_a, _b);
+	}
+}
+#endif
+
+
+// Some useful constants
+static const simdfloat SIMDZERO = 0.0f;
+static const simdfloat SIMDONE = 1.0f;
+static const simdfloat SIMDTWO = 2.0f;
+static const simdfloat SIMDHALF = 0.5f;
+static const simdfloat SIMDPI = 3.1415927f;
+static const simdfloat SIMDTWOPI = 6.2831855f;
+static const simdfloat SIMDHALFPI = 1.5707964f;
+
+static const simddouble SIMDDZERO = 0.0;
+static const simddouble SIMDDONE = 1.0;
+static const simddouble SIMDDTWO = 2.0;
+static const simddouble SIMDDHALF = 0.5;
+static const simddouble SIMDDPI = 3.141592653589793;
+static const simddouble SIMDDTWOPI = 6.283185307179586;
+static const simddouble SIMDDHALFPI = 1.5707963267948966;
+
+static const simdint SIMDIZERO = 0;
+static const simdint SIMDIONE = 1;
+static const simdint SIMDITWO = 2;
+
+
+
+
+
+#pragma region vector types
+struct vec2;
+struct vec3;
+struct vec4;
+struct dvec2;
+struct dvec3;
+struct dvec4;
+struct ivec2;
+struct ivec3;
+struct ivec4;
+
+// Structs defining a vector2, vector3 and vector3 of simdfloat types
+struct vec2
+{
+	simdfloat x, y;
+	simdfloat& r = x;
+	simdfloat& g = y;
+
+	vec2() { x = (0.0f);	y = (0.0f); }
+	vec2(const vec2& other) = default;
+	vec2(const simdfloat& _f) { x = _f; y = _f; }
+	vec2(const simdfloat& _x, const simdfloat& _y) : x(_x), y(_y) {}
+#ifndef USE_SCALAR
+	vec2(const float& _f) { x = (_f); y = (_f); }
+	vec2(const float& _x, const float& _y) { x = (_x); y = (_y); }
+	vec2(const simdfloat& _x, const float& _y) : x(_x) { y = (_y); }
+	vec2(const float& _x, const simdfloat& _y) : y(_y) { x = (_x); }
+#endif
+	// Swizzle method
+	inline vec2 gg() const;
+	inline vec3 ggg() const;
+	inline vec4 gggg() const;
+	inline vec4 gggr() const;
+	inline vec3 ggr() const;
+	inline vec4 ggrg() const;
+	inline vec4 ggrr() const;
+	inline vec2 gr() const;
+	inline vec3 grg() const;
+	inline vec4 grgg() const;
+	inline vec4 grgr() const;
+	inline vec3 grr() const;
+	inline vec4 grrg() const;
+	inline vec4 grrr() const;
+	inline vec2 rg() const;
+	inline vec3 rgg() const;
+	inline vec4 rggg() const;
+	inline vec4 rggr() const;
+	inline vec3 rgr() const;
+	inline vec4 rgrg() const;
+	inline vec4 rgrr() const;
+	inline vec2 rr() const;
+	inline vec3 rrg() const;
+	inline vec4 rrgg() const;
+	inline vec4 rrgr() const;
+	inline vec3 rrr() const;
+	inline vec4 rrrg() const;
+	inline vec4 rrrr() const;
+	inline vec2 xx() const;
+	inline vec3 xxx() const;
+	inline vec4 xxxx() const;
+	inline vec4 xxxy() const;
+	inline vec3 xxy() const;
+	inline vec4 xxyx() const;
+	inline vec4 xxyy() const;
+	inline vec2 xy() const;
+	inline vec3 xyx() const;
+	inline vec4 xyxx() const;
+	inline vec4 xyxy() const;
+	inline vec3 xyy() const;
+	inline vec4 xyyx() const;
+	inline vec4 xyyy() const;
+	inline vec2 yx() const;
+	inline vec3 yxx() const;
+	inline vec4 yxxx() const;
+	inline vec4 yxxy() const;
+	inline vec3 yxy() const;
+	inline vec4 yxyx() const;
+	inline vec4 yxyy() const;
+	inline vec2 yy() const;
+	inline vec3 yyx() const;
+	inline vec4 yyxx() const;
+	inline vec4 yyxy() const;
+	inline vec3 yyy() const;
+	inline vec4 yyyx() const;
+	inline vec4 yyyy() const;
+	inline void gr(const simdfloat&, const simdfloat&);
+	inline void gr(const vec2&);
+	inline void gr(const simdfloat&);
+	inline void rg(const simdfloat&, const simdfloat&);
+	inline void rg(const vec2&);
+	inline void rg(const simdfloat&);
+	inline void xy(const simdfloat&, const simdfloat&);
+	inline void xy(const vec2&);
+	inline void xy(const simdfloat&);
+	inline void yx(const simdfloat&, const simdfloat&);
+	inline void yx(const vec2&);
+	inline void yx(const simdfloat&);
+#ifndef USE_SCALAR
+	inline void gr(const float&);
+	inline void rg(const float&);
+	inline void xy(const float&);
+	inline void yx(const float&);
+#endif
+
+	// Operator to access elements like an array
+	inline simdfloat& operator[](int index)
+	{
+		// Use a switch to return the correct element
+		switch (index)
+		{
+		case 0:
+			return x;
+		case 1:
+			return y;
+		default:
+			throw std::out_of_range("Index out of range");
+		}
+	}
+
+	inline vec2 operator=(const vec2& _f)
+	{
+		x = _f.x;
+		y = _f.y;
+		return *this;
+	}
+};
+
+struct vec3
+{
+	simdfloat x, y, z;
+	simdfloat& r = x;
+	simdfloat& g = y;
+	simdfloat& b = z;
+
+	vec3() { x = (0.0f); y = (0.0f); z = (0.0f); }
+	vec3(const vec3& other) = default;
+	vec3(const simdfloat& _f) { x = _f; y = _f; z = _f; }
+	vec3(const simdfloat& _x, const simdfloat& _y, const simdfloat& _z) : x(_x), y(_y), z(_z) {}
+	vec3(const simdfloat& _x, const vec2& vec2) : x(_x), y(vec2.x), z(vec2.y) {}
+	vec3(const vec2& vec2, const simdfloat& _z) : x(vec2.x), y(vec2.y), z(_z) {}
+
+#ifndef USE_SCALAR
+	vec3(const float& _f)
+	{
+		x = (_f);
+		y = (_f);
+		z = (_f);
+	}
+	vec3(const simdfloat& _x, const simdfloat& _y, const float& _z) : x(_x), y(_y) { z = (_z); }
+	vec3(const simdfloat& _x, const float& _y, const simdfloat& _z) : x(_x), z(_z) { y = (_y); }
+	vec3(const simdfloat& _x, const float& _y, const float& _z) : x(_x) { y = (_y); z = (_z); }
+	vec3(const float& _x, const simdfloat& _y, const simdfloat& _z) : y(_y), z(_z) { x = (_x); }
+	vec3(const float& _x, const simdfloat& _y, const float& _z) : y(_y) { x = (_x); z = (_z); }
+	vec3(const float& _x, const float& _y, const simdfloat& _z) : z(_z) { x = (_x); y = (_y); }
+	vec3(const float& _x, const float& _y, const float& _z) { x = (_x); y = (_y); z = (_z); }
+	vec3(const vec2& vec2, const float& _z) : x(vec2.x), y(vec2.y) { z = (_z); }
+	vec3(const float& _x, const vec2& vec2) : y(vec2.x), z(vec2.y) { x = (_x); }
+#endif
+	inline vec2 bb() const;
+	inline vec3 bbb() const;
+	inline vec4 bbbb() const;
+	inline vec4 bbbg() const;
+	inline vec4 bbbr() const;
+	inline vec3 bbg() const;
+	inline vec4 bbgb() const;
+	inline vec4 bbgg() const;
+	inline vec4 bbgr() const;
+	inline vec3 bbr() const;
+	inline vec4 bbrb() const;
+	inline vec4 bbrg() const;
+	inline vec4 bbrr() const;
+	inline vec2 bg() const;
+	inline vec3 bgb() const;
+	inline vec4 bgbb() const;
+	inline vec4 bgbg() const;
+	inline vec4 bgbr() const;
+	inline vec3 bgg() const;
+	inline vec4 bggb() const;
+	inline vec4 bggg() const;
+	inline vec4 bggr() const;
+	inline vec3 bgr() const;
+	inline vec4 bgrb() const;
+	inline vec4 bgrg() const;
+	inline vec4 bgrr() const;
+	inline vec2 br() const;
+	inline vec3 brb() const;
+	inline vec4 brbb() const;
+	inline vec4 brbg() const;
+	inline vec4 brbr() const;
+	inline vec3 brg() const;
+	inline vec4 brgb() const;
+	inline vec4 brgg() const;
+	inline vec4 brgr() const;
+	inline vec3 brr() const;
+	inline vec4 brrb() const;
+	inline vec4 brrg() const;
+	inline vec4 brrr() const;
+	inline vec2 gb() const;
+	inline vec3 gbb() const;
+	inline vec4 gbbb() const;
+	inline vec4 gbbg() const;
+	inline vec4 gbbr() const;
+	inline vec3 gbg() const;
+	inline vec4 gbgb() const;
+	inline vec4 gbgg() const;
+	inline vec4 gbgr() const;
+	inline vec3 gbr() const;
+	inline vec4 gbrb() const;
+	inline vec4 gbrg() const;
+	inline vec4 gbrr() const;
+	inline vec2 gg() const;
+	inline vec3 ggb() const;
+	inline vec4 ggbb() const;
+	inline vec4 ggbg() const;
+	inline vec4 ggbr() const;
+	inline vec3 ggg() const;
+	inline vec4 gggb() const;
+	inline vec4 gggg() const;
+	inline vec4 gggr() const;
+	inline vec3 ggr() const;
+	inline vec4 ggrb() const;
+	inline vec4 ggrg() const;
+	inline vec4 ggrr() const;
+	inline vec2 gr() const;
+	inline vec3 grb() const;
+	inline vec4 grbb() const;
+	inline vec4 grbg() const;
+	inline vec4 grbr() const;
+	inline vec3 grg() const;
+	inline vec4 grgb() const;
+	inline vec4 grgg() const;
+	inline vec4 grgr() const;
+	inline vec3 grr() const;
+	inline vec4 grrb() const;
+	inline vec4 grrg() const;
+	inline vec4 grrr() const;
+	inline vec2 rb() const;
+	inline vec3 rbb() const;
+	inline vec4 rbbb() const;
+	inline vec4 rbbg() const;
+	inline vec4 rbbr() const;
+	inline vec3 rbg() const;
+	inline vec4 rbgb() const;
+	inline vec4 rbgg() const;
+	inline vec4 rbgr() const;
+	inline vec3 rbr() const;
+	inline vec4 rbrb() const;
+	inline vec4 rbrg() const;
+	inline vec4 rbrr() const;
+	inline vec2 rg() const;
+	inline vec3 rgb() const;
+	inline vec4 rgbb() const;
+	inline vec4 rgbg() const;
+	inline vec4 rgbr() const;
+	inline vec3 rgg() const;
+	inline vec4 rggb() const;
+	inline vec4 rggg() const;
+	inline vec4 rggr() const;
+	inline vec3 rgr() const;
+	inline vec4 rgrb() const;
+	inline vec4 rgrg() const;
+	inline vec4 rgrr() const;
+	inline vec2 rr() const;
+	inline vec3 rrb() const;
+	inline vec4 rrbb() const;
+	inline vec4 rrbg() const;
+	inline vec4 rrbr() const;
+	inline vec3 rrg() const;
+	inline vec4 rrgb() const;
+	inline vec4 rrgg() const;
+	inline vec4 rrgr() const;
+	inline vec3 rrr() const;
+	inline vec4 rrrb() const;
+	inline vec4 rrrg() const;
+	inline vec4 rrrr() const;
+	inline vec2 xx() const;
+	inline vec3 xxx() const;
+	inline vec4 xxxx() const;
+	inline vec4 xxxy() const;
+	inline vec4 xxxz() const;
+	inline vec3 xxy() const;
+	inline vec4 xxyx() const;
+	inline vec4 xxyy() const;
+	inline vec4 xxyz() const;
+	inline vec3 xxz() const;
+	inline vec4 xxzx() const;
+	inline vec4 xxzy() const;
+	inline vec4 xxzz() const;
+	inline vec2 xy() const;
+	inline vec3 xyx() const;
+	inline vec4 xyxx() const;
+	inline vec4 xyxy() const;
+	inline vec4 xyxz() const;
+	inline vec3 xyy() const;
+	inline vec4 xyyx() const;
+	inline vec4 xyyy() const;
+	inline vec4 xyyz() const;
+	inline vec3 xyz() const;
+	inline vec4 xyzx() const;
+	inline vec4 xyzy() const;
+	inline vec4 xyzz() const;
+	inline vec2 xz() const;
+	inline vec3 xzx() const;
+	inline vec4 xzxx() const;
+	inline vec4 xzxy() const;
+	inline vec4 xzxz() const;
+	inline vec3 xzy() const;
+	inline vec4 xzyx() const;
+	inline vec4 xzyy() const;
+	inline vec4 xzyz() const;
+	inline vec3 xzz() const;
+	inline vec4 xzzx() const;
+	inline vec4 xzzy() const;
+	inline vec4 xzzz() const;
+	inline vec2 yx() const;
+	inline vec3 yxx() const;
+	inline vec4 yxxx() const;
+	inline vec4 yxxy() const;
+	inline vec4 yxxz() const;
+	inline vec3 yxy() const;
+	inline vec4 yxyx() const;
+	inline vec4 yxyy() const;
+	inline vec4 yxyz() const;
+	inline vec3 yxz() const;
+	inline vec4 yxzx() const;
+	inline vec4 yxzy() const;
+	inline vec4 yxzz() const;
+	inline vec2 yy() const;
+	inline vec3 yyx() const;
+	inline vec4 yyxx() const;
+	inline vec4 yyxy() const;
+	inline vec4 yyxz() const;
+	inline vec3 yyy() const;
+	inline vec4 yyyx() const;
+	inline vec4 yyyy() const;
+	inline vec4 yyyz() const;
+	inline vec3 yyz() const;
+	inline vec4 yyzx() const;
+	inline vec4 yyzy() const;
+	inline vec4 yyzz() const;
+	inline vec2 yz() const;
+	inline vec3 yzx() const;
+	inline vec4 yzxx() const;
+	inline vec4 yzxy() const;
+	inline vec4 yzxz() const;
+	inline vec3 yzy() const;
+	inline vec4 yzyx() const;
+	inline vec4 yzyy() const;
+	inline vec4 yzyz() const;
+	inline vec3 yzz() const;
+	inline vec4 yzzx() const;
+	inline vec4 yzzy() const;
+	inline vec4 yzzz() const;
+	inline vec2 zx() const;
+	inline vec3 zxx() const;
+	inline vec4 zxxx() const;
+	inline vec4 zxxy() const;
+	inline vec4 zxxz() const;
+	inline vec3 zxy() const;
+	inline vec4 zxyx() const;
+	inline vec4 zxyy() const;
+	inline vec4 zxyz() const;
+	inline vec3 zxz() const;
+	inline vec4 zxzx() const;
+	inline vec4 zxzy() const;
+	inline vec4 zxzz() const;
+	inline vec2 zy() const;
+	inline vec3 zyx() const;
+	inline vec4 zyxx() const;
+	inline vec4 zyxy() const;
+	inline vec4 zyxz() const;
+	inline vec3 zyy() const;
+	inline vec4 zyyx() const;
+	inline vec4 zyyy() const;
+	inline vec4 zyyz() const;
+	inline vec3 zyz() const;
+	inline vec4 zyzx() const;
+	inline vec4 zyzy() const;
+	inline vec4 zyzz() const;
+	inline vec2 zz() const;
+	inline vec3 zzx() const;
+	inline vec4 zzxx() const;
+	inline vec4 zzxy() const;
+	inline vec4 zzxz() const;
+	inline vec3 zzy() const;
+	inline vec4 zzyx() const;
+	inline vec4 zzyy() const;
+	inline vec4 zzyz() const;
+	inline vec3 zzz() const;
+	inline vec4 zzzx() const;
+	inline vec4 zzzy() const;
+	inline vec4 zzzz() const;
+	inline void bg(const simdfloat&, const simdfloat&);
+	inline void bg(const vec2&);
+	inline void bg(const simdfloat&);
+	inline void bgr(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void bgr(const vec3&);
+	inline void bgr(const simdfloat&);
+	inline void br(const simdfloat&, const simdfloat&);
+	inline void br(const vec2&);
+	inline void br(const simdfloat&);
+	inline void brg(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void brg(const vec3&);
+	inline void brg(const simdfloat&);
+	inline void gb(const simdfloat&, const simdfloat&);
+	inline void gb(const vec2&);
+	inline void gb(const simdfloat&);
+	inline void gbr(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void gbr(const vec3&);
+	inline void gbr(const simdfloat&);
+	inline void gr(const simdfloat&, const simdfloat&);
+	inline void gr(const vec2&);
+	inline void gr(const simdfloat&);
+	inline void grb(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void grb(const vec3&);
+	inline void grb(const simdfloat&);
+	inline void rb(const simdfloat&, const simdfloat&);
+	inline void rb(const vec2&);
+	inline void rb(const simdfloat&);
+	inline void rbg(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void rbg(const vec3&);
+	inline void rbg(const simdfloat&);
+	inline void rg(const simdfloat&, const simdfloat&);
+	inline void rg(const vec2&);
+	inline void rg(const simdfloat&);
+	inline void rgb(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void rgb(const vec3&);
+	inline void rgb(const simdfloat&);
+	inline void xy(const simdfloat&, const simdfloat&);
+	inline void xy(const vec2&);
+	inline void xy(const simdfloat&);
+	inline void xyz(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void xyz(const vec3&);
+	inline void xyz(const simdfloat&);
+	inline void xz(const simdfloat&, const simdfloat&);
+	inline void xz(const vec2&);
+	inline void xz(const simdfloat&);
+	inline void xzy(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void xzy(const vec3&);
+	inline void xzy(const simdfloat&);
+	inline void yx(const simdfloat&, const simdfloat&);
+	inline void yx(const vec2&);
+	inline void yx(const simdfloat&);
+	inline void yxz(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void yxz(const vec3&);
+	inline void yxz(const simdfloat&);
+	inline void yz(const simdfloat&, const simdfloat&);
+	inline void yz(const vec2&);
+	inline void yz(const simdfloat&);
+	inline void yzx(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void yzx(const vec3&);
+	inline void yzx(const simdfloat&);
+	inline void zx(const simdfloat&, const simdfloat&);
+	inline void zx(const vec2&);
+	inline void zx(const simdfloat&);
+	inline void zxy(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void zxy(const vec3&);
+	inline void zxy(const simdfloat&);
+	inline void zy(const simdfloat&, const simdfloat&);
+	inline void zy(const vec2&);
+	inline void zy(const simdfloat&);
+	inline void zyx(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void zyx(const vec3&);
+	inline void zyx(const simdfloat&);
+#ifndef USE_SCALAR
+	inline void bg(const float&);
+	inline void bgr(const float&);
+	inline void br(const float&);
+	inline void brg(const float&);
+	inline void gb(const float&);
+	inline void gbr(const float&);
+	inline void gr(const float&);
+	inline void grb(const float&);
+	inline void rb(const float&);
+	inline void rbg(const float&);
+	inline void rg(const float&);
+	inline void rgb(const float&);
+	inline void xy(const float&);
+	inline void xyz(const float&);
+	inline void xz(const float&);
+	inline void xzy(const float&);
+	inline void yx(const float&);
+	inline void yxz(const float&);
+	inline void yz(const float&);
+	inline void yzx(const float&);
+	inline void zx(const float&);
+	inline void zxy(const float&);
+	inline void zy(const float&);
+	inline void zyx(const float&);
+#endif
+
+	// Operator to access elements like an array
+	inline simdfloat& operator[](int index)
+	{
+		// Use a switch to return the correct element
+		switch (index)
+		{
+		case 0:
+			return x;
+		case 1:
+			return y;
+		case 2:
+			return z;
+		default:
+			throw std::out_of_range("Index out of range");
+		}
+	}
+
+	inline vec3 operator=(const vec3& _f)
+	{
+		x = _f.x;
+		y = _f.y;
+		z = _f.z;
+		return *this;
+	}
+};
+
+struct vec4
+{
+	simdfloat x, y, z, w;
+	simdfloat& r = x;
+	simdfloat& g = y;
+	simdfloat& b = z;
+	simdfloat& a = w;
+
+	vec4() { x = (0.0f);	y = (0.0f);	z = (0.0f);	w = (0.0f); }
+	vec4(const vec4& other) = default;
+	vec4(const simdfloat& _f) { x = _f; y = _f; z = _f; w = _f; }
+	vec4(const simdfloat& _x, const simdfloat& _y, const simdfloat& _z, const simdfloat& _w) : x(_x), y(_y), z(_z), w(_w) {}
+	vec4(const vec3& vec3, simdfloat _w) : x(vec3.x), y(vec3.y), z(vec3.z), w(_w) {}
+	vec4(const simdfloat& _x, const vec3& vec3) : x(_x), y(vec3.x), z(vec3.y), w(vec3.z) {}
+	vec4(const simdfloat& _x, const vec2& vec2, const simdfloat& _w) : x(_x), y(vec2.x), z(vec2.y), w(_w) {}
+	vec4(const simdfloat& _x, const simdfloat& _y, const vec2& vec2) : x(_x), y(_y), z(vec2.x), w(vec2.y) {}
+	vec4(const vec2& vec2, const simdfloat& _z, const simdfloat& _w) : x(vec2.x), y(vec2.y), z(_z), w(_w) {}
+
+#ifndef USE_SCALAR
+	vec4(const float& _f) { x = (_f); y = (_f); z = (_f); w = (_f); }
+	vec4(const simdfloat& _x, const simdfloat& _y, const simdfloat& _z, const float& _w) : x(_x), y(_y), z(_z) { w = (_w); }
+	vec4(const simdfloat& _x, const simdfloat& _y, const float& _z, const simdfloat& _w) : x(_x), y(_y), w(_w) { z = (_z); }
+	vec4(const simdfloat& _x, const simdfloat& _y, const float& _z, const float& _w) : x(_x), y(_y) { z = (_z); w = (_w); }
+	vec4(const simdfloat& _x, const float& _y, const simdfloat& _z, const simdfloat& _w) : x(_x), z(_z), w(_w) { y = (_y); }
+	vec4(const simdfloat& _x, const float& _y, const simdfloat& _z, const float& _w) : x(_x), z(_z) { y = (_y); w = (_w); }
+	vec4(const simdfloat& _x, const float& _y, const float& _z, const simdfloat& _w) : x(_x), w(_w) { y = (_y); z = (_z); }
+	vec4(const simdfloat& _x, const float& _y, const float& _z, const float& _w) : x(_x) { y = (_y); z = (_z); w = (_w); }
+	vec4(const float& _x, const simdfloat& _y, const simdfloat& _z, const simdfloat& _w) : y(_y), z(_z), w(_w) { x = (_x); }
+	vec4(const float& _x, const simdfloat& _y, const simdfloat& _z, const float& _w) : y(_y), z(_z) { x = (_x); w = (_w); }
+	vec4(const float& _x, const simdfloat& _y, const float& _z, const simdfloat& _w) : y(_y), w(_w) { x = (_x); z = (_z); }
+	vec4(const float& _x, const simdfloat& _y, const float& _z, const float& _w) : y(_y) { x = (_x); z = (_z); w = (_w); }
+	vec4(const float& _x, const float& _y, const simdfloat& _z, const simdfloat& _w) : z(_z), w(_w) { x = (_x); y = (_y); }
+	vec4(const float& _x, const float& _y, const simdfloat& _z, const float& _w) : z(_z) { x = (_x); y = (_y); w = (_w); }
+	vec4(const float& _x, const float& _y, const float& _z, const simdfloat& _w) : w(_w) { x = (_x); y = (_y); z = (_z); }
+	vec4(const float& _x, const float& _y, const float& _z, const float& _w) { x = (_x); y = (_y); z = (_z); w = (_w); }
+	vec4(const vec3& vec3, const float& _w) : x(vec3.x), y(vec3.y), z(vec3.z) { w = (_w); }
+	vec4(const vec2& vec2, const float& _z, const float& _w) : x(vec2.x), y(vec2.y) { z = (_z); w = (_w); }
+	vec4(const float& _x, const vec2& vec2, const float& _w) : y(vec2.x), z(vec2.y) { x = (_x); w = (_w); }
+	vec4(const float& _x, const float& _y, const vec2& vec2) : z(vec2.x), w(vec2.y) { x = (_x); y = (_y); }
+	vec4(const vec2& vec2a, const vec2& vec2b) : x(vec2a.x), y(vec2a.y), z(vec2b.x), w(vec2b.y) {}
+#endif
+
+	inline vec2 aa() const;
+	inline vec3 aaa() const;
+	inline vec4 aaaa() const;
+	inline vec4 aaab() const;
+	inline vec4 aaag() const;
+	inline vec4 aaar() const;
+	inline vec3 aab() const;
+	inline vec4 aaba() const;
+	inline vec4 aabb() const;
+	inline vec4 aabg() const;
+	inline vec4 aabr() const;
+	inline vec3 aag() const;
+	inline vec4 aaga() const;
+	inline vec4 aagb() const;
+	inline vec4 aagg() const;
+	inline vec4 aagr() const;
+	inline vec3 aar() const;
+	inline vec4 aara() const;
+	inline vec4 aarb() const;
+	inline vec4 aarg() const;
+	inline vec4 aarr() const;
+	inline vec2 ab() const;
+	inline vec3 aba() const;
+	inline vec4 abaa() const;
+	inline vec4 abab() const;
+	inline vec4 abag() const;
+	inline vec4 abar() const;
+	inline vec3 abb() const;
+	inline vec4 abba() const;
+	inline vec4 abbb() const;
+	inline vec4 abbg() const;
+	inline vec4 abbr() const;
+	inline vec3 abg() const;
+	inline vec4 abga() const;
+	inline vec4 abgb() const;
+	inline vec4 abgg() const;
+	inline vec4 abgr() const;
+	inline vec3 abr() const;
+	inline vec4 abra() const;
+	inline vec4 abrb() const;
+	inline vec4 abrg() const;
+	inline vec4 abrr() const;
+	inline vec2 ag() const;
+	inline vec3 aga() const;
+	inline vec4 agaa() const;
+	inline vec4 agab() const;
+	inline vec4 agag() const;
+	inline vec4 agar() const;
+	inline vec3 agb() const;
+	inline vec4 agba() const;
+	inline vec4 agbb() const;
+	inline vec4 agbg() const;
+	inline vec4 agbr() const;
+	inline vec3 agg() const;
+	inline vec4 agga() const;
+	inline vec4 aggb() const;
+	inline vec4 aggg() const;
+	inline vec4 aggr() const;
+	inline vec3 agr() const;
+	inline vec4 agra() const;
+	inline vec4 agrb() const;
+	inline vec4 agrg() const;
+	inline vec4 agrr() const;
+	inline vec2 ar() const;
+	inline vec3 ara() const;
+	inline vec4 araa() const;
+	inline vec4 arab() const;
+	inline vec4 arag() const;
+	inline vec4 arar() const;
+	inline vec3 arb() const;
+	inline vec4 arba() const;
+	inline vec4 arbb() const;
+	inline vec4 arbg() const;
+	inline vec4 arbr() const;
+	inline vec3 arg() const;
+	inline vec4 arga() const;
+	inline vec4 argb() const;
+	inline vec4 argg() const;
+	inline vec4 argr() const;
+	inline vec3 arr() const;
+	inline vec4 arra() const;
+	inline vec4 arrb() const;
+	inline vec4 arrg() const;
+	inline vec4 arrr() const;
+	inline vec2 ba() const;
+	inline vec3 baa() const;
+	inline vec4 baaa() const;
+	inline vec4 baab() const;
+	inline vec4 baag() const;
+	inline vec4 baar() const;
+	inline vec3 bab() const;
+	inline vec4 baba() const;
+	inline vec4 babb() const;
+	inline vec4 babg() const;
+	inline vec4 babr() const;
+	inline vec3 bag() const;
+	inline vec4 baga() const;
+	inline vec4 bagb() const;
+	inline vec4 bagg() const;
+	inline vec4 bagr() const;
+	inline vec3 bar() const;
+	inline vec4 bara() const;
+	inline vec4 barb() const;
+	inline vec4 barg() const;
+	inline vec4 barr() const;
+	inline vec2 bb() const;
+	inline vec3 bba() const;
+	inline vec4 bbaa() const;
+	inline vec4 bbab() const;
+	inline vec4 bbag() const;
+	inline vec4 bbar() const;
+	inline vec3 bbb() const;
+	inline vec4 bbba() const;
+	inline vec4 bbbb() const;
+	inline vec4 bbbg() const;
+	inline vec4 bbbr() const;
+	inline vec3 bbg() const;
+	inline vec4 bbga() const;
+	inline vec4 bbgb() const;
+	inline vec4 bbgg() const;
+	inline vec4 bbgr() const;
+	inline vec3 bbr() const;
+	inline vec4 bbra() const;
+	inline vec4 bbrb() const;
+	inline vec4 bbrg() const;
+	inline vec4 bbrr() const;
+	inline vec2 bg() const;
+	inline vec3 bga() const;
+	inline vec4 bgaa() const;
+	inline vec4 bgab() const;
+	inline vec4 bgag() const;
+	inline vec4 bgar() const;
+	inline vec3 bgb() const;
+	inline vec4 bgba() const;
+	inline vec4 bgbb() const;
+	inline vec4 bgbg() const;
+	inline vec4 bgbr() const;
+	inline vec3 bgg() const;
+	inline vec4 bgga() const;
+	inline vec4 bggb() const;
+	inline vec4 bggg() const;
+	inline vec4 bggr() const;
+	inline vec3 bgr() const;
+	inline vec4 bgra() const;
+	inline vec4 bgrb() const;
+	inline vec4 bgrg() const;
+	inline vec4 bgrr() const;
+	inline vec2 br() const;
+	inline vec3 bra() const;
+	inline vec4 braa() const;
+	inline vec4 brab() const;
+	inline vec4 brag() const;
+	inline vec4 brar() const;
+	inline vec3 brb() const;
+	inline vec4 brba() const;
+	inline vec4 brbb() const;
+	inline vec4 brbg() const;
+	inline vec4 brbr() const;
+	inline vec3 brg() const;
+	inline vec4 brga() const;
+	inline vec4 brgb() const;
+	inline vec4 brgg() const;
+	inline vec4 brgr() const;
+	inline vec3 brr() const;
+	inline vec4 brra() const;
+	inline vec4 brrb() const;
+	inline vec4 brrg() const;
+	inline vec4 brrr() const;
+	inline vec2 ga() const;
+	inline vec3 gaa() const;
+	inline vec4 gaaa() const;
+	inline vec4 gaab() const;
+	inline vec4 gaag() const;
+	inline vec4 gaar() const;
+	inline vec3 gab() const;
+	inline vec4 gaba() const;
+	inline vec4 gabb() const;
+	inline vec4 gabg() const;
+	inline vec4 gabr() const;
+	inline vec3 gag() const;
+	inline vec4 gaga() const;
+	inline vec4 gagb() const;
+	inline vec4 gagg() const;
+	inline vec4 gagr() const;
+	inline vec3 gar() const;
+	inline vec4 gara() const;
+	inline vec4 garb() const;
+	inline vec4 garg() const;
+	inline vec4 garr() const;
+	inline vec2 gb() const;
+	inline vec3 gba() const;
+	inline vec4 gbaa() const;
+	inline vec4 gbab() const;
+	inline vec4 gbag() const;
+	inline vec4 gbar() const;
+	inline vec3 gbb() const;
+	inline vec4 gbba() const;
+	inline vec4 gbbb() const;
+	inline vec4 gbbg() const;
+	inline vec4 gbbr() const;
+	inline vec3 gbg() const;
+	inline vec4 gbga() const;
+	inline vec4 gbgb() const;
+	inline vec4 gbgg() const;
+	inline vec4 gbgr() const;
+	inline vec3 gbr() const;
+	inline vec4 gbra() const;
+	inline vec4 gbrb() const;
+	inline vec4 gbrg() const;
+	inline vec4 gbrr() const;
+	inline vec2 gg() const;
+	inline vec3 gga() const;
+	inline vec4 ggaa() const;
+	inline vec4 ggab() const;
+	inline vec4 ggag() const;
+	inline vec4 ggar() const;
+	inline vec3 ggb() const;
+	inline vec4 ggba() const;
+	inline vec4 ggbb() const;
+	inline vec4 ggbg() const;
+	inline vec4 ggbr() const;
+	inline vec3 ggg() const;
+	inline vec4 ggga() const;
+	inline vec4 gggb() const;
+	inline vec4 gggg() const;
+	inline vec4 gggr() const;
+	inline vec3 ggr() const;
+	inline vec4 ggra() const;
+	inline vec4 ggrb() const;
+	inline vec4 ggrg() const;
+	inline vec4 ggrr() const;
+	inline vec2 gr() const;
+	inline vec3 gra() const;
+	inline vec4 graa() const;
+	inline vec4 grab() const;
+	inline vec4 grag() const;
+	inline vec4 grar() const;
+	inline vec3 grb() const;
+	inline vec4 grba() const;
+	inline vec4 grbb() const;
+	inline vec4 grbg() const;
+	inline vec4 grbr() const;
+	inline vec3 grg() const;
+	inline vec4 grga() const;
+	inline vec4 grgb() const;
+	inline vec4 grgg() const;
+	inline vec4 grgr() const;
+	inline vec3 grr() const;
+	inline vec4 grra() const;
+	inline vec4 grrb() const;
+	inline vec4 grrg() const;
+	inline vec4 grrr() const;
+	inline vec2 ra() const;
+	inline vec3 raa() const;
+	inline vec4 raaa() const;
+	inline vec4 raab() const;
+	inline vec4 raag() const;
+	inline vec4 raar() const;
+	inline vec3 rab() const;
+	inline vec4 raba() const;
+	inline vec4 rabb() const;
+	inline vec4 rabg() const;
+	inline vec4 rabr() const;
+	inline vec3 rag() const;
+	inline vec4 raga() const;
+	inline vec4 ragb() const;
+	inline vec4 ragg() const;
+	inline vec4 ragr() const;
+	inline vec3 rar() const;
+	inline vec4 rara() const;
+	inline vec4 rarb() const;
+	inline vec4 rarg() const;
+	inline vec4 rarr() const;
+	inline vec2 rb() const;
+	inline vec3 rba() const;
+	inline vec4 rbaa() const;
+	inline vec4 rbab() const;
+	inline vec4 rbag() const;
+	inline vec4 rbar() const;
+	inline vec3 rbb() const;
+	inline vec4 rbba() const;
+	inline vec4 rbbb() const;
+	inline vec4 rbbg() const;
+	inline vec4 rbbr() const;
+	inline vec3 rbg() const;
+	inline vec4 rbga() const;
+	inline vec4 rbgb() const;
+	inline vec4 rbgg() const;
+	inline vec4 rbgr() const;
+	inline vec3 rbr() const;
+	inline vec4 rbra() const;
+	inline vec4 rbrb() const;
+	inline vec4 rbrg() const;
+	inline vec4 rbrr() const;
+	inline vec2 rg() const;
+	inline vec3 rga() const;
+	inline vec4 rgaa() const;
+	inline vec4 rgab() const;
+	inline vec4 rgag() const;
+	inline vec4 rgar() const;
+	inline vec3 rgb() const;
+	inline vec4 rgba() const;
+	inline vec4 rgbb() const;
+	inline vec4 rgbg() const;
+	inline vec4 rgbr() const;
+	inline vec3 rgg() const;
+	inline vec4 rgga() const;
+	inline vec4 rggb() const;
+	inline vec4 rggg() const;
+	inline vec4 rggr() const;
+	inline vec3 rgr() const;
+	inline vec4 rgra() const;
+	inline vec4 rgrb() const;
+	inline vec4 rgrg() const;
+	inline vec4 rgrr() const;
+	inline vec2 rr() const;
+	inline vec3 rra() const;
+	inline vec4 rraa() const;
+	inline vec4 rrab() const;
+	inline vec4 rrag() const;
+	inline vec4 rrar() const;
+	inline vec3 rrb() const;
+	inline vec4 rrba() const;
+	inline vec4 rrbb() const;
+	inline vec4 rrbg() const;
+	inline vec4 rrbr() const;
+	inline vec3 rrg() const;
+	inline vec4 rrga() const;
+	inline vec4 rrgb() const;
+	inline vec4 rrgg() const;
+	inline vec4 rrgr() const;
+	inline vec3 rrr() const;
+	inline vec4 rrra() const;
+	inline vec4 rrrb() const;
+	inline vec4 rrrg() const;
+	inline vec4 rrrr() const;
+	inline vec2 ww() const;
+	inline vec3 www() const;
+	inline vec4 wwww() const;
+	inline vec4 wwwx() const;
+	inline vec4 wwwy() const;
+	inline vec4 wwwz() const;
+	inline vec3 wwx() const;
+	inline vec4 wwxw() const;
+	inline vec4 wwxx() const;
+	inline vec4 wwxy() const;
+	inline vec4 wwxz() const;
+	inline vec3 wwy() const;
+	inline vec4 wwyw() const;
+	inline vec4 wwyx() const;
+	inline vec4 wwyy() const;
+	inline vec4 wwyz() const;
+	inline vec3 wwz() const;
+	inline vec4 wwzw() const;
+	inline vec4 wwzx() const;
+	inline vec4 wwzy() const;
+	inline vec4 wwzz() const;
+	inline vec2 wx() const;
+	inline vec3 wxw() const;
+	inline vec4 wxww() const;
+	inline vec4 wxwx() const;
+	inline vec4 wxwy() const;
+	inline vec4 wxwz() const;
+	inline vec3 wxx() const;
+	inline vec4 wxxw() const;
+	inline vec4 wxxx() const;
+	inline vec4 wxxy() const;
+	inline vec4 wxxz() const;
+	inline vec3 wxy() const;
+	inline vec4 wxyw() const;
+	inline vec4 wxyx() const;
+	inline vec4 wxyy() const;
+	inline vec4 wxyz() const;
+	inline vec3 wxz() const;
+	inline vec4 wxzw() const;
+	inline vec4 wxzx() const;
+	inline vec4 wxzy() const;
+	inline vec4 wxzz() const;
+	inline vec2 wy() const;
+	inline vec3 wyw() const;
+	inline vec4 wyww() const;
+	inline vec4 wywx() const;
+	inline vec4 wywy() const;
+	inline vec4 wywz() const;
+	inline vec3 wyx() const;
+	inline vec4 wyxw() const;
+	inline vec4 wyxx() const;
+	inline vec4 wyxy() const;
+	inline vec4 wyxz() const;
+	inline vec3 wyy() const;
+	inline vec4 wyyw() const;
+	inline vec4 wyyx() const;
+	inline vec4 wyyy() const;
+	inline vec4 wyyz() const;
+	inline vec3 wyz() const;
+	inline vec4 wyzw() const;
+	inline vec4 wyzx() const;
+	inline vec4 wyzy() const;
+	inline vec4 wyzz() const;
+	inline vec2 wz() const;
+	inline vec3 wzw() const;
+	inline vec4 wzww() const;
+	inline vec4 wzwx() const;
+	inline vec4 wzwy() const;
+	inline vec4 wzwz() const;
+	inline vec3 wzx() const;
+	inline vec4 wzxw() const;
+	inline vec4 wzxx() const;
+	inline vec4 wzxy() const;
+	inline vec4 wzxz() const;
+	inline vec3 wzy() const;
+	inline vec4 wzyw() const;
+	inline vec4 wzyx() const;
+	inline vec4 wzyy() const;
+	inline vec4 wzyz() const;
+	inline vec3 wzz() const;
+	inline vec4 wzzw() const;
+	inline vec4 wzzx() const;
+	inline vec4 wzzy() const;
+	inline vec4 wzzz() const;
+	inline vec2 xw() const;
+	inline vec3 xww() const;
+	inline vec4 xwww() const;
+	inline vec4 xwwx() const;
+	inline vec4 xwwy() const;
+	inline vec4 xwwz() const;
+	inline vec3 xwx() const;
+	inline vec4 xwxw() const;
+	inline vec4 xwxx() const;
+	inline vec4 xwxy() const;
+	inline vec4 xwxz() const;
+	inline vec3 xwy() const;
+	inline vec4 xwyw() const;
+	inline vec4 xwyx() const;
+	inline vec4 xwyy() const;
+	inline vec4 xwyz() const;
+	inline vec3 xwz() const;
+	inline vec4 xwzw() const;
+	inline vec4 xwzx() const;
+	inline vec4 xwzy() const;
+	inline vec4 xwzz() const;
+	inline vec2 xx() const;
+	inline vec3 xxw() const;
+	inline vec4 xxww() const;
+	inline vec4 xxwx() const;
+	inline vec4 xxwy() const;
+	inline vec4 xxwz() const;
+	inline vec3 xxx() const;
+	inline vec4 xxxw() const;
+	inline vec4 xxxx() const;
+	inline vec4 xxxy() const;
+	inline vec4 xxxz() const;
+	inline vec3 xxy() const;
+	inline vec4 xxyw() const;
+	inline vec4 xxyx() const;
+	inline vec4 xxyy() const;
+	inline vec4 xxyz() const;
+	inline vec3 xxz() const;
+	inline vec4 xxzw() const;
+	inline vec4 xxzx() const;
+	inline vec4 xxzy() const;
+	inline vec4 xxzz() const;
+	inline vec2 xy() const;
+	inline vec3 xyw() const;
+	inline vec4 xyww() const;
+	inline vec4 xywx() const;
+	inline vec4 xywy() const;
+	inline vec4 xywz() const;
+	inline vec3 xyx() const;
+	inline vec4 xyxw() const;
+	inline vec4 xyxx() const;
+	inline vec4 xyxy() const;
+	inline vec4 xyxz() const;
+	inline vec3 xyy() const;
+	inline vec4 xyyw() const;
+	inline vec4 xyyx() const;
+	inline vec4 xyyy() const;
+	inline vec4 xyyz() const;
+	inline vec3 xyz() const;
+	inline vec4 xyzw() const;
+	inline vec4 xyzx() const;
+	inline vec4 xyzy() const;
+	inline vec4 xyzz() const;
+	inline vec2 xz() const;
+	inline vec3 xzw() const;
+	inline vec4 xzww() const;
+	inline vec4 xzwx() const;
+	inline vec4 xzwy() const;
+	inline vec4 xzwz() const;
+	inline vec3 xzx() const;
+	inline vec4 xzxw() const;
+	inline vec4 xzxx() const;
+	inline vec4 xzxy() const;
+	inline vec4 xzxz() const;
+	inline vec3 xzy() const;
+	inline vec4 xzyw() const;
+	inline vec4 xzyx() const;
+	inline vec4 xzyy() const;
+	inline vec4 xzyz() const;
+	inline vec3 xzz() const;
+	inline vec4 xzzw() const;
+	inline vec4 xzzx() const;
+	inline vec4 xzzy() const;
+	inline vec4 xzzz() const;
+	inline vec2 yw() const;
+	inline vec3 yww() const;
+	inline vec4 ywww() const;
+	inline vec4 ywwx() const;
+	inline vec4 ywwy() const;
+	inline vec4 ywwz() const;
+	inline vec3 ywx() const;
+	inline vec4 ywxw() const;
+	inline vec4 ywxx() const;
+	inline vec4 ywxy() const;
+	inline vec4 ywxz() const;
+	inline vec3 ywy() const;
+	inline vec4 ywyw() const;
+	inline vec4 ywyx() const;
+	inline vec4 ywyy() const;
+	inline vec4 ywyz() const;
+	inline vec3 ywz() const;
+	inline vec4 ywzw() const;
+	inline vec4 ywzx() const;
+	inline vec4 ywzy() const;
+	inline vec4 ywzz() const;
+	inline vec2 yx() const;
+	inline vec3 yxw() const;
+	inline vec4 yxww() const;
+	inline vec4 yxwx() const;
+	inline vec4 yxwy() const;
+	inline vec4 yxwz() const;
+	inline vec3 yxx() const;
+	inline vec4 yxxw() const;
+	inline vec4 yxxx() const;
+	inline vec4 yxxy() const;
+	inline vec4 yxxz() const;
+	inline vec3 yxy() const;
+	inline vec4 yxyw() const;
+	inline vec4 yxyx() const;
+	inline vec4 yxyy() const;
+	inline vec4 yxyz() const;
+	inline vec3 yxz() const;
+	inline vec4 yxzw() const;
+	inline vec4 yxzx() const;
+	inline vec4 yxzy() const;
+	inline vec4 yxzz() const;
+	inline vec2 yy() const;
+	inline vec3 yyw() const;
+	inline vec4 yyww() const;
+	inline vec4 yywx() const;
+	inline vec4 yywy() const;
+	inline vec4 yywz() const;
+	inline vec3 yyx() const;
+	inline vec4 yyxw() const;
+	inline vec4 yyxx() const;
+	inline vec4 yyxy() const;
+	inline vec4 yyxz() const;
+	inline vec3 yyy() const;
+	inline vec4 yyyw() const;
+	inline vec4 yyyx() const;
+	inline vec4 yyyy() const;
+	inline vec4 yyyz() const;
+	inline vec3 yyz() const;
+	inline vec4 yyzw() const;
+	inline vec4 yyzx() const;
+	inline vec4 yyzy() const;
+	inline vec4 yyzz() const;
+	inline vec2 yz() const;
+	inline vec3 yzw() const;
+	inline vec4 yzww() const;
+	inline vec4 yzwx() const;
+	inline vec4 yzwy() const;
+	inline vec4 yzwz() const;
+	inline vec3 yzx() const;
+	inline vec4 yzxw() const;
+	inline vec4 yzxx() const;
+	inline vec4 yzxy() const;
+	inline vec4 yzxz() const;
+	inline vec3 yzy() const;
+	inline vec4 yzyw() const;
+	inline vec4 yzyx() const;
+	inline vec4 yzyy() const;
+	inline vec4 yzyz() const;
+	inline vec3 yzz() const;
+	inline vec4 yzzw() const;
+	inline vec4 yzzx() const;
+	inline vec4 yzzy() const;
+	inline vec4 yzzz() const;
+	inline vec2 zw() const;
+	inline vec3 zww() const;
+	inline vec4 zwww() const;
+	inline vec4 zwwx() const;
+	inline vec4 zwwy() const;
+	inline vec4 zwwz() const;
+	inline vec3 zwx() const;
+	inline vec4 zwxw() const;
+	inline vec4 zwxx() const;
+	inline vec4 zwxy() const;
+	inline vec4 zwxz() const;
+	inline vec3 zwy() const;
+	inline vec4 zwyw() const;
+	inline vec4 zwyx() const;
+	inline vec4 zwyy() const;
+	inline vec4 zwyz() const;
+	inline vec3 zwz() const;
+	inline vec4 zwzw() const;
+	inline vec4 zwzx() const;
+	inline vec4 zwzy() const;
+	inline vec4 zwzz() const;
+	inline vec2 zx() const;
+	inline vec3 zxw() const;
+	inline vec4 zxww() const;
+	inline vec4 zxwx() const;
+	inline vec4 zxwy() const;
+	inline vec4 zxwz() const;
+	inline vec3 zxx() const;
+	inline vec4 zxxw() const;
+	inline vec4 zxxx() const;
+	inline vec4 zxxy() const;
+	inline vec4 zxxz() const;
+	inline vec3 zxy() const;
+	inline vec4 zxyw() const;
+	inline vec4 zxyx() const;
+	inline vec4 zxyy() const;
+	inline vec4 zxyz() const;
+	inline vec3 zxz() const;
+	inline vec4 zxzw() const;
+	inline vec4 zxzx() const;
+	inline vec4 zxzy() const;
+	inline vec4 zxzz() const;
+	inline vec2 zy() const;
+	inline vec3 zyw() const;
+	inline vec4 zyww() const;
+	inline vec4 zywx() const;
+	inline vec4 zywy() const;
+	inline vec4 zywz() const;
+	inline vec3 zyx() const;
+	inline vec4 zyxw() const;
+	inline vec4 zyxx() const;
+	inline vec4 zyxy() const;
+	inline vec4 zyxz() const;
+	inline vec3 zyy() const;
+	inline vec4 zyyw() const;
+	inline vec4 zyyx() const;
+	inline vec4 zyyy() const;
+	inline vec4 zyyz() const;
+	inline vec3 zyz() const;
+	inline vec4 zyzw() const;
+	inline vec4 zyzx() const;
+	inline vec4 zyzy() const;
+	inline vec4 zyzz() const;
+	inline vec2 zz() const;
+	inline vec3 zzw() const;
+	inline vec4 zzww() const;
+	inline vec4 zzwx() const;
+	inline vec4 zzwy() const;
+	inline vec4 zzwz() const;
+	inline vec3 zzx() const;
+	inline vec4 zzxw() const;
+	inline vec4 zzxx() const;
+	inline vec4 zzxy() const;
+	inline vec4 zzxz() const;
+	inline vec3 zzy() const;
+	inline vec4 zzyw() const;
+	inline vec4 zzyx() const;
+	inline vec4 zzyy() const;
+	inline vec4 zzyz() const;
+	inline vec3 zzz() const;
+	inline vec4 zzzw() const;
+	inline vec4 zzzx() const;
+	inline vec4 zzzy() const;
+	inline vec4 zzzz() const;
+	inline void ab(const simdfloat&, const simdfloat&);
+	inline void ab(const vec2&);
+	inline void ab(const simdfloat&);
+	inline void abg(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void abg(const vec3&);
+	inline void abg(const simdfloat&);
+	inline void abgr(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void abgr(const vec4&);
+	inline void abgr(const simdfloat&);
+	inline void abr(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void abr(const vec3&);
+	inline void abr(const simdfloat&);
+	inline void abrg(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void abrg(const vec4&);
+	inline void abrg(const simdfloat&);
+	inline void ag(const simdfloat&, const simdfloat&);
+	inline void ag(const vec2&);
+	inline void ag(const simdfloat&);
+	inline void agb(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void agb(const vec3&);
+	inline void agb(const simdfloat&);
+	inline void agbr(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void agbr(const vec4&);
+	inline void agbr(const simdfloat&);
+	inline void agr(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void agr(const vec3&);
+	inline void agr(const simdfloat&);
+	inline void agrb(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void agrb(const vec4&);
+	inline void agrb(const simdfloat&);
+	inline void ar(const simdfloat&, const simdfloat&);
+	inline void ar(const vec2&);
+	inline void ar(const simdfloat&);
+	inline void arb(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void arb(const vec3&);
+	inline void arb(const simdfloat&);
+	inline void arbg(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void arbg(const vec4&);
+	inline void arbg(const simdfloat&);
+	inline void arg(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void arg(const vec3&);
+	inline void arg(const simdfloat&);
+	inline void argb(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void argb(const vec4&);
+	inline void argb(const simdfloat&);
+	inline void ba(const simdfloat&, const simdfloat&);
+	inline void ba(const vec2&);
+	inline void ba(const simdfloat&);
+	inline void bag(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void bag(const vec3&);
+	inline void bag(const simdfloat&);
+	inline void bagr(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void bagr(const vec4&);
+	inline void bagr(const simdfloat&);
+	inline void bar(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void bar(const vec3&);
+	inline void bar(const simdfloat&);
+	inline void barg(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void barg(const vec4&);
+	inline void barg(const simdfloat&);
+	inline void bg(const simdfloat&, const simdfloat&);
+	inline void bg(const vec2&);
+	inline void bg(const simdfloat&);
+	inline void bga(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void bga(const vec3&);
+	inline void bga(const simdfloat&);
+	inline void bgar(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void bgar(const vec4&);
+	inline void bgar(const simdfloat&);
+	inline void bgr(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void bgr(const vec3&);
+	inline void bgr(const simdfloat&);
+	inline void bgra(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void bgra(const vec4&);
+	inline void bgra(const simdfloat&);
+	inline void br(const simdfloat&, const simdfloat&);
+	inline void br(const vec2&);
+	inline void br(const simdfloat&);
+	inline void bra(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void bra(const vec3&);
+	inline void bra(const simdfloat&);
+	inline void brag(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void brag(const vec4&);
+	inline void brag(const simdfloat&);
+	inline void brg(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void brg(const vec3&);
+	inline void brg(const simdfloat&);
+	inline void brga(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void brga(const vec4&);
+	inline void brga(const simdfloat&);
+	inline void ga(const simdfloat&, const simdfloat&);
+	inline void ga(const vec2&);
+	inline void ga(const simdfloat&);
+	inline void gab(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void gab(const vec3&);
+	inline void gab(const simdfloat&);
+	inline void gabr(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void gabr(const vec4&);
+	inline void gabr(const simdfloat&);
+	inline void gar(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void gar(const vec3&);
+	inline void gar(const simdfloat&);
+	inline void garb(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void garb(const vec4&);
+	inline void garb(const simdfloat&);
+	inline void gb(const simdfloat&, const simdfloat&);
+	inline void gb(const vec2&);
+	inline void gb(const simdfloat&);
+	inline void gba(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void gba(const vec3&);
+	inline void gba(const simdfloat&);
+	inline void gbar(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void gbar(const vec4&);
+	inline void gbar(const simdfloat&);
+	inline void gbr(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void gbr(const vec3&);
+	inline void gbr(const simdfloat&);
+	inline void gbra(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void gbra(const vec4&);
+	inline void gbra(const simdfloat&);
+	inline void gr(const simdfloat&, const simdfloat&);
+	inline void gr(const vec2&);
+	inline void gr(const simdfloat&);
+	inline void gra(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void gra(const vec3&);
+	inline void gra(const simdfloat&);
+	inline void grab(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void grab(const vec4&);
+	inline void grab(const simdfloat&);
+	inline void grb(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void grb(const vec3&);
+	inline void grb(const simdfloat&);
+	inline void grba(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void grba(const vec4&);
+	inline void grba(const simdfloat&);
+	inline void ra(const simdfloat&, const simdfloat&);
+	inline void ra(const vec2&);
+	inline void ra(const simdfloat&);
+	inline void rab(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void rab(const vec3&);
+	inline void rab(const simdfloat&);
+	inline void rabg(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void rabg(const vec4&);
+	inline void rabg(const simdfloat&);
+	inline void rag(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void rag(const vec3&);
+	inline void rag(const simdfloat&);
+	inline void ragb(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void ragb(const vec4&);
+	inline void ragb(const simdfloat&);
+	inline void rb(const simdfloat&, const simdfloat&);
+	inline void rb(const vec2&);
+	inline void rb(const simdfloat&);
+	inline void rba(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void rba(const vec3&);
+	inline void rba(const simdfloat&);
+	inline void rbag(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void rbag(const vec4&);
+	inline void rbag(const simdfloat&);
+	inline void rbg(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void rbg(const vec3&);
+	inline void rbg(const simdfloat&);
+	inline void rbga(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void rbga(const vec4&);
+	inline void rbga(const simdfloat&);
+	inline void rg(const simdfloat&, const simdfloat&);
+	inline void rg(const vec2&);
+	inline void rg(const simdfloat&);
+	inline void rga(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void rga(const vec3&);
+	inline void rga(const simdfloat&);
+	inline void rgab(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void rgab(const vec4&);
+	inline void rgab(const simdfloat&);
+	inline void rgb(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void rgb(const vec3&);
+	inline void rgb(const simdfloat&);
+	inline void rgba(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void rgba(const vec4&);
+	inline void rgba(const simdfloat&);
+	inline void wx(const simdfloat&, const simdfloat&);
+	inline void wx(const vec2&);
+	inline void wx(const simdfloat&);
+	inline void wxy(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void wxy(const vec3&);
+	inline void wxy(const simdfloat&);
+	inline void wxyz(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void wxyz(const vec4&);
+	inline void wxyz(const simdfloat&);
+	inline void wxz(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void wxz(const vec3&);
+	inline void wxz(const simdfloat&);
+	inline void wxzy(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void wxzy(const vec4&);
+	inline void wxzy(const simdfloat&);
+	inline void wy(const simdfloat&, const simdfloat&);
+	inline void wy(const vec2&);
+	inline void wy(const simdfloat&);
+	inline void wyx(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void wyx(const vec3&);
+	inline void wyx(const simdfloat&);
+	inline void wyxz(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void wyxz(const vec4&);
+	inline void wyxz(const simdfloat&);
+	inline void wyz(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void wyz(const vec3&);
+	inline void wyz(const simdfloat&);
+	inline void wyzx(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void wyzx(const vec4&);
+	inline void wyzx(const simdfloat&);
+	inline void wz(const simdfloat&, const simdfloat&);
+	inline void wz(const vec2&);
+	inline void wz(const simdfloat&);
+	inline void wzx(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void wzx(const vec3&);
+	inline void wzx(const simdfloat&);
+	inline void wzxy(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void wzxy(const vec4&);
+	inline void wzxy(const simdfloat&);
+	inline void wzy(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void wzy(const vec3&);
+	inline void wzy(const simdfloat&);
+	inline void wzyx(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void wzyx(const vec4&);
+	inline void wzyx(const simdfloat&);
+	inline void xw(const simdfloat&, const simdfloat&);
+	inline void xw(const vec2&);
+	inline void xw(const simdfloat&);
+	inline void xwy(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void xwy(const vec3&);
+	inline void xwy(const simdfloat&);
+	inline void xwyz(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void xwyz(const vec4&);
+	inline void xwyz(const simdfloat&);
+	inline void xwz(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void xwz(const vec3&);
+	inline void xwz(const simdfloat&);
+	inline void xwzy(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void xwzy(const vec4&);
+	inline void xwzy(const simdfloat&);
+	inline void xy(const simdfloat&, const simdfloat&);
+	inline void xy(const vec2&);
+	inline void xy(const simdfloat&);
+	inline void xyw(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void xyw(const vec3&);
+	inline void xyw(const simdfloat&);
+	inline void xywz(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void xywz(const vec4&);
+	inline void xywz(const simdfloat&);
+	inline void xyz(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void xyz(const vec3&);
+	inline void xyz(const simdfloat&);
+	inline void xyzw(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void xyzw(const vec4&);
+	inline void xyzw(const simdfloat&);
+	inline void xz(const simdfloat&, const simdfloat&);
+	inline void xz(const vec2&);
+	inline void xz(const simdfloat&);
+	inline void xzw(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void xzw(const vec3&);
+	inline void xzw(const simdfloat&);
+	inline void xzwy(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void xzwy(const vec4&);
+	inline void xzwy(const simdfloat&);
+	inline void xzy(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void xzy(const vec3&);
+	inline void xzy(const simdfloat&);
+	inline void xzyw(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void xzyw(const vec4&);
+	inline void xzyw(const simdfloat&);
+	inline void yw(const simdfloat&, const simdfloat&);
+	inline void yw(const vec2&);
+	inline void yw(const simdfloat&);
+	inline void ywx(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void ywx(const vec3&);
+	inline void ywx(const simdfloat&);
+	inline void ywxz(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void ywxz(const vec4&);
+	inline void ywxz(const simdfloat&);
+	inline void ywz(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void ywz(const vec3&);
+	inline void ywz(const simdfloat&);
+	inline void ywzx(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void ywzx(const vec4&);
+	inline void ywzx(const simdfloat&);
+	inline void yx(const simdfloat&, const simdfloat&);
+	inline void yx(const vec2&);
+	inline void yx(const simdfloat&);
+	inline void yxw(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void yxw(const vec3&);
+	inline void yxw(const simdfloat&);
+	inline void yxwz(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void yxwz(const vec4&);
+	inline void yxwz(const simdfloat&);
+	inline void yxz(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void yxz(const vec3&);
+	inline void yxz(const simdfloat&);
+	inline void yxzw(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void yxzw(const vec4&);
+	inline void yxzw(const simdfloat&);
+	inline void yz(const simdfloat&, const simdfloat&);
+	inline void yz(const vec2&);
+	inline void yz(const simdfloat&);
+	inline void yzw(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void yzw(const vec3&);
+	inline void yzw(const simdfloat&);
+	inline void yzwx(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void yzwx(const vec4&);
+	inline void yzwx(const simdfloat&);
+	inline void yzx(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void yzx(const vec3&);
+	inline void yzx(const simdfloat&);
+	inline void yzxw(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void yzxw(const vec4&);
+	inline void yzxw(const simdfloat&);
+	inline void zw(const simdfloat&, const simdfloat&);
+	inline void zw(const vec2&);
+	inline void zw(const simdfloat&);
+	inline void zwx(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void zwx(const vec3&);
+	inline void zwx(const simdfloat&);
+	inline void zwxy(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void zwxy(const vec4&);
+	inline void zwxy(const simdfloat&);
+	inline void zwy(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void zwy(const vec3&);
+	inline void zwy(const simdfloat&);
+	inline void zwyx(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void zwyx(const vec4&);
+	inline void zwyx(const simdfloat&);
+	inline void zx(const simdfloat&, const simdfloat&);
+	inline void zx(const vec2&);
+	inline void zx(const simdfloat&);
+	inline void zxw(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void zxw(const vec3&);
+	inline void zxw(const simdfloat&);
+	inline void zxwy(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void zxwy(const vec4&);
+	inline void zxwy(const simdfloat&);
+	inline void zxy(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void zxy(const vec3&);
+	inline void zxy(const simdfloat&);
+	inline void zxyw(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void zxyw(const vec4&);
+	inline void zxyw(const simdfloat&);
+	inline void zy(const simdfloat&, const simdfloat&);
+	inline void zy(const vec2&);
+	inline void zy(const simdfloat&);
+	inline void zyw(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void zyw(const vec3&);
+	inline void zyw(const simdfloat&);
+	inline void zywx(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void zywx(const vec4&);
+	inline void zywx(const simdfloat&);
+	inline void zyx(const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void zyx(const vec3&);
+	inline void zyx(const simdfloat&);
+	inline void zyxw(const simdfloat&, const simdfloat&, const simdfloat&, const simdfloat&);
+	inline void zyxw(const vec4&);
+	inline void zyxw(const simdfloat&);
+#ifndef USE_SCALAR
+	inline void ab(const float&);
+	inline void abg(const float&);
+	inline void abgr(const float&);
+	inline void abr(const float&);
+	inline void abrg(const float&);
+	inline void ag(const float&);
+	inline void agb(const float&);
+	inline void agbr(const float&);
+	inline void agr(const float&);
+	inline void agrb(const float&);
+	inline void ar(const float&);
+	inline void arb(const float&);
+	inline void arbg(const float&);
+	inline void arg(const float&);
+	inline void argb(const float&);
+	inline void ba(const float&);
+	inline void bag(const float&);
+	inline void bagr(const float&);
+	inline void bar(const float&);
+	inline void barg(const float&);
+	inline void bg(const float&);
+	inline void bga(const float&);
+	inline void bgar(const float&);
+	inline void bgr(const float&);
+	inline void bgra(const float&);
+	inline void br(const float&);
+	inline void bra(const float&);
+	inline void brag(const float&);
+	inline void brg(const float&);
+	inline void brga(const float&);
+	inline void ga(const float&);
+	inline void gab(const float&);
+	inline void gabr(const float&);
+	inline void gar(const float&);
+	inline void garb(const float&);
+	inline void gb(const float&);
+	inline void gba(const float&);
+	inline void gbar(const float&);
+	inline void gbr(const float&);
+	inline void gbra(const float&);
+	inline void gr(const float&);
+	inline void gra(const float&);
+	inline void grab(const float&);
+	inline void grb(const float&);
+	inline void grba(const float&);
+	inline void ra(const float&);
+	inline void rab(const float&);
+	inline void rabg(const float&);
+	inline void rag(const float&);
+	inline void ragb(const float&);
+	inline void rb(const float&);
+	inline void rba(const float&);
+	inline void rbag(const float&);
+	inline void rbg(const float&);
+	inline void rbga(const float&);
+	inline void rg(const float&);
+	inline void rga(const float&);
+	inline void rgab(const float&);
+	inline void rgb(const float&);
+	inline void rgba(const float&);
+	inline void wx(const float&);
+	inline void wxy(const float&);
+	inline void wxyz(const float&);
+	inline void wxz(const float&);
+	inline void wxzy(const float&);
+	inline void wy(const float&);
+	inline void wyx(const float&);
+	inline void wyxz(const float&);
+	inline void wyz(const float&);
+	inline void wyzx(const float&);
+	inline void wz(const float&);
+	inline void wzx(const float&);
+	inline void wzxy(const float&);
+	inline void wzy(const float&);
+	inline void wzyx(const float&);
+	inline void xw(const float&);
+	inline void xwy(const float&);
+	inline void xwyz(const float&);
+	inline void xwz(const float&);
+	inline void xwzy(const float&);
+	inline void xy(const float&);
+	inline void xyw(const float&);
+	inline void xywz(const float&);
+	inline void xyz(const float&);
+	inline void xyzw(const float&);
+	inline void xz(const float&);
+	inline void xzw(const float&);
+	inline void xzwy(const float&);
+	inline void xzy(const float&);
+	inline void xzyw(const float&);
+	inline void yw(const float&);
+	inline void ywx(const float&);
+	inline void ywxz(const float&);
+	inline void ywz(const float&);
+	inline void ywzx(const float&);
+	inline void yx(const float&);
+	inline void yxw(const float&);
+	inline void yxwz(const float&);
+	inline void yxz(const float&);
+	inline void yxzw(const float&);
+	inline void yz(const float&);
+	inline void yzw(const float&);
+	inline void yzwx(const float&);
+	inline void yzx(const float&);
+	inline void yzxw(const float&);
+	inline void zw(const float&);
+	inline void zwx(const float&);
+	inline void zwxy(const float&);
+	inline void zwy(const float&);
+	inline void zwyx(const float&);
+	inline void zx(const float&);
+	inline void zxw(const float&);
+	inline void zxwy(const float&);
+	inline void zxy(const float&);
+	inline void zxyw(const float&);
+	inline void zy(const float&);
+	inline void zyw(const float&);
+	inline void zywx(const float&);
+	inline void zyx(const float&);
+	inline void zyxw(const float&);
+#endif
+
+
+
+	// Operator to access elements like an array
+	inline simdfloat& operator[](int index)
+	{
+		// Use a switch to return the correct element
+		switch (index)
+		{
+		case 0:
+			return x;
+		case 1:
+			return y;
+		case 2:
+			return z;
+		case 3:
+			return w;
+		default:
+			throw std::out_of_range("Index out of range");
+		}
+	}
+
+	inline vec4 operator=(const vec4& _f)
+	{
+		x = _f.x;
+		y = _f.y;
+		z = _f.z;
+		w = _f.w;
+		return *this;
+	}
+
+};
+
+// Structs defining a vector2, vector3 and vector3 of simddouble types
+struct dvec2
+{
+	simddouble x, y;
+	simddouble& r = x;
+	simddouble& g = y;
+
+	dvec2() { x = (0.0);	y = (0.0); }
+	dvec2(const dvec2& other) = default;
+	dvec2(const simddouble& _f) { x = _f; y = _f; }
+	dvec2(const simddouble& _x, const simddouble& _y) : x(_x), y(_y) {}
+#ifndef USE_SCALAR
+	dvec2(const double& _f) { x = (_f); y = (_f); }
+	dvec2(const double& _x, const double& _y) { x = (_x); y = (_y); }
+	dvec2(const simddouble& _x, const double& _y) : x(_x) { y = (_y); }
+	dvec2(const double& _x, const simddouble& _y) : y(_y) { x = (_x); }
+#endif
+	// Swizzle method
+	inline dvec2 gg() const;
+	inline dvec3 ggg() const;
+	inline dvec4 gggg() const;
+	inline dvec4 gggr() const;
+	inline dvec3 ggr() const;
+	inline dvec4 ggrg() const;
+	inline dvec4 ggrr() const;
+	inline dvec2 gr() const;
+	inline dvec3 grg() const;
+	inline dvec4 grgg() const;
+	inline dvec4 grgr() const;
+	inline dvec3 grr() const;
+	inline dvec4 grrg() const;
+	inline dvec4 grrr() const;
+	inline dvec2 rg() const;
+	inline dvec3 rgg() const;
+	inline dvec4 rggg() const;
+	inline dvec4 rggr() const;
+	inline dvec3 rgr() const;
+	inline dvec4 rgrg() const;
+	inline dvec4 rgrr() const;
+	inline dvec2 rr() const;
+	inline dvec3 rrg() const;
+	inline dvec4 rrgg() const;
+	inline dvec4 rrgr() const;
+	inline dvec3 rrr() const;
+	inline dvec4 rrrg() const;
+	inline dvec4 rrrr() const;
+	inline dvec2 xx() const;
+	inline dvec3 xxx() const;
+	inline dvec4 xxxx() const;
+	inline dvec4 xxxy() const;
+	inline dvec3 xxy() const;
+	inline dvec4 xxyx() const;
+	inline dvec4 xxyy() const;
+	inline dvec2 xy() const;
+	inline dvec3 xyx() const;
+	inline dvec4 xyxx() const;
+	inline dvec4 xyxy() const;
+	inline dvec3 xyy() const;
+	inline dvec4 xyyx() const;
+	inline dvec4 xyyy() const;
+	inline dvec2 yx() const;
+	inline dvec3 yxx() const;
+	inline dvec4 yxxx() const;
+	inline dvec4 yxxy() const;
+	inline dvec3 yxy() const;
+	inline dvec4 yxyx() const;
+	inline dvec4 yxyy() const;
+	inline dvec2 yy() const;
+	inline dvec3 yyx() const;
+	inline dvec4 yyxx() const;
+	inline dvec4 yyxy() const;
+	inline dvec3 yyy() const;
+	inline dvec4 yyyx() const;
+	inline dvec4 yyyy() const;
+	inline void gr(const simddouble&, const simddouble&);
+	inline void gr(const dvec2&);
+	inline void gr(const simddouble&);
+	inline void rg(const simddouble&, const simddouble&);
+	inline void rg(const dvec2&);
+	inline void rg(const simddouble&);
+	inline void xy(const simddouble&, const simddouble&);
+	inline void xy(const dvec2&);
+	inline void xy(const simddouble&);
+	inline void yx(const simddouble&, const simddouble&);
+	inline void yx(const dvec2&);
+	inline void yx(const simddouble&);
+#ifndef USE_SCALAR
+	inline void gr(const double&);
+	inline void rg(const double&);
+	inline void xy(const double&);
+	inline void yx(const double&);
+#endif
+
+	// Operator to access elements like an array
+	inline simddouble& operator[](int index)
+	{
+		// Use a switch to return the correct element
+		switch (index)
+		{
+		case 0:
+			return x;
+		case 1:
+			return y;
+		default:
+			throw std::out_of_range("Index out of range");
+		}
+	}
+
+	inline dvec2 operator=(const dvec2& _f)
+	{
+		x = _f.x;
+		y = _f.y;
+		return *this;
+	}
+};
+
+struct dvec3
+{
+	simddouble x, y, z;
+	simddouble& r = x;
+	simddouble& g = y;
+	simddouble& b = z;
+
+	dvec3() { x = (0.0); y = (0.0); z = (0.0); }
+	dvec3(const dvec3& other) = default;
+	dvec3(const simddouble& _f) { x = _f; y = _f; z = _f; }
+	dvec3(const simddouble& _x, const simddouble& _y, const simddouble& _z) : x(_x), y(_y), z(_z) {}
+	dvec3(const simddouble& _x, const dvec2& dvec2) : x(_x), y(dvec2.x), z(dvec2.y) {}
+	dvec3(const dvec2& dvec2, const simddouble& _z) : x(dvec2.x), y(dvec2.y), z(_z) {}
+
+#ifndef USE_SCALAR
+	dvec3(const double& _f)
+	{
+		x = (_f);
+		y = (_f);
+		z = (_f);
+	}
+	dvec3(const simddouble& _x, const simddouble& _y, const double& _z) : x(_x), y(_y) { z = (_z); }
+	dvec3(const simddouble& _x, const double& _y, const simddouble& _z) : x(_x), z(_z) { y = (_y); }
+	dvec3(const simddouble& _x, const double& _y, const double& _z) : x(_x) { y = (_y); z = (_z); }
+	dvec3(const double& _x, const simddouble& _y, const simddouble& _z) : y(_y), z(_z) { x = (_x); }
+	dvec3(const double& _x, const simddouble& _y, const double& _z) : y(_y) { x = (_x); z = (_z); }
+	dvec3(const double& _x, const double& _y, const simddouble& _z) : z(_z) { x = (_x); y = (_y); }
+	dvec3(const double& _x, const double& _y, const double& _z) { x = (_x); y = (_y); z = (_z); }
+	dvec3(const dvec2& dvec2, const double& _z) : x(dvec2.x), y(dvec2.y) { z = (_z); }
+	dvec3(const double& _x, const dvec2& dvec2) : y(dvec2.x), z(dvec2.y) { x = (_x); }
+#endif
+	inline dvec2 bb() const;
+	inline dvec3 bbb() const;
+	inline dvec4 bbbb() const;
+	inline dvec4 bbbg() const;
+	inline dvec4 bbbr() const;
+	inline dvec3 bbg() const;
+	inline dvec4 bbgb() const;
+	inline dvec4 bbgg() const;
+	inline dvec4 bbgr() const;
+	inline dvec3 bbr() const;
+	inline dvec4 bbrb() const;
+	inline dvec4 bbrg() const;
+	inline dvec4 bbrr() const;
+	inline dvec2 bg() const;
+	inline dvec3 bgb() const;
+	inline dvec4 bgbb() const;
+	inline dvec4 bgbg() const;
+	inline dvec4 bgbr() const;
+	inline dvec3 bgg() const;
+	inline dvec4 bggb() const;
+	inline dvec4 bggg() const;
+	inline dvec4 bggr() const;
+	inline dvec3 bgr() const;
+	inline dvec4 bgrb() const;
+	inline dvec4 bgrg() const;
+	inline dvec4 bgrr() const;
+	inline dvec2 br() const;
+	inline dvec3 brb() const;
+	inline dvec4 brbb() const;
+	inline dvec4 brbg() const;
+	inline dvec4 brbr() const;
+	inline dvec3 brg() const;
+	inline dvec4 brgb() const;
+	inline dvec4 brgg() const;
+	inline dvec4 brgr() const;
+	inline dvec3 brr() const;
+	inline dvec4 brrb() const;
+	inline dvec4 brrg() const;
+	inline dvec4 brrr() const;
+	inline dvec2 gb() const;
+	inline dvec3 gbb() const;
+	inline dvec4 gbbb() const;
+	inline dvec4 gbbg() const;
+	inline dvec4 gbbr() const;
+	inline dvec3 gbg() const;
+	inline dvec4 gbgb() const;
+	inline dvec4 gbgg() const;
+	inline dvec4 gbgr() const;
+	inline dvec3 gbr() const;
+	inline dvec4 gbrb() const;
+	inline dvec4 gbrg() const;
+	inline dvec4 gbrr() const;
+	inline dvec2 gg() const;
+	inline dvec3 ggb() const;
+	inline dvec4 ggbb() const;
+	inline dvec4 ggbg() const;
+	inline dvec4 ggbr() const;
+	inline dvec3 ggg() const;
+	inline dvec4 gggb() const;
+	inline dvec4 gggg() const;
+	inline dvec4 gggr() const;
+	inline dvec3 ggr() const;
+	inline dvec4 ggrb() const;
+	inline dvec4 ggrg() const;
+	inline dvec4 ggrr() const;
+	inline dvec2 gr() const;
+	inline dvec3 grb() const;
+	inline dvec4 grbb() const;
+	inline dvec4 grbg() const;
+	inline dvec4 grbr() const;
+	inline dvec3 grg() const;
+	inline dvec4 grgb() const;
+	inline dvec4 grgg() const;
+	inline dvec4 grgr() const;
+	inline dvec3 grr() const;
+	inline dvec4 grrb() const;
+	inline dvec4 grrg() const;
+	inline dvec4 grrr() const;
+	inline dvec2 rb() const;
+	inline dvec3 rbb() const;
+	inline dvec4 rbbb() const;
+	inline dvec4 rbbg() const;
+	inline dvec4 rbbr() const;
+	inline dvec3 rbg() const;
+	inline dvec4 rbgb() const;
+	inline dvec4 rbgg() const;
+	inline dvec4 rbgr() const;
+	inline dvec3 rbr() const;
+	inline dvec4 rbrb() const;
+	inline dvec4 rbrg() const;
+	inline dvec4 rbrr() const;
+	inline dvec2 rg() const;
+	inline dvec3 rgb() const;
+	inline dvec4 rgbb() const;
+	inline dvec4 rgbg() const;
+	inline dvec4 rgbr() const;
+	inline dvec3 rgg() const;
+	inline dvec4 rggb() const;
+	inline dvec4 rggg() const;
+	inline dvec4 rggr() const;
+	inline dvec3 rgr() const;
+	inline dvec4 rgrb() const;
+	inline dvec4 rgrg() const;
+	inline dvec4 rgrr() const;
+	inline dvec2 rr() const;
+	inline dvec3 rrb() const;
+	inline dvec4 rrbb() const;
+	inline dvec4 rrbg() const;
+	inline dvec4 rrbr() const;
+	inline dvec3 rrg() const;
+	inline dvec4 rrgb() const;
+	inline dvec4 rrgg() const;
+	inline dvec4 rrgr() const;
+	inline dvec3 rrr() const;
+	inline dvec4 rrrb() const;
+	inline dvec4 rrrg() const;
+	inline dvec4 rrrr() const;
+	inline dvec2 xx() const;
+	inline dvec3 xxx() const;
+	inline dvec4 xxxx() const;
+	inline dvec4 xxxy() const;
+	inline dvec4 xxxz() const;
+	inline dvec3 xxy() const;
+	inline dvec4 xxyx() const;
+	inline dvec4 xxyy() const;
+	inline dvec4 xxyz() const;
+	inline dvec3 xxz() const;
+	inline dvec4 xxzx() const;
+	inline dvec4 xxzy() const;
+	inline dvec4 xxzz() const;
+	inline dvec2 xy() const;
+	inline dvec3 xyx() const;
+	inline dvec4 xyxx() const;
+	inline dvec4 xyxy() const;
+	inline dvec4 xyxz() const;
+	inline dvec3 xyy() const;
+	inline dvec4 xyyx() const;
+	inline dvec4 xyyy() const;
+	inline dvec4 xyyz() const;
+	inline dvec3 xyz() const;
+	inline dvec4 xyzx() const;
+	inline dvec4 xyzy() const;
+	inline dvec4 xyzz() const;
+	inline dvec2 xz() const;
+	inline dvec3 xzx() const;
+	inline dvec4 xzxx() const;
+	inline dvec4 xzxy() const;
+	inline dvec4 xzxz() const;
+	inline dvec3 xzy() const;
+	inline dvec4 xzyx() const;
+	inline dvec4 xzyy() const;
+	inline dvec4 xzyz() const;
+	inline dvec3 xzz() const;
+	inline dvec4 xzzx() const;
+	inline dvec4 xzzy() const;
+	inline dvec4 xzzz() const;
+	inline dvec2 yx() const;
+	inline dvec3 yxx() const;
+	inline dvec4 yxxx() const;
+	inline dvec4 yxxy() const;
+	inline dvec4 yxxz() const;
+	inline dvec3 yxy() const;
+	inline dvec4 yxyx() const;
+	inline dvec4 yxyy() const;
+	inline dvec4 yxyz() const;
+	inline dvec3 yxz() const;
+	inline dvec4 yxzx() const;
+	inline dvec4 yxzy() const;
+	inline dvec4 yxzz() const;
+	inline dvec2 yy() const;
+	inline dvec3 yyx() const;
+	inline dvec4 yyxx() const;
+	inline dvec4 yyxy() const;
+	inline dvec4 yyxz() const;
+	inline dvec3 yyy() const;
+	inline dvec4 yyyx() const;
+	inline dvec4 yyyy() const;
+	inline dvec4 yyyz() const;
+	inline dvec3 yyz() const;
+	inline dvec4 yyzx() const;
+	inline dvec4 yyzy() const;
+	inline dvec4 yyzz() const;
+	inline dvec2 yz() const;
+	inline dvec3 yzx() const;
+	inline dvec4 yzxx() const;
+	inline dvec4 yzxy() const;
+	inline dvec4 yzxz() const;
+	inline dvec3 yzy() const;
+	inline dvec4 yzyx() const;
+	inline dvec4 yzyy() const;
+	inline dvec4 yzyz() const;
+	inline dvec3 yzz() const;
+	inline dvec4 yzzx() const;
+	inline dvec4 yzzy() const;
+	inline dvec4 yzzz() const;
+	inline dvec2 zx() const;
+	inline dvec3 zxx() const;
+	inline dvec4 zxxx() const;
+	inline dvec4 zxxy() const;
+	inline dvec4 zxxz() const;
+	inline dvec3 zxy() const;
+	inline dvec4 zxyx() const;
+	inline dvec4 zxyy() const;
+	inline dvec4 zxyz() const;
+	inline dvec3 zxz() const;
+	inline dvec4 zxzx() const;
+	inline dvec4 zxzy() const;
+	inline dvec4 zxzz() const;
+	inline dvec2 zy() const;
+	inline dvec3 zyx() const;
+	inline dvec4 zyxx() const;
+	inline dvec4 zyxy() const;
+	inline dvec4 zyxz() const;
+	inline dvec3 zyy() const;
+	inline dvec4 zyyx() const;
+	inline dvec4 zyyy() const;
+	inline dvec4 zyyz() const;
+	inline dvec3 zyz() const;
+	inline dvec4 zyzx() const;
+	inline dvec4 zyzy() const;
+	inline dvec4 zyzz() const;
+	inline dvec2 zz() const;
+	inline dvec3 zzx() const;
+	inline dvec4 zzxx() const;
+	inline dvec4 zzxy() const;
+	inline dvec4 zzxz() const;
+	inline dvec3 zzy() const;
+	inline dvec4 zzyx() const;
+	inline dvec4 zzyy() const;
+	inline dvec4 zzyz() const;
+	inline dvec3 zzz() const;
+	inline dvec4 zzzx() const;
+	inline dvec4 zzzy() const;
+	inline dvec4 zzzz() const;
+	inline void bg(const simddouble&, const simddouble&);
+	inline void bg(const dvec2&);
+	inline void bg(const simddouble&);
+	inline void bgr(const simddouble&, const simddouble&, const simddouble&);
+	inline void bgr(const dvec3&);
+	inline void bgr(const simddouble&);
+	inline void br(const simddouble&, const simddouble&);
+	inline void br(const dvec2&);
+	inline void br(const simddouble&);
+	inline void brg(const simddouble&, const simddouble&, const simddouble&);
+	inline void brg(const dvec3&);
+	inline void brg(const simddouble&);
+	inline void gb(const simddouble&, const simddouble&);
+	inline void gb(const dvec2&);
+	inline void gb(const simddouble&);
+	inline void gbr(const simddouble&, const simddouble&, const simddouble&);
+	inline void gbr(const dvec3&);
+	inline void gbr(const simddouble&);
+	inline void gr(const simddouble&, const simddouble&);
+	inline void gr(const dvec2&);
+	inline void gr(const simddouble&);
+	inline void grb(const simddouble&, const simddouble&, const simddouble&);
+	inline void grb(const dvec3&);
+	inline void grb(const simddouble&);
+	inline void rb(const simddouble&, const simddouble&);
+	inline void rb(const dvec2&);
+	inline void rb(const simddouble&);
+	inline void rbg(const simddouble&, const simddouble&, const simddouble&);
+	inline void rbg(const dvec3&);
+	inline void rbg(const simddouble&);
+	inline void rg(const simddouble&, const simddouble&);
+	inline void rg(const dvec2&);
+	inline void rg(const simddouble&);
+	inline void rgb(const simddouble&, const simddouble&, const simddouble&);
+	inline void rgb(const dvec3&);
+	inline void rgb(const simddouble&);
+	inline void xy(const simddouble&, const simddouble&);
+	inline void xy(const dvec2&);
+	inline void xy(const simddouble&);
+	inline void xyz(const simddouble&, const simddouble&, const simddouble&);
+	inline void xyz(const dvec3&);
+	inline void xyz(const simddouble&);
+	inline void xz(const simddouble&, const simddouble&);
+	inline void xz(const dvec2&);
+	inline void xz(const simddouble&);
+	inline void xzy(const simddouble&, const simddouble&, const simddouble&);
+	inline void xzy(const dvec3&);
+	inline void xzy(const simddouble&);
+	inline void yx(const simddouble&, const simddouble&);
+	inline void yx(const dvec2&);
+	inline void yx(const simddouble&);
+	inline void yxz(const simddouble&, const simddouble&, const simddouble&);
+	inline void yxz(const dvec3&);
+	inline void yxz(const simddouble&);
+	inline void yz(const simddouble&, const simddouble&);
+	inline void yz(const dvec2&);
+	inline void yz(const simddouble&);
+	inline void yzx(const simddouble&, const simddouble&, const simddouble&);
+	inline void yzx(const dvec3&);
+	inline void yzx(const simddouble&);
+	inline void zx(const simddouble&, const simddouble&);
+	inline void zx(const dvec2&);
+	inline void zx(const simddouble&);
+	inline void zxy(const simddouble&, const simddouble&, const simddouble&);
+	inline void zxy(const dvec3&);
+	inline void zxy(const simddouble&);
+	inline void zy(const simddouble&, const simddouble&);
+	inline void zy(const dvec2&);
+	inline void zy(const simddouble&);
+	inline void zyx(const simddouble&, const simddouble&, const simddouble&);
+	inline void zyx(const dvec3&);
+	inline void zyx(const simddouble&);
+#ifndef USE_SCALAR
+	inline void bg(const double&);
+	inline void bgr(const double&);
+	inline void br(const double&);
+	inline void brg(const double&);
+	inline void gb(const double&);
+	inline void gbr(const double&);
+	inline void gr(const double&);
+	inline void grb(const double&);
+	inline void rb(const double&);
+	inline void rbg(const double&);
+	inline void rg(const double&);
+	inline void rgb(const double&);
+	inline void xy(const double&);
+	inline void xyz(const double&);
+	inline void xz(const double&);
+	inline void xzy(const double&);
+	inline void yx(const double&);
+	inline void yxz(const double&);
+	inline void yz(const double&);
+	inline void yzx(const double&);
+	inline void zx(const double&);
+	inline void zxy(const double&);
+	inline void zy(const double&);
+	inline void zyx(const double&);
+#endif
+
+	// Operator to access elements like an array
+	inline simddouble& operator[](int index)
+	{
+		// Use a switch to return the correct element
+		switch (index)
+		{
+		case 0:
+			return x;
+		case 1:
+			return y;
+		case 2:
+			return z;
+		default:
+			throw std::out_of_range("Index out of range");
+		}
+	}
+
+	inline dvec3 operator=(const dvec3& _f)
+	{
+		x = _f.x;
+		y = _f.y;
+		z = _f.z;
+		return *this;
+	}
+};
+
+struct dvec4
+{
+	simddouble x, y, z, w;
+	simddouble& r = x;
+	simddouble& g = y;
+	simddouble& b = z;
+	simddouble& a = w;
+
+	dvec4() { x = (0.0);	y = (0.0);	z = (0.0);	w = (0.0); }
+	dvec4(const dvec4& other) = default;
+	dvec4(const simddouble& _f) { x = _f; y = _f; z = _f; w = _f; }
+	dvec4(const simddouble& _x, const simddouble& _y, const simddouble& _z, const simddouble& _w) : x(_x), y(_y), z(_z), w(_w) {}
+	dvec4(const dvec3& dvec3, simddouble _w) : x(dvec3.x), y(dvec3.y), z(dvec3.z), w(_w) {}
+	dvec4(const simddouble& _x, const dvec3& dvec3) : x(_x), y(dvec3.x), z(dvec3.y), w(dvec3.z) {}
+	dvec4(const simddouble& _x, const dvec2& dvec2, const simddouble& _w) : x(_x), y(dvec2.x), z(dvec2.y), w(_w) {}
+	dvec4(const simddouble& _x, const simddouble& _y, const dvec2& dvec2) : x(_x), y(_y), z(dvec2.x), w(dvec2.y) {}
+	dvec4(const dvec2& dvec2, const simddouble& _z, const simddouble& _w) : x(dvec2.x), y(dvec2.y), z(_z), w(_w) {}
+
+#ifndef USE_SCALAR
+	dvec4(const double& _f) { x = (_f); y = (_f); z = (_f); w = (_f); }
+	dvec4(const simddouble& _x, const simddouble& _y, const simddouble& _z, const double& _w) : x(_x), y(_y), z(_z) { w = (_w); }
+	dvec4(const simddouble& _x, const simddouble& _y, const double& _z, const simddouble& _w) : x(_x), y(_y), w(_w) { z = (_z); }
+	dvec4(const simddouble& _x, const simddouble& _y, const double& _z, const double& _w) : x(_x), y(_y) { z = (_z); w = (_w); }
+	dvec4(const simddouble& _x, const double& _y, const simddouble& _z, const simddouble& _w) : x(_x), z(_z), w(_w) { y = (_y); }
+	dvec4(const simddouble& _x, const double& _y, const simddouble& _z, const double& _w) : x(_x), z(_z) { y = (_y); w = (_w); }
+	dvec4(const simddouble& _x, const double& _y, const double& _z, const simddouble& _w) : x(_x), w(_w) { y = (_y); z = (_z); }
+	dvec4(const simddouble& _x, const double& _y, const double& _z, const double& _w) : x(_x) { y = (_y); z = (_z); w = (_w); }
+	dvec4(const double& _x, const simddouble& _y, const simddouble& _z, const simddouble& _w) : y(_y), z(_z), w(_w) { x = (_x); }
+	dvec4(const double& _x, const simddouble& _y, const simddouble& _z, const double& _w) : y(_y), z(_z) { x = (_x); w = (_w); }
+	dvec4(const double& _x, const simddouble& _y, const double& _z, const simddouble& _w) : y(_y), w(_w) { x = (_x); z = (_z); }
+	dvec4(const double& _x, const simddouble& _y, const double& _z, const double& _w) : y(_y) { x = (_x); z = (_z); w = (_w); }
+	dvec4(const double& _x, const double& _y, const simddouble& _z, const simddouble& _w) : z(_z), w(_w) { x = (_x); y = (_y); }
+	dvec4(const double& _x, const double& _y, const simddouble& _z, const double& _w) : z(_z) { x = (_x); y = (_y); w = (_w); }
+	dvec4(const double& _x, const double& _y, const double& _z, const simddouble& _w) : w(_w) { x = (_x); y = (_y); z = (_z); }
+	dvec4(const double& _x, const double& _y, const double& _z, const double& _w) { x = (_x); y = (_y); z = (_z); w = (_w); }
+	dvec4(const dvec3& dvec3, const double& _w) : x(dvec3.x), y(dvec3.y), z(dvec3.z) { w = (_w); }
+	dvec4(const dvec2& dvec2, const double& _z, const double& _w) : x(dvec2.x), y(dvec2.y) { z = (_z); w = (_w); }
+	dvec4(const double& _x, const dvec2& dvec2, const double& _w) : y(dvec2.x), z(dvec2.y) { x = (_x); w = (_w); }
+	dvec4(const double& _x, const double& _y, const dvec2& dvec2) : z(dvec2.x), w(dvec2.y) { x = (_x); y = (_y); }
+	dvec4(const dvec2& dvec2a, const dvec2& dvec2b) : x(dvec2a.x), y(dvec2a.y), z(dvec2b.x), w(dvec2b.y) {}
+#endif
+
+	inline dvec2 aa() const;
+	inline dvec3 aaa() const;
+	inline dvec4 aaaa() const;
+	inline dvec4 aaab() const;
+	inline dvec4 aaag() const;
+	inline dvec4 aaar() const;
+	inline dvec3 aab() const;
+	inline dvec4 aaba() const;
+	inline dvec4 aabb() const;
+	inline dvec4 aabg() const;
+	inline dvec4 aabr() const;
+	inline dvec3 aag() const;
+	inline dvec4 aaga() const;
+	inline dvec4 aagb() const;
+	inline dvec4 aagg() const;
+	inline dvec4 aagr() const;
+	inline dvec3 aar() const;
+	inline dvec4 aara() const;
+	inline dvec4 aarb() const;
+	inline dvec4 aarg() const;
+	inline dvec4 aarr() const;
+	inline dvec2 ab() const;
+	inline dvec3 aba() const;
+	inline dvec4 abaa() const;
+	inline dvec4 abab() const;
+	inline dvec4 abag() const;
+	inline dvec4 abar() const;
+	inline dvec3 abb() const;
+	inline dvec4 abba() const;
+	inline dvec4 abbb() const;
+	inline dvec4 abbg() const;
+	inline dvec4 abbr() const;
+	inline dvec3 abg() const;
+	inline dvec4 abga() const;
+	inline dvec4 abgb() const;
+	inline dvec4 abgg() const;
+	inline dvec4 abgr() const;
+	inline dvec3 abr() const;
+	inline dvec4 abra() const;
+	inline dvec4 abrb() const;
+	inline dvec4 abrg() const;
+	inline dvec4 abrr() const;
+	inline dvec2 ag() const;
+	inline dvec3 aga() const;
+	inline dvec4 agaa() const;
+	inline dvec4 agab() const;
+	inline dvec4 agag() const;
+	inline dvec4 agar() const;
+	inline dvec3 agb() const;
+	inline dvec4 agba() const;
+	inline dvec4 agbb() const;
+	inline dvec4 agbg() const;
+	inline dvec4 agbr() const;
+	inline dvec3 agg() const;
+	inline dvec4 agga() const;
+	inline dvec4 aggb() const;
+	inline dvec4 aggg() const;
+	inline dvec4 aggr() const;
+	inline dvec3 agr() const;
+	inline dvec4 agra() const;
+	inline dvec4 agrb() const;
+	inline dvec4 agrg() const;
+	inline dvec4 agrr() const;
+	inline dvec2 ar() const;
+	inline dvec3 ara() const;
+	inline dvec4 araa() const;
+	inline dvec4 arab() const;
+	inline dvec4 arag() const;
+	inline dvec4 arar() const;
+	inline dvec3 arb() const;
+	inline dvec4 arba() const;
+	inline dvec4 arbb() const;
+	inline dvec4 arbg() const;
+	inline dvec4 arbr() const;
+	inline dvec3 arg() const;
+	inline dvec4 arga() const;
+	inline dvec4 argb() const;
+	inline dvec4 argg() const;
+	inline dvec4 argr() const;
+	inline dvec3 arr() const;
+	inline dvec4 arra() const;
+	inline dvec4 arrb() const;
+	inline dvec4 arrg() const;
+	inline dvec4 arrr() const;
+	inline dvec2 ba() const;
+	inline dvec3 baa() const;
+	inline dvec4 baaa() const;
+	inline dvec4 baab() const;
+	inline dvec4 baag() const;
+	inline dvec4 baar() const;
+	inline dvec3 bab() const;
+	inline dvec4 baba() const;
+	inline dvec4 babb() const;
+	inline dvec4 babg() const;
+	inline dvec4 babr() const;
+	inline dvec3 bag() const;
+	inline dvec4 baga() const;
+	inline dvec4 bagb() const;
+	inline dvec4 bagg() const;
+	inline dvec4 bagr() const;
+	inline dvec3 bar() const;
+	inline dvec4 bara() const;
+	inline dvec4 barb() const;
+	inline dvec4 barg() const;
+	inline dvec4 barr() const;
+	inline dvec2 bb() const;
+	inline dvec3 bba() const;
+	inline dvec4 bbaa() const;
+	inline dvec4 bbab() const;
+	inline dvec4 bbag() const;
+	inline dvec4 bbar() const;
+	inline dvec3 bbb() const;
+	inline dvec4 bbba() const;
+	inline dvec4 bbbb() const;
+	inline dvec4 bbbg() const;
+	inline dvec4 bbbr() const;
+	inline dvec3 bbg() const;
+	inline dvec4 bbga() const;
+	inline dvec4 bbgb() const;
+	inline dvec4 bbgg() const;
+	inline dvec4 bbgr() const;
+	inline dvec3 bbr() const;
+	inline dvec4 bbra() const;
+	inline dvec4 bbrb() const;
+	inline dvec4 bbrg() const;
+	inline dvec4 bbrr() const;
+	inline dvec2 bg() const;
+	inline dvec3 bga() const;
+	inline dvec4 bgaa() const;
+	inline dvec4 bgab() const;
+	inline dvec4 bgag() const;
+	inline dvec4 bgar() const;
+	inline dvec3 bgb() const;
+	inline dvec4 bgba() const;
+	inline dvec4 bgbb() const;
+	inline dvec4 bgbg() const;
+	inline dvec4 bgbr() const;
+	inline dvec3 bgg() const;
+	inline dvec4 bgga() const;
+	inline dvec4 bggb() const;
+	inline dvec4 bggg() const;
+	inline dvec4 bggr() const;
+	inline dvec3 bgr() const;
+	inline dvec4 bgra() const;
+	inline dvec4 bgrb() const;
+	inline dvec4 bgrg() const;
+	inline dvec4 bgrr() const;
+	inline dvec2 br() const;
+	inline dvec3 bra() const;
+	inline dvec4 braa() const;
+	inline dvec4 brab() const;
+	inline dvec4 brag() const;
+	inline dvec4 brar() const;
+	inline dvec3 brb() const;
+	inline dvec4 brba() const;
+	inline dvec4 brbb() const;
+	inline dvec4 brbg() const;
+	inline dvec4 brbr() const;
+	inline dvec3 brg() const;
+	inline dvec4 brga() const;
+	inline dvec4 brgb() const;
+	inline dvec4 brgg() const;
+	inline dvec4 brgr() const;
+	inline dvec3 brr() const;
+	inline dvec4 brra() const;
+	inline dvec4 brrb() const;
+	inline dvec4 brrg() const;
+	inline dvec4 brrr() const;
+	inline dvec2 ga() const;
+	inline dvec3 gaa() const;
+	inline dvec4 gaaa() const;
+	inline dvec4 gaab() const;
+	inline dvec4 gaag() const;
+	inline dvec4 gaar() const;
+	inline dvec3 gab() const;
+	inline dvec4 gaba() const;
+	inline dvec4 gabb() const;
+	inline dvec4 gabg() const;
+	inline dvec4 gabr() const;
+	inline dvec3 gag() const;
+	inline dvec4 gaga() const;
+	inline dvec4 gagb() const;
+	inline dvec4 gagg() const;
+	inline dvec4 gagr() const;
+	inline dvec3 gar() const;
+	inline dvec4 gara() const;
+	inline dvec4 garb() const;
+	inline dvec4 garg() const;
+	inline dvec4 garr() const;
+	inline dvec2 gb() const;
+	inline dvec3 gba() const;
+	inline dvec4 gbaa() const;
+	inline dvec4 gbab() const;
+	inline dvec4 gbag() const;
+	inline dvec4 gbar() const;
+	inline dvec3 gbb() const;
+	inline dvec4 gbba() const;
+	inline dvec4 gbbb() const;
+	inline dvec4 gbbg() const;
+	inline dvec4 gbbr() const;
+	inline dvec3 gbg() const;
+	inline dvec4 gbga() const;
+	inline dvec4 gbgb() const;
+	inline dvec4 gbgg() const;
+	inline dvec4 gbgr() const;
+	inline dvec3 gbr() const;
+	inline dvec4 gbra() const;
+	inline dvec4 gbrb() const;
+	inline dvec4 gbrg() const;
+	inline dvec4 gbrr() const;
+	inline dvec2 gg() const;
+	inline dvec3 gga() const;
+	inline dvec4 ggaa() const;
+	inline dvec4 ggab() const;
+	inline dvec4 ggag() const;
+	inline dvec4 ggar() const;
+	inline dvec3 ggb() const;
+	inline dvec4 ggba() const;
+	inline dvec4 ggbb() const;
+	inline dvec4 ggbg() const;
+	inline dvec4 ggbr() const;
+	inline dvec3 ggg() const;
+	inline dvec4 ggga() const;
+	inline dvec4 gggb() const;
+	inline dvec4 gggg() const;
+	inline dvec4 gggr() const;
+	inline dvec3 ggr() const;
+	inline dvec4 ggra() const;
+	inline dvec4 ggrb() const;
+	inline dvec4 ggrg() const;
+	inline dvec4 ggrr() const;
+	inline dvec2 gr() const;
+	inline dvec3 gra() const;
+	inline dvec4 graa() const;
+	inline dvec4 grab() const;
+	inline dvec4 grag() const;
+	inline dvec4 grar() const;
+	inline dvec3 grb() const;
+	inline dvec4 grba() const;
+	inline dvec4 grbb() const;
+	inline dvec4 grbg() const;
+	inline dvec4 grbr() const;
+	inline dvec3 grg() const;
+	inline dvec4 grga() const;
+	inline dvec4 grgb() const;
+	inline dvec4 grgg() const;
+	inline dvec4 grgr() const;
+	inline dvec3 grr() const;
+	inline dvec4 grra() const;
+	inline dvec4 grrb() const;
+	inline dvec4 grrg() const;
+	inline dvec4 grrr() const;
+	inline dvec2 ra() const;
+	inline dvec3 raa() const;
+	inline dvec4 raaa() const;
+	inline dvec4 raab() const;
+	inline dvec4 raag() const;
+	inline dvec4 raar() const;
+	inline dvec3 rab() const;
+	inline dvec4 raba() const;
+	inline dvec4 rabb() const;
+	inline dvec4 rabg() const;
+	inline dvec4 rabr() const;
+	inline dvec3 rag() const;
+	inline dvec4 raga() const;
+	inline dvec4 ragb() const;
+	inline dvec4 ragg() const;
+	inline dvec4 ragr() const;
+	inline dvec3 rar() const;
+	inline dvec4 rara() const;
+	inline dvec4 rarb() const;
+	inline dvec4 rarg() const;
+	inline dvec4 rarr() const;
+	inline dvec2 rb() const;
+	inline dvec3 rba() const;
+	inline dvec4 rbaa() const;
+	inline dvec4 rbab() const;
+	inline dvec4 rbag() const;
+	inline dvec4 rbar() const;
+	inline dvec3 rbb() const;
+	inline dvec4 rbba() const;
+	inline dvec4 rbbb() const;
+	inline dvec4 rbbg() const;
+	inline dvec4 rbbr() const;
+	inline dvec3 rbg() const;
+	inline dvec4 rbga() const;
+	inline dvec4 rbgb() const;
+	inline dvec4 rbgg() const;
+	inline dvec4 rbgr() const;
+	inline dvec3 rbr() const;
+	inline dvec4 rbra() const;
+	inline dvec4 rbrb() const;
+	inline dvec4 rbrg() const;
+	inline dvec4 rbrr() const;
+	inline dvec2 rg() const;
+	inline dvec3 rga() const;
+	inline dvec4 rgaa() const;
+	inline dvec4 rgab() const;
+	inline dvec4 rgag() const;
+	inline dvec4 rgar() const;
+	inline dvec3 rgb() const;
+	inline dvec4 rgba() const;
+	inline dvec4 rgbb() const;
+	inline dvec4 rgbg() const;
+	inline dvec4 rgbr() const;
+	inline dvec3 rgg() const;
+	inline dvec4 rgga() const;
+	inline dvec4 rggb() const;
+	inline dvec4 rggg() const;
+	inline dvec4 rggr() const;
+	inline dvec3 rgr() const;
+	inline dvec4 rgra() const;
+	inline dvec4 rgrb() const;
+	inline dvec4 rgrg() const;
+	inline dvec4 rgrr() const;
+	inline dvec2 rr() const;
+	inline dvec3 rra() const;
+	inline dvec4 rraa() const;
+	inline dvec4 rrab() const;
+	inline dvec4 rrag() const;
+	inline dvec4 rrar() const;
+	inline dvec3 rrb() const;
+	inline dvec4 rrba() const;
+	inline dvec4 rrbb() const;
+	inline dvec4 rrbg() const;
+	inline dvec4 rrbr() const;
+	inline dvec3 rrg() const;
+	inline dvec4 rrga() const;
+	inline dvec4 rrgb() const;
+	inline dvec4 rrgg() const;
+	inline dvec4 rrgr() const;
+	inline dvec3 rrr() const;
+	inline dvec4 rrra() const;
+	inline dvec4 rrrb() const;
+	inline dvec4 rrrg() const;
+	inline dvec4 rrrr() const;
+	inline dvec2 ww() const;
+	inline dvec3 www() const;
+	inline dvec4 wwww() const;
+	inline dvec4 wwwx() const;
+	inline dvec4 wwwy() const;
+	inline dvec4 wwwz() const;
+	inline dvec3 wwx() const;
+	inline dvec4 wwxw() const;
+	inline dvec4 wwxx() const;
+	inline dvec4 wwxy() const;
+	inline dvec4 wwxz() const;
+	inline dvec3 wwy() const;
+	inline dvec4 wwyw() const;
+	inline dvec4 wwyx() const;
+	inline dvec4 wwyy() const;
+	inline dvec4 wwyz() const;
+	inline dvec3 wwz() const;
+	inline dvec4 wwzw() const;
+	inline dvec4 wwzx() const;
+	inline dvec4 wwzy() const;
+	inline dvec4 wwzz() const;
+	inline dvec2 wx() const;
+	inline dvec3 wxw() const;
+	inline dvec4 wxww() const;
+	inline dvec4 wxwx() const;
+	inline dvec4 wxwy() const;
+	inline dvec4 wxwz() const;
+	inline dvec3 wxx() const;
+	inline dvec4 wxxw() const;
+	inline dvec4 wxxx() const;
+	inline dvec4 wxxy() const;
+	inline dvec4 wxxz() const;
+	inline dvec3 wxy() const;
+	inline dvec4 wxyw() const;
+	inline dvec4 wxyx() const;
+	inline dvec4 wxyy() const;
+	inline dvec4 wxyz() const;
+	inline dvec3 wxz() const;
+	inline dvec4 wxzw() const;
+	inline dvec4 wxzx() const;
+	inline dvec4 wxzy() const;
+	inline dvec4 wxzz() const;
+	inline dvec2 wy() const;
+	inline dvec3 wyw() const;
+	inline dvec4 wyww() const;
+	inline dvec4 wywx() const;
+	inline dvec4 wywy() const;
+	inline dvec4 wywz() const;
+	inline dvec3 wyx() const;
+	inline dvec4 wyxw() const;
+	inline dvec4 wyxx() const;
+	inline dvec4 wyxy() const;
+	inline dvec4 wyxz() const;
+	inline dvec3 wyy() const;
+	inline dvec4 wyyw() const;
+	inline dvec4 wyyx() const;
+	inline dvec4 wyyy() const;
+	inline dvec4 wyyz() const;
+	inline dvec3 wyz() const;
+	inline dvec4 wyzw() const;
+	inline dvec4 wyzx() const;
+	inline dvec4 wyzy() const;
+	inline dvec4 wyzz() const;
+	inline dvec2 wz() const;
+	inline dvec3 wzw() const;
+	inline dvec4 wzww() const;
+	inline dvec4 wzwx() const;
+	inline dvec4 wzwy() const;
+	inline dvec4 wzwz() const;
+	inline dvec3 wzx() const;
+	inline dvec4 wzxw() const;
+	inline dvec4 wzxx() const;
+	inline dvec4 wzxy() const;
+	inline dvec4 wzxz() const;
+	inline dvec3 wzy() const;
+	inline dvec4 wzyw() const;
+	inline dvec4 wzyx() const;
+	inline dvec4 wzyy() const;
+	inline dvec4 wzyz() const;
+	inline dvec3 wzz() const;
+	inline dvec4 wzzw() const;
+	inline dvec4 wzzx() const;
+	inline dvec4 wzzy() const;
+	inline dvec4 wzzz() const;
+	inline dvec2 xw() const;
+	inline dvec3 xww() const;
+	inline dvec4 xwww() const;
+	inline dvec4 xwwx() const;
+	inline dvec4 xwwy() const;
+	inline dvec4 xwwz() const;
+	inline dvec3 xwx() const;
+	inline dvec4 xwxw() const;
+	inline dvec4 xwxx() const;
+	inline dvec4 xwxy() const;
+	inline dvec4 xwxz() const;
+	inline dvec3 xwy() const;
+	inline dvec4 xwyw() const;
+	inline dvec4 xwyx() const;
+	inline dvec4 xwyy() const;
+	inline dvec4 xwyz() const;
+	inline dvec3 xwz() const;
+	inline dvec4 xwzw() const;
+	inline dvec4 xwzx() const;
+	inline dvec4 xwzy() const;
+	inline dvec4 xwzz() const;
+	inline dvec2 xx() const;
+	inline dvec3 xxw() const;
+	inline dvec4 xxww() const;
+	inline dvec4 xxwx() const;
+	inline dvec4 xxwy() const;
+	inline dvec4 xxwz() const;
+	inline dvec3 xxx() const;
+	inline dvec4 xxxw() const;
+	inline dvec4 xxxx() const;
+	inline dvec4 xxxy() const;
+	inline dvec4 xxxz() const;
+	inline dvec3 xxy() const;
+	inline dvec4 xxyw() const;
+	inline dvec4 xxyx() const;
+	inline dvec4 xxyy() const;
+	inline dvec4 xxyz() const;
+	inline dvec3 xxz() const;
+	inline dvec4 xxzw() const;
+	inline dvec4 xxzx() const;
+	inline dvec4 xxzy() const;
+	inline dvec4 xxzz() const;
+	inline dvec2 xy() const;
+	inline dvec3 xyw() const;
+	inline dvec4 xyww() const;
+	inline dvec4 xywx() const;
+	inline dvec4 xywy() const;
+	inline dvec4 xywz() const;
+	inline dvec3 xyx() const;
+	inline dvec4 xyxw() const;
+	inline dvec4 xyxx() const;
+	inline dvec4 xyxy() const;
+	inline dvec4 xyxz() const;
+	inline dvec3 xyy() const;
+	inline dvec4 xyyw() const;
+	inline dvec4 xyyx() const;
+	inline dvec4 xyyy() const;
+	inline dvec4 xyyz() const;
+	inline dvec3 xyz() const;
+	inline dvec4 xyzw() const;
+	inline dvec4 xyzx() const;
+	inline dvec4 xyzy() const;
+	inline dvec4 xyzz() const;
+	inline dvec2 xz() const;
+	inline dvec3 xzw() const;
+	inline dvec4 xzww() const;
+	inline dvec4 xzwx() const;
+	inline dvec4 xzwy() const;
+	inline dvec4 xzwz() const;
+	inline dvec3 xzx() const;
+	inline dvec4 xzxw() const;
+	inline dvec4 xzxx() const;
+	inline dvec4 xzxy() const;
+	inline dvec4 xzxz() const;
+	inline dvec3 xzy() const;
+	inline dvec4 xzyw() const;
+	inline dvec4 xzyx() const;
+	inline dvec4 xzyy() const;
+	inline dvec4 xzyz() const;
+	inline dvec3 xzz() const;
+	inline dvec4 xzzw() const;
+	inline dvec4 xzzx() const;
+	inline dvec4 xzzy() const;
+	inline dvec4 xzzz() const;
+	inline dvec2 yw() const;
+	inline dvec3 yww() const;
+	inline dvec4 ywww() const;
+	inline dvec4 ywwx() const;
+	inline dvec4 ywwy() const;
+	inline dvec4 ywwz() const;
+	inline dvec3 ywx() const;
+	inline dvec4 ywxw() const;
+	inline dvec4 ywxx() const;
+	inline dvec4 ywxy() const;
+	inline dvec4 ywxz() const;
+	inline dvec3 ywy() const;
+	inline dvec4 ywyw() const;
+	inline dvec4 ywyx() const;
+	inline dvec4 ywyy() const;
+	inline dvec4 ywyz() const;
+	inline dvec3 ywz() const;
+	inline dvec4 ywzw() const;
+	inline dvec4 ywzx() const;
+	inline dvec4 ywzy() const;
+	inline dvec4 ywzz() const;
+	inline dvec2 yx() const;
+	inline dvec3 yxw() const;
+	inline dvec4 yxww() const;
+	inline dvec4 yxwx() const;
+	inline dvec4 yxwy() const;
+	inline dvec4 yxwz() const;
+	inline dvec3 yxx() const;
+	inline dvec4 yxxw() const;
+	inline dvec4 yxxx() const;
+	inline dvec4 yxxy() const;
+	inline dvec4 yxxz() const;
+	inline dvec3 yxy() const;
+	inline dvec4 yxyw() const;
+	inline dvec4 yxyx() const;
+	inline dvec4 yxyy() const;
+	inline dvec4 yxyz() const;
+	inline dvec3 yxz() const;
+	inline dvec4 yxzw() const;
+	inline dvec4 yxzx() const;
+	inline dvec4 yxzy() const;
+	inline dvec4 yxzz() const;
+	inline dvec2 yy() const;
+	inline dvec3 yyw() const;
+	inline dvec4 yyww() const;
+	inline dvec4 yywx() const;
+	inline dvec4 yywy() const;
+	inline dvec4 yywz() const;
+	inline dvec3 yyx() const;
+	inline dvec4 yyxw() const;
+	inline dvec4 yyxx() const;
+	inline dvec4 yyxy() const;
+	inline dvec4 yyxz() const;
+	inline dvec3 yyy() const;
+	inline dvec4 yyyw() const;
+	inline dvec4 yyyx() const;
+	inline dvec4 yyyy() const;
+	inline dvec4 yyyz() const;
+	inline dvec3 yyz() const;
+	inline dvec4 yyzw() const;
+	inline dvec4 yyzx() const;
+	inline dvec4 yyzy() const;
+	inline dvec4 yyzz() const;
+	inline dvec2 yz() const;
+	inline dvec3 yzw() const;
+	inline dvec4 yzww() const;
+	inline dvec4 yzwx() const;
+	inline dvec4 yzwy() const;
+	inline dvec4 yzwz() const;
+	inline dvec3 yzx() const;
+	inline dvec4 yzxw() const;
+	inline dvec4 yzxx() const;
+	inline dvec4 yzxy() const;
+	inline dvec4 yzxz() const;
+	inline dvec3 yzy() const;
+	inline dvec4 yzyw() const;
+	inline dvec4 yzyx() const;
+	inline dvec4 yzyy() const;
+	inline dvec4 yzyz() const;
+	inline dvec3 yzz() const;
+	inline dvec4 yzzw() const;
+	inline dvec4 yzzx() const;
+	inline dvec4 yzzy() const;
+	inline dvec4 yzzz() const;
+	inline dvec2 zw() const;
+	inline dvec3 zww() const;
+	inline dvec4 zwww() const;
+	inline dvec4 zwwx() const;
+	inline dvec4 zwwy() const;
+	inline dvec4 zwwz() const;
+	inline dvec3 zwx() const;
+	inline dvec4 zwxw() const;
+	inline dvec4 zwxx() const;
+	inline dvec4 zwxy() const;
+	inline dvec4 zwxz() const;
+	inline dvec3 zwy() const;
+	inline dvec4 zwyw() const;
+	inline dvec4 zwyx() const;
+	inline dvec4 zwyy() const;
+	inline dvec4 zwyz() const;
+	inline dvec3 zwz() const;
+	inline dvec4 zwzw() const;
+	inline dvec4 zwzx() const;
+	inline dvec4 zwzy() const;
+	inline dvec4 zwzz() const;
+	inline dvec2 zx() const;
+	inline dvec3 zxw() const;
+	inline dvec4 zxww() const;
+	inline dvec4 zxwx() const;
+	inline dvec4 zxwy() const;
+	inline dvec4 zxwz() const;
+	inline dvec3 zxx() const;
+	inline dvec4 zxxw() const;
+	inline dvec4 zxxx() const;
+	inline dvec4 zxxy() const;
+	inline dvec4 zxxz() const;
+	inline dvec3 zxy() const;
+	inline dvec4 zxyw() const;
+	inline dvec4 zxyx() const;
+	inline dvec4 zxyy() const;
+	inline dvec4 zxyz() const;
+	inline dvec3 zxz() const;
+	inline dvec4 zxzw() const;
+	inline dvec4 zxzx() const;
+	inline dvec4 zxzy() const;
+	inline dvec4 zxzz() const;
+	inline dvec2 zy() const;
+	inline dvec3 zyw() const;
+	inline dvec4 zyww() const;
+	inline dvec4 zywx() const;
+	inline dvec4 zywy() const;
+	inline dvec4 zywz() const;
+	inline dvec3 zyx() const;
+	inline dvec4 zyxw() const;
+	inline dvec4 zyxx() const;
+	inline dvec4 zyxy() const;
+	inline dvec4 zyxz() const;
+	inline dvec3 zyy() const;
+	inline dvec4 zyyw() const;
+	inline dvec4 zyyx() const;
+	inline dvec4 zyyy() const;
+	inline dvec4 zyyz() const;
+	inline dvec3 zyz() const;
+	inline dvec4 zyzw() const;
+	inline dvec4 zyzx() const;
+	inline dvec4 zyzy() const;
+	inline dvec4 zyzz() const;
+	inline dvec2 zz() const;
+	inline dvec3 zzw() const;
+	inline dvec4 zzww() const;
+	inline dvec4 zzwx() const;
+	inline dvec4 zzwy() const;
+	inline dvec4 zzwz() const;
+	inline dvec3 zzx() const;
+	inline dvec4 zzxw() const;
+	inline dvec4 zzxx() const;
+	inline dvec4 zzxy() const;
+	inline dvec4 zzxz() const;
+	inline dvec3 zzy() const;
+	inline dvec4 zzyw() const;
+	inline dvec4 zzyx() const;
+	inline dvec4 zzyy() const;
+	inline dvec4 zzyz() const;
+	inline dvec3 zzz() const;
+	inline dvec4 zzzw() const;
+	inline dvec4 zzzx() const;
+	inline dvec4 zzzy() const;
+	inline dvec4 zzzz() const;
+	inline void ab(const simddouble&, const simddouble&);
+	inline void ab(const dvec2&);
+	inline void ab(const simddouble&);
+	inline void abg(const simddouble&, const simddouble&, const simddouble&);
+	inline void abg(const dvec3&);
+	inline void abg(const simddouble&);
+	inline void abgr(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void abgr(const dvec4&);
+	inline void abgr(const simddouble&);
+	inline void abr(const simddouble&, const simddouble&, const simddouble&);
+	inline void abr(const dvec3&);
+	inline void abr(const simddouble&);
+	inline void abrg(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void abrg(const dvec4&);
+	inline void abrg(const simddouble&);
+	inline void ag(const simddouble&, const simddouble&);
+	inline void ag(const dvec2&);
+	inline void ag(const simddouble&);
+	inline void agb(const simddouble&, const simddouble&, const simddouble&);
+	inline void agb(const dvec3&);
+	inline void agb(const simddouble&);
+	inline void agbr(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void agbr(const dvec4&);
+	inline void agbr(const simddouble&);
+	inline void agr(const simddouble&, const simddouble&, const simddouble&);
+	inline void agr(const dvec3&);
+	inline void agr(const simddouble&);
+	inline void agrb(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void agrb(const dvec4&);
+	inline void agrb(const simddouble&);
+	inline void ar(const simddouble&, const simddouble&);
+	inline void ar(const dvec2&);
+	inline void ar(const simddouble&);
+	inline void arb(const simddouble&, const simddouble&, const simddouble&);
+	inline void arb(const dvec3&);
+	inline void arb(const simddouble&);
+	inline void arbg(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void arbg(const dvec4&);
+	inline void arbg(const simddouble&);
+	inline void arg(const simddouble&, const simddouble&, const simddouble&);
+	inline void arg(const dvec3&);
+	inline void arg(const simddouble&);
+	inline void argb(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void argb(const dvec4&);
+	inline void argb(const simddouble&);
+	inline void ba(const simddouble&, const simddouble&);
+	inline void ba(const dvec2&);
+	inline void ba(const simddouble&);
+	inline void bag(const simddouble&, const simddouble&, const simddouble&);
+	inline void bag(const dvec3&);
+	inline void bag(const simddouble&);
+	inline void bagr(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void bagr(const dvec4&);
+	inline void bagr(const simddouble&);
+	inline void bar(const simddouble&, const simddouble&, const simddouble&);
+	inline void bar(const dvec3&);
+	inline void bar(const simddouble&);
+	inline void barg(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void barg(const dvec4&);
+	inline void barg(const simddouble&);
+	inline void bg(const simddouble&, const simddouble&);
+	inline void bg(const dvec2&);
+	inline void bg(const simddouble&);
+	inline void bga(const simddouble&, const simddouble&, const simddouble&);
+	inline void bga(const dvec3&);
+	inline void bga(const simddouble&);
+	inline void bgar(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void bgar(const dvec4&);
+	inline void bgar(const simddouble&);
+	inline void bgr(const simddouble&, const simddouble&, const simddouble&);
+	inline void bgr(const dvec3&);
+	inline void bgr(const simddouble&);
+	inline void bgra(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void bgra(const dvec4&);
+	inline void bgra(const simddouble&);
+	inline void br(const simddouble&, const simddouble&);
+	inline void br(const dvec2&);
+	inline void br(const simddouble&);
+	inline void bra(const simddouble&, const simddouble&, const simddouble&);
+	inline void bra(const dvec3&);
+	inline void bra(const simddouble&);
+	inline void brag(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void brag(const dvec4&);
+	inline void brag(const simddouble&);
+	inline void brg(const simddouble&, const simddouble&, const simddouble&);
+	inline void brg(const dvec3&);
+	inline void brg(const simddouble&);
+	inline void brga(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void brga(const dvec4&);
+	inline void brga(const simddouble&);
+	inline void ga(const simddouble&, const simddouble&);
+	inline void ga(const dvec2&);
+	inline void ga(const simddouble&);
+	inline void gab(const simddouble&, const simddouble&, const simddouble&);
+	inline void gab(const dvec3&);
+	inline void gab(const simddouble&);
+	inline void gabr(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void gabr(const dvec4&);
+	inline void gabr(const simddouble&);
+	inline void gar(const simddouble&, const simddouble&, const simddouble&);
+	inline void gar(const dvec3&);
+	inline void gar(const simddouble&);
+	inline void garb(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void garb(const dvec4&);
+	inline void garb(const simddouble&);
+	inline void gb(const simddouble&, const simddouble&);
+	inline void gb(const dvec2&);
+	inline void gb(const simddouble&);
+	inline void gba(const simddouble&, const simddouble&, const simddouble&);
+	inline void gba(const dvec3&);
+	inline void gba(const simddouble&);
+	inline void gbar(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void gbar(const dvec4&);
+	inline void gbar(const simddouble&);
+	inline void gbr(const simddouble&, const simddouble&, const simddouble&);
+	inline void gbr(const dvec3&);
+	inline void gbr(const simddouble&);
+	inline void gbra(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void gbra(const dvec4&);
+	inline void gbra(const simddouble&);
+	inline void gr(const simddouble&, const simddouble&);
+	inline void gr(const dvec2&);
+	inline void gr(const simddouble&);
+	inline void gra(const simddouble&, const simddouble&, const simddouble&);
+	inline void gra(const dvec3&);
+	inline void gra(const simddouble&);
+	inline void grab(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void grab(const dvec4&);
+	inline void grab(const simddouble&);
+	inline void grb(const simddouble&, const simddouble&, const simddouble&);
+	inline void grb(const dvec3&);
+	inline void grb(const simddouble&);
+	inline void grba(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void grba(const dvec4&);
+	inline void grba(const simddouble&);
+	inline void ra(const simddouble&, const simddouble&);
+	inline void ra(const dvec2&);
+	inline void ra(const simddouble&);
+	inline void rab(const simddouble&, const simddouble&, const simddouble&);
+	inline void rab(const dvec3&);
+	inline void rab(const simddouble&);
+	inline void rabg(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void rabg(const dvec4&);
+	inline void rabg(const simddouble&);
+	inline void rag(const simddouble&, const simddouble&, const simddouble&);
+	inline void rag(const dvec3&);
+	inline void rag(const simddouble&);
+	inline void ragb(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void ragb(const dvec4&);
+	inline void ragb(const simddouble&);
+	inline void rb(const simddouble&, const simddouble&);
+	inline void rb(const dvec2&);
+	inline void rb(const simddouble&);
+	inline void rba(const simddouble&, const simddouble&, const simddouble&);
+	inline void rba(const dvec3&);
+	inline void rba(const simddouble&);
+	inline void rbag(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void rbag(const dvec4&);
+	inline void rbag(const simddouble&);
+	inline void rbg(const simddouble&, const simddouble&, const simddouble&);
+	inline void rbg(const dvec3&);
+	inline void rbg(const simddouble&);
+	inline void rbga(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void rbga(const dvec4&);
+	inline void rbga(const simddouble&);
+	inline void rg(const simddouble&, const simddouble&);
+	inline void rg(const dvec2&);
+	inline void rg(const simddouble&);
+	inline void rga(const simddouble&, const simddouble&, const simddouble&);
+	inline void rga(const dvec3&);
+	inline void rga(const simddouble&);
+	inline void rgab(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void rgab(const dvec4&);
+	inline void rgab(const simddouble&);
+	inline void rgb(const simddouble&, const simddouble&, const simddouble&);
+	inline void rgb(const dvec3&);
+	inline void rgb(const simddouble&);
+	inline void rgba(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void rgba(const dvec4&);
+	inline void rgba(const simddouble&);
+	inline void wx(const simddouble&, const simddouble&);
+	inline void wx(const dvec2&);
+	inline void wx(const simddouble&);
+	inline void wxy(const simddouble&, const simddouble&, const simddouble&);
+	inline void wxy(const dvec3&);
+	inline void wxy(const simddouble&);
+	inline void wxyz(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void wxyz(const dvec4&);
+	inline void wxyz(const simddouble&);
+	inline void wxz(const simddouble&, const simddouble&, const simddouble&);
+	inline void wxz(const dvec3&);
+	inline void wxz(const simddouble&);
+	inline void wxzy(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void wxzy(const dvec4&);
+	inline void wxzy(const simddouble&);
+	inline void wy(const simddouble&, const simddouble&);
+	inline void wy(const dvec2&);
+	inline void wy(const simddouble&);
+	inline void wyx(const simddouble&, const simddouble&, const simddouble&);
+	inline void wyx(const dvec3&);
+	inline void wyx(const simddouble&);
+	inline void wyxz(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void wyxz(const dvec4&);
+	inline void wyxz(const simddouble&);
+	inline void wyz(const simddouble&, const simddouble&, const simddouble&);
+	inline void wyz(const dvec3&);
+	inline void wyz(const simddouble&);
+	inline void wyzx(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void wyzx(const dvec4&);
+	inline void wyzx(const simddouble&);
+	inline void wz(const simddouble&, const simddouble&);
+	inline void wz(const dvec2&);
+	inline void wz(const simddouble&);
+	inline void wzx(const simddouble&, const simddouble&, const simddouble&);
+	inline void wzx(const dvec3&);
+	inline void wzx(const simddouble&);
+	inline void wzxy(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void wzxy(const dvec4&);
+	inline void wzxy(const simddouble&);
+	inline void wzy(const simddouble&, const simddouble&, const simddouble&);
+	inline void wzy(const dvec3&);
+	inline void wzy(const simddouble&);
+	inline void wzyx(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void wzyx(const dvec4&);
+	inline void wzyx(const simddouble&);
+	inline void xw(const simddouble&, const simddouble&);
+	inline void xw(const dvec2&);
+	inline void xw(const simddouble&);
+	inline void xwy(const simddouble&, const simddouble&, const simddouble&);
+	inline void xwy(const dvec3&);
+	inline void xwy(const simddouble&);
+	inline void xwyz(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void xwyz(const dvec4&);
+	inline void xwyz(const simddouble&);
+	inline void xwz(const simddouble&, const simddouble&, const simddouble&);
+	inline void xwz(const dvec3&);
+	inline void xwz(const simddouble&);
+	inline void xwzy(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void xwzy(const dvec4&);
+	inline void xwzy(const simddouble&);
+	inline void xy(const simddouble&, const simddouble&);
+	inline void xy(const dvec2&);
+	inline void xy(const simddouble&);
+	inline void xyw(const simddouble&, const simddouble&, const simddouble&);
+	inline void xyw(const dvec3&);
+	inline void xyw(const simddouble&);
+	inline void xywz(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void xywz(const dvec4&);
+	inline void xywz(const simddouble&);
+	inline void xyz(const simddouble&, const simddouble&, const simddouble&);
+	inline void xyz(const dvec3&);
+	inline void xyz(const simddouble&);
+	inline void xyzw(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void xyzw(const dvec4&);
+	inline void xyzw(const simddouble&);
+	inline void xz(const simddouble&, const simddouble&);
+	inline void xz(const dvec2&);
+	inline void xz(const simddouble&);
+	inline void xzw(const simddouble&, const simddouble&, const simddouble&);
+	inline void xzw(const dvec3&);
+	inline void xzw(const simddouble&);
+	inline void xzwy(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void xzwy(const dvec4&);
+	inline void xzwy(const simddouble&);
+	inline void xzy(const simddouble&, const simddouble&, const simddouble&);
+	inline void xzy(const dvec3&);
+	inline void xzy(const simddouble&);
+	inline void xzyw(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void xzyw(const dvec4&);
+	inline void xzyw(const simddouble&);
+	inline void yw(const simddouble&, const simddouble&);
+	inline void yw(const dvec2&);
+	inline void yw(const simddouble&);
+	inline void ywx(const simddouble&, const simddouble&, const simddouble&);
+	inline void ywx(const dvec3&);
+	inline void ywx(const simddouble&);
+	inline void ywxz(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void ywxz(const dvec4&);
+	inline void ywxz(const simddouble&);
+	inline void ywz(const simddouble&, const simddouble&, const simddouble&);
+	inline void ywz(const dvec3&);
+	inline void ywz(const simddouble&);
+	inline void ywzx(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void ywzx(const dvec4&);
+	inline void ywzx(const simddouble&);
+	inline void yx(const simddouble&, const simddouble&);
+	inline void yx(const dvec2&);
+	inline void yx(const simddouble&);
+	inline void yxw(const simddouble&, const simddouble&, const simddouble&);
+	inline void yxw(const dvec3&);
+	inline void yxw(const simddouble&);
+	inline void yxwz(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void yxwz(const dvec4&);
+	inline void yxwz(const simddouble&);
+	inline void yxz(const simddouble&, const simddouble&, const simddouble&);
+	inline void yxz(const dvec3&);
+	inline void yxz(const simddouble&);
+	inline void yxzw(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void yxzw(const dvec4&);
+	inline void yxzw(const simddouble&);
+	inline void yz(const simddouble&, const simddouble&);
+	inline void yz(const dvec2&);
+	inline void yz(const simddouble&);
+	inline void yzw(const simddouble&, const simddouble&, const simddouble&);
+	inline void yzw(const dvec3&);
+	inline void yzw(const simddouble&);
+	inline void yzwx(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void yzwx(const dvec4&);
+	inline void yzwx(const simddouble&);
+	inline void yzx(const simddouble&, const simddouble&, const simddouble&);
+	inline void yzx(const dvec3&);
+	inline void yzx(const simddouble&);
+	inline void yzxw(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void yzxw(const dvec4&);
+	inline void yzxw(const simddouble&);
+	inline void zw(const simddouble&, const simddouble&);
+	inline void zw(const dvec2&);
+	inline void zw(const simddouble&);
+	inline void zwx(const simddouble&, const simddouble&, const simddouble&);
+	inline void zwx(const dvec3&);
+	inline void zwx(const simddouble&);
+	inline void zwxy(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void zwxy(const dvec4&);
+	inline void zwxy(const simddouble&);
+	inline void zwy(const simddouble&, const simddouble&, const simddouble&);
+	inline void zwy(const dvec3&);
+	inline void zwy(const simddouble&);
+	inline void zwyx(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void zwyx(const dvec4&);
+	inline void zwyx(const simddouble&);
+	inline void zx(const simddouble&, const simddouble&);
+	inline void zx(const dvec2&);
+	inline void zx(const simddouble&);
+	inline void zxw(const simddouble&, const simddouble&, const simddouble&);
+	inline void zxw(const dvec3&);
+	inline void zxw(const simddouble&);
+	inline void zxwy(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void zxwy(const dvec4&);
+	inline void zxwy(const simddouble&);
+	inline void zxy(const simddouble&, const simddouble&, const simddouble&);
+	inline void zxy(const dvec3&);
+	inline void zxy(const simddouble&);
+	inline void zxyw(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void zxyw(const dvec4&);
+	inline void zxyw(const simddouble&);
+	inline void zy(const simddouble&, const simddouble&);
+	inline void zy(const dvec2&);
+	inline void zy(const simddouble&);
+	inline void zyw(const simddouble&, const simddouble&, const simddouble&);
+	inline void zyw(const dvec3&);
+	inline void zyw(const simddouble&);
+	inline void zywx(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void zywx(const dvec4&);
+	inline void zywx(const simddouble&);
+	inline void zyx(const simddouble&, const simddouble&, const simddouble&);
+	inline void zyx(const dvec3&);
+	inline void zyx(const simddouble&);
+	inline void zyxw(const simddouble&, const simddouble&, const simddouble&, const simddouble&);
+	inline void zyxw(const dvec4&);
+	inline void zyxw(const simddouble&);
+#ifndef USE_SCALAR
+	inline void ab(const double&);
+	inline void abg(const double&);
+	inline void abgr(const double&);
+	inline void abr(const double&);
+	inline void abrg(const double&);
+	inline void ag(const double&);
+	inline void agb(const double&);
+	inline void agbr(const double&);
+	inline void agr(const double&);
+	inline void agrb(const double&);
+	inline void ar(const double&);
+	inline void arb(const double&);
+	inline void arbg(const double&);
+	inline void arg(const double&);
+	inline void argb(const double&);
+	inline void ba(const double&);
+	inline void bag(const double&);
+	inline void bagr(const double&);
+	inline void bar(const double&);
+	inline void barg(const double&);
+	inline void bg(const double&);
+	inline void bga(const double&);
+	inline void bgar(const double&);
+	inline void bgr(const double&);
+	inline void bgra(const double&);
+	inline void br(const double&);
+	inline void bra(const double&);
+	inline void brag(const double&);
+	inline void brg(const double&);
+	inline void brga(const double&);
+	inline void ga(const double&);
+	inline void gab(const double&);
+	inline void gabr(const double&);
+	inline void gar(const double&);
+	inline void garb(const double&);
+	inline void gb(const double&);
+	inline void gba(const double&);
+	inline void gbar(const double&);
+	inline void gbr(const double&);
+	inline void gbra(const double&);
+	inline void gr(const double&);
+	inline void gra(const double&);
+	inline void grab(const double&);
+	inline void grb(const double&);
+	inline void grba(const double&);
+	inline void ra(const double&);
+	inline void rab(const double&);
+	inline void rabg(const double&);
+	inline void rag(const double&);
+	inline void ragb(const double&);
+	inline void rb(const double&);
+	inline void rba(const double&);
+	inline void rbag(const double&);
+	inline void rbg(const double&);
+	inline void rbga(const double&);
+	inline void rg(const double&);
+	inline void rga(const double&);
+	inline void rgab(const double&);
+	inline void rgb(const double&);
+	inline void rgba(const double&);
+	inline void wx(const double&);
+	inline void wxy(const double&);
+	inline void wxyz(const double&);
+	inline void wxz(const double&);
+	inline void wxzy(const double&);
+	inline void wy(const double&);
+	inline void wyx(const double&);
+	inline void wyxz(const double&);
+	inline void wyz(const double&);
+	inline void wyzx(const double&);
+	inline void wz(const double&);
+	inline void wzx(const double&);
+	inline void wzxy(const double&);
+	inline void wzy(const double&);
+	inline void wzyx(const double&);
+	inline void xw(const double&);
+	inline void xwy(const double&);
+	inline void xwyz(const double&);
+	inline void xwz(const double&);
+	inline void xwzy(const double&);
+	inline void xy(const double&);
+	inline void xyw(const double&);
+	inline void xywz(const double&);
+	inline void xyz(const double&);
+	inline void xyzw(const double&);
+	inline void xz(const double&);
+	inline void xzw(const double&);
+	inline void xzwy(const double&);
+	inline void xzy(const double&);
+	inline void xzyw(const double&);
+	inline void yw(const double&);
+	inline void ywx(const double&);
+	inline void ywxz(const double&);
+	inline void ywz(const double&);
+	inline void ywzx(const double&);
+	inline void yx(const double&);
+	inline void yxw(const double&);
+	inline void yxwz(const double&);
+	inline void yxz(const double&);
+	inline void yxzw(const double&);
+	inline void yz(const double&);
+	inline void yzw(const double&);
+	inline void yzwx(const double&);
+	inline void yzx(const double&);
+	inline void yzxw(const double&);
+	inline void zw(const double&);
+	inline void zwx(const double&);
+	inline void zwxy(const double&);
+	inline void zwy(const double&);
+	inline void zwyx(const double&);
+	inline void zx(const double&);
+	inline void zxw(const double&);
+	inline void zxwy(const double&);
+	inline void zxy(const double&);
+	inline void zxyw(const double&);
+	inline void zy(const double&);
+	inline void zyw(const double&);
+	inline void zywx(const double&);
+	inline void zyx(const double&);
+	inline void zyxw(const double&);
+#endif
+
+
+
+	// Operator to access elements like an array
+	inline simddouble& operator[](int index)
+	{
+		// Use a switch to return the correct element
+		switch (index)
+		{
+		case 0:
+			return x;
+		case 1:
+			return y;
+		case 2:
+			return z;
+		case 3:
+			return w;
+		default:
+			throw std::out_of_range("Index out of range");
+		}
+	}
+
+	inline dvec4 operator=(const dvec4& _f)
+	{
+		x = _f.x;
+		y = _f.y;
+		z = _f.z;
+		w = _f.w;
+		return *this;
+	}
+
+};
+
+// Structs defining a vector2, vector3 and vector3 of simdint types
+struct ivec2
+{
+	simdint x, y;
+	simdint& r = x;
+	simdint& g = y;
+
+	ivec2() { x = (0);	y = (0); }
+	ivec2(const ivec2& other) = default;
+	ivec2(const simdint& _f) { x = _f; y = _f; }
+	ivec2(const simdint& _x, const simdint& _y) : x(_x), y(_y) {}
+#ifndef USE_SCALAR
+	ivec2(const int& _f) { x = (_f); y = (_f); }
+	ivec2(const int& _x, const int& _y) { x = (_x); y = (_y); }
+	ivec2(const simdint& _x, const int& _y) : x(_x) { y = (_y); }
+	ivec2(const int& _x, const simdint& _y) : y(_y) { x = (_x); }
+#endif
+	// Swizzle method
+	inline ivec2 gg() const;
+	inline ivec3 ggg() const;
+	inline ivec4 gggg() const;
+	inline ivec4 gggr() const;
+	inline ivec3 ggr() const;
+	inline ivec4 ggrg() const;
+	inline ivec4 ggrr() const;
+	inline ivec2 gr() const;
+	inline ivec3 grg() const;
+	inline ivec4 grgg() const;
+	inline ivec4 grgr() const;
+	inline ivec3 grr() const;
+	inline ivec4 grrg() const;
+	inline ivec4 grrr() const;
+	inline ivec2 rg() const;
+	inline ivec3 rgg() const;
+	inline ivec4 rggg() const;
+	inline ivec4 rggr() const;
+	inline ivec3 rgr() const;
+	inline ivec4 rgrg() const;
+	inline ivec4 rgrr() const;
+	inline ivec2 rr() const;
+	inline ivec3 rrg() const;
+	inline ivec4 rrgg() const;
+	inline ivec4 rrgr() const;
+	inline ivec3 rrr() const;
+	inline ivec4 rrrg() const;
+	inline ivec4 rrrr() const;
+	inline ivec2 xx() const;
+	inline ivec3 xxx() const;
+	inline ivec4 xxxx() const;
+	inline ivec4 xxxy() const;
+	inline ivec3 xxy() const;
+	inline ivec4 xxyx() const;
+	inline ivec4 xxyy() const;
+	inline ivec2 xy() const;
+	inline ivec3 xyx() const;
+	inline ivec4 xyxx() const;
+	inline ivec4 xyxy() const;
+	inline ivec3 xyy() const;
+	inline ivec4 xyyx() const;
+	inline ivec4 xyyy() const;
+	inline ivec2 yx() const;
+	inline ivec3 yxx() const;
+	inline ivec4 yxxx() const;
+	inline ivec4 yxxy() const;
+	inline ivec3 yxy() const;
+	inline ivec4 yxyx() const;
+	inline ivec4 yxyy() const;
+	inline ivec2 yy() const;
+	inline ivec3 yyx() const;
+	inline ivec4 yyxx() const;
+	inline ivec4 yyxy() const;
+	inline ivec3 yyy() const;
+	inline ivec4 yyyx() const;
+	inline ivec4 yyyy() const;
+	inline void gr(const simdint&, const simdint&);
+	inline void gr(const ivec2&);
+	inline void gr(const simdint&);
+	inline void rg(const simdint&, const simdint&);
+	inline void rg(const ivec2&);
+	inline void rg(const simdint&);
+	inline void xy(const simdint&, const simdint&);
+	inline void xy(const ivec2&);
+	inline void xy(const simdint&);
+	inline void yx(const simdint&, const simdint&);
+	inline void yx(const ivec2&);
+	inline void yx(const simdint&);
+#ifndef USE_SCALAR
+	inline void gr(const int&);
+	inline void rg(const int&);
+	inline void xy(const int&);
+	inline void yx(const int&);
+#endif
+
+	// Operator to access elements like an array
+	inline simdint& operator[](int index)
+	{
+		// Use a switch to return the correct element
+		switch (index)
+		{
+		case 0:
+			return x;
+		case 1:
+			return y;
+		default:
+			throw std::out_of_range("Index out of range");
+		}
+	}
+
+	inline ivec2 operator=(const ivec2& _f)
+	{
+		x = _f.x;
+		y = _f.y;
+		return *this;
+	}
+};
+
+struct ivec3
+{
+	simdint x, y, z;
+	simdint& r = x;
+	simdint& g = y;
+	simdint& b = z;
+
+	ivec3() { x = (0); y = (0); z = (0); }
+	ivec3(const ivec3& other) = default;
+	ivec3(const simdint& _f) { x = _f; y = _f; z = _f; }
+	ivec3(const simdint& _x, const simdint& _y, const simdint& _z) : x(_x), y(_y), z(_z) {}
+	ivec3(const simdint& _x, const ivec2& ivec2) : x(_x), y(ivec2.x), z(ivec2.y) {}
+	ivec3(const ivec2& ivec2, const simdint& _z) : x(ivec2.x), y(ivec2.y), z(_z) {}
+
+#ifndef USE_SCALAR
+	ivec3(const int& _f)
+	{
+		x = (_f);
+		y = (_f);
+		z = (_f);
+	}
+	ivec3(const simdint& _x, const simdint& _y, const int& _z) : x(_x), y(_y) { z = (_z); }
+	ivec3(const simdint& _x, const int& _y, const simdint& _z) : x(_x), z(_z) { y = (_y); }
+	ivec3(const simdint& _x, const int& _y, const int& _z) : x(_x) { y = (_y); z = (_z); }
+	ivec3(const int& _x, const simdint& _y, const simdint& _z) : y(_y), z(_z) { x = (_x); }
+	ivec3(const int& _x, const simdint& _y, const int& _z) : y(_y) { x = (_x); z = (_z); }
+	ivec3(const int& _x, const int& _y, const simdint& _z) : z(_z) { x = (_x); y = (_y); }
+	ivec3(const int& _x, const int& _y, const int& _z) { x = (_x); y = (_y); z = (_z); }
+	ivec3(const ivec2& ivec2, const int& _z) : x(ivec2.x), y(ivec2.y) { z = (_z); }
+	ivec3(const int& _x, const ivec2& ivec2) : y(ivec2.x), z(ivec2.y) { x = (_x); }
+#endif
+	inline ivec2 bb() const;
+	inline ivec3 bbb() const;
+	inline ivec4 bbbb() const;
+	inline ivec4 bbbg() const;
+	inline ivec4 bbbr() const;
+	inline ivec3 bbg() const;
+	inline ivec4 bbgb() const;
+	inline ivec4 bbgg() const;
+	inline ivec4 bbgr() const;
+	inline ivec3 bbr() const;
+	inline ivec4 bbrb() const;
+	inline ivec4 bbrg() const;
+	inline ivec4 bbrr() const;
+	inline ivec2 bg() const;
+	inline ivec3 bgb() const;
+	inline ivec4 bgbb() const;
+	inline ivec4 bgbg() const;
+	inline ivec4 bgbr() const;
+	inline ivec3 bgg() const;
+	inline ivec4 bggb() const;
+	inline ivec4 bggg() const;
+	inline ivec4 bggr() const;
+	inline ivec3 bgr() const;
+	inline ivec4 bgrb() const;
+	inline ivec4 bgrg() const;
+	inline ivec4 bgrr() const;
+	inline ivec2 br() const;
+	inline ivec3 brb() const;
+	inline ivec4 brbb() const;
+	inline ivec4 brbg() const;
+	inline ivec4 brbr() const;
+	inline ivec3 brg() const;
+	inline ivec4 brgb() const;
+	inline ivec4 brgg() const;
+	inline ivec4 brgr() const;
+	inline ivec3 brr() const;
+	inline ivec4 brrb() const;
+	inline ivec4 brrg() const;
+	inline ivec4 brrr() const;
+	inline ivec2 gb() const;
+	inline ivec3 gbb() const;
+	inline ivec4 gbbb() const;
+	inline ivec4 gbbg() const;
+	inline ivec4 gbbr() const;
+	inline ivec3 gbg() const;
+	inline ivec4 gbgb() const;
+	inline ivec4 gbgg() const;
+	inline ivec4 gbgr() const;
+	inline ivec3 gbr() const;
+	inline ivec4 gbrb() const;
+	inline ivec4 gbrg() const;
+	inline ivec4 gbrr() const;
+	inline ivec2 gg() const;
+	inline ivec3 ggb() const;
+	inline ivec4 ggbb() const;
+	inline ivec4 ggbg() const;
+	inline ivec4 ggbr() const;
+	inline ivec3 ggg() const;
+	inline ivec4 gggb() const;
+	inline ivec4 gggg() const;
+	inline ivec4 gggr() const;
+	inline ivec3 ggr() const;
+	inline ivec4 ggrb() const;
+	inline ivec4 ggrg() const;
+	inline ivec4 ggrr() const;
+	inline ivec2 gr() const;
+	inline ivec3 grb() const;
+	inline ivec4 grbb() const;
+	inline ivec4 grbg() const;
+	inline ivec4 grbr() const;
+	inline ivec3 grg() const;
+	inline ivec4 grgb() const;
+	inline ivec4 grgg() const;
+	inline ivec4 grgr() const;
+	inline ivec3 grr() const;
+	inline ivec4 grrb() const;
+	inline ivec4 grrg() const;
+	inline ivec4 grrr() const;
+	inline ivec2 rb() const;
+	inline ivec3 rbb() const;
+	inline ivec4 rbbb() const;
+	inline ivec4 rbbg() const;
+	inline ivec4 rbbr() const;
+	inline ivec3 rbg() const;
+	inline ivec4 rbgb() const;
+	inline ivec4 rbgg() const;
+	inline ivec4 rbgr() const;
+	inline ivec3 rbr() const;
+	inline ivec4 rbrb() const;
+	inline ivec4 rbrg() const;
+	inline ivec4 rbrr() const;
+	inline ivec2 rg() const;
+	inline ivec3 rgb() const;
+	inline ivec4 rgbb() const;
+	inline ivec4 rgbg() const;
+	inline ivec4 rgbr() const;
+	inline ivec3 rgg() const;
+	inline ivec4 rggb() const;
+	inline ivec4 rggg() const;
+	inline ivec4 rggr() const;
+	inline ivec3 rgr() const;
+	inline ivec4 rgrb() const;
+	inline ivec4 rgrg() const;
+	inline ivec4 rgrr() const;
+	inline ivec2 rr() const;
+	inline ivec3 rrb() const;
+	inline ivec4 rrbb() const;
+	inline ivec4 rrbg() const;
+	inline ivec4 rrbr() const;
+	inline ivec3 rrg() const;
+	inline ivec4 rrgb() const;
+	inline ivec4 rrgg() const;
+	inline ivec4 rrgr() const;
+	inline ivec3 rrr() const;
+	inline ivec4 rrrb() const;
+	inline ivec4 rrrg() const;
+	inline ivec4 rrrr() const;
+	inline ivec2 xx() const;
+	inline ivec3 xxx() const;
+	inline ivec4 xxxx() const;
+	inline ivec4 xxxy() const;
+	inline ivec4 xxxz() const;
+	inline ivec3 xxy() const;
+	inline ivec4 xxyx() const;
+	inline ivec4 xxyy() const;
+	inline ivec4 xxyz() const;
+	inline ivec3 xxz() const;
+	inline ivec4 xxzx() const;
+	inline ivec4 xxzy() const;
+	inline ivec4 xxzz() const;
+	inline ivec2 xy() const;
+	inline ivec3 xyx() const;
+	inline ivec4 xyxx() const;
+	inline ivec4 xyxy() const;
+	inline ivec4 xyxz() const;
+	inline ivec3 xyy() const;
+	inline ivec4 xyyx() const;
+	inline ivec4 xyyy() const;
+	inline ivec4 xyyz() const;
+	inline ivec3 xyz() const;
+	inline ivec4 xyzx() const;
+	inline ivec4 xyzy() const;
+	inline ivec4 xyzz() const;
+	inline ivec2 xz() const;
+	inline ivec3 xzx() const;
+	inline ivec4 xzxx() const;
+	inline ivec4 xzxy() const;
+	inline ivec4 xzxz() const;
+	inline ivec3 xzy() const;
+	inline ivec4 xzyx() const;
+	inline ivec4 xzyy() const;
+	inline ivec4 xzyz() const;
+	inline ivec3 xzz() const;
+	inline ivec4 xzzx() const;
+	inline ivec4 xzzy() const;
+	inline ivec4 xzzz() const;
+	inline ivec2 yx() const;
+	inline ivec3 yxx() const;
+	inline ivec4 yxxx() const;
+	inline ivec4 yxxy() const;
+	inline ivec4 yxxz() const;
+	inline ivec3 yxy() const;
+	inline ivec4 yxyx() const;
+	inline ivec4 yxyy() const;
+	inline ivec4 yxyz() const;
+	inline ivec3 yxz() const;
+	inline ivec4 yxzx() const;
+	inline ivec4 yxzy() const;
+	inline ivec4 yxzz() const;
+	inline ivec2 yy() const;
+	inline ivec3 yyx() const;
+	inline ivec4 yyxx() const;
+	inline ivec4 yyxy() const;
+	inline ivec4 yyxz() const;
+	inline ivec3 yyy() const;
+	inline ivec4 yyyx() const;
+	inline ivec4 yyyy() const;
+	inline ivec4 yyyz() const;
+	inline ivec3 yyz() const;
+	inline ivec4 yyzx() const;
+	inline ivec4 yyzy() const;
+	inline ivec4 yyzz() const;
+	inline ivec2 yz() const;
+	inline ivec3 yzx() const;
+	inline ivec4 yzxx() const;
+	inline ivec4 yzxy() const;
+	inline ivec4 yzxz() const;
+	inline ivec3 yzy() const;
+	inline ivec4 yzyx() const;
+	inline ivec4 yzyy() const;
+	inline ivec4 yzyz() const;
+	inline ivec3 yzz() const;
+	inline ivec4 yzzx() const;
+	inline ivec4 yzzy() const;
+	inline ivec4 yzzz() const;
+	inline ivec2 zx() const;
+	inline ivec3 zxx() const;
+	inline ivec4 zxxx() const;
+	inline ivec4 zxxy() const;
+	inline ivec4 zxxz() const;
+	inline ivec3 zxy() const;
+	inline ivec4 zxyx() const;
+	inline ivec4 zxyy() const;
+	inline ivec4 zxyz() const;
+	inline ivec3 zxz() const;
+	inline ivec4 zxzx() const;
+	inline ivec4 zxzy() const;
+	inline ivec4 zxzz() const;
+	inline ivec2 zy() const;
+	inline ivec3 zyx() const;
+	inline ivec4 zyxx() const;
+	inline ivec4 zyxy() const;
+	inline ivec4 zyxz() const;
+	inline ivec3 zyy() const;
+	inline ivec4 zyyx() const;
+	inline ivec4 zyyy() const;
+	inline ivec4 zyyz() const;
+	inline ivec3 zyz() const;
+	inline ivec4 zyzx() const;
+	inline ivec4 zyzy() const;
+	inline ivec4 zyzz() const;
+	inline ivec2 zz() const;
+	inline ivec3 zzx() const;
+	inline ivec4 zzxx() const;
+	inline ivec4 zzxy() const;
+	inline ivec4 zzxz() const;
+	inline ivec3 zzy() const;
+	inline ivec4 zzyx() const;
+	inline ivec4 zzyy() const;
+	inline ivec4 zzyz() const;
+	inline ivec3 zzz() const;
+	inline ivec4 zzzx() const;
+	inline ivec4 zzzy() const;
+	inline ivec4 zzzz() const;
+	inline void bg(const simdint&, const simdint&);
+	inline void bg(const ivec2&);
+	inline void bg(const simdint&);
+	inline void bgr(const simdint&, const simdint&, const simdint&);
+	inline void bgr(const ivec3&);
+	inline void bgr(const simdint&);
+	inline void br(const simdint&, const simdint&);
+	inline void br(const ivec2&);
+	inline void br(const simdint&);
+	inline void brg(const simdint&, const simdint&, const simdint&);
+	inline void brg(const ivec3&);
+	inline void brg(const simdint&);
+	inline void gb(const simdint&, const simdint&);
+	inline void gb(const ivec2&);
+	inline void gb(const simdint&);
+	inline void gbr(const simdint&, const simdint&, const simdint&);
+	inline void gbr(const ivec3&);
+	inline void gbr(const simdint&);
+	inline void gr(const simdint&, const simdint&);
+	inline void gr(const ivec2&);
+	inline void gr(const simdint&);
+	inline void grb(const simdint&, const simdint&, const simdint&);
+	inline void grb(const ivec3&);
+	inline void grb(const simdint&);
+	inline void rb(const simdint&, const simdint&);
+	inline void rb(const ivec2&);
+	inline void rb(const simdint&);
+	inline void rbg(const simdint&, const simdint&, const simdint&);
+	inline void rbg(const ivec3&);
+	inline void rbg(const simdint&);
+	inline void rg(const simdint&, const simdint&);
+	inline void rg(const ivec2&);
+	inline void rg(const simdint&);
+	inline void rgb(const simdint&, const simdint&, const simdint&);
+	inline void rgb(const ivec3&);
+	inline void rgb(const simdint&);
+	inline void xy(const simdint&, const simdint&);
+	inline void xy(const ivec2&);
+	inline void xy(const simdint&);
+	inline void xyz(const simdint&, const simdint&, const simdint&);
+	inline void xyz(const ivec3&);
+	inline void xyz(const simdint&);
+	inline void xz(const simdint&, const simdint&);
+	inline void xz(const ivec2&);
+	inline void xz(const simdint&);
+	inline void xzy(const simdint&, const simdint&, const simdint&);
+	inline void xzy(const ivec3&);
+	inline void xzy(const simdint&);
+	inline void yx(const simdint&, const simdint&);
+	inline void yx(const ivec2&);
+	inline void yx(const simdint&);
+	inline void yxz(const simdint&, const simdint&, const simdint&);
+	inline void yxz(const ivec3&);
+	inline void yxz(const simdint&);
+	inline void yz(const simdint&, const simdint&);
+	inline void yz(const ivec2&);
+	inline void yz(const simdint&);
+	inline void yzx(const simdint&, const simdint&, const simdint&);
+	inline void yzx(const ivec3&);
+	inline void yzx(const simdint&);
+	inline void zx(const simdint&, const simdint&);
+	inline void zx(const ivec2&);
+	inline void zx(const simdint&);
+	inline void zxy(const simdint&, const simdint&, const simdint&);
+	inline void zxy(const ivec3&);
+	inline void zxy(const simdint&);
+	inline void zy(const simdint&, const simdint&);
+	inline void zy(const ivec2&);
+	inline void zy(const simdint&);
+	inline void zyx(const simdint&, const simdint&, const simdint&);
+	inline void zyx(const ivec3&);
+	inline void zyx(const simdint&);
+#ifndef USE_SCALAR
+	inline void bg(const int&);
+	inline void bgr(const int&);
+	inline void br(const int&);
+	inline void brg(const int&);
+	inline void gb(const int&);
+	inline void gbr(const int&);
+	inline void gr(const int&);
+	inline void grb(const int&);
+	inline void rb(const int&);
+	inline void rbg(const int&);
+	inline void rg(const int&);
+	inline void rgb(const int&);
+	inline void xy(const int&);
+	inline void xyz(const int&);
+	inline void xz(const int&);
+	inline void xzy(const int&);
+	inline void yx(const int&);
+	inline void yxz(const int&);
+	inline void yz(const int&);
+	inline void yzx(const int&);
+	inline void zx(const int&);
+	inline void zxy(const int&);
+	inline void zy(const int&);
+	inline void zyx(const int&);
+#endif
+
+	// Operator to access elements like an array
+	inline simdint& operator[](int index)
+	{
+		// Use a switch to return the correct element
+		switch (index)
+		{
+		case 0:
+			return x;
+		case 1:
+			return y;
+		case 2:
+			return z;
+		default:
+			throw std::out_of_range("Index out of range");
+		}
+	}
+
+	inline ivec3 operator=(const ivec3& _f)
+	{
+		x = _f.x;
+		y = _f.y;
+		z = _f.z;
+		return *this;
+	}
+};
+
+struct ivec4
+{
+	simdint x, y, z, w;
+	simdint& r = x;
+	simdint& g = y;
+	simdint& b = z;
+	simdint& a = w;
+
+	ivec4() { x = (0);	y = (0);	z = (0);	w = (0); }
+	ivec4(const ivec4& other) = default;
+	ivec4(const simdint& _f) { x = _f; y = _f; z = _f; w = _f; }
+	ivec4(const simdint& _x, const simdint& _y, const simdint& _z, const simdint& _w) : x(_x), y(_y), z(_z), w(_w) {}
+	ivec4(const ivec3& ivec3, simdint _w) : x(ivec3.x), y(ivec3.y), z(ivec3.z), w(_w) {}
+	ivec4(const simdint& _x, const ivec3& ivec3) : x(_x), y(ivec3.x), z(ivec3.y), w(ivec3.z) {}
+	ivec4(const simdint& _x, const ivec2& ivec2, const simdint& _w) : x(_x), y(ivec2.x), z(ivec2.y), w(_w) {}
+	ivec4(const simdint& _x, const simdint& _y, const ivec2& ivec2) : x(_x), y(_y), z(ivec2.x), w(ivec2.y) {}
+	ivec4(const ivec2& ivec2, const simdint& _z, const simdint& _w) : x(ivec2.x), y(ivec2.y), z(_z), w(_w) {}
+
+#ifndef USE_SCALAR
+	ivec4(const int& _f) { x = (_f); y = (_f); z = (_f); w = (_f); }
+	ivec4(const simdint& _x, const simdint& _y, const simdint& _z, const int& _w) : x(_x), y(_y), z(_z) { w = (_w); }
+	ivec4(const simdint& _x, const simdint& _y, const int& _z, const simdint& _w) : x(_x), y(_y), w(_w) { z = (_z); }
+	ivec4(const simdint& _x, const simdint& _y, const int& _z, const int& _w) : x(_x), y(_y) { z = (_z); w = (_w); }
+	ivec4(const simdint& _x, const int& _y, const simdint& _z, const simdint& _w) : x(_x), z(_z), w(_w) { y = (_y); }
+	ivec4(const simdint& _x, const int& _y, const simdint& _z, const int& _w) : x(_x), z(_z) { y = (_y); w = (_w); }
+	ivec4(const simdint& _x, const int& _y, const int& _z, const simdint& _w) : x(_x), w(_w) { y = (_y); z = (_z); }
+	ivec4(const simdint& _x, const int& _y, const int& _z, const int& _w) : x(_x) { y = (_y); z = (_z); w = (_w); }
+	ivec4(const int& _x, const simdint& _y, const simdint& _z, const simdint& _w) : y(_y), z(_z), w(_w) { x = (_x); }
+	ivec4(const int& _x, const simdint& _y, const simdint& _z, const int& _w) : y(_y), z(_z) { x = (_x); w = (_w); }
+	ivec4(const int& _x, const simdint& _y, const int& _z, const simdint& _w) : y(_y), w(_w) { x = (_x); z = (_z); }
+	ivec4(const int& _x, const simdint& _y, const int& _z, const int& _w) : y(_y) { x = (_x); z = (_z); w = (_w); }
+	ivec4(const int& _x, const int& _y, const simdint& _z, const simdint& _w) : z(_z), w(_w) { x = (_x); y = (_y); }
+	ivec4(const int& _x, const int& _y, const simdint& _z, const int& _w) : z(_z) { x = (_x); y = (_y); w = (_w); }
+	ivec4(const int& _x, const int& _y, const int& _z, const simdint& _w) : w(_w) { x = (_x); y = (_y); z = (_z); }
+	ivec4(const int& _x, const int& _y, const int& _z, const int& _w) { x = (_x); y = (_y); z = (_z); w = (_w); }
+	ivec4(const ivec3& ivec3, const int& _w) : x(ivec3.x), y(ivec3.y), z(ivec3.z) { w = (_w); }
+	ivec4(const ivec2& ivec2, const int& _z, const int& _w) : x(ivec2.x), y(ivec2.y) { z = (_z); w = (_w); }
+	ivec4(const int& _x, const ivec2& ivec2, const int& _w) : y(ivec2.x), z(ivec2.y) { x = (_x); w = (_w); }
+	ivec4(const int& _x, const int& _y, const ivec2& ivec2) : z(ivec2.x), w(ivec2.y) { x = (_x); y = (_y); }
+	ivec4(const ivec2& ivec2a, const ivec2& ivec2b) : x(ivec2a.x), y(ivec2a.y), z(ivec2b.x), w(ivec2b.y) {}
+#endif
+
+	inline ivec2 aa() const;
+	inline ivec3 aaa() const;
+	inline ivec4 aaaa() const;
+	inline ivec4 aaab() const;
+	inline ivec4 aaag() const;
+	inline ivec4 aaar() const;
+	inline ivec3 aab() const;
+	inline ivec4 aaba() const;
+	inline ivec4 aabb() const;
+	inline ivec4 aabg() const;
+	inline ivec4 aabr() const;
+	inline ivec3 aag() const;
+	inline ivec4 aaga() const;
+	inline ivec4 aagb() const;
+	inline ivec4 aagg() const;
+	inline ivec4 aagr() const;
+	inline ivec3 aar() const;
+	inline ivec4 aara() const;
+	inline ivec4 aarb() const;
+	inline ivec4 aarg() const;
+	inline ivec4 aarr() const;
+	inline ivec2 ab() const;
+	inline ivec3 aba() const;
+	inline ivec4 abaa() const;
+	inline ivec4 abab() const;
+	inline ivec4 abag() const;
+	inline ivec4 abar() const;
+	inline ivec3 abb() const;
+	inline ivec4 abba() const;
+	inline ivec4 abbb() const;
+	inline ivec4 abbg() const;
+	inline ivec4 abbr() const;
+	inline ivec3 abg() const;
+	inline ivec4 abga() const;
+	inline ivec4 abgb() const;
+	inline ivec4 abgg() const;
+	inline ivec4 abgr() const;
+	inline ivec3 abr() const;
+	inline ivec4 abra() const;
+	inline ivec4 abrb() const;
+	inline ivec4 abrg() const;
+	inline ivec4 abrr() const;
+	inline ivec2 ag() const;
+	inline ivec3 aga() const;
+	inline ivec4 agaa() const;
+	inline ivec4 agab() const;
+	inline ivec4 agag() const;
+	inline ivec4 agar() const;
+	inline ivec3 agb() const;
+	inline ivec4 agba() const;
+	inline ivec4 agbb() const;
+	inline ivec4 agbg() const;
+	inline ivec4 agbr() const;
+	inline ivec3 agg() const;
+	inline ivec4 agga() const;
+	inline ivec4 aggb() const;
+	inline ivec4 aggg() const;
+	inline ivec4 aggr() const;
+	inline ivec3 agr() const;
+	inline ivec4 agra() const;
+	inline ivec4 agrb() const;
+	inline ivec4 agrg() const;
+	inline ivec4 agrr() const;
+	inline ivec2 ar() const;
+	inline ivec3 ara() const;
+	inline ivec4 araa() const;
+	inline ivec4 arab() const;
+	inline ivec4 arag() const;
+	inline ivec4 arar() const;
+	inline ivec3 arb() const;
+	inline ivec4 arba() const;
+	inline ivec4 arbb() const;
+	inline ivec4 arbg() const;
+	inline ivec4 arbr() const;
+	inline ivec3 arg() const;
+	inline ivec4 arga() const;
+	inline ivec4 argb() const;
+	inline ivec4 argg() const;
+	inline ivec4 argr() const;
+	inline ivec3 arr() const;
+	inline ivec4 arra() const;
+	inline ivec4 arrb() const;
+	inline ivec4 arrg() const;
+	inline ivec4 arrr() const;
+	inline ivec2 ba() const;
+	inline ivec3 baa() const;
+	inline ivec4 baaa() const;
+	inline ivec4 baab() const;
+	inline ivec4 baag() const;
+	inline ivec4 baar() const;
+	inline ivec3 bab() const;
+	inline ivec4 baba() const;
+	inline ivec4 babb() const;
+	inline ivec4 babg() const;
+	inline ivec4 babr() const;
+	inline ivec3 bag() const;
+	inline ivec4 baga() const;
+	inline ivec4 bagb() const;
+	inline ivec4 bagg() const;
+	inline ivec4 bagr() const;
+	inline ivec3 bar() const;
+	inline ivec4 bara() const;
+	inline ivec4 barb() const;
+	inline ivec4 barg() const;
+	inline ivec4 barr() const;
+	inline ivec2 bb() const;
+	inline ivec3 bba() const;
+	inline ivec4 bbaa() const;
+	inline ivec4 bbab() const;
+	inline ivec4 bbag() const;
+	inline ivec4 bbar() const;
+	inline ivec3 bbb() const;
+	inline ivec4 bbba() const;
+	inline ivec4 bbbb() const;
+	inline ivec4 bbbg() const;
+	inline ivec4 bbbr() const;
+	inline ivec3 bbg() const;
+	inline ivec4 bbga() const;
+	inline ivec4 bbgb() const;
+	inline ivec4 bbgg() const;
+	inline ivec4 bbgr() const;
+	inline ivec3 bbr() const;
+	inline ivec4 bbra() const;
+	inline ivec4 bbrb() const;
+	inline ivec4 bbrg() const;
+	inline ivec4 bbrr() const;
+	inline ivec2 bg() const;
+	inline ivec3 bga() const;
+	inline ivec4 bgaa() const;
+	inline ivec4 bgab() const;
+	inline ivec4 bgag() const;
+	inline ivec4 bgar() const;
+	inline ivec3 bgb() const;
+	inline ivec4 bgba() const;
+	inline ivec4 bgbb() const;
+	inline ivec4 bgbg() const;
+	inline ivec4 bgbr() const;
+	inline ivec3 bgg() const;
+	inline ivec4 bgga() const;
+	inline ivec4 bggb() const;
+	inline ivec4 bggg() const;
+	inline ivec4 bggr() const;
+	inline ivec3 bgr() const;
+	inline ivec4 bgra() const;
+	inline ivec4 bgrb() const;
+	inline ivec4 bgrg() const;
+	inline ivec4 bgrr() const;
+	inline ivec2 br() const;
+	inline ivec3 bra() const;
+	inline ivec4 braa() const;
+	inline ivec4 brab() const;
+	inline ivec4 brag() const;
+	inline ivec4 brar() const;
+	inline ivec3 brb() const;
+	inline ivec4 brba() const;
+	inline ivec4 brbb() const;
+	inline ivec4 brbg() const;
+	inline ivec4 brbr() const;
+	inline ivec3 brg() const;
+	inline ivec4 brga() const;
+	inline ivec4 brgb() const;
+	inline ivec4 brgg() const;
+	inline ivec4 brgr() const;
+	inline ivec3 brr() const;
+	inline ivec4 brra() const;
+	inline ivec4 brrb() const;
+	inline ivec4 brrg() const;
+	inline ivec4 brrr() const;
+	inline ivec2 ga() const;
+	inline ivec3 gaa() const;
+	inline ivec4 gaaa() const;
+	inline ivec4 gaab() const;
+	inline ivec4 gaag() const;
+	inline ivec4 gaar() const;
+	inline ivec3 gab() const;
+	inline ivec4 gaba() const;
+	inline ivec4 gabb() const;
+	inline ivec4 gabg() const;
+	inline ivec4 gabr() const;
+	inline ivec3 gag() const;
+	inline ivec4 gaga() const;
+	inline ivec4 gagb() const;
+	inline ivec4 gagg() const;
+	inline ivec4 gagr() const;
+	inline ivec3 gar() const;
+	inline ivec4 gara() const;
+	inline ivec4 garb() const;
+	inline ivec4 garg() const;
+	inline ivec4 garr() const;
+	inline ivec2 gb() const;
+	inline ivec3 gba() const;
+	inline ivec4 gbaa() const;
+	inline ivec4 gbab() const;
+	inline ivec4 gbag() const;
+	inline ivec4 gbar() const;
+	inline ivec3 gbb() const;
+	inline ivec4 gbba() const;
+	inline ivec4 gbbb() const;
+	inline ivec4 gbbg() const;
+	inline ivec4 gbbr() const;
+	inline ivec3 gbg() const;
+	inline ivec4 gbga() const;
+	inline ivec4 gbgb() const;
+	inline ivec4 gbgg() const;
+	inline ivec4 gbgr() const;
+	inline ivec3 gbr() const;
+	inline ivec4 gbra() const;
+	inline ivec4 gbrb() const;
+	inline ivec4 gbrg() const;
+	inline ivec4 gbrr() const;
+	inline ivec2 gg() const;
+	inline ivec3 gga() const;
+	inline ivec4 ggaa() const;
+	inline ivec4 ggab() const;
+	inline ivec4 ggag() const;
+	inline ivec4 ggar() const;
+	inline ivec3 ggb() const;
+	inline ivec4 ggba() const;
+	inline ivec4 ggbb() const;
+	inline ivec4 ggbg() const;
+	inline ivec4 ggbr() const;
+	inline ivec3 ggg() const;
+	inline ivec4 ggga() const;
+	inline ivec4 gggb() const;
+	inline ivec4 gggg() const;
+	inline ivec4 gggr() const;
+	inline ivec3 ggr() const;
+	inline ivec4 ggra() const;
+	inline ivec4 ggrb() const;
+	inline ivec4 ggrg() const;
+	inline ivec4 ggrr() const;
+	inline ivec2 gr() const;
+	inline ivec3 gra() const;
+	inline ivec4 graa() const;
+	inline ivec4 grab() const;
+	inline ivec4 grag() const;
+	inline ivec4 grar() const;
+	inline ivec3 grb() const;
+	inline ivec4 grba() const;
+	inline ivec4 grbb() const;
+	inline ivec4 grbg() const;
+	inline ivec4 grbr() const;
+	inline ivec3 grg() const;
+	inline ivec4 grga() const;
+	inline ivec4 grgb() const;
+	inline ivec4 grgg() const;
+	inline ivec4 grgr() const;
+	inline ivec3 grr() const;
+	inline ivec4 grra() const;
+	inline ivec4 grrb() const;
+	inline ivec4 grrg() const;
+	inline ivec4 grrr() const;
+	inline ivec2 ra() const;
+	inline ivec3 raa() const;
+	inline ivec4 raaa() const;
+	inline ivec4 raab() const;
+	inline ivec4 raag() const;
+	inline ivec4 raar() const;
+	inline ivec3 rab() const;
+	inline ivec4 raba() const;
+	inline ivec4 rabb() const;
+	inline ivec4 rabg() const;
+	inline ivec4 rabr() const;
+	inline ivec3 rag() const;
+	inline ivec4 raga() const;
+	inline ivec4 ragb() const;
+	inline ivec4 ragg() const;
+	inline ivec4 ragr() const;
+	inline ivec3 rar() const;
+	inline ivec4 rara() const;
+	inline ivec4 rarb() const;
+	inline ivec4 rarg() const;
+	inline ivec4 rarr() const;
+	inline ivec2 rb() const;
+	inline ivec3 rba() const;
+	inline ivec4 rbaa() const;
+	inline ivec4 rbab() const;
+	inline ivec4 rbag() const;
+	inline ivec4 rbar() const;
+	inline ivec3 rbb() const;
+	inline ivec4 rbba() const;
+	inline ivec4 rbbb() const;
+	inline ivec4 rbbg() const;
+	inline ivec4 rbbr() const;
+	inline ivec3 rbg() const;
+	inline ivec4 rbga() const;
+	inline ivec4 rbgb() const;
+	inline ivec4 rbgg() const;
+	inline ivec4 rbgr() const;
+	inline ivec3 rbr() const;
+	inline ivec4 rbra() const;
+	inline ivec4 rbrb() const;
+	inline ivec4 rbrg() const;
+	inline ivec4 rbrr() const;
+	inline ivec2 rg() const;
+	inline ivec3 rga() const;
+	inline ivec4 rgaa() const;
+	inline ivec4 rgab() const;
+	inline ivec4 rgag() const;
+	inline ivec4 rgar() const;
+	inline ivec3 rgb() const;
+	inline ivec4 rgba() const;
+	inline ivec4 rgbb() const;
+	inline ivec4 rgbg() const;
+	inline ivec4 rgbr() const;
+	inline ivec3 rgg() const;
+	inline ivec4 rgga() const;
+	inline ivec4 rggb() const;
+	inline ivec4 rggg() const;
+	inline ivec4 rggr() const;
+	inline ivec3 rgr() const;
+	inline ivec4 rgra() const;
+	inline ivec4 rgrb() const;
+	inline ivec4 rgrg() const;
+	inline ivec4 rgrr() const;
+	inline ivec2 rr() const;
+	inline ivec3 rra() const;
+	inline ivec4 rraa() const;
+	inline ivec4 rrab() const;
+	inline ivec4 rrag() const;
+	inline ivec4 rrar() const;
+	inline ivec3 rrb() const;
+	inline ivec4 rrba() const;
+	inline ivec4 rrbb() const;
+	inline ivec4 rrbg() const;
+	inline ivec4 rrbr() const;
+	inline ivec3 rrg() const;
+	inline ivec4 rrga() const;
+	inline ivec4 rrgb() const;
+	inline ivec4 rrgg() const;
+	inline ivec4 rrgr() const;
+	inline ivec3 rrr() const;
+	inline ivec4 rrra() const;
+	inline ivec4 rrrb() const;
+	inline ivec4 rrrg() const;
+	inline ivec4 rrrr() const;
+	inline ivec2 ww() const;
+	inline ivec3 www() const;
+	inline ivec4 wwww() const;
+	inline ivec4 wwwx() const;
+	inline ivec4 wwwy() const;
+	inline ivec4 wwwz() const;
+	inline ivec3 wwx() const;
+	inline ivec4 wwxw() const;
+	inline ivec4 wwxx() const;
+	inline ivec4 wwxy() const;
+	inline ivec4 wwxz() const;
+	inline ivec3 wwy() const;
+	inline ivec4 wwyw() const;
+	inline ivec4 wwyx() const;
+	inline ivec4 wwyy() const;
+	inline ivec4 wwyz() const;
+	inline ivec3 wwz() const;
+	inline ivec4 wwzw() const;
+	inline ivec4 wwzx() const;
+	inline ivec4 wwzy() const;
+	inline ivec4 wwzz() const;
+	inline ivec2 wx() const;
+	inline ivec3 wxw() const;
+	inline ivec4 wxww() const;
+	inline ivec4 wxwx() const;
+	inline ivec4 wxwy() const;
+	inline ivec4 wxwz() const;
+	inline ivec3 wxx() const;
+	inline ivec4 wxxw() const;
+	inline ivec4 wxxx() const;
+	inline ivec4 wxxy() const;
+	inline ivec4 wxxz() const;
+	inline ivec3 wxy() const;
+	inline ivec4 wxyw() const;
+	inline ivec4 wxyx() const;
+	inline ivec4 wxyy() const;
+	inline ivec4 wxyz() const;
+	inline ivec3 wxz() const;
+	inline ivec4 wxzw() const;
+	inline ivec4 wxzx() const;
+	inline ivec4 wxzy() const;
+	inline ivec4 wxzz() const;
+	inline ivec2 wy() const;
+	inline ivec3 wyw() const;
+	inline ivec4 wyww() const;
+	inline ivec4 wywx() const;
+	inline ivec4 wywy() const;
+	inline ivec4 wywz() const;
+	inline ivec3 wyx() const;
+	inline ivec4 wyxw() const;
+	inline ivec4 wyxx() const;
+	inline ivec4 wyxy() const;
+	inline ivec4 wyxz() const;
+	inline ivec3 wyy() const;
+	inline ivec4 wyyw() const;
+	inline ivec4 wyyx() const;
+	inline ivec4 wyyy() const;
+	inline ivec4 wyyz() const;
+	inline ivec3 wyz() const;
+	inline ivec4 wyzw() const;
+	inline ivec4 wyzx() const;
+	inline ivec4 wyzy() const;
+	inline ivec4 wyzz() const;
+	inline ivec2 wz() const;
+	inline ivec3 wzw() const;
+	inline ivec4 wzww() const;
+	inline ivec4 wzwx() const;
+	inline ivec4 wzwy() const;
+	inline ivec4 wzwz() const;
+	inline ivec3 wzx() const;
+	inline ivec4 wzxw() const;
+	inline ivec4 wzxx() const;
+	inline ivec4 wzxy() const;
+	inline ivec4 wzxz() const;
+	inline ivec3 wzy() const;
+	inline ivec4 wzyw() const;
+	inline ivec4 wzyx() const;
+	inline ivec4 wzyy() const;
+	inline ivec4 wzyz() const;
+	inline ivec3 wzz() const;
+	inline ivec4 wzzw() const;
+	inline ivec4 wzzx() const;
+	inline ivec4 wzzy() const;
+	inline ivec4 wzzz() const;
+	inline ivec2 xw() const;
+	inline ivec3 xww() const;
+	inline ivec4 xwww() const;
+	inline ivec4 xwwx() const;
+	inline ivec4 xwwy() const;
+	inline ivec4 xwwz() const;
+	inline ivec3 xwx() const;
+	inline ivec4 xwxw() const;
+	inline ivec4 xwxx() const;
+	inline ivec4 xwxy() const;
+	inline ivec4 xwxz() const;
+	inline ivec3 xwy() const;
+	inline ivec4 xwyw() const;
+	inline ivec4 xwyx() const;
+	inline ivec4 xwyy() const;
+	inline ivec4 xwyz() const;
+	inline ivec3 xwz() const;
+	inline ivec4 xwzw() const;
+	inline ivec4 xwzx() const;
+	inline ivec4 xwzy() const;
+	inline ivec4 xwzz() const;
+	inline ivec2 xx() const;
+	inline ivec3 xxw() const;
+	inline ivec4 xxww() const;
+	inline ivec4 xxwx() const;
+	inline ivec4 xxwy() const;
+	inline ivec4 xxwz() const;
+	inline ivec3 xxx() const;
+	inline ivec4 xxxw() const;
+	inline ivec4 xxxx() const;
+	inline ivec4 xxxy() const;
+	inline ivec4 xxxz() const;
+	inline ivec3 xxy() const;
+	inline ivec4 xxyw() const;
+	inline ivec4 xxyx() const;
+	inline ivec4 xxyy() const;
+	inline ivec4 xxyz() const;
+	inline ivec3 xxz() const;
+	inline ivec4 xxzw() const;
+	inline ivec4 xxzx() const;
+	inline ivec4 xxzy() const;
+	inline ivec4 xxzz() const;
+	inline ivec2 xy() const;
+	inline ivec3 xyw() const;
+	inline ivec4 xyww() const;
+	inline ivec4 xywx() const;
+	inline ivec4 xywy() const;
+	inline ivec4 xywz() const;
+	inline ivec3 xyx() const;
+	inline ivec4 xyxw() const;
+	inline ivec4 xyxx() const;
+	inline ivec4 xyxy() const;
+	inline ivec4 xyxz() const;
+	inline ivec3 xyy() const;
+	inline ivec4 xyyw() const;
+	inline ivec4 xyyx() const;
+	inline ivec4 xyyy() const;
+	inline ivec4 xyyz() const;
+	inline ivec3 xyz() const;
+	inline ivec4 xyzw() const;
+	inline ivec4 xyzx() const;
+	inline ivec4 xyzy() const;
+	inline ivec4 xyzz() const;
+	inline ivec2 xz() const;
+	inline ivec3 xzw() const;
+	inline ivec4 xzww() const;
+	inline ivec4 xzwx() const;
+	inline ivec4 xzwy() const;
+	inline ivec4 xzwz() const;
+	inline ivec3 xzx() const;
+	inline ivec4 xzxw() const;
+	inline ivec4 xzxx() const;
+	inline ivec4 xzxy() const;
+	inline ivec4 xzxz() const;
+	inline ivec3 xzy() const;
+	inline ivec4 xzyw() const;
+	inline ivec4 xzyx() const;
+	inline ivec4 xzyy() const;
+	inline ivec4 xzyz() const;
+	inline ivec3 xzz() const;
+	inline ivec4 xzzw() const;
+	inline ivec4 xzzx() const;
+	inline ivec4 xzzy() const;
+	inline ivec4 xzzz() const;
+	inline ivec2 yw() const;
+	inline ivec3 yww() const;
+	inline ivec4 ywww() const;
+	inline ivec4 ywwx() const;
+	inline ivec4 ywwy() const;
+	inline ivec4 ywwz() const;
+	inline ivec3 ywx() const;
+	inline ivec4 ywxw() const;
+	inline ivec4 ywxx() const;
+	inline ivec4 ywxy() const;
+	inline ivec4 ywxz() const;
+	inline ivec3 ywy() const;
+	inline ivec4 ywyw() const;
+	inline ivec4 ywyx() const;
+	inline ivec4 ywyy() const;
+	inline ivec4 ywyz() const;
+	inline ivec3 ywz() const;
+	inline ivec4 ywzw() const;
+	inline ivec4 ywzx() const;
+	inline ivec4 ywzy() const;
+	inline ivec4 ywzz() const;
+	inline ivec2 yx() const;
+	inline ivec3 yxw() const;
+	inline ivec4 yxww() const;
+	inline ivec4 yxwx() const;
+	inline ivec4 yxwy() const;
+	inline ivec4 yxwz() const;
+	inline ivec3 yxx() const;
+	inline ivec4 yxxw() const;
+	inline ivec4 yxxx() const;
+	inline ivec4 yxxy() const;
+	inline ivec4 yxxz() const;
+	inline ivec3 yxy() const;
+	inline ivec4 yxyw() const;
+	inline ivec4 yxyx() const;
+	inline ivec4 yxyy() const;
+	inline ivec4 yxyz() const;
+	inline ivec3 yxz() const;
+	inline ivec4 yxzw() const;
+	inline ivec4 yxzx() const;
+	inline ivec4 yxzy() const;
+	inline ivec4 yxzz() const;
+	inline ivec2 yy() const;
+	inline ivec3 yyw() const;
+	inline ivec4 yyww() const;
+	inline ivec4 yywx() const;
+	inline ivec4 yywy() const;
+	inline ivec4 yywz() const;
+	inline ivec3 yyx() const;
+	inline ivec4 yyxw() const;
+	inline ivec4 yyxx() const;
+	inline ivec4 yyxy() const;
+	inline ivec4 yyxz() const;
+	inline ivec3 yyy() const;
+	inline ivec4 yyyw() const;
+	inline ivec4 yyyx() const;
+	inline ivec4 yyyy() const;
+	inline ivec4 yyyz() const;
+	inline ivec3 yyz() const;
+	inline ivec4 yyzw() const;
+	inline ivec4 yyzx() const;
+	inline ivec4 yyzy() const;
+	inline ivec4 yyzz() const;
+	inline ivec2 yz() const;
+	inline ivec3 yzw() const;
+	inline ivec4 yzww() const;
+	inline ivec4 yzwx() const;
+	inline ivec4 yzwy() const;
+	inline ivec4 yzwz() const;
+	inline ivec3 yzx() const;
+	inline ivec4 yzxw() const;
+	inline ivec4 yzxx() const;
+	inline ivec4 yzxy() const;
+	inline ivec4 yzxz() const;
+	inline ivec3 yzy() const;
+	inline ivec4 yzyw() const;
+	inline ivec4 yzyx() const;
+	inline ivec4 yzyy() const;
+	inline ivec4 yzyz() const;
+	inline ivec3 yzz() const;
+	inline ivec4 yzzw() const;
+	inline ivec4 yzzx() const;
+	inline ivec4 yzzy() const;
+	inline ivec4 yzzz() const;
+	inline ivec2 zw() const;
+	inline ivec3 zww() const;
+	inline ivec4 zwww() const;
+	inline ivec4 zwwx() const;
+	inline ivec4 zwwy() const;
+	inline ivec4 zwwz() const;
+	inline ivec3 zwx() const;
+	inline ivec4 zwxw() const;
+	inline ivec4 zwxx() const;
+	inline ivec4 zwxy() const;
+	inline ivec4 zwxz() const;
+	inline ivec3 zwy() const;
+	inline ivec4 zwyw() const;
+	inline ivec4 zwyx() const;
+	inline ivec4 zwyy() const;
+	inline ivec4 zwyz() const;
+	inline ivec3 zwz() const;
+	inline ivec4 zwzw() const;
+	inline ivec4 zwzx() const;
+	inline ivec4 zwzy() const;
+	inline ivec4 zwzz() const;
+	inline ivec2 zx() const;
+	inline ivec3 zxw() const;
+	inline ivec4 zxww() const;
+	inline ivec4 zxwx() const;
+	inline ivec4 zxwy() const;
+	inline ivec4 zxwz() const;
+	inline ivec3 zxx() const;
+	inline ivec4 zxxw() const;
+	inline ivec4 zxxx() const;
+	inline ivec4 zxxy() const;
+	inline ivec4 zxxz() const;
+	inline ivec3 zxy() const;
+	inline ivec4 zxyw() const;
+	inline ivec4 zxyx() const;
+	inline ivec4 zxyy() const;
+	inline ivec4 zxyz() const;
+	inline ivec3 zxz() const;
+	inline ivec4 zxzw() const;
+	inline ivec4 zxzx() const;
+	inline ivec4 zxzy() const;
+	inline ivec4 zxzz() const;
+	inline ivec2 zy() const;
+	inline ivec3 zyw() const;
+	inline ivec4 zyww() const;
+	inline ivec4 zywx() const;
+	inline ivec4 zywy() const;
+	inline ivec4 zywz() const;
+	inline ivec3 zyx() const;
+	inline ivec4 zyxw() const;
+	inline ivec4 zyxx() const;
+	inline ivec4 zyxy() const;
+	inline ivec4 zyxz() const;
+	inline ivec3 zyy() const;
+	inline ivec4 zyyw() const;
+	inline ivec4 zyyx() const;
+	inline ivec4 zyyy() const;
+	inline ivec4 zyyz() const;
+	inline ivec3 zyz() const;
+	inline ivec4 zyzw() const;
+	inline ivec4 zyzx() const;
+	inline ivec4 zyzy() const;
+	inline ivec4 zyzz() const;
+	inline ivec2 zz() const;
+	inline ivec3 zzw() const;
+	inline ivec4 zzww() const;
+	inline ivec4 zzwx() const;
+	inline ivec4 zzwy() const;
+	inline ivec4 zzwz() const;
+	inline ivec3 zzx() const;
+	inline ivec4 zzxw() const;
+	inline ivec4 zzxx() const;
+	inline ivec4 zzxy() const;
+	inline ivec4 zzxz() const;
+	inline ivec3 zzy() const;
+	inline ivec4 zzyw() const;
+	inline ivec4 zzyx() const;
+	inline ivec4 zzyy() const;
+	inline ivec4 zzyz() const;
+	inline ivec3 zzz() const;
+	inline ivec4 zzzw() const;
+	inline ivec4 zzzx() const;
+	inline ivec4 zzzy() const;
+	inline ivec4 zzzz() const;
+	inline void ab(const simdint&, const simdint&);
+	inline void ab(const ivec2&);
+	inline void ab(const simdint&);
+	inline void abg(const simdint&, const simdint&, const simdint&);
+	inline void abg(const ivec3&);
+	inline void abg(const simdint&);
+	inline void abgr(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void abgr(const ivec4&);
+	inline void abgr(const simdint&);
+	inline void abr(const simdint&, const simdint&, const simdint&);
+	inline void abr(const ivec3&);
+	inline void abr(const simdint&);
+	inline void abrg(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void abrg(const ivec4&);
+	inline void abrg(const simdint&);
+	inline void ag(const simdint&, const simdint&);
+	inline void ag(const ivec2&);
+	inline void ag(const simdint&);
+	inline void agb(const simdint&, const simdint&, const simdint&);
+	inline void agb(const ivec3&);
+	inline void agb(const simdint&);
+	inline void agbr(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void agbr(const ivec4&);
+	inline void agbr(const simdint&);
+	inline void agr(const simdint&, const simdint&, const simdint&);
+	inline void agr(const ivec3&);
+	inline void agr(const simdint&);
+	inline void agrb(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void agrb(const ivec4&);
+	inline void agrb(const simdint&);
+	inline void ar(const simdint&, const simdint&);
+	inline void ar(const ivec2&);
+	inline void ar(const simdint&);
+	inline void arb(const simdint&, const simdint&, const simdint&);
+	inline void arb(const ivec3&);
+	inline void arb(const simdint&);
+	inline void arbg(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void arbg(const ivec4&);
+	inline void arbg(const simdint&);
+	inline void arg(const simdint&, const simdint&, const simdint&);
+	inline void arg(const ivec3&);
+	inline void arg(const simdint&);
+	inline void argb(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void argb(const ivec4&);
+	inline void argb(const simdint&);
+	inline void ba(const simdint&, const simdint&);
+	inline void ba(const ivec2&);
+	inline void ba(const simdint&);
+	inline void bag(const simdint&, const simdint&, const simdint&);
+	inline void bag(const ivec3&);
+	inline void bag(const simdint&);
+	inline void bagr(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void bagr(const ivec4&);
+	inline void bagr(const simdint&);
+	inline void bar(const simdint&, const simdint&, const simdint&);
+	inline void bar(const ivec3&);
+	inline void bar(const simdint&);
+	inline void barg(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void barg(const ivec4&);
+	inline void barg(const simdint&);
+	inline void bg(const simdint&, const simdint&);
+	inline void bg(const ivec2&);
+	inline void bg(const simdint&);
+	inline void bga(const simdint&, const simdint&, const simdint&);
+	inline void bga(const ivec3&);
+	inline void bga(const simdint&);
+	inline void bgar(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void bgar(const ivec4&);
+	inline void bgar(const simdint&);
+	inline void bgr(const simdint&, const simdint&, const simdint&);
+	inline void bgr(const ivec3&);
+	inline void bgr(const simdint&);
+	inline void bgra(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void bgra(const ivec4&);
+	inline void bgra(const simdint&);
+	inline void br(const simdint&, const simdint&);
+	inline void br(const ivec2&);
+	inline void br(const simdint&);
+	inline void bra(const simdint&, const simdint&, const simdint&);
+	inline void bra(const ivec3&);
+	inline void bra(const simdint&);
+	inline void brag(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void brag(const ivec4&);
+	inline void brag(const simdint&);
+	inline void brg(const simdint&, const simdint&, const simdint&);
+	inline void brg(const ivec3&);
+	inline void brg(const simdint&);
+	inline void brga(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void brga(const ivec4&);
+	inline void brga(const simdint&);
+	inline void ga(const simdint&, const simdint&);
+	inline void ga(const ivec2&);
+	inline void ga(const simdint&);
+	inline void gab(const simdint&, const simdint&, const simdint&);
+	inline void gab(const ivec3&);
+	inline void gab(const simdint&);
+	inline void gabr(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void gabr(const ivec4&);
+	inline void gabr(const simdint&);
+	inline void gar(const simdint&, const simdint&, const simdint&);
+	inline void gar(const ivec3&);
+	inline void gar(const simdint&);
+	inline void garb(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void garb(const ivec4&);
+	inline void garb(const simdint&);
+	inline void gb(const simdint&, const simdint&);
+	inline void gb(const ivec2&);
+	inline void gb(const simdint&);
+	inline void gba(const simdint&, const simdint&, const simdint&);
+	inline void gba(const ivec3&);
+	inline void gba(const simdint&);
+	inline void gbar(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void gbar(const ivec4&);
+	inline void gbar(const simdint&);
+	inline void gbr(const simdint&, const simdint&, const simdint&);
+	inline void gbr(const ivec3&);
+	inline void gbr(const simdint&);
+	inline void gbra(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void gbra(const ivec4&);
+	inline void gbra(const simdint&);
+	inline void gr(const simdint&, const simdint&);
+	inline void gr(const ivec2&);
+	inline void gr(const simdint&);
+	inline void gra(const simdint&, const simdint&, const simdint&);
+	inline void gra(const ivec3&);
+	inline void gra(const simdint&);
+	inline void grab(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void grab(const ivec4&);
+	inline void grab(const simdint&);
+	inline void grb(const simdint&, const simdint&, const simdint&);
+	inline void grb(const ivec3&);
+	inline void grb(const simdint&);
+	inline void grba(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void grba(const ivec4&);
+	inline void grba(const simdint&);
+	inline void ra(const simdint&, const simdint&);
+	inline void ra(const ivec2&);
+	inline void ra(const simdint&);
+	inline void rab(const simdint&, const simdint&, const simdint&);
+	inline void rab(const ivec3&);
+	inline void rab(const simdint&);
+	inline void rabg(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void rabg(const ivec4&);
+	inline void rabg(const simdint&);
+	inline void rag(const simdint&, const simdint&, const simdint&);
+	inline void rag(const ivec3&);
+	inline void rag(const simdint&);
+	inline void ragb(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void ragb(const ivec4&);
+	inline void ragb(const simdint&);
+	inline void rb(const simdint&, const simdint&);
+	inline void rb(const ivec2&);
+	inline void rb(const simdint&);
+	inline void rba(const simdint&, const simdint&, const simdint&);
+	inline void rba(const ivec3&);
+	inline void rba(const simdint&);
+	inline void rbag(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void rbag(const ivec4&);
+	inline void rbag(const simdint&);
+	inline void rbg(const simdint&, const simdint&, const simdint&);
+	inline void rbg(const ivec3&);
+	inline void rbg(const simdint&);
+	inline void rbga(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void rbga(const ivec4&);
+	inline void rbga(const simdint&);
+	inline void rg(const simdint&, const simdint&);
+	inline void rg(const ivec2&);
+	inline void rg(const simdint&);
+	inline void rga(const simdint&, const simdint&, const simdint&);
+	inline void rga(const ivec3&);
+	inline void rga(const simdint&);
+	inline void rgab(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void rgab(const ivec4&);
+	inline void rgab(const simdint&);
+	inline void rgb(const simdint&, const simdint&, const simdint&);
+	inline void rgb(const ivec3&);
+	inline void rgb(const simdint&);
+	inline void rgba(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void rgba(const ivec4&);
+	inline void rgba(const simdint&);
+	inline void wx(const simdint&, const simdint&);
+	inline void wx(const ivec2&);
+	inline void wx(const simdint&);
+	inline void wxy(const simdint&, const simdint&, const simdint&);
+	inline void wxy(const ivec3&);
+	inline void wxy(const simdint&);
+	inline void wxyz(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void wxyz(const ivec4&);
+	inline void wxyz(const simdint&);
+	inline void wxz(const simdint&, const simdint&, const simdint&);
+	inline void wxz(const ivec3&);
+	inline void wxz(const simdint&);
+	inline void wxzy(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void wxzy(const ivec4&);
+	inline void wxzy(const simdint&);
+	inline void wy(const simdint&, const simdint&);
+	inline void wy(const ivec2&);
+	inline void wy(const simdint&);
+	inline void wyx(const simdint&, const simdint&, const simdint&);
+	inline void wyx(const ivec3&);
+	inline void wyx(const simdint&);
+	inline void wyxz(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void wyxz(const ivec4&);
+	inline void wyxz(const simdint&);
+	inline void wyz(const simdint&, const simdint&, const simdint&);
+	inline void wyz(const ivec3&);
+	inline void wyz(const simdint&);
+	inline void wyzx(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void wyzx(const ivec4&);
+	inline void wyzx(const simdint&);
+	inline void wz(const simdint&, const simdint&);
+	inline void wz(const ivec2&);
+	inline void wz(const simdint&);
+	inline void wzx(const simdint&, const simdint&, const simdint&);
+	inline void wzx(const ivec3&);
+	inline void wzx(const simdint&);
+	inline void wzxy(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void wzxy(const ivec4&);
+	inline void wzxy(const simdint&);
+	inline void wzy(const simdint&, const simdint&, const simdint&);
+	inline void wzy(const ivec3&);
+	inline void wzy(const simdint&);
+	inline void wzyx(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void wzyx(const ivec4&);
+	inline void wzyx(const simdint&);
+	inline void xw(const simdint&, const simdint&);
+	inline void xw(const ivec2&);
+	inline void xw(const simdint&);
+	inline void xwy(const simdint&, const simdint&, const simdint&);
+	inline void xwy(const ivec3&);
+	inline void xwy(const simdint&);
+	inline void xwyz(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void xwyz(const ivec4&);
+	inline void xwyz(const simdint&);
+	inline void xwz(const simdint&, const simdint&, const simdint&);
+	inline void xwz(const ivec3&);
+	inline void xwz(const simdint&);
+	inline void xwzy(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void xwzy(const ivec4&);
+	inline void xwzy(const simdint&);
+	inline void xy(const simdint&, const simdint&);
+	inline void xy(const ivec2&);
+	inline void xy(const simdint&);
+	inline void xyw(const simdint&, const simdint&, const simdint&);
+	inline void xyw(const ivec3&);
+	inline void xyw(const simdint&);
+	inline void xywz(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void xywz(const ivec4&);
+	inline void xywz(const simdint&);
+	inline void xyz(const simdint&, const simdint&, const simdint&);
+	inline void xyz(const ivec3&);
+	inline void xyz(const simdint&);
+	inline void xyzw(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void xyzw(const ivec4&);
+	inline void xyzw(const simdint&);
+	inline void xz(const simdint&, const simdint&);
+	inline void xz(const ivec2&);
+	inline void xz(const simdint&);
+	inline void xzw(const simdint&, const simdint&, const simdint&);
+	inline void xzw(const ivec3&);
+	inline void xzw(const simdint&);
+	inline void xzwy(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void xzwy(const ivec4&);
+	inline void xzwy(const simdint&);
+	inline void xzy(const simdint&, const simdint&, const simdint&);
+	inline void xzy(const ivec3&);
+	inline void xzy(const simdint&);
+	inline void xzyw(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void xzyw(const ivec4&);
+	inline void xzyw(const simdint&);
+	inline void yw(const simdint&, const simdint&);
+	inline void yw(const ivec2&);
+	inline void yw(const simdint&);
+	inline void ywx(const simdint&, const simdint&, const simdint&);
+	inline void ywx(const ivec3&);
+	inline void ywx(const simdint&);
+	inline void ywxz(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void ywxz(const ivec4&);
+	inline void ywxz(const simdint&);
+	inline void ywz(const simdint&, const simdint&, const simdint&);
+	inline void ywz(const ivec3&);
+	inline void ywz(const simdint&);
+	inline void ywzx(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void ywzx(const ivec4&);
+	inline void ywzx(const simdint&);
+	inline void yx(const simdint&, const simdint&);
+	inline void yx(const ivec2&);
+	inline void yx(const simdint&);
+	inline void yxw(const simdint&, const simdint&, const simdint&);
+	inline void yxw(const ivec3&);
+	inline void yxw(const simdint&);
+	inline void yxwz(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void yxwz(const ivec4&);
+	inline void yxwz(const simdint&);
+	inline void yxz(const simdint&, const simdint&, const simdint&);
+	inline void yxz(const ivec3&);
+	inline void yxz(const simdint&);
+	inline void yxzw(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void yxzw(const ivec4&);
+	inline void yxzw(const simdint&);
+	inline void yz(const simdint&, const simdint&);
+	inline void yz(const ivec2&);
+	inline void yz(const simdint&);
+	inline void yzw(const simdint&, const simdint&, const simdint&);
+	inline void yzw(const ivec3&);
+	inline void yzw(const simdint&);
+	inline void yzwx(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void yzwx(const ivec4&);
+	inline void yzwx(const simdint&);
+	inline void yzx(const simdint&, const simdint&, const simdint&);
+	inline void yzx(const ivec3&);
+	inline void yzx(const simdint&);
+	inline void yzxw(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void yzxw(const ivec4&);
+	inline void yzxw(const simdint&);
+	inline void zw(const simdint&, const simdint&);
+	inline void zw(const ivec2&);
+	inline void zw(const simdint&);
+	inline void zwx(const simdint&, const simdint&, const simdint&);
+	inline void zwx(const ivec3&);
+	inline void zwx(const simdint&);
+	inline void zwxy(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void zwxy(const ivec4&);
+	inline void zwxy(const simdint&);
+	inline void zwy(const simdint&, const simdint&, const simdint&);
+	inline void zwy(const ivec3&);
+	inline void zwy(const simdint&);
+	inline void zwyx(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void zwyx(const ivec4&);
+	inline void zwyx(const simdint&);
+	inline void zx(const simdint&, const simdint&);
+	inline void zx(const ivec2&);
+	inline void zx(const simdint&);
+	inline void zxw(const simdint&, const simdint&, const simdint&);
+	inline void zxw(const ivec3&);
+	inline void zxw(const simdint&);
+	inline void zxwy(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void zxwy(const ivec4&);
+	inline void zxwy(const simdint&);
+	inline void zxy(const simdint&, const simdint&, const simdint&);
+	inline void zxy(const ivec3&);
+	inline void zxy(const simdint&);
+	inline void zxyw(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void zxyw(const ivec4&);
+	inline void zxyw(const simdint&);
+	inline void zy(const simdint&, const simdint&);
+	inline void zy(const ivec2&);
+	inline void zy(const simdint&);
+	inline void zyw(const simdint&, const simdint&, const simdint&);
+	inline void zyw(const ivec3&);
+	inline void zyw(const simdint&);
+	inline void zywx(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void zywx(const ivec4&);
+	inline void zywx(const simdint&);
+	inline void zyx(const simdint&, const simdint&, const simdint&);
+	inline void zyx(const ivec3&);
+	inline void zyx(const simdint&);
+	inline void zyxw(const simdint&, const simdint&, const simdint&, const simdint&);
+	inline void zyxw(const ivec4&);
+	inline void zyxw(const simdint&);
+#ifndef USE_SCALAR
+	inline void ab(const int&);
+	inline void abg(const int&);
+	inline void abgr(const int&);
+	inline void abr(const int&);
+	inline void abrg(const int&);
+	inline void ag(const int&);
+	inline void agb(const int&);
+	inline void agbr(const int&);
+	inline void agr(const int&);
+	inline void agrb(const int&);
+	inline void ar(const int&);
+	inline void arb(const int&);
+	inline void arbg(const int&);
+	inline void arg(const int&);
+	inline void argb(const int&);
+	inline void ba(const int&);
+	inline void bag(const int&);
+	inline void bagr(const int&);
+	inline void bar(const int&);
+	inline void barg(const int&);
+	inline void bg(const int&);
+	inline void bga(const int&);
+	inline void bgar(const int&);
+	inline void bgr(const int&);
+	inline void bgra(const int&);
+	inline void br(const int&);
+	inline void bra(const int&);
+	inline void brag(const int&);
+	inline void brg(const int&);
+	inline void brga(const int&);
+	inline void ga(const int&);
+	inline void gab(const int&);
+	inline void gabr(const int&);
+	inline void gar(const int&);
+	inline void garb(const int&);
+	inline void gb(const int&);
+	inline void gba(const int&);
+	inline void gbar(const int&);
+	inline void gbr(const int&);
+	inline void gbra(const int&);
+	inline void gr(const int&);
+	inline void gra(const int&);
+	inline void grab(const int&);
+	inline void grb(const int&);
+	inline void grba(const int&);
+	inline void ra(const int&);
+	inline void rab(const int&);
+	inline void rabg(const int&);
+	inline void rag(const int&);
+	inline void ragb(const int&);
+	inline void rb(const int&);
+	inline void rba(const int&);
+	inline void rbag(const int&);
+	inline void rbg(const int&);
+	inline void rbga(const int&);
+	inline void rg(const int&);
+	inline void rga(const int&);
+	inline void rgab(const int&);
+	inline void rgb(const int&);
+	inline void rgba(const int&);
+	inline void wx(const int&);
+	inline void wxy(const int&);
+	inline void wxyz(const int&);
+	inline void wxz(const int&);
+	inline void wxzy(const int&);
+	inline void wy(const int&);
+	inline void wyx(const int&);
+	inline void wyxz(const int&);
+	inline void wyz(const int&);
+	inline void wyzx(const int&);
+	inline void wz(const int&);
+	inline void wzx(const int&);
+	inline void wzxy(const int&);
+	inline void wzy(const int&);
+	inline void wzyx(const int&);
+	inline void xw(const int&);
+	inline void xwy(const int&);
+	inline void xwyz(const int&);
+	inline void xwz(const int&);
+	inline void xwzy(const int&);
+	inline void xy(const int&);
+	inline void xyw(const int&);
+	inline void xywz(const int&);
+	inline void xyz(const int&);
+	inline void xyzw(const int&);
+	inline void xz(const int&);
+	inline void xzw(const int&);
+	inline void xzwy(const int&);
+	inline void xzy(const int&);
+	inline void xzyw(const int&);
+	inline void yw(const int&);
+	inline void ywx(const int&);
+	inline void ywxz(const int&);
+	inline void ywz(const int&);
+	inline void ywzx(const int&);
+	inline void yx(const int&);
+	inline void yxw(const int&);
+	inline void yxwz(const int&);
+	inline void yxz(const int&);
+	inline void yxzw(const int&);
+	inline void yz(const int&);
+	inline void yzw(const int&);
+	inline void yzwx(const int&);
+	inline void yzx(const int&);
+	inline void yzxw(const int&);
+	inline void zw(const int&);
+	inline void zwx(const int&);
+	inline void zwxy(const int&);
+	inline void zwy(const int&);
+	inline void zwyx(const int&);
+	inline void zx(const int&);
+	inline void zxw(const int&);
+	inline void zxwy(const int&);
+	inline void zxy(const int&);
+	inline void zxyw(const int&);
+	inline void zy(const int&);
+	inline void zyw(const int&);
+	inline void zywx(const int&);
+	inline void zyx(const int&);
+	inline void zyxw(const int&);
+#endif
+
+
+
+	// Operator to access elements like an array
+	inline simdint& operator[](int index)
+	{
+		// Use a switch to return the correct element
+		switch (index)
+		{
+		case 0:
+			return x;
+		case 1:
+			return y;
+		case 2:
+			return z;
+		case 3:
+			return w;
+		default:
+			throw std::out_of_range("Index out of range");
+		}
+	}
+
+	inline ivec4 operator=(const ivec4& _f)
+	{
+		x = _f.x;
+		y = _f.y;
+		z = _f.z;
+		w = _f.w;
+		return *this;
+	}
+
+};
+
+#pragma endregion vector types
+
+
+
+
+
+#pragma region matrix types
+struct mat2
+{
+	vec2 columns[2];
+	mat2() = default;
+	mat2(const mat2& other) = default;
+	mat2(const simdfloat& _val)
+	{
+		columns[0] = vec2(_val, 0);
+		columns[1] = vec2(0, _val);
+	}
+	mat2(const simdfloat& _val0, const simdfloat& _val1,
+		const simdfloat& _val2, const simdfloat& _val3) // all elements
+	{
+		columns[0] = vec2(_val0, _val1);
+		columns[1] = vec2(_val2, _val3);
+	}
+
+	mat2(const vec2& column0, const vec2& column1)
+	{
+		columns[0] = column0;
+		columns[1] = column1;
+	}
+	mat2(const vec4& _val)
+	{
+		columns[0] = vec2(_val.x, _val.y);
+		columns[1] = vec2(_val.z, _val.w);
+	}
+#ifndef USE_SCALAR
+	mat2(const float& _val0, const float& _val1,
+		const float& _val2, const float& _val3) // all elements
+	{
+		columns[0] = vec2(simd_set1_float(_val0), simd_set1_float(_val1));
+		columns[1] = vec2(simd_set1_float(_val2), simd_set1_float(_val3));
+	}
+#endif
+
+	// Operator [] to access columns
+	vec2& operator[](int index)
+	{
+		return columns[index];
+	}
+	// Operator [][] to access elements
+	simdfloat& operator()(int row, int col)
+	{
+		return columns[col][row]; // Col = vector attribute, column = vector index
+	}
+};
+
+struct mat3
+{
+	vec3 columns[3];
+
+	mat3() = default;
+	mat3(const mat3& other) = default;
+	mat3(const simdfloat& _val)
+	{
+		columns[0] = vec3(_val, 0, 0);
+		columns[1] = vec3(0, _val, 0);
+		columns[2] = vec3(0, 0, _val);
+	}
+	mat3(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2,
+		const simdfloat& _val3, const simdfloat& _val4, const simdfloat& _val5,
+		const simdfloat& _val6, const simdfloat& _val7, const simdfloat& _val8) // all elements
+	{
+		columns[0] = vec3(_val0, _val1, _val2);
+		columns[1] = vec3(_val3, _val4, _val5);
+		columns[2] = vec3(_val6, _val7, _val8);
+	}
+
+	mat3(const vec3& column0, const vec3& column1, const vec3& column2)
+	{
+		columns[0] = column0;
+		columns[1] = column1;
+		columns[2] = column2;
+	}
+#ifndef USE_SCALAR
+	mat3(const float& _val0, const float& _val1, const float& _val2,
+		const float& _val3, const float& _val4, const float& _val5,
+		const float& _val6, const float& _val7, const float& _val8) // all elements
+	{
+		columns[0] = vec3(simd_set1_float(_val0), simd_set1_float(_val1), simd_set1_float(_val2));
+		columns[1] = vec3(simd_set1_float(_val3), simd_set1_float(_val4), simd_set1_float(_val5));
+		columns[2] = vec3(simd_set1_float(_val6), simd_set1_float(_val7), simd_set1_float(_val8));
+	}
+#endif
+
+	// Operator [] to access columns
+	vec3& operator[](int index)
+	{
+		return columns[index];
+	}
+
+	// Operator [][] to access elements
+	simdfloat& operator()(int row, int col)
+	{
+		return columns[col][row];
+	}
+};
+
+struct mat4
+{
+	vec4 columns[4];
+
+	mat4() = default;
+	mat4(const mat4& other) = default;
+	mat4(const simdfloat& _val)
+	{
+		columns[0] = vec4(_val, 0, 0, 0);
+		columns[1] = vec4(0, _val, 0, 0);
+		columns[2] = vec4(0, 0, _val, 0);
+		columns[3] = vec4(0, 0, 0, _val);
+	}
+	mat4(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3,
+		const simdfloat& _val4, const simdfloat& _val5, const simdfloat& _val6, const simdfloat& _val7,
+		const simdfloat& _val8, const simdfloat& _val9, const simdfloat& _val10, const simdfloat& _val11,
+		const simdfloat& _val12, const simdfloat& _val13, const simdfloat& _val14, const simdfloat& _val15) // all elements
+	{
+		columns[0] = vec4(_val0, _val1, _val2, _val3);
+		columns[1] = vec4(_val4, _val5, _val6, _val7);
+		columns[2] = vec4(_val8, _val9, _val10, _val11);
+		columns[3] = vec4(_val12, _val13, _val14, _val15);
+	}
+
+	mat4(const vec4& _col0, const vec4& _col1, const vec4& _col2, const vec4& _col3)
+	{
+		columns[0] = _col0;
+		columns[1] = _col1;
+		columns[2] = _col2;
+		columns[3] = _col3;
+	}
+#ifndef USE_SCALAR
+	mat4(const float& _val0, const float& _val1, const float& _val2, const float& _val3,
+		const float& _val4, const float& _val5, const float& _val6, const float& _val7,
+		const float& _val8, const float& _val9, const float& _val10, const float& _val11,
+		const float& _val12, const float& _val13, const float& _val14, const float& _val15) // all elements
+	{
+		columns[0] = vec4(simd_set1_float(_val0), simd_set1_float(_val1), simd_set1_float(_val2), simd_set1_float(_val3));
+		columns[1] = vec4(simd_set1_float(_val4), simd_set1_float(_val5), simd_set1_float(_val6), simd_set1_float(_val7));
+		columns[2] = vec4(simd_set1_float(_val8), simd_set1_float(_val9), simd_set1_float(_val10), simd_set1_float(_val11));
+		columns[3] = vec4(simd_set1_float(_val12), simd_set1_float(_val13), simd_set1_float(_val14), simd_set1_float(_val15));
+	}
+#endif
+
+	// Operator [] to access columns
+	vec4& operator[](int index)
+	{
+		return columns[index];
+	}
+
+	// Operator [][] to access elements
+	simdfloat& operator()(int row, int col)
+	{
+		return columns[col][row];
+	}
+};
+#pragma endregion
+
+#pragma region double matrix types
+struct dmat2
+{
+	dvec2 columns[2];
+	dmat2() = default;
+	dmat2(const dmat2& other) = default;
+	dmat2(const simddouble& _val)
+	{
+		columns[0] = dvec2(_val, 0);
+		columns[1] = dvec2(0, _val);
+	}
+	dmat2(const simddouble& _val0, const simddouble& _val1,
+		const simddouble& _val2, const simddouble& _val3) // all elements
+	{
+		columns[0] = dvec2(_val0, _val1);
+		columns[1] = dvec2(_val2, _val3);
+	}
+
+	dmat2(const dvec2& column0, const dvec2& column1)
+	{
+		columns[0] = column0;
+		columns[1] = column1;
+	}
+	dmat2(const dvec4& _val)
+	{
+		columns[0] = dvec2(_val.x, _val.y);
+		columns[1] = dvec2(_val.z, _val.w);
+	}
+#ifndef USE_SCALAR
+	dmat2(const double& _val0, const double& _val1,
+		const double& _val2, const double& _val3) // all elements
+	{
+		columns[0] = dvec2(simd_set1_double(_val0), simd_set1_double(_val1));
+		columns[1] = dvec2(simd_set1_double(_val2), simd_set1_double(_val3));
+	}
+#endif
+
+	// Operator [] to access columns
+	dvec2& operator[](int index)
+	{
+		return columns[index];
+	}
+	// Operator [][] to access elements
+	simddouble& operator()(int row, int col)
+	{
+		return columns[col][row];
+	}
+};
+
+struct dmat3
+{
+	dvec3 columns[3];
+
+	dmat3() = default;
+	dmat3(const dmat3& other) = default;
+	dmat3(const simddouble& _val)
+	{
+		columns[0] = dvec3(_val, 0, 0);
+		columns[1] = dvec3(0, _val, 0);
+		columns[2] = dvec3(0, 0, _val);
+	}
+	dmat3(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2,
+		const simddouble& _val3, const simddouble& _val4, const simddouble& _val5,
+		const simddouble& _val6, const simddouble& _val7, const simddouble& _val8) // all elements
+	{
+		columns[0] = dvec3(_val0, _val1, _val2);
+		columns[1] = dvec3(_val3, _val4, _val5);
+		columns[2] = dvec3(_val6, _val7, _val8);
+	}
+
+	dmat3(const dvec3& column0, const dvec3& column1, const dvec3& column2)
+	{
+		columns[0] = column0;
+		columns[1] = column1;
+		columns[2] = column2;
+	}
+#ifndef USE_SCALAR
+	dmat3(const double& _val0, const double& _val1, const double& _val2,
+		const double& _val3, const double& _val4, const double& _val5,
+		const double& _val6, const double& _val7, const double& _val8) // all elements
+	{
+		columns[0] = dvec3(simd_set1_double(_val0), simd_set1_double(_val1), simd_set1_double(_val2));
+		columns[1] = dvec3(simd_set1_double(_val3), simd_set1_double(_val4), simd_set1_double(_val5));
+		columns[2] = dvec3(simd_set1_double(_val6), simd_set1_double(_val7), simd_set1_double(_val8));
+	}
+#endif
+
+	// Operator [] to access columns
+	dvec3& operator[](int index)
+	{
+		return columns[index];
+	}
+
+	// Operator [][] to access elements
+	simddouble& operator()(int row, int col)
+	{
+		return columns[col][row];
+	}
+};
+
+struct dmat4
+{
+	dvec4 columns[4];
+
+	dmat4() = default;
+	dmat4(const dmat4& other) = default;
+	dmat4(const simddouble& _val)
+	{
+		columns[0] = dvec4(_val, 0, 0, 0);
+		columns[1] = dvec4(0, _val, 0, 0);
+		columns[2] = dvec4(0, 0, _val, 0);
+		columns[3] = dvec4(0, 0, 0, _val);
+	}
+	dmat4(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3,
+		const simddouble& _val4, const simddouble& _val5, const simddouble& _val6, const simddouble& _val7,
+		const simddouble& _val8, const simddouble& _val9, const simddouble& _val10, const simddouble& _val11,
+		const simddouble& _val12, const simddouble& _val13, const simddouble& _val14, const simddouble& _val15) // all elements
+	{
+		columns[0] = dvec4(_val0, _val1, _val2, _val3);
+		columns[1] = dvec4(_val4, _val5, _val6, _val7);
+		columns[2] = dvec4(_val8, _val9, _val10, _val11);
+		columns[3] = dvec4(_val12, _val13, _val14, _val15);
+	}
+
+	dmat4(const dvec4& _col0, const dvec4& _col1, const dvec4& _col2, const dvec4& _col3)
+	{
+		columns[0] = _col0;
+		columns[1] = _col1;
+		columns[2] = _col2;
+		columns[3] = _col3;
+	}
+#ifndef USE_SCALAR
+	dmat4(const double& _val0, const double& _val1, const double& _val2, const double& _val3,
+		const double& _val4, const double& _val5, const double& _val6, const double& _val7,
+		const double& _val8, const double& _val9, const double& _val10, const double& _val11,
+		const double& _val12, const double& _val13, const double& _val14, const double& _val15) // all elements
+	{
+		columns[0] = dvec4(simd_set1_double(_val0), simd_set1_double(_val1), simd_set1_double(_val2), simd_set1_double(_val3));
+		columns[1] = dvec4(simd_set1_double(_val4), simd_set1_double(_val5), simd_set1_double(_val6), simd_set1_double(_val7));
+		columns[2] = dvec4(simd_set1_double(_val8), simd_set1_double(_val9), simd_set1_double(_val10), simd_set1_double(_val11));
+		columns[3] = dvec4(simd_set1_double(_val12), simd_set1_double(_val13), simd_set1_double(_val14), simd_set1_double(_val15));
+	}
+#endif
+
+	// Operator [] to access columns
+	dvec4& operator[](int index)
+	{
+		return columns[index];
+	}
+
+	// Operator [][] to access elements
+	simddouble& operator()(int row, int col)
+	{
+		return columns[col][row];
+	}
+};
+#pragma endregion
+
+
+
+
+#pragma region float operators
+#pragma region simd comparison operators
+#ifndef USE_SCALAR
+
+inline simdmask operator>(const simdfloat& _a, const simdfloat& _b) {
+	return simd_cmp_float(_a, _b, _CMP_GT_OQ);
+}
+
+inline simdmask operator>(const simdfloat& _a, const float& _b) {
+	return simd_cmp_float(_a, simd_set1_float(_b), _CMP_GT_OQ);
+}
+
+inline simdmask operator>(const float& _a, const simdfloat& _b) {
+	return simd_cmp_float(simd_set1_float(_a), _b, _CMP_GT_OQ);
+}
+
+inline simdmask operator<(const simdfloat& _a, const simdfloat& _b) {
+	return simd_cmp_float(_a, _b, _CMP_LT_OQ);
+}
+
+inline simdmask operator<(const simdfloat& _a, const float& _b) {
+	return simd_cmp_float(_a, simd_set1_float(_b), _CMP_LT_OQ);
+}
+
+inline simdmask operator<(const float& _a, const simdfloat& _b) {
+	return simd_cmp_float(simd_set1_float(_a), _b, _CMP_LT_OQ);
+}
+
+inline simdmask operator>=(const simdfloat& _a, const simdfloat& _b) {
+	return simd_cmp_float(_a, _b, _CMP_GE_OQ);
+}
+
+inline simdmask operator>=(const simdfloat& _a, const float& _b) {
+	return simd_cmp_float(_a, simd_set1_float(_b), _CMP_GE_OQ);
+}
+
+inline simdmask operator<=(const simdfloat& _a, const simdfloat& _b) {
+	return simd_cmp_float(_a, _b, _CMP_LE_OQ);
+}
+
+inline simdmask operator<=(const simdfloat& _a, const float& _b) {
+	return simd_cmp_float(_a, simd_set1_float(_b), _CMP_LE_OQ);
+}
+
+inline simdmask operator==(const simdfloat& _a, const simdfloat& _b) {
+	return simd_cmp_float(_a, _b, _CMP_EQ_OQ);
+}
+
+inline simdmask operator==(const simdfloat& _a, const float& _b) {
+	return simd_cmp_float(_a, simd_set1_float(_b), _CMP_EQ_OQ);
+}
+
+inline simdmask operator&&(const simdmask& _a, const simdmask& _b) {
+#ifdef USE_AVX512
+	return simdmask(_a.value & _b.value);
+#else
+	return simd_and_float(_a, _b);
+#endif
+}
+
+inline simdmask operator||(const simdmask& _a, const simdmask& _b) {
+#ifdef USE_AVX512
+	return simdmask(_a.value | _b.value);
+#else
+	return simd_or_float(_a, _b);
+#endif
+}
+#endif
+
+
+#pragma endregion simd comparison operators
+
+
+#pragma region vector operators
+
+
+#ifndef USE_SCALAR
+// Unary negation
+inline simdfloat operator-(const simdfloat& _a)
+{
+	return simd_sub_float(simd_set1_float(0.0f), _a);
+}
+
+// pre-increment operator for simdfloat with proper return _value
+inline simdfloat& operator++(simdfloat& _a)
+{
+	simdfloat one = simd_set1_float(1.0f);
+	_a = simd_add_float(_a, one);
+	return _a;
+}
+
+inline simdfloat& operator--(simdfloat& _a)
+{
+	simdfloat one = simd_set1_float(-1.0f);
+	_a = simd_add_float(_a, one);
+	return _a;
+}
+
+// post-increment operator for simdfloat with proper return _value
+inline simdfloat operator++(simdfloat& _a, int)
+{
+	simdfloat temp = _a;
+	_a = simd_add_float(_a, simd_set1_float(1.0f));
+	return temp;
+}
+inline simdfloat operator--(simdfloat& _a, int)
+{
+	simdfloat temp = _a;
+	_a = simd_add_float(_a, simd_set1_float(-1.0f));
+	return temp;
+}
+
+// Common math operators for AVX types
+inline simdfloat operator+(const simdfloat& _a, const simdfloat& _b)
+{
+	return simd_add_float(_a, _b);
+}
+inline simdfloat operator-(const simdfloat& _a, const simdfloat& _b)
+{
+	return simd_sub_float(_a, _b);
+}
+inline simdfloat operator*(const simdfloat& _a, const simdfloat& _b)
+{
+	return simd_mul_float(_a, _b);
+}
+inline simdfloat operator/(const simdfloat& _a, const simdfloat& _b)
+{
+	return simd_div_float(_a, _b);
+}
+
+inline simdfloat operator+=(simdfloat& _a, const simdfloat& _b)
+{
+	_a = simd_add_float(_a, _b);
+	return _a;
+}
+inline simdfloat operator-=(simdfloat& _a, const simdfloat& _b)
+{
+	_a = simd_sub_float(_a, _b);
+	return _a;
+}
+inline simdfloat operator*=(simdfloat& _a, const simdfloat& _b)
+{
+	_a = simd_mul_float(_a, _b);
+	return _a;
+}
+inline simdfloat operator/=(simdfloat& _a, const simdfloat& _b)
+{
+	_a = simd_div_float(_a, _b);
+	return _a;
+}
+
+inline simdfloat operator+(const simdfloat& _a, const float& _b)
+{
+	return simd_add_float(_a, simd_set1_float(_b));
+}
+inline simdfloat operator-(const simdfloat& _a, const float& _b)
+{
+	return simd_sub_float(_a, simd_set1_float(_b));
+}
+inline simdfloat operator*(const simdfloat& _a, const float& _b)
+{
+	return simd_mul_float(_a, simd_set1_float(_b));
+}
+inline simdfloat operator/(const simdfloat& _a, const float& _b)
+{
+	return simd_div_float(_a, simd_set1_float(_b));
+}
+
+inline simdfloat operator+=(simdfloat& _a, const float& _b)
+{
+	_a += simd_set1_float(_b);
+	return _a;
+}
+inline simdfloat operator-=(simdfloat& _a, const float& _b)
+{
+	_a -= simd_set1_float(_b);
+	return _a;
+}
+inline simdfloat operator*=(simdfloat& _a, const float& _b)
+{
+	_a *= simd_set1_float(_b);
+	return _a;
+}
+inline simdfloat operator/=(simdfloat& _a, const float& _b)
+{
+	_a /= simd_set1_float(_b);
+	return _a;
+}
+
+inline simdfloat operator+(const float& _a, const simdfloat& _b)
+{
+	return simd_add_float(simd_set1_float(_a), _b);
+}
+inline simdfloat operator-(const float& _a, const simdfloat& _b)
+{
+	return simd_sub_float(simd_set1_float(_a), _b);
+}
+inline simdfloat operator*(const float& _a, const simdfloat& _b)
+{
+	return simd_mul_float(simd_set1_float(_a), _b);
+}
+inline simdfloat operator/(const float& _a, const simdfloat& _b)
+{
+	return simd_div_float(simd_set1_float(_a), _b);
+}
+#endif // USE_SCALAR
+
+
+// Vec2 operators
+inline vec2 operator-(const vec2& _a)
+{
+	return { -_a.x, -_a.y };
+}
+#ifndef USE_SCALAR
+inline vec2 operator+(const vec2& _a, const float& _b)
+{
+	return { _a.x + simd_set1_float(_b), _a.y + simd_set1_float(_b) };
+}
+inline vec2 operator-(const vec2& _a, const float& _b)
+{
+	return { _a.x - simd_set1_float(_b), _a.y - simd_set1_float(_b) };
+}
+inline vec2 operator*(const vec2& _a, const float& _b)
+{
+	return { _a.x * simd_set1_float(_b), _a.y * simd_set1_float(_b) };
+}
+inline vec2 operator/(const vec2& _a, const float& _b)
+{
+	return { _a.x / simd_set1_float(_b), _a.y / simd_set1_float(_b) };
+}
+
+inline vec2 operator+(const float& _a, const vec2& _b)
+{
+	return { simd_set1_float(_a) + _b.x, simd_set1_float(_a) + _b.y };
+}
+inline vec2 operator-(const float& _a, const vec2& _b)
+{
+	return { simd_set1_float(_a) - _b.x, simd_set1_float(_a) - _b.y };
+}
+inline vec2 operator*(const float& _a, const vec2& _b)
+{
+	return { simd_set1_float(_a) * _b.x, simd_set1_float(_a) * _b.y };
+}
+inline vec2 operator/(const float& _a, const vec2& _b)
+{
+	return { simd_set1_float(_a) / _b.x, simd_set1_float(_a) / _b.y };
+}
+
+inline vec2 operator+=(vec2& _a, const float& _b)
+{
+	_a.x += _b;
+	_a.y += _b;
+	return _a;
+}
+inline vec2 operator-=(vec2& _a, const float& _b)
+{
+	_a.x -= _b;
+	_a.y -= _b;
+	return _a;
+}
+inline vec2 operator*=(vec2& _a, const float& _b)
+{
+	_a.x *= _b;
+	_a.y *= _b;
+	return _a;
+}
+inline vec2 operator/=(vec2& _a, const float& _b)
+{
+	_a.x /= _b;
+	_a.y /= _b;
+	return _a;
+}
+
+#endif
+
+// vec2 and simdfloat
+inline vec2 operator+(const vec2& _a, const simdfloat& _b)
+{
+	return { _a.x + _b, _a.y + _b };
+}
+inline vec2 operator-(const vec2& _a, const simdfloat& _b)
+{
+	return { _a.x - _b, _a.y - _b };
+}
+inline vec2 operator*(const vec2& _a, const simdfloat& _b)
+{
+	return { _a.x * _b, _a.y * _b };
+}
+inline vec2 operator/(const vec2& _a, const simdfloat& _b)
+{
+	return { _a.x / _b, _a.y / _b };
+}
+
+inline vec2 operator+(const simdfloat& _a, const vec2& _b)
+{
+	return { _a + _b.x, _a + _b.y };
+}
+inline vec2 operator-(const simdfloat& _a, const vec2& _b)
+{
+	return { _a - _b.x, _a - _b.y };
+}
+inline vec2 operator*(const simdfloat& _a, const vec2& _b)
+{
+	return { _a * _b.x, _a * _b.y };
+}
+inline vec2 operator/(const simdfloat& _a, const vec2& _b)
+{
+	return { _a / _b.x, _a / _b.y };
+}
+
+inline vec2 operator+=(vec2& _a, const simdfloat& _b)
+{
+	_a = _a + _b;
+	return _a;
+}
+inline vec2 operator-=(vec2& _a, const simdfloat& _b)
+{
+	_a = _a - _b;
+	return _a;
+}
+inline vec2 operator*=(vec2& _a, const simdfloat& _b)
+{
+	_a = _a * _b;
+	return _a;
+}
+inline vec2 operator/=(vec2& _a, const simdfloat& _b)
+{
+	_a = _a / _b;
+	return _a;
+}
+
+// vec2 and vec2
+inline vec2 operator+(const vec2& _a, const vec2& _b)
+{
+	return { _a.x + _b.x, _a.y + _b.y };
+}
+inline vec2 operator-(const vec2& _a, const vec2& _b)
+{
+	return { _a.x - _b.x, _a.y - _b.y };
+}
+inline vec2 operator*(const vec2& _a, const vec2& _b)
+{
+	return { _a.x * _b.x, _a.y * _b.y };
+}
+inline vec2 operator/(const vec2& _a, const vec2& _b)
+{
+	return { _a.x / _b.x, _a.y / _b.y };
+}
+
+inline vec2 operator+=(vec2& _a, const vec2& _b)
+{
+	_a = _a + _b;
+	return _a;
+}
+inline vec2 operator-=(vec2& _a, const vec2& _b)
+{
+	_a = _a - _b;
+	return _a;
+}
+inline vec2 operator*=(vec2& _a, const vec2& _b)
+{
+	_a = _a * _b;
+	return _a;
+}
+inline vec2 operator/=(vec2& _a, const vec2& _b)
+{
+	_a = _a / _b;
+	return _a;
+}
+
+// Vec3 operators
+inline vec3 operator-(const vec3& _a)
+{
+	return { -_a.x, -_a.y, -_a.z };
+}
+#ifndef USE_SCALAR
+inline vec3 operator+(const vec3& _a, const float& _b)
+{
+	return { _a.x + _b, _a.y + _b, _a.z + _b };
+}
+inline vec3 operator-(const vec3& _a, const float& _b)
+{
+	return { _a.x - _b, _a.y - _b, _a.z - _b };
+}
+inline vec3 operator*(const vec3& _a, const float& _b)
+{
+	return { _a.x * _b, _a.y * _b, _a.z * _b };
+}
+inline vec3 operator/(const vec3& _a, const float& _b)
+{
+	return { _a.x / _b, _a.y / _b, _a.z / _b };
+}
+
+inline vec3 operator+(const float& _a, const vec3& _b)
+{
+	return { _a + _b.x, _a + _b.y, _a + _b.z };
+}
+inline vec3 operator-(const float& _a, const vec3& _b)
+{
+	return { _a - _b.x, _a - _b.y, _a - _b.z };
+}
+inline vec3 operator*(const float& _a, const vec3& _b)
+{
+	return { _a * _b.x, _a * _b.y, _a * _b.z };
+}
+inline vec3 operator/(const float& _a, const vec3& _b)
+{
+	return { _a / _b.x, _a / _b.y, _a / _b.z };
+}
+
+inline vec3 operator+=(vec3& _a, const float& _b)
+{
+	_a = _a + _b;
+	return _a;
+}
+inline vec3 operator-=(vec3& _a, const float& _b)
+{
+	_a = _a - _b;
+	return _a;
+}
+inline vec3 operator*=(vec3& _a, const float& _b)
+{
+	_a = _a * _b;
+	return _a;
+}
+inline vec3 operator/=(vec3& _a, const float& _b)
+{
+	_a = _a / _b;
+	return _a;
+}
+#endif
+
+// vec3 and simdfloat
+inline vec3 operator+(const vec3& _a, const simdfloat& _b)
+{
+	return { _a.x + _b, _a.y + _b, _a.z + _b };
+}
+inline vec3 operator-(const vec3& _a, const simdfloat& _b)
+{
+	return { _a.x - _b, _a.y - _b, _a.z - _b };
+}
+inline vec3 operator*(const vec3& _a, const simdfloat& _b)
+{
+	return { _a.x * _b, _a.y * _b, _a.z * _b };
+}
+inline vec3 operator/(const vec3& _a, const simdfloat& _b)
+{
+	return { _a.x / _b, _a.y / _b, _a.z / _b };
+}
+
+inline vec3 operator+(const simdfloat& _a, const vec3& _b)
+{
+	return { _a + _b.x, _a + _b.y, _a + _b.z };
+}
+inline vec3 operator-(const simdfloat& _a, const vec3& _b)
+{
+	return { _a - _b.x, _a - _b.y, _a - _b.z };
+}
+inline vec3 operator*(const simdfloat& _a, const vec3& _b)
+{
+	return { _a * _b.x, _a * _b.y, _a * _b.z };
+}
+inline vec3 operator/(const simdfloat& _a, const vec3& _b)
+{
+	return { _a / _b.x, _a / _b.y, _a / _b.z };
+}
+
+inline vec3 operator+=(vec3& _a, const simdfloat& _b)
+{
+	_a = _a + _b;
+	return _a;
+}
+inline vec3 operator-=(vec3& _a, const simdfloat& _b)
+{
+	_a = _a - _b;
+	return _a;
+}
+inline vec3 operator*=(vec3& _a, const simdfloat& _b)
+{
+	_a = _a * _b;
+	return _a;
+}
+inline vec3 operator/=(vec3& _a, const simdfloat& _b)
+{
+	_a = _a / _b;
+	return _a;
+}
+
+// vec3 and vec3
+inline vec3 operator+(const vec3& _a, const vec3& _b)
+{
+	return { _a.x + _b.x, _a.y + _b.y, _a.z + _b.z };
+}
+inline vec3 operator-(const vec3& _a, const vec3& _b)
+{
+	return { _a.x - _b.x, _a.y - _b.y, _a.z - _b.z };
+}
+inline vec3 operator*(const vec3& _a, const vec3& _b)
+{
+	return { _a.x * _b.x, _a.y * _b.y, _a.z * _b.z };
+}
+inline vec3 operator/(const vec3& _a, const vec3& _b)
+{
+	return { _a.x / _b.x, _a.y / _b.y, _a.z / _b.z };
+}
+
+inline vec3 operator+=(vec3& _a, const vec3& _b)
+{
+	_a = _a + _b;
+	return _a;
+}
+inline vec3 operator-=(vec3& _a, const vec3& _b)
+{
+	_a = _a - _b;
+	return _a;
+}
+inline vec3 operator*=(vec3& _a, const vec3& _b)
+{
+	_a = _a * _b;
+	return _a;
+}
+inline vec3 operator/=(vec3& _a, const vec3& _b)
+{
+	_a = _a / _b;
+	return _a;
+}
+
+// Vec4 operators
+inline vec4 operator-(const vec4& _a)
+{
+	return { -_a.x, -_a.y, -_a.z, -_a.w };
+}
+
+#ifndef USE_SCALAR
+inline vec4 operator+(const vec4& _a, const float& _b)
+{
+	return { _a.x + _b, _a.y + _b, _a.z + _b, _a.w + _b };
+}
+inline vec4 operator-(const vec4& _a, const float& _b)
+{
+	return { _a.x - _b, _a.y - _b, _a.z - _b, _a.w - _b };
+}
+inline vec4 operator*(const vec4& _a, const float& _b)
+{
+	return { _a.x * _b, _a.y * _b, _a.z * _b, _a.w * _b };
+}
+inline vec4 operator/(const vec4& _a, const float& _b)
+{
+	return { _a.x / _b, _a.y / _b, _a.z / _b, _a.w / _b };
+}
+inline vec4 operator+(const float& _a, const vec4& _b)
+{
+	return { _a + _b.x, _a + _b.y, _a + _b.z, _a + _b.w };
+}
+inline vec4 operator-(const float& _a, const vec4& _b)
+{
+	return { _a - _b.x, _a - _b.y, _a - _b.z, _a - _b.w };
+}
+inline vec4 operator*(const float& _a, const vec4& _b)
+{
+	return { _a * _b.x, _a * _b.y, _a * _b.z, _a * _b.w };
+}
+inline vec4 operator/(const float& _a, const vec4& _b)
+{
+	return { _a / _b.x, _a / _b.y, _a / _b.z, _a / _b.w };
+}
+
+inline vec4 operator+=(vec4& _a, const float& _b)
+{
+	_a = _a + _b;
+	return _a;
+}
+inline vec4 operator-=(vec4& _a, const float& _b)
+{
+	_a = _a - _b;
+	return _a;
+}
+inline vec4 operator*=(vec4& _a, const float& _b)
+{
+	_a = _a * _b;
+	return _a;
+}
+inline vec4 operator/=(vec4& _a, const float& _b)
+{
+	_a = _a / _b;
+	return _a;
+}
+#endif
+
+// vec4 and simdfloat
+inline vec4 operator+(const vec4& _a, const simdfloat& _b)
+{
+	return { _a.x + _b, _a.y + _b, _a.z + _b, _a.w + _b };
+}
+inline vec4 operator-(const vec4& _a, const simdfloat& _b)
+{
+	return { _a.x - _b, _a.y - _b, _a.z - _b, _a.w - _b };
+}
+inline vec4 operator*(const vec4& _a, const simdfloat& _b)
+{
+	return { _a.x * _b, _a.y * _b, _a.z * _b, _a.w * _b };
+}
+inline vec4 operator/(const vec4& _a, const simdfloat& _b)
+{
+	return { _a.x / _b, _a.y / _b, _a.z / _b, _a.w / _b };
+}
+inline vec4 operator+(const simdfloat& _a, const vec4& _b)
+{
+	return { _a + _b.x, _a + _b.y, _a + _b.z, _a + _b.w };
+}
+inline vec4 operator-(const simdfloat& _a, const vec4& _b)
+{
+	return { _a - _b.x, _a - _b.y, _a - _b.z, _a - _b.w };
+}
+inline vec4 operator*(const simdfloat& _a, const vec4& _b)
+{
+	return { _a * _b.x, _a * _b.y, _a * _b.z, _a * _b.w };
+}
+inline vec4 operator/(const simdfloat& _a, const vec4& _b)
+{
+	return { _a / _b.x, _a / _b.y, _a / _b.z, _a / _b.w };
+}
+
+inline vec4 operator+=(vec4& _a, const simdfloat& _b)
+{
+	_a = _a + _b;
+	return _a;
+}
+inline vec4 operator-=(vec4& _a, const simdfloat& _b)
+{
+	_a = _a - _b;
+	return _a;
+}
+inline vec4 operator*=(vec4& _a, const simdfloat& _b)
+{
+	_a = _a * _b;
+	return _a;
+}
+inline vec4 operator/=(vec4& _a, const simdfloat& _b)
+{
+	_a = _a / _b;
+	return _a;
+}
+
+// vec4 and vec4
+inline vec4 operator+(const vec4& _a, const vec4& _b)
+{
+	return { _a.x + _b.x, _a.y + _b.y, _a.z + _b.z, _a.w + _b.w };
+}
+inline vec4 operator-(const vec4& _a, const vec4& _b)
+{
+	return { _a.x - _b.x, _a.y - _b.y, _a.z - _b.z, _a.w - _b.w };
+}
+inline vec4 operator*(const vec4& _a, const vec4& _b)
+{
+	return { _a.x * _b.x, _a.y * _b.y, _a.z * _b.z, _a.w * _b.w };
+}
+inline vec4 operator/(const vec4& _a, const vec4& _b)
+{
+	return { _a.x / _b.x, _a.y / _b.y, _a.z / _b.z, _a.w / _b.w };
+}
+
+inline vec4 operator+=(vec4& _a, const vec4& _b)
+{
+	_a = _a + _b;
+	return _a;
+}
+inline vec4 operator-=(vec4& _a, const vec4& _b)
+{
+	_a = _a - _b;
+	return _a;
+}
+inline vec4 operator*=(vec4& _a, const vec4& _b)
+{
+	_a = _a * _b;
+	return _a;
+}
+inline vec4 operator/=(vec4& _a, const vec4& _b)
+{
+	_a = _a / _b;
+	return _a;
+}
+
+#pragma endregion
+
+#pragma region std::cout operators
+#ifndef USE_SCALAR
+#ifndef USE_AVX512
+inline std::ostream& operator<<(std::ostream& _os, const simdmask& _v)
+{
+	alignas(64) float arr[8];
+	simd_store_float(arr, _v);
+	for (int i = 0; i < simdwidth; i++)
+	{
+		_os << arr[i];
+		if (i < simdwidth - 1) _os << ", ";
+	}
+	return _os;
+}
+#endif // USE_AVX512
+inline std::ostream& operator<<(std::ostream& _os, const simdfloat& _v)
+{
+	alignas(64) float arr[8];
+	simd_store_float(arr, _v);
+	for (int i = 0; i < simdwidth; i++)
+	{
+		_os << arr[i];
+		if (i < simdwidth - 1) _os << ", ";
+	}
+	return _os;
+}
+
+#endif
+
+inline std::ostream& operator<<(std::ostream& _os, const vec2& _v)
+{
+	_os << "[" << _v.x << "]" << ", " << "[" << _v.y << "]";
+	return _os;
+}
+inline std::ostream& operator<<(std::ostream& _os, const vec3& _v)
+{
+	_os << "[" << _v.x << "]" << ", " << "[" << _v.y << "]" << ", " << "[" << _v.z << "]";
+	return _os;
+}
+inline std::ostream& operator<<(std::ostream& _os, const vec4& _v)
+{
+	_os << "[" << _v.x << "]" << ", " << "[" << _v.y << "]" << ", " << "[" << _v.z << "]" << ", " << "[" << _v.w << "]";
+	return _os;
+}
+
+// overload << for mat2, mat3, mat4
+inline std::ostream& operator<<(std::ostream& _os, const mat2& _m)
+{
+	_os << "[" << _m.columns[0] << "]" << std::endl << "[" << _m.columns[1] << "]";
+	return _os;
+}
+
+inline std::ostream& operator<<(std::ostream& _os, const mat3& _m)
+{
+	_os << "[" << _m.columns[0] << "]" << std::endl << "[" << _m.columns[1] << "]" << std::endl << "[" << _m.columns[2] << "]";
+	return _os;
+}
+
+inline std::ostream& operator<<(std::ostream& _os, const mat4& _m)
+{
+	_os << "[" << _m.columns[0] << "]" << std::endl << "[" << _m.columns[1] << "]" << std::endl << "[" << _m.columns[2] << "]" << std::endl << "[" << _m.columns[3] << "]";
+	return _os;
+}
+
+#pragma endregion
+#pragma endregion float operators
+
+#pragma region double operators
+#pragma region double simd comparison operators
+#ifndef USE_SCALAR
+
+inline simddmask operator>(const simddouble& _a, const simddouble& _b) {
+	return simd_cmp_double(_a, _b, _CMP_GT_OQ);
+}
+
+inline simddmask operator>(const simddouble& _a, const double& _b) {
+	return simd_cmp_double(_a, simd_set1_double(_b), _CMP_GT_OQ);
+}
+
+inline simddmask operator>(const double& _a, const simddouble& _b) {
+	return simd_cmp_double(simd_set1_double(_a), _b, _CMP_GT_OQ);
+}
+
+inline simddmask operator<(const simddouble& _a, const simddouble& _b) {
+	return simd_cmp_double(_a, _b, _CMP_LT_OQ);
+}
+
+inline simddmask operator<(const simddouble& _a, const double& _b) {
+	return simd_cmp_double(_a, simd_set1_double(_b), _CMP_LT_OQ);
+}
+
+inline simddmask operator<(const double& _a, const simddouble& _b) {
+	return simd_cmp_double(simd_set1_double(_a), _b, _CMP_LT_OQ);
+}
+
+inline simddmask operator>=(const simddouble& _a, const simddouble& _b) {
+	return simd_cmp_double(_a, _b, _CMP_GE_OQ);
+}
+
+inline simddmask operator>=(const simddouble& _a, const double& _b) {
+	return simd_cmp_double(_a, simd_set1_double(_b), _CMP_GE_OQ);
+}
+
+inline simddmask operator<=(const simddouble& _a, const simddouble& _b) {
+	return simd_cmp_double(_a, _b, _CMP_LE_OQ);
+}
+
+inline simddmask operator<=(const simddouble& _a, const double& _b) {
+	return simd_cmp_double(_a, simd_set1_double(_b), _CMP_LE_OQ);
+}
+
+inline simddmask operator==(const simddouble& _a, const simddouble& _b) {
+	return simd_cmp_double(_a, _b, _CMP_EQ_OQ);
+}
+
+inline simddmask operator==(const simddouble& _a, const double& _b) {
+	return simd_cmp_double(_a, simd_set1_double(_b), _CMP_EQ_OQ);
+}
+
+inline simddmask operator&&(const simddmask& _a, const simddmask& _b) {
+#ifdef USE_AVX512
+	return simddmask(_a.value & _b.value);
+#else
+	return simd_and_double(_a, _b);
+#endif
+}
+
+inline simddmask operator||(const simddmask& _a, const simddmask& _b) {
+#ifdef USE_AVX512
+	return simddmask(_a.value | _b.value);
+#else
+	return simd_or_double(_a, _b);
+#endif
+}
+#endif
+
+
+#pragma endregion simd comparison operators
+
+
+#pragma region vectot operators
+
+#ifndef USE_SCALAR
+// Unary negation
+inline simddouble operator-(const simddouble& _a)
+{
+	return simd_sub_double(simd_set1_double(0.0f), _a);
+}
+
+// pre-increment operator for simddouble with proper return _value
+inline simddouble& operator++(simddouble& _a)
+{
+	simddouble one = simd_set1_double(1.0);
+	_a = simd_add_double(_a, one);
+	return _a;
+}
+
+inline simddouble& operator--(simddouble& _a)
+{
+	simddouble one = simd_set1_double(-1.0);
+	_a = simd_add_double(_a, one);
+	return _a;
+}
+
+// post-increment operator for simddouble with proper return _value
+inline simddouble operator++(simddouble& _a, int)
+{
+	simddouble temp = _a;
+	_a = simd_add_double(_a, simd_set1_double(1.0));
+	return temp;
+}
+inline simddouble operator--(simddouble& _a, int)
+{
+	simddouble temp = _a;
+	_a = simd_add_double(_a, simd_set1_double(-1.0));
+	return temp;
+}
+
+// Common dmath operators for AVX types
+inline simddouble operator+(const simddouble& _a, const simddouble& _b)
+{
+	return simd_add_double(_a, _b);
+}
+inline simddouble operator-(const simddouble& _a, const simddouble& _b)
+{
+	return simd_sub_double(_a, _b);
+}
+inline simddouble operator*(const simddouble& _a, const simddouble& _b)
+{
+	return simd_mul_double(_a, _b);
+}
+inline simddouble operator/(const simddouble& _a, const simddouble& _b)
+{
+	return simd_div_double(_a, _b);
+}
+
+inline simddouble operator+=(simddouble& _a, const simddouble& _b)
+{
+	_a = simd_add_double(_a, _b);
+	return _a;
+}
+inline simddouble operator-=(simddouble& _a, const simddouble& _b)
+{
+	_a = simd_sub_double(_a, _b);
+	return _a;
+}
+inline simddouble operator*=(simddouble& _a, const simddouble& _b)
+{
+	_a = simd_mul_double(_a, _b);
+	return _a;
+}
+inline simddouble operator/=(simddouble& _a, const simddouble& _b)
+{
+	_a = _a / _b;
+	return _a;
+}
+
+inline simddouble operator+(const simddouble& _a, const double& _b)
+{
+	return simd_add_double(_a, simd_set1_double(_b));
+}
+inline simddouble operator-(const simddouble& _a, const double& _b)
+{
+	return simd_sub_double(_a, simd_set1_double(_b));
+}
+inline simddouble operator*(const simddouble& _a, const double& _b)
+{
+	return simd_mul_double(_a, simd_set1_double(_b));
+}
+inline simddouble operator/(const simddouble& _a, const double& _b)
+{
+	return simd_div_double(_a, simd_set1_double(_b));
+}
+
+inline simddouble operator+=(simddouble& _a, const double& _b)
+{
+	_a += simd_set1_double(_b);
+	return _a;
+}
+inline simddouble operator-=(simddouble& _a, const double& _b)
+{
+	_a -= simd_set1_double(_b);
+	return _a;
+}
+inline simddouble operator*=(simddouble& _a, const double& _b)
+{
+	_a *= simd_set1_double(_b);
+	return _a;
+}
+inline simddouble operator/=(simddouble& _a, const double& _b)
+{
+	_a /= simd_set1_double(_b);
+	return _a;
+}
+
+inline simddouble operator+(const double& _a, const simddouble& _b)
+{
+	return simd_add_double(simd_set1_double(_a), _b);
+}
+inline simddouble operator-(const double& _a, const simddouble& _b)
+{
+	return simd_sub_double(simd_set1_double(_a), _b);
+}
+inline simddouble operator*(const double& _a, const simddouble& _b)
+{
+	return simd_mul_double(simd_set1_double(_a), _b);
+}
+inline simddouble operator/(const double& _a, const simddouble& _b)
+{
+	return simd_div_double(simd_set1_double(_a), _b);
+}
+#endif // USE_SCALAR
+
+
+// dvec2 operators
+// Unary negation
+inline dvec2 operator-(const dvec2& _a)
+{
+	return { -_a.x, -_a.y };
+}
+#ifndef USE_SCALAR
+inline dvec2 operator+(const dvec2& _a, const double& _b)
+{
+	return { _a.x + simd_set1_double(_b), _a.y + simd_set1_double(_b) };
+}
+inline dvec2 operator-(const dvec2& _a, const double& _b)
+{
+	return { _a.x - simd_set1_double(_b), _a.y - simd_set1_double(_b) };
+}
+inline dvec2 operator*(const dvec2& _a, const double& _b)
+{
+	return { _a.x * simd_set1_double(_b), _a.y * simd_set1_double(_b) };
+}
+inline dvec2 operator/(const dvec2& _a, const double& _b)
+{
+	return { _a.x / simd_set1_double(_b), _a.y / simd_set1_double(_b) };
+}
+
+inline dvec2 operator+(const double& _a, const dvec2& _b)
+{
+	return { simd_set1_double(_a) + _b.x, simd_set1_double(_a) + _b.y };
+}
+inline dvec2 operator-(const double& _a, const dvec2& _b)
+{
+	return { simd_set1_double(_a) - _b.x, simd_set1_double(_a) - _b.y };
+}
+inline dvec2 operator*(const double& _a, const dvec2& _b)
+{
+	return { simd_set1_double(_a) * _b.x, simd_set1_double(_a) * _b.y };
+}
+inline dvec2 operator/(const double& _a, const dvec2& _b)
+{
+	return { simd_set1_double(_a) / _b.x, simd_set1_double(_a) / _b.y };
+}
+
+inline dvec2 operator+=(dvec2& _a, const double& _b)
+{
+	_a.x += _b;
+	_a.y += _b;
+	return _a;
+}
+inline dvec2 operator-=(dvec2& _a, const double& _b)
+{
+	_a.x -= _b;
+	_a.y -= _b;
+	return _a;
+}
+inline dvec2 operator*=(dvec2& _a, const double& _b)
+{
+	_a.x *= _b;
+	_a.y *= _b;
+	return _a;
+}
+inline dvec2 operator/=(dvec2& _a, const double& _b)
+{
+	_a.x /= _b;
+	_a.y /= _b;
+	return _a;
+}
+#endif
+
+// dvec2 and simddouble
+inline dvec2 operator+(const dvec2& _a, const simddouble& _b)
+{
+	return { _a.x + _b, _a.y + _b };
+}
+inline dvec2 operator-(const dvec2& _a, const simddouble& _b)
+{
+	return { _a.x - _b, _a.y - _b };
+}
+inline dvec2 operator*(const dvec2& _a, const simddouble& _b)
+{
+	return { _a.x * _b, _a.y * _b };
+}
+inline dvec2 operator/(const dvec2& _a, const simddouble& _b)
+{
+	return { _a.x / _b, _a.y / _b };
+}
+
+inline dvec2 operator+(const simddouble& _a, const dvec2& _b)
+{
+	return { _a + _b.x, _a + _b.y };
+}
+inline dvec2 operator-(const simddouble& _a, const dvec2& _b)
+{
+	return { _a - _b.x, _a - _b.y };
+}
+inline dvec2 operator*(const simddouble& _a, const dvec2& _b)
+{
+	return { _a * _b.x, _a * _b.y };
+}
+inline dvec2 operator/(const simddouble& _a, const dvec2& _b)
+{
+	return { _a / _b.x, _a / _b.y };
+}
+
+
+inline dvec2 operator+=(dvec2& _a, const simddouble& _b)
+{
+	_a = _a + _b;
+	return _a;
+}
+inline dvec2 operator-=(dvec2& _a, const simddouble& _b)
+{
+	_a = _a - _b;
+	return _a;
+}
+inline dvec2 operator*=(dvec2& _a, const simddouble& _b)
+{
+	_a = _a * _b;
+	return _a;
+}
+inline dvec2 operator/=(dvec2& _a, const simddouble& _b)
+{
+	_a = _a / _b;
+	return _a;
+}
+
+// dvec2 and dvec2
+inline dvec2 operator+(const dvec2& _a, const dvec2& _b)
+{
+	return { _a.x + _b.x, _a.y + _b.y };
+}
+inline dvec2 operator-(const dvec2& _a, const dvec2& _b)
+{
+	return { _a.x - _b.x, _a.y - _b.y };
+}
+inline dvec2 operator*(const dvec2& _a, const dvec2& _b)
+{
+	return { _a.x * _b.x, _a.y * _b.y };
+}
+inline dvec2 operator/(const dvec2& _a, const dvec2& _b)
+{
+	return { _a.x / _b.x, _a.y / _b.y };
+}
+
+inline dvec2 operator+=(dvec2& _a, const dvec2& _b)
+{
+	_a = _a + _b;
+	return _a;
+}
+inline dvec2 operator-=(dvec2& _a, const dvec2& _b)
+{
+	_a = _a - _b;
+	return _a;
+}
+inline dvec2 operator*=(dvec2& _a, const dvec2& _b)
+{
+	_a = _a * _b;
+	return _a;
+}
+inline dvec2 operator/=(dvec2& _a, const dvec2& _b)
+{
+	_a = _a / _b;
+	return _a;
+}
+
+// dvec3 operators
+inline dvec3 operator-(const dvec3& _a)
+{
+	return { -_a.x, -_a.y, -_a.z };
+}
+
+#ifndef USE_SCALAR
+// dvec3 and simddouble
+inline dvec3 operator+(const dvec3& _a, const double& _b)
+{
+	return { _a.x + _b, _a.y + _b, _a.z + _b };
+}
+inline dvec3 operator-(const dvec3& _a, const double& _b)
+{
+	return { _a.x - _b, _a.y - _b, _a.z - _b };
+}
+inline dvec3 operator*(const dvec3& _a, const double& _b)
+{
+	return { _a.x * _b, _a.y * _b, _a.z * _b };
+}
+inline dvec3 operator/(const dvec3& _a, const double& _b)
+{
+	return { _a.x / _b, _a.y / _b, _a.z / _b };
+}
+
+inline dvec3 operator+(const double& _a, const dvec3& _b)
+{
+	return { _a + _b.x, _a + _b.y, _a + _b.z };
+}
+inline dvec3 operator-(const double& _a, const dvec3& _b)
+{
+	return { _a - _b.x, _a - _b.y, _a - _b.z };
+}
+inline dvec3 operator*(const double& _a, const dvec3& _b)
+{
+	return { _a * _b.x, _a * _b.y, _a * _b.z };
+}
+inline dvec3 operator/(const double& _a, const dvec3& _b)
+{
+	return { _a / _b.x, _a / _b.y, _a / _b.z };
+}
+
+inline dvec3 operator+=(dvec3& _a, const double& _b)
+{
+	_a = _a + _b;
+	return _a;
+}
+inline dvec3 operator-=(dvec3& _a, const double& _b)
+{
+	_a = _a - _b;
+	return _a;
+}
+inline dvec3 operator*=(dvec3& _a, const double& _b)
+{
+	_a = _a * _b;
+	return _a;
+}
+inline dvec3 operator/=(dvec3& _a, const double& _b)
+{
+	_a = _a / _b;
+	return _a;
+}
+#endif
+
+// dvec3 and simddouble
+inline dvec3 operator+(const dvec3& _a, const simddouble& _b)
+{
+	return { _a.x + _b, _a.y + _b, _a.z + _b };
+}
+inline dvec3 operator-(const dvec3& _a, const simddouble& _b)
+{
+	return { _a.x - _b, _a.y - _b, _a.z - _b };
+}
+inline dvec3 operator*(const dvec3& _a, const simddouble& _b)
+{
+	return { _a.x * _b, _a.y * _b, _a.z * _b };
+}
+inline dvec3 operator/(const dvec3& _a, const simddouble& _b)
+{
+	return { _a.x / _b, _a.y / _b, _a.z / _b };
+}
+
+inline dvec3 operator+(const simddouble& _a, const dvec3& _b)
+{
+	return { _a + _b.x, _a + _b.y, _a + _b.z };
+}
+inline dvec3 operator-(const simddouble& _a, const dvec3& _b)
+{
+	return { _a - _b.x, _a - _b.y, _a - _b.z };
+}
+inline dvec3 operator*(const simddouble& _a, const dvec3& _b)
+{
+	return { _a * _b.x, _a * _b.y, _a * _b.z };
+}
+inline dvec3 operator/(const simddouble& _a, const dvec3& _b)
+{
+	return { _a / _b.x, _a / _b.y, _a / _b.z };
+}
+
+inline dvec3 operator+=(dvec3& _a, const simddouble& _b)
+{
+	_a = _a + _b;
+	return _a;
+}
+inline dvec3 operator-=(dvec3& _a, const simddouble& _b)
+{
+	_a = _a - _b;
+	return _a;
+}
+inline dvec3 operator*=(dvec3& _a, const simddouble& _b)
+{
+	_a = _a * _b;
+	return _a;
+}
+inline dvec3 operator/=(dvec3& _a, const simddouble& _b)
+{
+	_a = _a / _b;
+	return _a;
+}
+
+// dvec3 and dvec3
+inline dvec3 operator+(const dvec3& _a, const dvec3& _b)
+{
+	return { _a.x + _b.x, _a.y + _b.y, _a.z + _b.z };
+}
+inline dvec3 operator-(const dvec3& _a, const dvec3& _b)
+{
+	return { _a.x - _b.x, _a.y - _b.y, _a.z - _b.z };
+}
+inline dvec3 operator*(const dvec3& _a, const dvec3& _b)
+{
+	return { _a.x * _b.x, _a.y * _b.y, _a.z * _b.z };
+}
+inline dvec3 operator/(const dvec3& _a, const dvec3& _b)
+{
+	return { _a.x / _b.x, _a.y / _b.y, _a.z / _b.z };
+}
+
+inline dvec3 operator+=(dvec3& _a, const dvec3& _b)
+{
+	_a = _a + _b;
+	return _a;
+}
+inline dvec3 operator-=(dvec3& _a, const dvec3& _b)
+{
+	_a = _a - _b;
+	return _a;
+}
+inline dvec3 operator*=(dvec3& _a, const dvec3& _b)
+{
+	_a = _a * _b;
+	return _a;
+}
+inline dvec3 operator/=(dvec3& _a, const dvec3& _b)
+{
+	_a = _a / _b;
+	return _a;
+}
+
+// dvec4 operators
+inline dvec4 operator-(const dvec4& _a)
+{
+	return { -_a.x, -_a.y, -_a.z, -_a.w };
+}
+
+#ifndef USE_SCALAR
+inline dvec4 operator+(const dvec4& _a, const double& _b)
+{
+	return { _a.x + _b, _a.y + _b, _a.z + _b, _a.w + _b };
+}
+inline dvec4 operator-(const dvec4& _a, const double& _b)
+{
+	return { _a.x - _b, _a.y - _b, _a.z - _b, _a.w - _b };
+}
+inline dvec4 operator*(const dvec4& _a, const double& _b)
+{
+	return { _a.x * _b, _a.y * _b, _a.z * _b, _a.w * _b };
+}
+inline dvec4 operator/(const dvec4& _a, const double& _b)
+{
+	return { _a.x / _b, _a.y / _b, _a.z / _b, _a.w / _b };
+}
+
+inline dvec4 operator+(const double& _a, const dvec4& _b)
+{
+	return { _a + _b.x, _a + _b.y, _a + _b.z, _a + _b.w };
+}
+inline dvec4 operator-(const double& _a, const dvec4& _b)
+{
+	return { _a - _b.x, _a - _b.y, _a - _b.z, _a - _b.w };
+}
+inline dvec4 operator*(const double& _a, const dvec4& _b)
+{
+	return { _a * _b.x, _a * _b.y, _a * _b.z, _a * _b.w };
+}
+inline dvec4 operator/(const double& _a, const dvec4& _b)
+{
+	return { _a / _b.x, _a / _b.y, _a / _b.z, _a / _b.w };
+}
+
+inline dvec4 operator+=(dvec4& _a, const double& _b)
+{
+	_a = _a + _b;
+	return _a;
+}
+inline dvec4 operator-=(dvec4& _a, const double& _b)
+{
+	_a = _a - _b;
+	return _a;
+}
+inline dvec4 operator*=(dvec4& _a, const double& _b)
+{
+	_a = _a * _b;
+	return _a;
+}
+inline dvec4 operator/=(dvec4& _a, const double& _b)
+{
+	_a = _a / _b;
+	return _a;
+}
+#endif
+
+// dvec4 and simddouble
+inline dvec4 operator+(const dvec4& _a, const simddouble& _b)
+{
+	return { _a.x + _b, _a.y + _b, _a.z + _b, _a.w + _b };
+}
+inline dvec4 operator-(const dvec4& _a, const simddouble& _b)
+{
+	return { _a.x - _b, _a.y - _b, _a.z - _b, _a.w - _b };
+}
+inline dvec4 operator*(const dvec4& _a, const simddouble& _b)
+{
+	return { _a.x * _b, _a.y * _b, _a.z * _b, _a.w * _b };
+}
+inline dvec4 operator/(const dvec4& _a, const simddouble& _b)
+{
+	return { _a.x / _b, _a.y / _b, _a.z / _b, _a.w / _b };
+}
+inline dvec4 operator+(const simddouble& _a, const dvec4& _b)
+{
+	return { _a + _b.x, _a + _b.y, _a + _b.z, _a + _b.w };
+}
+inline dvec4 operator-(const simddouble& _a, const dvec4& _b)
+{
+	return { _a - _b.x, _a - _b.y, _a - _b.z, _a - _b.w };
+}
+inline dvec4 operator*(const simddouble& _a, const dvec4& _b)
+{
+	return { _a * _b.x, _a * _b.y, _a * _b.z, _a * _b.w };
+}
+inline dvec4 operator/(const simddouble& _a, const dvec4& _b)
+{
+	return { _a / _b.x, _a / _b.y, _a / _b.z, _a / _b.w };
+}
+
+inline dvec4 operator+=(dvec4& _a, const simddouble& _b)
+{
+	_a = _a + _b;
+	return _a;
+}
+inline dvec4 operator-=(dvec4& _a, const simddouble& _b)
+{
+	_a = _a - _b;
+	return _a;
+}
+inline dvec4 operator*=(dvec4& _a, const simddouble& _b)
+{
+	_a = _a * _b;
+	return _a;
+}
+inline dvec4 operator/=(dvec4& _a, const simddouble& _b)
+{
+	_a = _a / _b;
+	return _a;
+}
+
+// dvec4 and dvec4
+inline dvec4 operator+(const dvec4& _a, const dvec4& _b)
+{
+	return { _a.x + _b.x, _a.y + _b.y, _a.z + _b.z, _a.w + _b.w };
+}
+inline dvec4 operator-(const dvec4& _a, const dvec4& _b)
+{
+	return { _a.x - _b.x, _a.y - _b.y, _a.z - _b.z, _a.w - _b.w };
+}
+inline dvec4 operator*(const dvec4& _a, const dvec4& _b)
+{
+	return { _a.x * _b.x, _a.y * _b.y, _a.z * _b.z, _a.w * _b.w };
+}
+inline dvec4 operator/(const dvec4& _a, const dvec4& _b)
+{
+	return { _a.x / _b.x, _a.y / _b.y, _a.z / _b.z, _a.w / _b.w };
+}
+
+inline dvec4 operator+=(dvec4& _a, const dvec4& _b)
+{
+	_a = _a + _b;
+	return _a;
+}
+inline dvec4 operator-=(dvec4& _a, const dvec4& _b)
+{
+	_a = _a - _b;
+	return _a;
+}
+inline dvec4 operator*=(dvec4& _a, const dvec4& _b)
+{
+	_a = _a * _b;
+	return _a;
+}
+inline dvec4 operator/=(dvec4& _a, const dvec4& _b)
+{
+	_a = _a / _b;
+	return _a;
+}
+#pragma endregion
+#pragma region std::cout operators
+#ifndef USE_SCALAR
+#ifndef USE_AVX512
+inline std::ostream& operator<<(std::ostream& _os, const simddmask& _v)
+{
+	alignas(64) double arr[8];
+	simd_store_double(arr, _v);
+	for (int i = 0; i < halfsimdwidth; i++)
+	{
+		_os << arr[i];
+		if (i < halfsimdwidth - 1) _os << ", ";
+	}
+	return _os;
+}
+#endif
+inline std::ostream& operator<<(std::ostream& _os, const simddouble& _v)
+{
+	alignas(64) double arr[8];
+	simd_store_double(arr, _v);
+	for (int i = 0; i < halfsimdwidth; i++)
+	{
+		_os << arr[i];
+		if (i < halfsimdwidth - 1) _os << ", ";
+	}
+	return _os;
+}
+
+#endif
+
+inline std::ostream& operator<<(std::ostream& _os, const dvec2& _v)
+{
+	_os << "[" << _v.x << "]" << ", " << "[" << _v.y << "]";
+	return _os;
+}
+inline std::ostream& operator<<(std::ostream& _os, const dvec3& _v)
+{
+	_os << "[" << _v.x << "]" << ", " << "[" << _v.y << "]" << ", " << "[" << _v.z << "]";
+	return _os;
+}
+inline std::ostream& operator<<(std::ostream& _os, const dvec4& _v)
+{
+	_os << "[" << _v.x << "]" << ", " << "[" << _v.y << "]" << ", " << "[" << _v.z << "]" << ", " << "[" << _v.w << "]";
+	return _os;
+}
+
+// overload << for dmat2, dmat3, dmat4
+inline std::ostream& operator<<(std::ostream& _os, const dmat2& _m)
+{
+	_os << "[" << _m.columns[0] << "]" << std::endl << "[" << _m.columns[1] << "]";
+	return _os;
+}
+
+inline std::ostream& operator<<(std::ostream& _os, const dmat3& _m)
+{
+	_os << "[" << _m.columns[0] << "]" << std::endl << "[" << _m.columns[1] << "]" << std::endl << "[" << _m.columns[2] << "]";
+	return _os;
+}
+
+inline std::ostream& operator<<(std::ostream& _os, const dmat4& _m)
+{
+	_os << "[" << _m.columns[0] << "]" << std::endl << "[" << _m.columns[1] << "]" << std::endl << "[" << _m.columns[2] << "]" << std::endl << "[" << _m.columns[3] << "]";
+	return _os;
+}
+
+#pragma endregion
+#pragma endregion double operators
+
+#pragma region int operators
+#pragma region int simd comparison operators
+#ifndef USE_SCALAR
+
+inline simdimask operator>(const simdint& _a, const simdint& _b) {
+	return simd_cmpgt_int(_a, _b);
+}
+
+inline simdimask operator>(const simdint& _a, const int& _b) {
+	return simd_cmpgt_int(_a, simd_set1_int(_b));
+}
+
+inline simdimask operator>(const int& _a, const simdint& _b) {
+	return simd_cmpgt_int(simd_set1_int(_a), _b);
+}
+
+inline simdimask operator<(const simdint& _a, const simdint& _b) {
+	return simd_cmpgt_int(_b, _a);
+}
+
+inline simdimask operator<(const simdint& _a, const int& _b) {
+	return simd_cmpgt_int(simd_set1_int(_b), _a);
+}
+
+inline simdimask operator<(const int& _a, const simdint& _b) {
+	return simd_cmpgt_int(_b, simd_set1_int(_a));
+}
+
+inline simdimask operator>=(const simdint& _a, const simdint& _b) {
+#ifndef USE_AVX512
+	return simd_or_int(simd_cmpgt_int(_a, _b), simd_cmpeq_int(_a, _b));
+#else
+	return (simd_cmpgt_int(_a, _b) | simd_cmpeq_int(_a, _b));
+#endif
+}
+
+inline simdimask operator>=(const simdint& _a, const int& _b) {
+#ifndef USE_AVX512
+	return simd_or_int(simd_cmpgt_int(_a, simd_set1_int(_b)), simd_cmpeq_int(_a, simd_set1_int(_b)));
+#else
+	return simd_cmpgt_int(_a, simd_set1_int(_b)) | simd_cmpeq_int(_a, simd_set1_int(_b));
+#endif
+}
+
+inline simdimask operator<=(const simdint& _a, const simdint& _b) {
+#ifndef USE_AVX512
+	return simd_or_int(simd_cmpgt_int(_b, _a), simd_cmpeq_int(_b, _a));
+#else
+	return simd_cmpgt_int(_b, _a) | simd_cmpeq_int(_b, _a);
+#endif
+}
+
+inline simdimask operator<=(const simdint& _a, const int& _b) {
+#ifndef USE_AVX512
+	return simd_or_int(simd_cmpgt_int(simd_set1_int(_b), _a), simd_cmpeq_int(simd_set1_int(_b), _a));
+#else
+	return simd_cmpgt_int(simd_set1_int(_b), _a) | simd_cmpeq_int(simd_set1_int(_b), _a);
+#endif
+}
+
+inline simdimask operator==(const simdint& _a, const simdint& _b) {
+	return simd_cmpeq_int(_a, _b);
+}
+
+inline simdimask operator==(const simdint& _a, const int& _b) {
+	return simd_cmpeq_int(_a, simd_set1_int(_b));
+}
+
+inline simdimask operator&&(const simdimask& _a, const simdimask& _b) {
+#ifdef USE_AVX512
+	return simdimask(_a.value & _b.value);
+#else
+	return simd_and_int(_a, _b);
+#endif
+}
+
+inline simdimask operator||(const simdimask& _a, const simdimask& _b) {
+#ifdef USE_AVX512
+	return simdimask(_a.value | _b.value);
+#else
+	return simd_or_int(_a, _b);
+#endif
+}
+
+#endif
+
+
+#pragma endregion simd comparison operators
+
+#pragma region ivector operators
+
+
+
+#ifndef USE_SCALAR
+// Unary negation
+inline simdint operator-(const simdint& _a)
+{
+	return simd_sub_int(simd_set1_int(0), _a);
+}
+
+// pre-increment operator for simdint with proper return _value
+inline simdint& operator++(simdint& _a)
+{
+	simdint one = simd_set1_int(1);
+	_a = simd_add_int(_a, one);
+	return _a;
+}
+
+inline simdint& operator--(simdint& _a)
+{
+	simdint one = simd_set1_int(-1);
+	_a = simd_add_int(_a, one);
+	return _a;
+}
+
+// post-increment operator for simdint with proper return _value
+inline simdint operator++(simdint& _a, int)
+{
+	simdint temp = _a;
+	_a = simd_add_int(_a, simd_set1_int(1));
+	return temp;
+}
+inline simdint operator--(simdint& _a, int)
+{
+	simdint temp = _a;
+	_a = simd_add_int(_a, simd_set1_int(-1));
+	return temp;
+}
+
+// Common math operators for AVX types
+inline simdint operator+(const simdint& _a, const simdint& _b)
+{
+	return simd_add_int(_a, _b);
+}
+inline simdint operator-(const simdint& _a, const simdint& _b)
+{
+	return simd_sub_int(_a, _b);
+}
+inline simdint operator*(const simdint& _a, const simdint& _b)
+{
+	return simd_mul_int(_a, _b);
+}
+inline simdint operator/(const simdint& _a, const simdint& _b)
+{
+	alignas(64) int arr_a[simdwidth] = { 0 };
+	alignas(64) int arr_b[simdwidth] = { 0 };
+	simd_store_int(arr_a, _a);
+	simd_store_int(arr_b, _b);
+	for (int i = 0; i < simdwidth; i++)
+	{
+		arr_a[i] /= arr_b[i];
+	}
+
+	return simd_load_int(arr_a);
+}
+
+inline simdint operator+=(simdint& _a, const simdint& _b)
+{
+	_a = simd_add_int(_a, _b);
+	return _a;
+}
+inline simdint operator-=(simdint& _a, const simdint& _b)
+{
+	_a = simd_sub_int(_a, _b);
+	return _a;
+}
+inline simdint operator*=(simdint& _a, const simdint& _b)
+{
+	_a = simd_mul_int(_a, _b);
+	return _a;
+}
+inline simdint operator/=(simdint& _a, const simdint& _b)
+{
+	_a = _a / _b;
+	return _a;
+}
+
+inline simdint operator+(const simdint& _a, const int& _b)
+{
+	return simd_add_int(_a, simd_set1_int(_b));
+}
+inline simdint operator-(const simdint& _a, const int& _b)
+{
+	return simd_sub_int(_a, simd_set1_int(_b));
+}
+inline simdint operator*(const simdint& _a, const int& _b)
+{
+	return simd_mul_int(_a, simd_set1_int(_b));
+}
+inline simdint operator/(const simdint& _a, const int& _b)
+{
+	return _a / simd_set1_int(_b);
+}
+
+inline simdint operator+=(simdint& _a, const int& _b)
+{
+	_a += simd_set1_int(_b);
+	return _a;
+}
+inline simdint operator-=(simdint& _a, const int& _b)
+{
+	_a -= simd_set1_int(_b);
+	return _a;
+}
+inline simdint operator*=(simdint& _a, const int& _b)
+{
+	_a *= simd_set1_int(_b);
+	return _a;
+}
+inline simdint operator/=(simdint& _a, const int& _b)
+{
+	_a /= simd_set1_int(_b);
+	return _a;
+}
+
+inline simdint operator+(const int& _a, const simdint& _b)
+{
+	return simd_add_int(simd_set1_int(_a), _b);
+}
+inline simdint operator-(const int& _a, const simdint& _b)
+{
+	return simd_sub_int(simd_set1_int(_a), _b);
+}
+inline simdint operator*(const int& _a, const simdint& _b)
+{
+	return simd_mul_int(simd_set1_int(_a), _b);
+}
+inline simdint operator/(const int& _a, const simdint& _b)
+{
+	return simd_set1_int(_a)/ _b;
+}
+#endif // USE_SCALAR
+
+
+#ifndef USE_SCALAR
+inline simdint operator%(const simdint& _a, const simdint& _b)
+{
+	alignas(64) int arr_a[simdwidth] = { 0 };
+	alignas(64) int arr_b[simdwidth] = { 0 };
+	simd_store_int(arr_a, _a);
+	simd_store_int(arr_b, _b);
+	for (int i = 0; i < simdwidth; i++)
+	{
+		arr_a[i] %= arr_b[i];
+	}
+	return simd_load_int(arr_a);
+}
+inline simdint operator%=(simdint& _a, const simdint& _b)
+{
+	_a = _a % _b;
+	return _a;
+}
+inline simdint operator%(const simdint& _a, const int& _b)
+{
+	alignas(64) int arr_a[simdwidth] = { 0 };
+	simd_store_int(arr_a, _a);
+	for (int i = 0; i < simdwidth; i++)
+	{
+		arr_a[i] %= _b;
+	}
+	return simd_load_int(arr_a);
+}
+inline simdint operator%=(simdint& _a, const int& _b)
+{
+	_a = _a % _b;
+	return _a;
+}
+
+#endif
+
+// ivec2 operators
+// Unary negation
+inline ivec2 operator-(const ivec2& _a)
+{
+	return { -_a.x, -_a.y };
+}
+
+// ivec2 and int
+#ifndef USE_SCALAR
+inline ivec2 operator+(const ivec2& _a, const int& _b)
+{
+	return { _a.x + simd_set1_int(_b), _a.y + simd_set1_int(_b) };
+}
+inline ivec2 operator-(const ivec2& _a, const int& _b)
+{
+	return { _a.x - simd_set1_int(_b), _a.y - simd_set1_int(_b) };
+}
+inline ivec2 operator*(const ivec2& _a, const int& _b)
+{
+	return { _a.x * simd_set1_int(_b), _a.y * simd_set1_int(_b) };
+}
+inline ivec2 operator/(const ivec2& _a, const int& _b)
+{
+	return { _a.x / simd_set1_int(_b), _a.y / simd_set1_int(_b) };
+}
+inline ivec2 operator%(const ivec2& _a, const int& _b)
+{
+	return { _a.x % _b, _a.y % _b };
+}
+
+inline ivec2 operator+(const int& _a, const ivec2& _b)
+{
+	return { simd_set1_int(_a) + _b.x, simd_set1_int(_a) + _b.y };
+}
+inline ivec2 operator-(const int& _a, const ivec2& _b)
+{
+	return { simd_set1_int(_a) - _b.x, simd_set1_int(_a) - _b.y };
+}
+inline ivec2 operator*(const int& _a, const ivec2& _b)
+{
+	return { simd_set1_int(_a) * _b.x, simd_set1_int(_a) * _b.y };
+}
+inline ivec2 operator/(const int& _a, const ivec2& _b)
+{
+	return { simd_set1_int(_a) / _b.x, simd_set1_int(_a) / _b.y };
+}
+
+inline ivec2 operator+=(ivec2& _a, const int& _b)
+{
+	_a.x += _b;
+	_a.y += _b;
+	return _a;
+}
+inline ivec2 operator-=(ivec2& _a, const int& _b)
+{
+	_a.x -= _b;
+	_a.y -= _b;
+	return _a;
+}
+inline ivec2 operator*=(ivec2& _a, const int& _b)
+{
+	_a.x *= _b;
+	_a.y *= _b;
+	return _a;
+}
+inline ivec2 operator/=(ivec2& _a, const int& _b)
+{
+	_a.x /= _b;
+	_a.y /= _b;
+	return _a;
+}
+inline ivec2 operator%=(ivec2& _a, const int& _b)
+{
+	_a.x %= _b;
+	_a.y %= _b;
+	return _a;
+}
+#endif
+
+// ivec2 and simdint
+inline ivec2 operator+(const ivec2& _a, const simdint& _b)
+{
+	return { _a.x + _b, _a.y + _b };
+}
+inline ivec2 operator-(const ivec2& _a, const simdint& _b)
+{
+	return { _a.x - _b, _a.y - _b };
+}
+inline ivec2 operator*(const ivec2& _a, const simdint& _b)
+{
+	return { _a.x * _b, _a.y * _b };
+}
+inline ivec2 operator/(const ivec2& _a, const simdint& _b)
+{
+	return { _a.x / _b, _a.y / _b };
+}
+inline ivec2 operator%(const ivec2& _a, const simdint& _b)
+{
+	return { _a.x % _b, _a.y % _b };
+}
+
+inline ivec2 operator+(const simdint& _a, const ivec2& _b)
+{
+	return { _a + _b.x, _a + _b.y };
+}
+inline ivec2 operator-(const simdint& _a, const ivec2& _b)
+{
+	return { _a - _b.x, _a - _b.y };
+}
+inline ivec2 operator*(const simdint& _a, const ivec2& _b)
+{
+	return { _a * _b.x, _a * _b.y };
+}
+inline ivec2 operator/(const simdint& _a, const ivec2& _b)
+{
+	return { _a / _b.x, _a / _b.y };
+}
+
+inline ivec2 operator+=(ivec2& _a, const simdint& _b)
+{
+	_a = _a + _b;
+	return _a;
+}
+inline ivec2 operator-=(ivec2& _a, const simdint& _b)
+{
+	_a = _a - _b;
+	return _a;
+}
+inline ivec2 operator*=(ivec2& _a, const simdint& _b)
+{
+	_a = _a * _b;
+	return _a;
+}
+inline ivec2 operator/=(ivec2& _a, const simdint& _b)
+{
+	_a = _a / _b;
+	return _a;
+}
+inline ivec2 operator%=(ivec2& _a, const simdint& _b)
+{
+	_a.x %= _b;
+	_a.y %= _b;
+	return _a;
+}
+
+// ivec2 and ivec2
+inline ivec2 operator+(const ivec2& _a, const ivec2& _b)
+{
+	return { _a.x + _b.x, _a.y + _b.y };
+}
+inline ivec2 operator-(const ivec2& _a, const ivec2& _b)
+{
+	return { _a.x - _b.x, _a.y - _b.y };
+}
+inline ivec2 operator*(const ivec2& _a, const ivec2& _b)
+{
+	return { _a.x * _b.x, _a.y * _b.y };
+}
+inline ivec2 operator/(const ivec2& _a, const ivec2& _b)
+{
+	return { _a.x / _b.x, _a.y / _b.y };
+}
+inline ivec2 operator%(const ivec2& _a, const ivec2& _b)
+{
+	return { _a.x % _b.x, _a.y % _b.y };
+}
+
+inline ivec2 operator+=(ivec2& _a, const ivec2& _b)
+{
+	_a = _a + _b;
+	return _a;
+}
+inline ivec2 operator-=(ivec2& _a, const ivec2& _b)
+{
+	_a = _a - _b;
+	return _a;
+}
+inline ivec2 operator*=(ivec2& _a, const ivec2& _b)
+{
+	_a = _a * _b;
+	return _a;
+}
+inline ivec2 operator/=(ivec2& _a, const ivec2& _b)
+{
+	_a = _a / _b;
+	return _a;
+}
+inline ivec2 operator%=(ivec2& _a, const ivec2& _b)
+{
+	_a.x %= _b.x;
+	_a.y %= _b.y;
+	return _a;
+}
+
+// ivec3 operators
+// unary negation
+inline ivec3 operator-(const ivec3& _a)
+{
+	return { -_a.x, -_a.y, -_a.z };
+}
+
+// ivec3 and int
+#ifndef USE_SCALAR
+inline ivec3 operator+(const ivec3& _a, const int& _b)
+{
+	return { _a.x + _b, _a.y + _b, _a.z + _b };
+}
+inline ivec3 operator-(const ivec3& _a, const int& _b)
+{
+	return { _a.x - _b, _a.y - _b, _a.z - _b };
+}
+inline ivec3 operator*(const ivec3& _a, const int& _b)
+{
+	return { _a.x * _b, _a.y * _b, _a.z * _b };
+}
+inline ivec3 operator/(const ivec3& _a, const int& _b)
+{
+	return { _a.x / _b, _a.y / _b, _a.z / _b };
+}
+inline ivec3 operator%(const ivec3& _a, const int& _b)
+{
+	return { _a.x % _b, _a.y % _b, _a.z % _b };
+}
+
+inline ivec3 operator+(const int& _a, const ivec3& _b)
+{
+	return { _a + _b.x, _a + _b.y, _a + _b.z };
+}
+inline ivec3 operator-(const int& _a, const ivec3& _b)
+{
+	return { _a - _b.x, _a - _b.y, _a - _b.z };
+}
+inline ivec3 operator*(const int& _a, const ivec3& _b)
+{
+	return { _a * _b.x, _a * _b.y, _a * _b.z };
+}
+inline ivec3 operator/(const int& _a, const ivec3& _b)
+{
+	return { _a / _b.x, _a / _b.y, _a / _b.z };
+}
+
+inline ivec3 operator+=(ivec3& _a, const int& _b)
+{
+	_a = _a + _b;
+	return _a;
+}
+inline ivec3 operator-=(ivec3& _a, const int& _b)
+{
+	_a = _a - _b;
+	return _a;
+}
+inline ivec3 operator*=(ivec3& _a, const int& _b)
+{
+	_a = _a * _b;
+	return _a;
+}
+inline ivec3 operator/=(ivec3& _a, const int& _b)
+{
+	_a = _a / _b;
+	return _a;
+}
+inline ivec3 operator%=(ivec3& _a, const int& _b)
+{
+	_a.x %= _b;
+	_a.y %= _b;
+	_a.z %= _b;
+	return _a;
+}
+
+#endif
+
+// ivec3 and simdint
+inline ivec3 operator+(const ivec3& _a, const simdint& _b)
+{
+	return { _a.x + _b, _a.y + _b, _a.z + _b };
+}
+inline ivec3 operator-(const ivec3& _a, const simdint& _b)
+{
+	return { _a.x - _b, _a.y - _b, _a.z - _b };
+}
+inline ivec3 operator*(const ivec3& _a, const simdint& _b)
+{
+	return { _a.x * _b, _a.y * _b, _a.z * _b };
+}
+inline ivec3 operator/(const ivec3& _a, const simdint& _b)
+{
+	return { _a.x / _b, _a.y / _b, _a.z / _b };
+}
+inline ivec3 operator%(const ivec3& _a, const simdint& _b)
+{
+	return { _a.x % _b, _a.y % _b, _a.z % _b };
+}
+
+inline ivec3 operator+(const simdint& _a, const ivec3& _b)
+{
+	return { _a + _b.x, _a + _b.y, _a + _b.z };
+}
+inline ivec3 operator-(const simdint& _a, const ivec3& _b)
+{
+	return { _a - _b.x, _a - _b.y, _a - _b.z };
+}
+inline ivec3 operator*(const simdint& _a, const ivec3& _b)
+{
+	return { _a * _b.x, _a * _b.y, _a * _b.z };
+}
+inline ivec3 operator/(const simdint& _a, const ivec3& _b)
+{
+	return { _a / _b.x, _a / _b.y, _a / _b.z };
+}
+
+inline ivec3 operator+=(ivec3& _a, const simdint& _b)
+{
+	_a = _a + _b;
+	return _a;
+}
+inline ivec3 operator-=(ivec3& _a, const simdint& _b)
+{
+	_a = _a - _b;
+	return _a;
+}
+inline ivec3 operator*=(ivec3& _a, const simdint& _b)
+{
+	_a = _a * _b;
+	return _a;
+}
+inline ivec3 operator/=(ivec3& _a, const simdint& _b)
+{
+	_a = _a / _b;
+	return _a;
+}
+inline ivec3 operator%=(ivec3& _a, const simdint& _b)
+{
+	_a.x %= _b;
+	_a.y %= _b;
+	_a.z %= _b;
+	return _a;
+}
+
+// ivec3 and ivec3
+inline ivec3 operator+(const ivec3& _a, const ivec3& _b)
+{
+	return { _a.x + _b.x, _a.y + _b.y, _a.z + _b.z };
+}
+inline ivec3 operator-(const ivec3& _a, const ivec3& _b)
+{
+	return { _a.x - _b.x, _a.y - _b.y, _a.z - _b.z };
+}
+inline ivec3 operator*(const ivec3& _a, const ivec3& _b)
+{
+	return { _a.x * _b.x, _a.y * _b.y, _a.z * _b.z };
+}
+inline ivec3 operator/(const ivec3& _a, const ivec3& _b)
+{
+	return { _a.x / _b.x, _a.y / _b.y, _a.z / _b.z };
+}
+inline ivec3 operator%(const ivec3& _a, const ivec3& _b)
+{
+	return { _a.x % _b.x, _a.y % _b.y, _a.z % _b.z };
+}
+
+inline ivec3 operator+=(ivec3& _a, const ivec3& _b)
+{
+	_a = _a + _b;
+	return _a;
+}
+inline ivec3 operator-=(ivec3& _a, const ivec3& _b)
+{
+	_a = _a - _b;
+	return _a;
+}
+inline ivec3 operator*=(ivec3& _a, const ivec3& _b)
+{
+	_a = _a * _b;
+	return _a;
+}
+inline ivec3 operator/=(ivec3& _a, const ivec3& _b)
+{
+	_a = _a / _b;
+	return _a;
+}
+inline ivec3 operator%=(ivec3& _a, const ivec3& _b)
+{
+	_a.x %= _b.x;
+	_a.y %= _b.y;
+	_a.z %= _b.z;
+	return _a;
+}
+
+// ivec4 operators
+inline ivec4 operator-(const ivec4& _a)
+{
+	return { -_a.x, -_a.y, -_a.z, -_a.w };
+}
+
+// ivec4 and int
+#ifndef USE_SCALAR
+inline ivec4 operator+(const ivec4& _a, const int& _b)
+{
+	return { _a.x + _b, _a.y + _b, _a.z + _b, _a.w + _b };
+}
+inline ivec4 operator-(const ivec4& _a, const int& _b)
+{
+	return { _a.x - _b, _a.y - _b, _a.z - _b, _a.w - _b };
+}
+inline ivec4 operator*(const ivec4& _a, const int& _b)
+{
+	return { _a.x * _b, _a.y * _b, _a.z * _b, _a.w * _b };
+}
+inline ivec4 operator/(const ivec4& _a, const int& _b)
+{
+	return { _a.x / _b, _a.y / _b, _a.z / _b, _a.w / _b };
+}
+inline ivec4 operator%(const ivec4& _a, const int& _b)
+{
+	return { _a.x % _b, _a.y % _b, _a.z % _b, _a.w % _b };
+}
+
+inline ivec4 operator+(const int& _a, const ivec4& _b)
+{
+	return { _a + _b.x, _a + _b.y, _a + _b.z, _a + _b.w };
+}
+inline ivec4 operator-(const int& _a, const ivec4& _b)
+{
+	return { _a - _b.x, _a - _b.y, _a - _b.z, _a - _b.w };
+}
+inline ivec4 operator*(const int& _a, const ivec4& _b)
+{
+	return { _a * _b.x, _a * _b.y, _a * _b.z, _a * _b.w };
+}
+inline ivec4 operator/(const int& _a, const ivec4& _b)
+{
+	return { _a / _b.x, _a / _b.y, _a / _b.z, _a / _b.w };
+}
+
+inline ivec4 operator+=(ivec4& _a, const int& _b)
+{
+	_a = _a + _b;
+	return _a;
+}
+inline ivec4 operator-=(ivec4& _a, const int& _b)
+{
+	_a = _a - _b;
+	return _a;
+}
+inline ivec4 operator*=(ivec4& _a, const int& _b)
+{
+	_a = _a * _b;
+	return _a;
+}
+inline ivec4 operator/=(ivec4& _a, const int& _b)
+{
+	_a = _a / _b;
+	return _a;
+}
+inline ivec4 operator%=(ivec4& _a, const int& _b)
+{
+	_a.x %= _b;
+	_a.y %= _b;
+	_a.z %= _b;
+	_a.w %= _b;
+	return _a;
+}
+#endif
+
+// ivec4 and simdint
+inline ivec4 operator+(const ivec4& _a, const simdint& _b)
+{
+	return { _a.x + _b, _a.y + _b, _a.z + _b, _a.w + _b };
+}
+inline ivec4 operator-(const ivec4& _a, const simdint& _b)
+{
+	return { _a.x - _b, _a.y - _b, _a.z - _b, _a.w - _b };
+}
+inline ivec4 operator*(const ivec4& _a, const simdint& _b)
+{
+	return { _a.x * _b, _a.y * _b, _a.z * _b, _a.w * _b };
+}
+inline ivec4 operator/(const ivec4& _a, const simdint& _b)
+{
+	return { _a.x / _b, _a.y / _b, _a.z / _b, _a.w / _b };
+}
+inline ivec4 operator%(const ivec4& _a, const simdint& _b)
+{
+	return { _a.x % _b, _a.y % _b, _a.z % _b, _a.w % _b };
+}
+
+inline ivec4 operator+(const simdint& _a, const ivec4& _b)
+{
+	return { _a + _b.x, _a + _b.y, _a + _b.z, _a + _b.w };
+}
+inline ivec4 operator-(const simdint& _a, const ivec4& _b)
+{
+	return { _a - _b.x, _a - _b.y, _a - _b.z, _a - _b.w };
+}
+inline ivec4 operator*(const simdint& _a, const ivec4& _b)
+{
+	return { _a * _b.x, _a * _b.y, _a * _b.z, _a * _b.w };
+}
+inline ivec4 operator/(const simdint& _a, const ivec4& _b)
+{
+	return { _a / _b.x, _a / _b.y, _a / _b.z, _a / _b.w };
+}
+
+inline ivec4 operator+=(ivec4& _a, const simdint& _b)
+{
+	_a = _a + _b;
+	return _a;
+}
+inline ivec4 operator-=(ivec4& _a, const simdint& _b)
+{
+	_a = _a - _b;
+	return _a;
+}
+inline ivec4 operator*=(ivec4& _a, const simdint& _b)
+{
+	_a = _a * _b;
+	return _a;
+}
+inline ivec4 operator/=(ivec4& _a, const simdint& _b)
+{
+	_a = _a / _b;
+	return _a;
+}
+inline ivec4 operator%=(ivec4& _a, const simdint& _b)
+{
+	_a.x %= _b;
+	_a.y %= _b;
+	_a.z %= _b;
+	_a.w %= _b;
+	return _a;
+}
+
+// ivec4 and ivec4
+inline ivec4 operator+(const ivec4& _a, const ivec4& _b)
+{
+	return { _a.x + _b.x, _a.y + _b.y, _a.z + _b.z, _a.w + _b.w };
+}
+inline ivec4 operator-(const ivec4& _a, const ivec4& _b)
+{
+	return { _a.x - _b.x, _a.y - _b.y, _a.z - _b.z, _a.w - _b.w };
+}
+inline ivec4 operator*(const ivec4& _a, const ivec4& _b)
+{
+	return { _a.x * _b.x, _a.y * _b.y, _a.z * _b.z, _a.w * _b.w };
+}
+inline ivec4 operator/(const ivec4& _a, const ivec4& _b)
+{
+	return { _a.x / _b.x, _a.y / _b.y, _a.z / _b.z, _a.w / _b.w };
+}
+inline ivec4 operator%(const ivec4& _a, const ivec4& _b)
+{
+	return { _a.x % _b.x, _a.y % _b.y, _a.z % _b.z, _a.w % _b.w };
+}
+
+inline ivec4 operator+=(ivec4& _a, const ivec4& _b)
+{
+	_a = _a + _b;
+	return _a;
+}
+inline ivec4 operator-=(ivec4& _a, const ivec4& _b)
+{
+	_a = _a - _b;
+	return _a;
+}
+inline ivec4 operator*=(ivec4& _a, const ivec4& _b)
+{
+	_a = _a * _b;
+	return _a;
+}
+inline ivec4 operator/=(ivec4& _a, const ivec4& _b)
+{
+	_a = _a / _b;
+	return _a;
+}
+inline ivec4 operator%=(ivec4& _a, const ivec4& _b)
+{
+	_a.x %= _b.x;
+	_a.y %= _b.y;
+	_a.z %= _b.z;
+	_a.w %= _b.w;
+	return _a;
+}
+#pragma endregion
+#pragma region binary operators
+
+// & operator
+#ifndef USE_SCALAR
+inline simdint operator&(const simdint& _a, const simdint& _b)
+{
+	return simd_and_int(_a, _b);
+}
+#endif
+
+inline ivec2 operator&(const ivec2& _a, const ivec2& _b)
+{
+	return { _a.x & _b.x, _a.y & _b.y };
+}
+
+inline ivec3 operator&(const ivec3& _a, const ivec3& _b)
+{
+	return { _a.x & _b.x, _a.y & _b.y, _a.z & _b.z };
+}
+
+inline ivec4 operator&(const ivec4& _a, const ivec4& _b)
+{
+	return { _a.x & _b.x, _a.y & _b.y, _a.z & _b.z, _a.w & _b.w };
+}
+
+// | operator
+#ifndef USE_SCALAR
+inline simdint operator|(const simdint& _a, const simdint& _b)
+{
+	return simd_or_int(_a, _b);
+}
+#endif
+
+inline ivec2 operator|(const ivec2& _a, const ivec2& _b)
+{
+	return { _a.x | _b.x, _a.y | _b.y };
+}
+
+inline ivec3 operator|(const ivec3& _a, const ivec3& _b)
+{
+	return { _a.x | _b.x, _a.y | _b.y, _a.z | _b.z };
+}
+
+inline ivec4 operator|(const ivec4& _a, const ivec4& _b)
+{
+	return { _a.x | _b.x, _a.y | _b.y, _a.z | _b.z, _a.w | _b.w };
+}
+
+// ^ operator
+#ifndef USE_SCALAR
+inline simdint operator^(const simdint& _a, const simdint& _b)
+{
+	return simd_xor_int(_a, _b);
+}
+#endif
+
+inline ivec2 operator^(const ivec2& _a, const ivec2& _b)
+{
+	return { _a.x ^ _b.x, _a.y ^ _b.y };
+}
+
+inline ivec3 operator^(const ivec3& _a, const ivec3& _b)
+{
+	return { _a.x ^ _b.x, _a.y ^ _b.y, _a.z ^ _b.z };
+}
+
+inline ivec4 operator^(const ivec4& _a, const ivec4& _b)
+{
+	return { _a.x ^ _b.x, _a.y ^ _b.y, _a.z ^ _b.z, _a.w ^ _b.w };
+}
+
+// ~ operator
+#ifndef USE_SCALAR
+inline simdint operator~(const simdint& _a)
+{
+	return simd_xor_int(_a, simd_set1_int(-1));
+}
+#endif
+
+inline ivec2 operator~(const ivec2& _a)
+{
+	return { ~_a.x, ~_a.y };
+}
+
+inline ivec3 operator~(const ivec3& _a)
+{
+	return { ~_a.x, ~_a.y, ~_a.z };
+}
+
+inline ivec4 operator~(const ivec4& _a)
+{
+	return { ~_a.x, ~_a.y, ~_a.z, ~_a.w };
+}
+
+// left shift operator
+#ifndef USE_SCALAR
+inline simdint operator<<(const simdint& _a, const int& _b)
+{
+	return simd_slli_int(_a, _b);
+}
+#endif
+
+inline ivec2 operator<<(const ivec2& _a, const int& _b)
+{
+	return { _a.x << _b, _a.y << _b };
+}
+
+inline ivec3 operator<<(const ivec3& _a, const int& _b)
+{
+	return { _a.x << _b, _a.y << _b, _a.z << _b };
+}
+
+inline ivec4 operator<<(const ivec4& _a, const int& _b)
+{
+	return { _a.x << _b, _a.y << _b, _a.z << _b, _a.w << _b };
+}
+
+// right shift operator
+#ifndef USE_SCALAR
+inline simdint operator>>(const simdint& _a, const int& _b)
+{
+	return simd_srli_int(_a, _b);
+}
+#endif
+
+inline ivec2 operator>>(const ivec2& _a, const int& _b)
+{
+	return { _a.x >> _b, _a.y >> _b };
+}
+
+inline ivec3 operator>>(const ivec3& _a, const int& _b)
+{
+	return { _a.x >> _b, _a.y >> _b, _a.z >> _b };
+}
+
+inline ivec4 operator>>(const ivec4& _a, const int& _b)
+{
+	return { _a.x >> _b, _a.y >> _b, _a.z >> _b, _a.w >> _b };
+}
+
+#pragma endregion binary operators
+
+#pragma region std::cout operators
+#ifndef USE_SCALAR
+#ifndef USE_AVX512
+inline std::ostream& operator<<(std::ostream& _os, const simdimask& _v)
+{
+	alignas(64) int arr[8] = { 0 };
+	simd_store_int(arr, _v);
+	for (int i = 0; i < simdwidth; i++)
+	{
+		_os << arr[i];
+		if (i < simdwidth - 1) _os << ", ";
+	}
+	return _os;
+}
+#endif
+inline std::ostream& operator<<(std::ostream& _os, const simdint& _v)
+{
+	alignas(64) int arr[8];
+	simd_store_int(arr, _v);
+	for (int i = 0; i < simdwidth; i++)
+	{
+		_os << arr[i];
+		if (i < simdwidth - 1) _os << ", ";
+	}
+	return _os;
+}
+
+#endif
+
+inline std::ostream& operator<<(std::ostream& _os, const ivec2& _v)
+{
+	_os << "[" << _v.x << "]" << ", " << "[" << _v.y << "]";
+	return _os;
+}
+inline std::ostream& operator<<(std::ostream& _os, const ivec3& _v)
+{
+	_os << "[" << _v.x << "]" << ", " << "[" << _v.y << "]" << ", " << "[" << _v.z << "]";
+	return _os;
+}
+inline std::ostream& operator<<(std::ostream& _os, const ivec4& _v)
+{
+	_os << "[" << _v.x << "]" << ", " << "[" << _v.y << "]" << ", " << "[" << _v.z << "]" << ", " << "[" << _v.w << "]";
+	return _os;
+}
+
+#pragma endregion
+#pragma endregion int operators
+
+
+
+
+#pragma region vec2 swizzle implementations
+// vec2 swizzle implementations
+inline vec2 vec2::gg() const { return { g, g }; }
+inline vec3 vec2::ggg() const { return { g, g, g }; }
+inline vec4 vec2::gggg() const { return { g, g, g, g }; }
+inline vec4 vec2::gggr() const { return { g, g, g, r }; }
+inline vec3 vec2::ggr() const { return { g, g, r }; }
+inline vec4 vec2::ggrg() const { return { g, g, r, g }; }
+inline vec4 vec2::ggrr() const { return { g, g, r, r }; }
+inline vec2 vec2::gr() const { return { g, r }; }
+inline vec3 vec2::grg() const { return { g, r, g }; }
+inline vec4 vec2::grgg() const { return { g, r, g, g }; }
+inline vec4 vec2::grgr() const { return { g, r, g, r }; }
+inline vec3 vec2::grr() const { return { g, r, r }; }
+inline vec4 vec2::grrg() const { return { g, r, r, g }; }
+inline vec4 vec2::grrr() const { return { g, r, r, r }; }
+inline vec2 vec2::rg() const { return { r, g }; }
+inline vec3 vec2::rgg() const { return { r, g, g }; }
+inline vec4 vec2::rggg() const { return { r, g, g, g }; }
+inline vec4 vec2::rggr() const { return { r, g, g, r }; }
+inline vec3 vec2::rgr() const { return { r, g, r }; }
+inline vec4 vec2::rgrg() const { return { r, g, r, g }; }
+inline vec4 vec2::rgrr() const { return { r, g, r, r }; }
+inline vec2 vec2::rr() const { return { r, r }; }
+inline vec3 vec2::rrg() const { return { r, r, g }; }
+inline vec4 vec2::rrgg() const { return { r, r, g, g }; }
+inline vec4 vec2::rrgr() const { return { r, r, g, r }; }
+inline vec3 vec2::rrr() const { return { r, r, r }; }
+inline vec4 vec2::rrrg() const { return { r, r, r, g }; }
+inline vec4 vec2::rrrr() const { return { r, r, r, r }; }
+inline vec2 vec2::xx() const { return { x, x }; }
+inline vec3 vec2::xxx() const { return { x, x, x }; }
+inline vec4 vec2::xxxx() const { return { x, x, x, x }; }
+inline vec4 vec2::xxxy() const { return { x, x, x, y }; }
+inline vec3 vec2::xxy() const { return { x, x, y }; }
+inline vec4 vec2::xxyx() const { return { x, x, y, x }; }
+inline vec4 vec2::xxyy() const { return { x, x, y, y }; }
+inline vec2 vec2::xy() const { return { x, y }; }
+inline vec3 vec2::xyx() const { return { x, y, x }; }
+inline vec4 vec2::xyxx() const { return { x, y, x, x }; }
+inline vec4 vec2::xyxy() const { return { x, y, x, y }; }
+inline vec3 vec2::xyy() const { return { x, y, y }; }
+inline vec4 vec2::xyyx() const { return { x, y, y, x }; }
+inline vec4 vec2::xyyy() const { return { x, y, y, y }; }
+inline vec2 vec2::yx() const { return { y, x }; }
+inline vec3 vec2::yxx() const { return { y, x, x }; }
+inline vec4 vec2::yxxx() const { return { y, x, x, x }; }
+inline vec4 vec2::yxxy() const { return { y, x, x, y }; }
+inline vec3 vec2::yxy() const { return { y, x, y }; }
+inline vec4 vec2::yxyx() const { return { y, x, y, x }; }
+inline vec4 vec2::yxyy() const { return { y, x, y, y }; }
+inline vec2 vec2::yy() const { return { y, y }; }
+inline vec3 vec2::yyx() const { return { y, y, x }; }
+inline vec4 vec2::yyxx() const { return { y, y, x, x }; }
+inline vec4 vec2::yyxy() const { return { y, y, x, y }; }
+inline vec3 vec2::yyy() const { return { y, y, y }; }
+inline vec4 vec2::yyyx() const { return { y, y, y, x }; }
+inline vec4 vec2::yyyy() const { return { y, y, y, y }; }
+inline void vec2::gr(const simdfloat& _val0, const simdfloat& _val1) { g = _val0; r = _val1; }
+inline void vec2::gr(const vec2& _val) { g = _val.x; r = _val.y; }
+inline void vec2::gr(const simdfloat& _val) { g = _val; r = _val; }
+inline void vec2::rg(const simdfloat& _val0, const simdfloat& _val1) { r = _val0; g = _val1; }
+inline void vec2::rg(const vec2& _val) { r = _val.x; g = _val.y; }
+inline void vec2::rg(const simdfloat& _val) { r = _val; g = _val; }
+inline void vec2::xy(const simdfloat& _val0, const simdfloat& _val1) { x = _val0; y = _val1; }
+inline void vec2::xy(const vec2& _val) { x = _val.x; y = _val.y; }
+inline void vec2::xy(const simdfloat& _val) { x = _val; y = _val; }
+inline void vec2::yx(const simdfloat& _val0, const simdfloat& _val1) { y = _val0; x = _val1; }
+inline void vec2::yx(const vec2& _val) { y = _val.x; x = _val.y; }
+inline void vec2::yx(const simdfloat& _val) { y = _val; x = _val; }
+#ifndef USE_SCALAR
+inline void vec2::gr(const float& _val) { const simdfloat temp = simd_set1_float(_val); g = temp; r = temp; }
+inline void vec2::rg(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; g = temp; }
+inline void vec2::xy(const float& _val) { const simdfloat temp = simd_set1_float(_val); x = temp; y = temp; }
+inline void vec2::yx(const float& _val) { const simdfloat temp = simd_set1_float(_val); y = temp; x = temp; }
+#endif
+
+#pragma endregion
+
+#pragma region vec3 swizzle implementations
+
+// vec3 swizzle implementations
+inline vec2 vec3::bb() const { return { b, b }; }
+inline vec3 vec3::bbb() const { return { b, b, b }; }
+inline vec4 vec3::bbbb() const { return { b, b, b, b }; }
+inline vec4 vec3::bbbg() const { return { b, b, b, g }; }
+inline vec4 vec3::bbbr() const { return { b, b, b, r }; }
+inline vec3 vec3::bbg() const { return { b, b, g }; }
+inline vec4 vec3::bbgb() const { return { b, b, g, b }; }
+inline vec4 vec3::bbgg() const { return { b, b, g, g }; }
+inline vec4 vec3::bbgr() const { return { b, b, g, r }; }
+inline vec3 vec3::bbr() const { return { b, b, r }; }
+inline vec4 vec3::bbrb() const { return { b, b, r, b }; }
+inline vec4 vec3::bbrg() const { return { b, b, r, g }; }
+inline vec4 vec3::bbrr() const { return { b, b, r, r }; }
+inline vec2 vec3::bg() const { return { b, g }; }
+inline vec3 vec3::bgb() const { return { b, g, b }; }
+inline vec4 vec3::bgbb() const { return { b, g, b, b }; }
+inline vec4 vec3::bgbg() const { return { b, g, b, g }; }
+inline vec4 vec3::bgbr() const { return { b, g, b, r }; }
+inline vec3 vec3::bgg() const { return { b, g, g }; }
+inline vec4 vec3::bggb() const { return { b, g, g, b }; }
+inline vec4 vec3::bggg() const { return { b, g, g, g }; }
+inline vec4 vec3::bggr() const { return { b, g, g, r }; }
+inline vec3 vec3::bgr() const { return { b, g, r }; }
+inline vec4 vec3::bgrb() const { return { b, g, r, b }; }
+inline vec4 vec3::bgrg() const { return { b, g, r, g }; }
+inline vec4 vec3::bgrr() const { return { b, g, r, r }; }
+inline vec2 vec3::br() const { return { b, r }; }
+inline vec3 vec3::brb() const { return { b, r, b }; }
+inline vec4 vec3::brbb() const { return { b, r, b, b }; }
+inline vec4 vec3::brbg() const { return { b, r, b, g }; }
+inline vec4 vec3::brbr() const { return { b, r, b, r }; }
+inline vec3 vec3::brg() const { return { b, r, g }; }
+inline vec4 vec3::brgb() const { return { b, r, g, b }; }
+inline vec4 vec3::brgg() const { return { b, r, g, g }; }
+inline vec4 vec3::brgr() const { return { b, r, g, r }; }
+inline vec3 vec3::brr() const { return { b, r, r }; }
+inline vec4 vec3::brrb() const { return { b, r, r, b }; }
+inline vec4 vec3::brrg() const { return { b, r, r, g }; }
+inline vec4 vec3::brrr() const { return { b, r, r, r }; }
+inline vec2 vec3::gb() const { return { g, b }; }
+inline vec3 vec3::gbb() const { return { g, b, b }; }
+inline vec4 vec3::gbbb() const { return { g, b, b, b }; }
+inline vec4 vec3::gbbg() const { return { g, b, b, g }; }
+inline vec4 vec3::gbbr() const { return { g, b, b, r }; }
+inline vec3 vec3::gbg() const { return { g, b, g }; }
+inline vec4 vec3::gbgb() const { return { g, b, g, b }; }
+inline vec4 vec3::gbgg() const { return { g, b, g, g }; }
+inline vec4 vec3::gbgr() const { return { g, b, g, r }; }
+inline vec3 vec3::gbr() const { return { g, b, r }; }
+inline vec4 vec3::gbrb() const { return { g, b, r, b }; }
+inline vec4 vec3::gbrg() const { return { g, b, r, g }; }
+inline vec4 vec3::gbrr() const { return { g, b, r, r }; }
+inline vec2 vec3::gg() const { return { g, g }; }
+inline vec3 vec3::ggb() const { return { g, g, b }; }
+inline vec4 vec3::ggbb() const { return { g, g, b, b }; }
+inline vec4 vec3::ggbg() const { return { g, g, b, g }; }
+inline vec4 vec3::ggbr() const { return { g, g, b, r }; }
+inline vec3 vec3::ggg() const { return { g, g, g }; }
+inline vec4 vec3::gggb() const { return { g, g, g, b }; }
+inline vec4 vec3::gggg() const { return { g, g, g, g }; }
+inline vec4 vec3::gggr() const { return { g, g, g, r }; }
+inline vec3 vec3::ggr() const { return { g, g, r }; }
+inline vec4 vec3::ggrb() const { return { g, g, r, b }; }
+inline vec4 vec3::ggrg() const { return { g, g, r, g }; }
+inline vec4 vec3::ggrr() const { return { g, g, r, r }; }
+inline vec2 vec3::gr() const { return { g, r }; }
+inline vec3 vec3::grb() const { return { g, r, b }; }
+inline vec4 vec3::grbb() const { return { g, r, b, b }; }
+inline vec4 vec3::grbg() const { return { g, r, b, g }; }
+inline vec4 vec3::grbr() const { return { g, r, b, r }; }
+inline vec3 vec3::grg() const { return { g, r, g }; }
+inline vec4 vec3::grgb() const { return { g, r, g, b }; }
+inline vec4 vec3::grgg() const { return { g, r, g, g }; }
+inline vec4 vec3::grgr() const { return { g, r, g, r }; }
+inline vec3 vec3::grr() const { return { g, r, r }; }
+inline vec4 vec3::grrb() const { return { g, r, r, b }; }
+inline vec4 vec3::grrg() const { return { g, r, r, g }; }
+inline vec4 vec3::grrr() const { return { g, r, r, r }; }
+inline vec2 vec3::rb() const { return { r, b }; }
+inline vec3 vec3::rbb() const { return { r, b, b }; }
+inline vec4 vec3::rbbb() const { return { r, b, b, b }; }
+inline vec4 vec3::rbbg() const { return { r, b, b, g }; }
+inline vec4 vec3::rbbr() const { return { r, b, b, r }; }
+inline vec3 vec3::rbg() const { return { r, b, g }; }
+inline vec4 vec3::rbgb() const { return { r, b, g, b }; }
+inline vec4 vec3::rbgg() const { return { r, b, g, g }; }
+inline vec4 vec3::rbgr() const { return { r, b, g, r }; }
+inline vec3 vec3::rbr() const { return { r, b, r }; }
+inline vec4 vec3::rbrb() const { return { r, b, r, b }; }
+inline vec4 vec3::rbrg() const { return { r, b, r, g }; }
+inline vec4 vec3::rbrr() const { return { r, b, r, r }; }
+inline vec2 vec3::rg() const { return { r, g }; }
+inline vec3 vec3::rgb() const { return { r, g, b }; }
+inline vec4 vec3::rgbb() const { return { r, g, b, b }; }
+inline vec4 vec3::rgbg() const { return { r, g, b, g }; }
+inline vec4 vec3::rgbr() const { return { r, g, b, r }; }
+inline vec3 vec3::rgg() const { return { r, g, g }; }
+inline vec4 vec3::rggb() const { return { r, g, g, b }; }
+inline vec4 vec3::rggg() const { return { r, g, g, g }; }
+inline vec4 vec3::rggr() const { return { r, g, g, r }; }
+inline vec3 vec3::rgr() const { return { r, g, r }; }
+inline vec4 vec3::rgrb() const { return { r, g, r, b }; }
+inline vec4 vec3::rgrg() const { return { r, g, r, g }; }
+inline vec4 vec3::rgrr() const { return { r, g, r, r }; }
+inline vec2 vec3::rr() const { return { r, r }; }
+inline vec3 vec3::rrb() const { return { r, r, b }; }
+inline vec4 vec3::rrbb() const { return { r, r, b, b }; }
+inline vec4 vec3::rrbg() const { return { r, r, b, g }; }
+inline vec4 vec3::rrbr() const { return { r, r, b, r }; }
+inline vec3 vec3::rrg() const { return { r, r, g }; }
+inline vec4 vec3::rrgb() const { return { r, r, g, b }; }
+inline vec4 vec3::rrgg() const { return { r, r, g, g }; }
+inline vec4 vec3::rrgr() const { return { r, r, g, r }; }
+inline vec3 vec3::rrr() const { return { r, r, r }; }
+inline vec4 vec3::rrrb() const { return { r, r, r, b }; }
+inline vec4 vec3::rrrg() const { return { r, r, r, g }; }
+inline vec4 vec3::rrrr() const { return { r, r, r, r }; }
+inline vec2 vec3::xx() const { return { x, x }; }
+inline vec3 vec3::xxx() const { return { x, x, x }; }
+inline vec4 vec3::xxxx() const { return { x, x, x, x }; }
+inline vec4 vec3::xxxy() const { return { x, x, x, y }; }
+inline vec4 vec3::xxxz() const { return { x, x, x, z }; }
+inline vec3 vec3::xxy() const { return { x, x, y }; }
+inline vec4 vec3::xxyx() const { return { x, x, y, x }; }
+inline vec4 vec3::xxyy() const { return { x, x, y, y }; }
+inline vec4 vec3::xxyz() const { return { x, x, y, z }; }
+inline vec3 vec3::xxz() const { return { x, x, z }; }
+inline vec4 vec3::xxzx() const { return { x, x, z, x }; }
+inline vec4 vec3::xxzy() const { return { x, x, z, y }; }
+inline vec4 vec3::xxzz() const { return { x, x, z, z }; }
+inline vec2 vec3::xy() const { return { x, y }; }
+inline vec3 vec3::xyx() const { return { x, y, x }; }
+inline vec4 vec3::xyxx() const { return { x, y, x, x }; }
+inline vec4 vec3::xyxy() const { return { x, y, x, y }; }
+inline vec4 vec3::xyxz() const { return { x, y, x, z }; }
+inline vec3 vec3::xyy() const { return { x, y, y }; }
+inline vec4 vec3::xyyx() const { return { x, y, y, x }; }
+inline vec4 vec3::xyyy() const { return { x, y, y, y }; }
+inline vec4 vec3::xyyz() const { return { x, y, y, z }; }
+inline vec3 vec3::xyz() const { return { x, y, z }; }
+inline vec4 vec3::xyzx() const { return { x, y, z, x }; }
+inline vec4 vec3::xyzy() const { return { x, y, z, y }; }
+inline vec4 vec3::xyzz() const { return { x, y, z, z }; }
+inline vec2 vec3::xz() const { return { x, z }; }
+inline vec3 vec3::xzx() const { return { x, z, x }; }
+inline vec4 vec3::xzxx() const { return { x, z, x, x }; }
+inline vec4 vec3::xzxy() const { return { x, z, x, y }; }
+inline vec4 vec3::xzxz() const { return { x, z, x, z }; }
+inline vec3 vec3::xzy() const { return { x, z, y }; }
+inline vec4 vec3::xzyx() const { return { x, z, y, x }; }
+inline vec4 vec3::xzyy() const { return { x, z, y, y }; }
+inline vec4 vec3::xzyz() const { return { x, z, y, z }; }
+inline vec3 vec3::xzz() const { return { x, z, z }; }
+inline vec4 vec3::xzzx() const { return { x, z, z, x }; }
+inline vec4 vec3::xzzy() const { return { x, z, z, y }; }
+inline vec4 vec3::xzzz() const { return { x, z, z, z }; }
+inline vec2 vec3::yx() const { return { y, x }; }
+inline vec3 vec3::yxx() const { return { y, x, x }; }
+inline vec4 vec3::yxxx() const { return { y, x, x, x }; }
+inline vec4 vec3::yxxy() const { return { y, x, x, y }; }
+inline vec4 vec3::yxxz() const { return { y, x, x, z }; }
+inline vec3 vec3::yxy() const { return { y, x, y }; }
+inline vec4 vec3::yxyx() const { return { y, x, y, x }; }
+inline vec4 vec3::yxyy() const { return { y, x, y, y }; }
+inline vec4 vec3::yxyz() const { return { y, x, y, z }; }
+inline vec3 vec3::yxz() const { return { y, x, z }; }
+inline vec4 vec3::yxzx() const { return { y, x, z, x }; }
+inline vec4 vec3::yxzy() const { return { y, x, z, y }; }
+inline vec4 vec3::yxzz() const { return { y, x, z, z }; }
+inline vec2 vec3::yy() const { return { y, y }; }
+inline vec3 vec3::yyx() const { return { y, y, x }; }
+inline vec4 vec3::yyxx() const { return { y, y, x, x }; }
+inline vec4 vec3::yyxy() const { return { y, y, x, y }; }
+inline vec4 vec3::yyxz() const { return { y, y, x, z }; }
+inline vec3 vec3::yyy() const { return { y, y, y }; }
+inline vec4 vec3::yyyx() const { return { y, y, y, x }; }
+inline vec4 vec3::yyyy() const { return { y, y, y, y }; }
+inline vec4 vec3::yyyz() const { return { y, y, y, z }; }
+inline vec3 vec3::yyz() const { return { y, y, z }; }
+inline vec4 vec3::yyzx() const { return { y, y, z, x }; }
+inline vec4 vec3::yyzy() const { return { y, y, z, y }; }
+inline vec4 vec3::yyzz() const { return { y, y, z, z }; }
+inline vec2 vec3::yz() const { return { y, z }; }
+inline vec3 vec3::yzx() const { return { y, z, x }; }
+inline vec4 vec3::yzxx() const { return { y, z, x, x }; }
+inline vec4 vec3::yzxy() const { return { y, z, x, y }; }
+inline vec4 vec3::yzxz() const { return { y, z, x, z }; }
+inline vec3 vec3::yzy() const { return { y, z, y }; }
+inline vec4 vec3::yzyx() const { return { y, z, y, x }; }
+inline vec4 vec3::yzyy() const { return { y, z, y, y }; }
+inline vec4 vec3::yzyz() const { return { y, z, y, z }; }
+inline vec3 vec3::yzz() const { return { y, z, z }; }
+inline vec4 vec3::yzzx() const { return { y, z, z, x }; }
+inline vec4 vec3::yzzy() const { return { y, z, z, y }; }
+inline vec4 vec3::yzzz() const { return { y, z, z, z }; }
+inline vec2 vec3::zx() const { return { z, x }; }
+inline vec3 vec3::zxx() const { return { z, x, x }; }
+inline vec4 vec3::zxxx() const { return { z, x, x, x }; }
+inline vec4 vec3::zxxy() const { return { z, x, x, y }; }
+inline vec4 vec3::zxxz() const { return { z, x, x, z }; }
+inline vec3 vec3::zxy() const { return { z, x, y }; }
+inline vec4 vec3::zxyx() const { return { z, x, y, x }; }
+inline vec4 vec3::zxyy() const { return { z, x, y, y }; }
+inline vec4 vec3::zxyz() const { return { z, x, y, z }; }
+inline vec3 vec3::zxz() const { return { z, x, z }; }
+inline vec4 vec3::zxzx() const { return { z, x, z, x }; }
+inline vec4 vec3::zxzy() const { return { z, x, z, y }; }
+inline vec4 vec3::zxzz() const { return { z, x, z, z }; }
+inline vec2 vec3::zy() const { return { z, y }; }
+inline vec3 vec3::zyx() const { return { z, y, x }; }
+inline vec4 vec3::zyxx() const { return { z, y, x, x }; }
+inline vec4 vec3::zyxy() const { return { z, y, x, y }; }
+inline vec4 vec3::zyxz() const { return { z, y, x, z }; }
+inline vec3 vec3::zyy() const { return { z, y, y }; }
+inline vec4 vec3::zyyx() const { return { z, y, y, x }; }
+inline vec4 vec3::zyyy() const { return { z, y, y, y }; }
+inline vec4 vec3::zyyz() const { return { z, y, y, z }; }
+inline vec3 vec3::zyz() const { return { z, y, z }; }
+inline vec4 vec3::zyzx() const { return { z, y, z, x }; }
+inline vec4 vec3::zyzy() const { return { z, y, z, y }; }
+inline vec4 vec3::zyzz() const { return { z, y, z, z }; }
+inline vec2 vec3::zz() const { return { z, z }; }
+inline vec3 vec3::zzx() const { return { z, z, x }; }
+inline vec4 vec3::zzxx() const { return { z, z, x, x }; }
+inline vec4 vec3::zzxy() const { return { z, z, x, y }; }
+inline vec4 vec3::zzxz() const { return { z, z, x, z }; }
+inline vec3 vec3::zzy() const { return { z, z, y }; }
+inline vec4 vec3::zzyx() const { return { z, z, y, x }; }
+inline vec4 vec3::zzyy() const { return { z, z, y, y }; }
+inline vec4 vec3::zzyz() const { return { z, z, y, z }; }
+inline vec3 vec3::zzz() const { return { z, z, z }; }
+inline vec4 vec3::zzzx() const { return { z, z, z, x }; }
+inline vec4 vec3::zzzy() const { return { z, z, z, y }; }
+inline vec4 vec3::zzzz() const { return { z, z, z, z }; }
+inline void vec3::bg(const simdfloat& _val0, const simdfloat& _val1) { b = _val0; g = _val1; }
+inline void vec3::bg(const vec2& _val) { b = _val.x; g = _val.y; }
+inline void vec3::bg(const simdfloat& _val) { b = _val; g = _val; }
+inline void vec3::bgr(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { b = _val0; g = _val1; r = _val2; }
+inline void vec3::bgr(const vec3& _val) { b = _val.x; g = _val.y; r = _val.z; }
+inline void vec3::bgr(const simdfloat& _val) { b = _val; g = _val; r = _val; }
+inline void vec3::br(const simdfloat& _val0, const simdfloat& _val1) { b = _val0; r = _val1; }
+inline void vec3::br(const vec2& _val) { b = _val.x; r = _val.y; }
+inline void vec3::br(const simdfloat& _val) { b = _val; r = _val; }
+inline void vec3::brg(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { b = _val0; r = _val1; g = _val2; }
+inline void vec3::brg(const vec3& _val) { b = _val.x; r = _val.y; g = _val.z; }
+inline void vec3::brg(const simdfloat& _val) { b = _val; r = _val; g = _val; }
+inline void vec3::gb(const simdfloat& _val0, const simdfloat& _val1) { g = _val0; b = _val1; }
+inline void vec3::gb(const vec2& _val) { g = _val.x; b = _val.y; }
+inline void vec3::gb(const simdfloat& _val) { g = _val; b = _val; }
+inline void vec3::gbr(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { g = _val0; b = _val1; r = _val2; }
+inline void vec3::gbr(const vec3& _val) { g = _val.x; b = _val.y; r = _val.z; }
+inline void vec3::gbr(const simdfloat& _val) { g = _val; b = _val; r = _val; }
+inline void vec3::gr(const simdfloat& _val0, const simdfloat& _val1) { g = _val0; r = _val1; }
+inline void vec3::gr(const vec2& _val) { g = _val.x; r = _val.y; }
+inline void vec3::gr(const simdfloat& _val) { g = _val; r = _val; }
+inline void vec3::grb(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { g = _val0; r = _val1; b = _val2; }
+inline void vec3::grb(const vec3& _val) { g = _val.x; r = _val.y; b = _val.z; }
+inline void vec3::grb(const simdfloat& _val) { g = _val; r = _val; b = _val; }
+inline void vec3::rb(const simdfloat& _val0, const simdfloat& _val1) { r = _val0; b = _val1; }
+inline void vec3::rb(const vec2& _val) { r = _val.x; b = _val.y; }
+inline void vec3::rb(const simdfloat& _val) { r = _val; b = _val; }
+inline void vec3::rbg(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { r = _val0; b = _val1; g = _val2; }
+inline void vec3::rbg(const vec3& _val) { r = _val.x; b = _val.y; g = _val.z; }
+inline void vec3::rbg(const simdfloat& _val) { r = _val; b = _val; g = _val; }
+inline void vec3::rg(const simdfloat& _val0, const simdfloat& _val1) { r = _val0; g = _val1; }
+inline void vec3::rg(const vec2& _val) { r = _val.x; g = _val.y; }
+inline void vec3::rg(const simdfloat& _val) { r = _val; g = _val; }
+inline void vec3::rgb(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { r = _val0; g = _val1; b = _val2; }
+inline void vec3::rgb(const vec3& _val) { r = _val.x; g = _val.y; b = _val.z; }
+inline void vec3::rgb(const simdfloat& _val) { r = _val; g = _val; b = _val; }
+inline void vec3::xy(const simdfloat& _val0, const simdfloat& _val1) { x = _val0; y = _val1; }
+inline void vec3::xy(const vec2& _val) { x = _val.x; y = _val.y; }
+inline void vec3::xy(const simdfloat& _val) { x = _val; y = _val; }
+inline void vec3::xyz(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { x = _val0; y = _val1; z = _val2; }
+inline void vec3::xyz(const vec3& _val) { x = _val.x; y = _val.y; z = _val.z; }
+inline void vec3::xyz(const simdfloat& _val) { x = _val; y = _val; z = _val; }
+inline void vec3::xz(const simdfloat& _val0, const simdfloat& _val1) { x = _val0; z = _val1; }
+inline void vec3::xz(const vec2& _val) { x = _val.x; z = _val.y; }
+inline void vec3::xz(const simdfloat& _val) { x = _val; z = _val; }
+inline void vec3::xzy(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { x = _val0; z = _val1; y = _val2; }
+inline void vec3::xzy(const vec3& _val) { x = _val.x; z = _val.y; y = _val.z; }
+inline void vec3::xzy(const simdfloat& _val) { x = _val; z = _val; y = _val; }
+inline void vec3::yx(const simdfloat& _val0, const simdfloat& _val1) { y = _val0; x = _val1; }
+inline void vec3::yx(const vec2& _val) { y = _val.x; x = _val.y; }
+inline void vec3::yx(const simdfloat& _val) { y = _val; x = _val; }
+inline void vec3::yxz(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { y = _val0; x = _val1; z = _val2; }
+inline void vec3::yxz(const vec3& _val) { y = _val.x; x = _val.y; z = _val.z; }
+inline void vec3::yxz(const simdfloat& _val) { y = _val; x = _val; z = _val; }
+inline void vec3::yz(const simdfloat& _val0, const simdfloat& _val1) { y = _val0; z = _val1; }
+inline void vec3::yz(const vec2& _val) { y = _val.x; z = _val.y; }
+inline void vec3::yz(const simdfloat& _val) { y = _val; z = _val; }
+inline void vec3::yzx(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { y = _val0; z = _val1; x = _val2; }
+inline void vec3::yzx(const vec3& _val) { y = _val.x; z = _val.y; x = _val.z; }
+inline void vec3::yzx(const simdfloat& _val) { y = _val; z = _val; x = _val; }
+inline void vec3::zx(const simdfloat& _val0, const simdfloat& _val1) { z = _val0; x = _val1; }
+inline void vec3::zx(const vec2& _val) { z = _val.x; x = _val.y; }
+inline void vec3::zx(const simdfloat& _val) { z = _val; x = _val; }
+inline void vec3::zxy(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { z = _val0; x = _val1; y = _val2; }
+inline void vec3::zxy(const vec3& _val) { z = _val.x; x = _val.y; y = _val.z; }
+inline void vec3::zxy(const simdfloat& _val) { z = _val; x = _val; y = _val; }
+inline void vec3::zy(const simdfloat& _val0, const simdfloat& _val1) { z = _val0; y = _val1; }
+inline void vec3::zy(const vec2& _val) { z = _val.x; y = _val.y; }
+inline void vec3::zy(const simdfloat& _val) { z = _val; y = _val; }
+inline void vec3::zyx(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { z = _val0; y = _val1; x = _val2; }
+inline void vec3::zyx(const vec3& _val) { z = _val.x; y = _val.y; x = _val.z; }
+inline void vec3::zyx(const simdfloat& _val) { z = _val; y = _val; x = _val; }
+#ifndef USE_SCALAR
+inline void vec3::bg(const float& _val) { const simdfloat temp = simd_set1_float(_val); b = temp; g = temp; }
+inline void vec3::bgr(const float& _val) { const simdfloat temp = simd_set1_float(_val); b = temp; g = temp; r = temp; }
+inline void vec3::br(const float& _val) { const simdfloat temp = simd_set1_float(_val); b = temp; r = temp; }
+inline void vec3::brg(const float& _val) { const simdfloat temp = simd_set1_float(_val); b = temp; r = temp; g = temp; }
+inline void vec3::gb(const float& _val) { const simdfloat temp = simd_set1_float(_val); g = temp; b = temp; }
+inline void vec3::gbr(const float& _val) { const simdfloat temp = simd_set1_float(_val); g = temp; b = temp; r = temp; }
+inline void vec3::gr(const float& _val) { const simdfloat temp = simd_set1_float(_val); g = temp; r = temp; }
+inline void vec3::grb(const float& _val) { const simdfloat temp = simd_set1_float(_val); g = temp; r = temp; b = temp; }
+inline void vec3::rb(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; b = temp; }
+inline void vec3::rbg(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; b = temp; g = temp; }
+inline void vec3::rg(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; g = temp; }
+inline void vec3::rgb(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; g = temp; b = temp; }
+inline void vec3::xy(const float& _val) { const simdfloat temp = simd_set1_float(_val); x = temp; y = temp; }
+inline void vec3::xyz(const float& _val) { const simdfloat temp = simd_set1_float(_val); x = temp; y = temp; z = temp; }
+inline void vec3::xz(const float& _val) { const simdfloat temp = simd_set1_float(_val); x = temp; z = temp; }
+inline void vec3::xzy(const float& _val) { const simdfloat temp = simd_set1_float(_val); x = temp; z = temp; y = temp; }
+inline void vec3::yx(const float& _val) { const simdfloat temp = simd_set1_float(_val); y = temp; x = temp; }
+inline void vec3::yxz(const float& _val) { const simdfloat temp = simd_set1_float(_val); y = temp; x = temp; z = temp; }
+inline void vec3::yz(const float& _val) { const simdfloat temp = simd_set1_float(_val); y = temp; z = temp; }
+inline void vec3::yzx(const float& _val) { const simdfloat temp = simd_set1_float(_val); y = temp; z = temp; x = temp; }
+inline void vec3::zx(const float& _val) { const simdfloat temp = simd_set1_float(_val); z = temp; x = temp; }
+inline void vec3::zxy(const float& _val) { const simdfloat temp = simd_set1_float(_val); z = temp; x = temp; y = temp; }
+inline void vec3::zy(const float& _val) { const simdfloat temp = simd_set1_float(_val); z = temp; y = temp; }
+inline void vec3::zyx(const float& _val) { const simdfloat temp = simd_set1_float(_val); z = temp; y = temp; x = temp; }
+#endif
+
+#pragma endregion
+
+#pragma region vec4 swizzle implementations
+
+// vec4 swizzle implementations
+inline vec2 vec4::aa() const { return { a, a }; }
+inline vec3 vec4::aaa() const { return { a, a, a }; }
+inline vec4 vec4::aaaa() const { return { a, a, a, a }; }
+inline vec4 vec4::aaab() const { return { a, a, a, b }; }
+inline vec4 vec4::aaag() const { return { a, a, a, g }; }
+inline vec4 vec4::aaar() const { return { a, a, a, r }; }
+inline vec3 vec4::aab() const { return { a, a, b }; }
+inline vec4 vec4::aaba() const { return { a, a, b, a }; }
+inline vec4 vec4::aabb() const { return { a, a, b, b }; }
+inline vec4 vec4::aabg() const { return { a, a, b, g }; }
+inline vec4 vec4::aabr() const { return { a, a, b, r }; }
+inline vec3 vec4::aag() const { return { a, a, g }; }
+inline vec4 vec4::aaga() const { return { a, a, g, a }; }
+inline vec4 vec4::aagb() const { return { a, a, g, b }; }
+inline vec4 vec4::aagg() const { return { a, a, g, g }; }
+inline vec4 vec4::aagr() const { return { a, a, g, r }; }
+inline vec3 vec4::aar() const { return { a, a, r }; }
+inline vec4 vec4::aara() const { return { a, a, r, a }; }
+inline vec4 vec4::aarb() const { return { a, a, r, b }; }
+inline vec4 vec4::aarg() const { return { a, a, r, g }; }
+inline vec4 vec4::aarr() const { return { a, a, r, r }; }
+inline vec2 vec4::ab() const { return { a, b }; }
+inline vec3 vec4::aba() const { return { a, b, a }; }
+inline vec4 vec4::abaa() const { return { a, b, a, a }; }
+inline vec4 vec4::abab() const { return { a, b, a, b }; }
+inline vec4 vec4::abag() const { return { a, b, a, g }; }
+inline vec4 vec4::abar() const { return { a, b, a, r }; }
+inline vec3 vec4::abb() const { return { a, b, b }; }
+inline vec4 vec4::abba() const { return { a, b, b, a }; }
+inline vec4 vec4::abbb() const { return { a, b, b, b }; }
+inline vec4 vec4::abbg() const { return { a, b, b, g }; }
+inline vec4 vec4::abbr() const { return { a, b, b, r }; }
+inline vec3 vec4::abg() const { return { a, b, g }; }
+inline vec4 vec4::abga() const { return { a, b, g, a }; }
+inline vec4 vec4::abgb() const { return { a, b, g, b }; }
+inline vec4 vec4::abgg() const { return { a, b, g, g }; }
+inline vec4 vec4::abgr() const { return { a, b, g, r }; }
+inline vec3 vec4::abr() const { return { a, b, r }; }
+inline vec4 vec4::abra() const { return { a, b, r, a }; }
+inline vec4 vec4::abrb() const { return { a, b, r, b }; }
+inline vec4 vec4::abrg() const { return { a, b, r, g }; }
+inline vec4 vec4::abrr() const { return { a, b, r, r }; }
+inline vec2 vec4::ag() const { return { a, g }; }
+inline vec3 vec4::aga() const { return { a, g, a }; }
+inline vec4 vec4::agaa() const { return { a, g, a, a }; }
+inline vec4 vec4::agab() const { return { a, g, a, b }; }
+inline vec4 vec4::agag() const { return { a, g, a, g }; }
+inline vec4 vec4::agar() const { return { a, g, a, r }; }
+inline vec3 vec4::agb() const { return { a, g, b }; }
+inline vec4 vec4::agba() const { return { a, g, b, a }; }
+inline vec4 vec4::agbb() const { return { a, g, b, b }; }
+inline vec4 vec4::agbg() const { return { a, g, b, g }; }
+inline vec4 vec4::agbr() const { return { a, g, b, r }; }
+inline vec3 vec4::agg() const { return { a, g, g }; }
+inline vec4 vec4::agga() const { return { a, g, g, a }; }
+inline vec4 vec4::aggb() const { return { a, g, g, b }; }
+inline vec4 vec4::aggg() const { return { a, g, g, g }; }
+inline vec4 vec4::aggr() const { return { a, g, g, r }; }
+inline vec3 vec4::agr() const { return { a, g, r }; }
+inline vec4 vec4::agra() const { return { a, g, r, a }; }
+inline vec4 vec4::agrb() const { return { a, g, r, b }; }
+inline vec4 vec4::agrg() const { return { a, g, r, g }; }
+inline vec4 vec4::agrr() const { return { a, g, r, r }; }
+inline vec2 vec4::ar() const { return { a, r }; }
+inline vec3 vec4::ara() const { return { a, r, a }; }
+inline vec4 vec4::araa() const { return { a, r, a, a }; }
+inline vec4 vec4::arab() const { return { a, r, a, b }; }
+inline vec4 vec4::arag() const { return { a, r, a, g }; }
+inline vec4 vec4::arar() const { return { a, r, a, r }; }
+inline vec3 vec4::arb() const { return { a, r, b }; }
+inline vec4 vec4::arba() const { return { a, r, b, a }; }
+inline vec4 vec4::arbb() const { return { a, r, b, b }; }
+inline vec4 vec4::arbg() const { return { a, r, b, g }; }
+inline vec4 vec4::arbr() const { return { a, r, b, r }; }
+inline vec3 vec4::arg() const { return { a, r, g }; }
+inline vec4 vec4::arga() const { return { a, r, g, a }; }
+inline vec4 vec4::argb() const { return { a, r, g, b }; }
+inline vec4 vec4::argg() const { return { a, r, g, g }; }
+inline vec4 vec4::argr() const { return { a, r, g, r }; }
+inline vec3 vec4::arr() const { return { a, r, r }; }
+inline vec4 vec4::arra() const { return { a, r, r, a }; }
+inline vec4 vec4::arrb() const { return { a, r, r, b }; }
+inline vec4 vec4::arrg() const { return { a, r, r, g }; }
+inline vec4 vec4::arrr() const { return { a, r, r, r }; }
+inline vec2 vec4::ba() const { return { b, a }; }
+inline vec3 vec4::baa() const { return { b, a, a }; }
+inline vec4 vec4::baaa() const { return { b, a, a, a }; }
+inline vec4 vec4::baab() const { return { b, a, a, b }; }
+inline vec4 vec4::baag() const { return { b, a, a, g }; }
+inline vec4 vec4::baar() const { return { b, a, a, r }; }
+inline vec3 vec4::bab() const { return { b, a, b }; }
+inline vec4 vec4::baba() const { return { b, a, b, a }; }
+inline vec4 vec4::babb() const { return { b, a, b, b }; }
+inline vec4 vec4::babg() const { return { b, a, b, g }; }
+inline vec4 vec4::babr() const { return { b, a, b, r }; }
+inline vec3 vec4::bag() const { return { b, a, g }; }
+inline vec4 vec4::baga() const { return { b, a, g, a }; }
+inline vec4 vec4::bagb() const { return { b, a, g, b }; }
+inline vec4 vec4::bagg() const { return { b, a, g, g }; }
+inline vec4 vec4::bagr() const { return { b, a, g, r }; }
+inline vec3 vec4::bar() const { return { b, a, r }; }
+inline vec4 vec4::bara() const { return { b, a, r, a }; }
+inline vec4 vec4::barb() const { return { b, a, r, b }; }
+inline vec4 vec4::barg() const { return { b, a, r, g }; }
+inline vec4 vec4::barr() const { return { b, a, r, r }; }
+inline vec2 vec4::bb() const { return { b, b }; }
+inline vec3 vec4::bba() const { return { b, b, a }; }
+inline vec4 vec4::bbaa() const { return { b, b, a, a }; }
+inline vec4 vec4::bbab() const { return { b, b, a, b }; }
+inline vec4 vec4::bbag() const { return { b, b, a, g }; }
+inline vec4 vec4::bbar() const { return { b, b, a, r }; }
+inline vec3 vec4::bbb() const { return { b, b, b }; }
+inline vec4 vec4::bbba() const { return { b, b, b, a }; }
+inline vec4 vec4::bbbb() const { return { b, b, b, b }; }
+inline vec4 vec4::bbbg() const { return { b, b, b, g }; }
+inline vec4 vec4::bbbr() const { return { b, b, b, r }; }
+inline vec3 vec4::bbg() const { return { b, b, g }; }
+inline vec4 vec4::bbga() const { return { b, b, g, a }; }
+inline vec4 vec4::bbgb() const { return { b, b, g, b }; }
+inline vec4 vec4::bbgg() const { return { b, b, g, g }; }
+inline vec4 vec4::bbgr() const { return { b, b, g, r }; }
+inline vec3 vec4::bbr() const { return { b, b, r }; }
+inline vec4 vec4::bbra() const { return { b, b, r, a }; }
+inline vec4 vec4::bbrb() const { return { b, b, r, b }; }
+inline vec4 vec4::bbrg() const { return { b, b, r, g }; }
+inline vec4 vec4::bbrr() const { return { b, b, r, r }; }
+inline vec2 vec4::bg() const { return { b, g }; }
+inline vec3 vec4::bga() const { return { b, g, a }; }
+inline vec4 vec4::bgaa() const { return { b, g, a, a }; }
+inline vec4 vec4::bgab() const { return { b, g, a, b }; }
+inline vec4 vec4::bgag() const { return { b, g, a, g }; }
+inline vec4 vec4::bgar() const { return { b, g, a, r }; }
+inline vec3 vec4::bgb() const { return { b, g, b }; }
+inline vec4 vec4::bgba() const { return { b, g, b, a }; }
+inline vec4 vec4::bgbb() const { return { b, g, b, b }; }
+inline vec4 vec4::bgbg() const { return { b, g, b, g }; }
+inline vec4 vec4::bgbr() const { return { b, g, b, r }; }
+inline vec3 vec4::bgg() const { return { b, g, g }; }
+inline vec4 vec4::bgga() const { return { b, g, g, a }; }
+inline vec4 vec4::bggb() const { return { b, g, g, b }; }
+inline vec4 vec4::bggg() const { return { b, g, g, g }; }
+inline vec4 vec4::bggr() const { return { b, g, g, r }; }
+inline vec3 vec4::bgr() const { return { b, g, r }; }
+inline vec4 vec4::bgra() const { return { b, g, r, a }; }
+inline vec4 vec4::bgrb() const { return { b, g, r, b }; }
+inline vec4 vec4::bgrg() const { return { b, g, r, g }; }
+inline vec4 vec4::bgrr() const { return { b, g, r, r }; }
+inline vec2 vec4::br() const { return { b, r }; }
+inline vec3 vec4::bra() const { return { b, r, a }; }
+inline vec4 vec4::braa() const { return { b, r, a, a }; }
+inline vec4 vec4::brab() const { return { b, r, a, b }; }
+inline vec4 vec4::brag() const { return { b, r, a, g }; }
+inline vec4 vec4::brar() const { return { b, r, a, r }; }
+inline vec3 vec4::brb() const { return { b, r, b }; }
+inline vec4 vec4::brba() const { return { b, r, b, a }; }
+inline vec4 vec4::brbb() const { return { b, r, b, b }; }
+inline vec4 vec4::brbg() const { return { b, r, b, g }; }
+inline vec4 vec4::brbr() const { return { b, r, b, r }; }
+inline vec3 vec4::brg() const { return { b, r, g }; }
+inline vec4 vec4::brga() const { return { b, r, g, a }; }
+inline vec4 vec4::brgb() const { return { b, r, g, b }; }
+inline vec4 vec4::brgg() const { return { b, r, g, g }; }
+inline vec4 vec4::brgr() const { return { b, r, g, r }; }
+inline vec3 vec4::brr() const { return { b, r, r }; }
+inline vec4 vec4::brra() const { return { b, r, r, a }; }
+inline vec4 vec4::brrb() const { return { b, r, r, b }; }
+inline vec4 vec4::brrg() const { return { b, r, r, g }; }
+inline vec4 vec4::brrr() const { return { b, r, r, r }; }
+inline vec2 vec4::ga() const { return { g, a }; }
+inline vec3 vec4::gaa() const { return { g, a, a }; }
+inline vec4 vec4::gaaa() const { return { g, a, a, a }; }
+inline vec4 vec4::gaab() const { return { g, a, a, b }; }
+inline vec4 vec4::gaag() const { return { g, a, a, g }; }
+inline vec4 vec4::gaar() const { return { g, a, a, r }; }
+inline vec3 vec4::gab() const { return { g, a, b }; }
+inline vec4 vec4::gaba() const { return { g, a, b, a }; }
+inline vec4 vec4::gabb() const { return { g, a, b, b }; }
+inline vec4 vec4::gabg() const { return { g, a, b, g }; }
+inline vec4 vec4::gabr() const { return { g, a, b, r }; }
+inline vec3 vec4::gag() const { return { g, a, g }; }
+inline vec4 vec4::gaga() const { return { g, a, g, a }; }
+inline vec4 vec4::gagb() const { return { g, a, g, b }; }
+inline vec4 vec4::gagg() const { return { g, a, g, g }; }
+inline vec4 vec4::gagr() const { return { g, a, g, r }; }
+inline vec3 vec4::gar() const { return { g, a, r }; }
+inline vec4 vec4::gara() const { return { g, a, r, a }; }
+inline vec4 vec4::garb() const { return { g, a, r, b }; }
+inline vec4 vec4::garg() const { return { g, a, r, g }; }
+inline vec4 vec4::garr() const { return { g, a, r, r }; }
+inline vec2 vec4::gb() const { return { g, b }; }
+inline vec3 vec4::gba() const { return { g, b, a }; }
+inline vec4 vec4::gbaa() const { return { g, b, a, a }; }
+inline vec4 vec4::gbab() const { return { g, b, a, b }; }
+inline vec4 vec4::gbag() const { return { g, b, a, g }; }
+inline vec4 vec4::gbar() const { return { g, b, a, r }; }
+inline vec3 vec4::gbb() const { return { g, b, b }; }
+inline vec4 vec4::gbba() const { return { g, b, b, a }; }
+inline vec4 vec4::gbbb() const { return { g, b, b, b }; }
+inline vec4 vec4::gbbg() const { return { g, b, b, g }; }
+inline vec4 vec4::gbbr() const { return { g, b, b, r }; }
+inline vec3 vec4::gbg() const { return { g, b, g }; }
+inline vec4 vec4::gbga() const { return { g, b, g, a }; }
+inline vec4 vec4::gbgb() const { return { g, b, g, b }; }
+inline vec4 vec4::gbgg() const { return { g, b, g, g }; }
+inline vec4 vec4::gbgr() const { return { g, b, g, r }; }
+inline vec3 vec4::gbr() const { return { g, b, r }; }
+inline vec4 vec4::gbra() const { return { g, b, r, a }; }
+inline vec4 vec4::gbrb() const { return { g, b, r, b }; }
+inline vec4 vec4::gbrg() const { return { g, b, r, g }; }
+inline vec4 vec4::gbrr() const { return { g, b, r, r }; }
+inline vec2 vec4::gg() const { return { g, g }; }
+inline vec3 vec4::gga() const { return { g, g, a }; }
+inline vec4 vec4::ggaa() const { return { g, g, a, a }; }
+inline vec4 vec4::ggab() const { return { g, g, a, b }; }
+inline vec4 vec4::ggag() const { return { g, g, a, g }; }
+inline vec4 vec4::ggar() const { return { g, g, a, r }; }
+inline vec3 vec4::ggb() const { return { g, g, b }; }
+inline vec4 vec4::ggba() const { return { g, g, b, a }; }
+inline vec4 vec4::ggbb() const { return { g, g, b, b }; }
+inline vec4 vec4::ggbg() const { return { g, g, b, g }; }
+inline vec4 vec4::ggbr() const { return { g, g, b, r }; }
+inline vec3 vec4::ggg() const { return { g, g, g }; }
+inline vec4 vec4::ggga() const { return { g, g, g, a }; }
+inline vec4 vec4::gggb() const { return { g, g, g, b }; }
+inline vec4 vec4::gggg() const { return { g, g, g, g }; }
+inline vec4 vec4::gggr() const { return { g, g, g, r }; }
+inline vec3 vec4::ggr() const { return { g, g, r }; }
+inline vec4 vec4::ggra() const { return { g, g, r, a }; }
+inline vec4 vec4::ggrb() const { return { g, g, r, b }; }
+inline vec4 vec4::ggrg() const { return { g, g, r, g }; }
+inline vec4 vec4::ggrr() const { return { g, g, r, r }; }
+inline vec2 vec4::gr() const { return { g, r }; }
+inline vec3 vec4::gra() const { return { g, r, a }; }
+inline vec4 vec4::graa() const { return { g, r, a, a }; }
+inline vec4 vec4::grab() const { return { g, r, a, b }; }
+inline vec4 vec4::grag() const { return { g, r, a, g }; }
+inline vec4 vec4::grar() const { return { g, r, a, r }; }
+inline vec3 vec4::grb() const { return { g, r, b }; }
+inline vec4 vec4::grba() const { return { g, r, b, a }; }
+inline vec4 vec4::grbb() const { return { g, r, b, b }; }
+inline vec4 vec4::grbg() const { return { g, r, b, g }; }
+inline vec4 vec4::grbr() const { return { g, r, b, r }; }
+inline vec3 vec4::grg() const { return { g, r, g }; }
+inline vec4 vec4::grga() const { return { g, r, g, a }; }
+inline vec4 vec4::grgb() const { return { g, r, g, b }; }
+inline vec4 vec4::grgg() const { return { g, r, g, g }; }
+inline vec4 vec4::grgr() const { return { g, r, g, r }; }
+inline vec3 vec4::grr() const { return { g, r, r }; }
+inline vec4 vec4::grra() const { return { g, r, r, a }; }
+inline vec4 vec4::grrb() const { return { g, r, r, b }; }
+inline vec4 vec4::grrg() const { return { g, r, r, g }; }
+inline vec4 vec4::grrr() const { return { g, r, r, r }; }
+inline vec2 vec4::ra() const { return { r, a }; }
+inline vec3 vec4::raa() const { return { r, a, a }; }
+inline vec4 vec4::raaa() const { return { r, a, a, a }; }
+inline vec4 vec4::raab() const { return { r, a, a, b }; }
+inline vec4 vec4::raag() const { return { r, a, a, g }; }
+inline vec4 vec4::raar() const { return { r, a, a, r }; }
+inline vec3 vec4::rab() const { return { r, a, b }; }
+inline vec4 vec4::raba() const { return { r, a, b, a }; }
+inline vec4 vec4::rabb() const { return { r, a, b, b }; }
+inline vec4 vec4::rabg() const { return { r, a, b, g }; }
+inline vec4 vec4::rabr() const { return { r, a, b, r }; }
+inline vec3 vec4::rag() const { return { r, a, g }; }
+inline vec4 vec4::raga() const { return { r, a, g, a }; }
+inline vec4 vec4::ragb() const { return { r, a, g, b }; }
+inline vec4 vec4::ragg() const { return { r, a, g, g }; }
+inline vec4 vec4::ragr() const { return { r, a, g, r }; }
+inline vec3 vec4::rar() const { return { r, a, r }; }
+inline vec4 vec4::rara() const { return { r, a, r, a }; }
+inline vec4 vec4::rarb() const { return { r, a, r, b }; }
+inline vec4 vec4::rarg() const { return { r, a, r, g }; }
+inline vec4 vec4::rarr() const { return { r, a, r, r }; }
+inline vec2 vec4::rb() const { return { r, b }; }
+inline vec3 vec4::rba() const { return { r, b, a }; }
+inline vec4 vec4::rbaa() const { return { r, b, a, a }; }
+inline vec4 vec4::rbab() const { return { r, b, a, b }; }
+inline vec4 vec4::rbag() const { return { r, b, a, g }; }
+inline vec4 vec4::rbar() const { return { r, b, a, r }; }
+inline vec3 vec4::rbb() const { return { r, b, b }; }
+inline vec4 vec4::rbba() const { return { r, b, b, a }; }
+inline vec4 vec4::rbbb() const { return { r, b, b, b }; }
+inline vec4 vec4::rbbg() const { return { r, b, b, g }; }
+inline vec4 vec4::rbbr() const { return { r, b, b, r }; }
+inline vec3 vec4::rbg() const { return { r, b, g }; }
+inline vec4 vec4::rbga() const { return { r, b, g, a }; }
+inline vec4 vec4::rbgb() const { return { r, b, g, b }; }
+inline vec4 vec4::rbgg() const { return { r, b, g, g }; }
+inline vec4 vec4::rbgr() const { return { r, b, g, r }; }
+inline vec3 vec4::rbr() const { return { r, b, r }; }
+inline vec4 vec4::rbra() const { return { r, b, r, a }; }
+inline vec4 vec4::rbrb() const { return { r, b, r, b }; }
+inline vec4 vec4::rbrg() const { return { r, b, r, g }; }
+inline vec4 vec4::rbrr() const { return { r, b, r, r }; }
+inline vec2 vec4::rg() const { return { r, g }; }
+inline vec3 vec4::rga() const { return { r, g, a }; }
+inline vec4 vec4::rgaa() const { return { r, g, a, a }; }
+inline vec4 vec4::rgab() const { return { r, g, a, b }; }
+inline vec4 vec4::rgag() const { return { r, g, a, g }; }
+inline vec4 vec4::rgar() const { return { r, g, a, r }; }
+inline vec3 vec4::rgb() const { return { r, g, b }; }
+inline vec4 vec4::rgba() const { return { r, g, b, a }; }
+inline vec4 vec4::rgbb() const { return { r, g, b, b }; }
+inline vec4 vec4::rgbg() const { return { r, g, b, g }; }
+inline vec4 vec4::rgbr() const { return { r, g, b, r }; }
+inline vec3 vec4::rgg() const { return { r, g, g }; }
+inline vec4 vec4::rgga() const { return { r, g, g, a }; }
+inline vec4 vec4::rggb() const { return { r, g, g, b }; }
+inline vec4 vec4::rggg() const { return { r, g, g, g }; }
+inline vec4 vec4::rggr() const { return { r, g, g, r }; }
+inline vec3 vec4::rgr() const { return { r, g, r }; }
+inline vec4 vec4::rgra() const { return { r, g, r, a }; }
+inline vec4 vec4::rgrb() const { return { r, g, r, b }; }
+inline vec4 vec4::rgrg() const { return { r, g, r, g }; }
+inline vec4 vec4::rgrr() const { return { r, g, r, r }; }
+inline vec2 vec4::rr() const { return { r, r }; }
+inline vec3 vec4::rra() const { return { r, r, a }; }
+inline vec4 vec4::rraa() const { return { r, r, a, a }; }
+inline vec4 vec4::rrab() const { return { r, r, a, b }; }
+inline vec4 vec4::rrag() const { return { r, r, a, g }; }
+inline vec4 vec4::rrar() const { return { r, r, a, r }; }
+inline vec3 vec4::rrb() const { return { r, r, b }; }
+inline vec4 vec4::rrba() const { return { r, r, b, a }; }
+inline vec4 vec4::rrbb() const { return { r, r, b, b }; }
+inline vec4 vec4::rrbg() const { return { r, r, b, g }; }
+inline vec4 vec4::rrbr() const { return { r, r, b, r }; }
+inline vec3 vec4::rrg() const { return { r, r, g }; }
+inline vec4 vec4::rrga() const { return { r, r, g, a }; }
+inline vec4 vec4::rrgb() const { return { r, r, g, b }; }
+inline vec4 vec4::rrgg() const { return { r, r, g, g }; }
+inline vec4 vec4::rrgr() const { return { r, r, g, r }; }
+inline vec3 vec4::rrr() const { return { r, r, r }; }
+inline vec4 vec4::rrra() const { return { r, r, r, a }; }
+inline vec4 vec4::rrrb() const { return { r, r, r, b }; }
+inline vec4 vec4::rrrg() const { return { r, r, r, g }; }
+inline vec4 vec4::rrrr() const { return { r, r, r, r }; }
+inline vec2 vec4::ww() const { return { w, w }; }
+inline vec3 vec4::www() const { return { w, w, w }; }
+inline vec4 vec4::wwww() const { return { w, w, w, w }; }
+inline vec4 vec4::wwwx() const { return { w, w, w, x }; }
+inline vec4 vec4::wwwy() const { return { w, w, w, y }; }
+inline vec4 vec4::wwwz() const { return { w, w, w, z }; }
+inline vec3 vec4::wwx() const { return { w, w, x }; }
+inline vec4 vec4::wwxw() const { return { w, w, x, w }; }
+inline vec4 vec4::wwxx() const { return { w, w, x, x }; }
+inline vec4 vec4::wwxy() const { return { w, w, x, y }; }
+inline vec4 vec4::wwxz() const { return { w, w, x, z }; }
+inline vec3 vec4::wwy() const { return { w, w, y }; }
+inline vec4 vec4::wwyw() const { return { w, w, y, w }; }
+inline vec4 vec4::wwyx() const { return { w, w, y, x }; }
+inline vec4 vec4::wwyy() const { return { w, w, y, y }; }
+inline vec4 vec4::wwyz() const { return { w, w, y, z }; }
+inline vec3 vec4::wwz() const { return { w, w, z }; }
+inline vec4 vec4::wwzw() const { return { w, w, z, w }; }
+inline vec4 vec4::wwzx() const { return { w, w, z, x }; }
+inline vec4 vec4::wwzy() const { return { w, w, z, y }; }
+inline vec4 vec4::wwzz() const { return { w, w, z, z }; }
+inline vec2 vec4::wx() const { return { w, x }; }
+inline vec3 vec4::wxw() const { return { w, x, w }; }
+inline vec4 vec4::wxww() const { return { w, x, w, w }; }
+inline vec4 vec4::wxwx() const { return { w, x, w, x }; }
+inline vec4 vec4::wxwy() const { return { w, x, w, y }; }
+inline vec4 vec4::wxwz() const { return { w, x, w, z }; }
+inline vec3 vec4::wxx() const { return { w, x, x }; }
+inline vec4 vec4::wxxw() const { return { w, x, x, w }; }
+inline vec4 vec4::wxxx() const { return { w, x, x, x }; }
+inline vec4 vec4::wxxy() const { return { w, x, x, y }; }
+inline vec4 vec4::wxxz() const { return { w, x, x, z }; }
+inline vec3 vec4::wxy() const { return { w, x, y }; }
+inline vec4 vec4::wxyw() const { return { w, x, y, w }; }
+inline vec4 vec4::wxyx() const { return { w, x, y, x }; }
+inline vec4 vec4::wxyy() const { return { w, x, y, y }; }
+inline vec4 vec4::wxyz() const { return { w, x, y, z }; }
+inline vec3 vec4::wxz() const { return { w, x, z }; }
+inline vec4 vec4::wxzw() const { return { w, x, z, w }; }
+inline vec4 vec4::wxzx() const { return { w, x, z, x }; }
+inline vec4 vec4::wxzy() const { return { w, x, z, y }; }
+inline vec4 vec4::wxzz() const { return { w, x, z, z }; }
+inline vec2 vec4::wy() const { return { w, y }; }
+inline vec3 vec4::wyw() const { return { w, y, w }; }
+inline vec4 vec4::wyww() const { return { w, y, w, w }; }
+inline vec4 vec4::wywx() const { return { w, y, w, x }; }
+inline vec4 vec4::wywy() const { return { w, y, w, y }; }
+inline vec4 vec4::wywz() const { return { w, y, w, z }; }
+inline vec3 vec4::wyx() const { return { w, y, x }; }
+inline vec4 vec4::wyxw() const { return { w, y, x, w }; }
+inline vec4 vec4::wyxx() const { return { w, y, x, x }; }
+inline vec4 vec4::wyxy() const { return { w, y, x, y }; }
+inline vec4 vec4::wyxz() const { return { w, y, x, z }; }
+inline vec3 vec4::wyy() const { return { w, y, y }; }
+inline vec4 vec4::wyyw() const { return { w, y, y, w }; }
+inline vec4 vec4::wyyx() const { return { w, y, y, x }; }
+inline vec4 vec4::wyyy() const { return { w, y, y, y }; }
+inline vec4 vec4::wyyz() const { return { w, y, y, z }; }
+inline vec3 vec4::wyz() const { return { w, y, z }; }
+inline vec4 vec4::wyzw() const { return { w, y, z, w }; }
+inline vec4 vec4::wyzx() const { return { w, y, z, x }; }
+inline vec4 vec4::wyzy() const { return { w, y, z, y }; }
+inline vec4 vec4::wyzz() const { return { w, y, z, z }; }
+inline vec2 vec4::wz() const { return { w, z }; }
+inline vec3 vec4::wzw() const { return { w, z, w }; }
+inline vec4 vec4::wzww() const { return { w, z, w, w }; }
+inline vec4 vec4::wzwx() const { return { w, z, w, x }; }
+inline vec4 vec4::wzwy() const { return { w, z, w, y }; }
+inline vec4 vec4::wzwz() const { return { w, z, w, z }; }
+inline vec3 vec4::wzx() const { return { w, z, x }; }
+inline vec4 vec4::wzxw() const { return { w, z, x, w }; }
+inline vec4 vec4::wzxx() const { return { w, z, x, x }; }
+inline vec4 vec4::wzxy() const { return { w, z, x, y }; }
+inline vec4 vec4::wzxz() const { return { w, z, x, z }; }
+inline vec3 vec4::wzy() const { return { w, z, y }; }
+inline vec4 vec4::wzyw() const { return { w, z, y, w }; }
+inline vec4 vec4::wzyx() const { return { w, z, y, x }; }
+inline vec4 vec4::wzyy() const { return { w, z, y, y }; }
+inline vec4 vec4::wzyz() const { return { w, z, y, z }; }
+inline vec3 vec4::wzz() const { return { w, z, z }; }
+inline vec4 vec4::wzzw() const { return { w, z, z, w }; }
+inline vec4 vec4::wzzx() const { return { w, z, z, x }; }
+inline vec4 vec4::wzzy() const { return { w, z, z, y }; }
+inline vec4 vec4::wzzz() const { return { w, z, z, z }; }
+inline vec2 vec4::xw() const { return { x, w }; }
+inline vec3 vec4::xww() const { return { x, w, w }; }
+inline vec4 vec4::xwww() const { return { x, w, w, w }; }
+inline vec4 vec4::xwwx() const { return { x, w, w, x }; }
+inline vec4 vec4::xwwy() const { return { x, w, w, y }; }
+inline vec4 vec4::xwwz() const { return { x, w, w, z }; }
+inline vec3 vec4::xwx() const { return { x, w, x }; }
+inline vec4 vec4::xwxw() const { return { x, w, x, w }; }
+inline vec4 vec4::xwxx() const { return { x, w, x, x }; }
+inline vec4 vec4::xwxy() const { return { x, w, x, y }; }
+inline vec4 vec4::xwxz() const { return { x, w, x, z }; }
+inline vec3 vec4::xwy() const { return { x, w, y }; }
+inline vec4 vec4::xwyw() const { return { x, w, y, w }; }
+inline vec4 vec4::xwyx() const { return { x, w, y, x }; }
+inline vec4 vec4::xwyy() const { return { x, w, y, y }; }
+inline vec4 vec4::xwyz() const { return { x, w, y, z }; }
+inline vec3 vec4::xwz() const { return { x, w, z }; }
+inline vec4 vec4::xwzw() const { return { x, w, z, w }; }
+inline vec4 vec4::xwzx() const { return { x, w, z, x }; }
+inline vec4 vec4::xwzy() const { return { x, w, z, y }; }
+inline vec4 vec4::xwzz() const { return { x, w, z, z }; }
+inline vec2 vec4::xx() const { return { x, x }; }
+inline vec3 vec4::xxw() const { return { x, x, w }; }
+inline vec4 vec4::xxww() const { return { x, x, w, w }; }
+inline vec4 vec4::xxwx() const { return { x, x, w, x }; }
+inline vec4 vec4::xxwy() const { return { x, x, w, y }; }
+inline vec4 vec4::xxwz() const { return { x, x, w, z }; }
+inline vec3 vec4::xxx() const { return { x, x, x }; }
+inline vec4 vec4::xxxw() const { return { x, x, x, w }; }
+inline vec4 vec4::xxxx() const { return { x, x, x, x }; }
+inline vec4 vec4::xxxy() const { return { x, x, x, y }; }
+inline vec4 vec4::xxxz() const { return { x, x, x, z }; }
+inline vec3 vec4::xxy() const { return { x, x, y }; }
+inline vec4 vec4::xxyw() const { return { x, x, y, w }; }
+inline vec4 vec4::xxyx() const { return { x, x, y, x }; }
+inline vec4 vec4::xxyy() const { return { x, x, y, y }; }
+inline vec4 vec4::xxyz() const { return { x, x, y, z }; }
+inline vec3 vec4::xxz() const { return { x, x, z }; }
+inline vec4 vec4::xxzw() const { return { x, x, z, w }; }
+inline vec4 vec4::xxzx() const { return { x, x, z, x }; }
+inline vec4 vec4::xxzy() const { return { x, x, z, y }; }
+inline vec4 vec4::xxzz() const { return { x, x, z, z }; }
+inline vec2 vec4::xy() const { return { x, y }; }
+inline vec3 vec4::xyw() const { return { x, y, w }; }
+inline vec4 vec4::xyww() const { return { x, y, w, w }; }
+inline vec4 vec4::xywx() const { return { x, y, w, x }; }
+inline vec4 vec4::xywy() const { return { x, y, w, y }; }
+inline vec4 vec4::xywz() const { return { x, y, w, z }; }
+inline vec3 vec4::xyx() const { return { x, y, x }; }
+inline vec4 vec4::xyxw() const { return { x, y, x, w }; }
+inline vec4 vec4::xyxx() const { return { x, y, x, x }; }
+inline vec4 vec4::xyxy() const { return { x, y, x, y }; }
+inline vec4 vec4::xyxz() const { return { x, y, x, z }; }
+inline vec3 vec4::xyy() const { return { x, y, y }; }
+inline vec4 vec4::xyyw() const { return { x, y, y, w }; }
+inline vec4 vec4::xyyx() const { return { x, y, y, x }; }
+inline vec4 vec4::xyyy() const { return { x, y, y, y }; }
+inline vec4 vec4::xyyz() const { return { x, y, y, z }; }
+inline vec3 vec4::xyz() const { return { x, y, z }; }
+inline vec4 vec4::xyzw() const { return { x, y, z, w }; }
+inline vec4 vec4::xyzx() const { return { x, y, z, x }; }
+inline vec4 vec4::xyzy() const { return { x, y, z, y }; }
+inline vec4 vec4::xyzz() const { return { x, y, z, z }; }
+inline vec2 vec4::xz() const { return { x, z }; }
+inline vec3 vec4::xzw() const { return { x, z, w }; }
+inline vec4 vec4::xzww() const { return { x, z, w, w }; }
+inline vec4 vec4::xzwx() const { return { x, z, w, x }; }
+inline vec4 vec4::xzwy() const { return { x, z, w, y }; }
+inline vec4 vec4::xzwz() const { return { x, z, w, z }; }
+inline vec3 vec4::xzx() const { return { x, z, x }; }
+inline vec4 vec4::xzxw() const { return { x, z, x, w }; }
+inline vec4 vec4::xzxx() const { return { x, z, x, x }; }
+inline vec4 vec4::xzxy() const { return { x, z, x, y }; }
+inline vec4 vec4::xzxz() const { return { x, z, x, z }; }
+inline vec3 vec4::xzy() const { return { x, z, y }; }
+inline vec4 vec4::xzyw() const { return { x, z, y, w }; }
+inline vec4 vec4::xzyx() const { return { x, z, y, x }; }
+inline vec4 vec4::xzyy() const { return { x, z, y, y }; }
+inline vec4 vec4::xzyz() const { return { x, z, y, z }; }
+inline vec3 vec4::xzz() const { return { x, z, z }; }
+inline vec4 vec4::xzzw() const { return { x, z, z, w }; }
+inline vec4 vec4::xzzx() const { return { x, z, z, x }; }
+inline vec4 vec4::xzzy() const { return { x, z, z, y }; }
+inline vec4 vec4::xzzz() const { return { x, z, z, z }; }
+inline vec2 vec4::yw() const { return { y, w }; }
+inline vec3 vec4::yww() const { return { y, w, w }; }
+inline vec4 vec4::ywww() const { return { y, w, w, w }; }
+inline vec4 vec4::ywwx() const { return { y, w, w, x }; }
+inline vec4 vec4::ywwy() const { return { y, w, w, y }; }
+inline vec4 vec4::ywwz() const { return { y, w, w, z }; }
+inline vec3 vec4::ywx() const { return { y, w, x }; }
+inline vec4 vec4::ywxw() const { return { y, w, x, w }; }
+inline vec4 vec4::ywxx() const { return { y, w, x, x }; }
+inline vec4 vec4::ywxy() const { return { y, w, x, y }; }
+inline vec4 vec4::ywxz() const { return { y, w, x, z }; }
+inline vec3 vec4::ywy() const { return { y, w, y }; }
+inline vec4 vec4::ywyw() const { return { y, w, y, w }; }
+inline vec4 vec4::ywyx() const { return { y, w, y, x }; }
+inline vec4 vec4::ywyy() const { return { y, w, y, y }; }
+inline vec4 vec4::ywyz() const { return { y, w, y, z }; }
+inline vec3 vec4::ywz() const { return { y, w, z }; }
+inline vec4 vec4::ywzw() const { return { y, w, z, w }; }
+inline vec4 vec4::ywzx() const { return { y, w, z, x }; }
+inline vec4 vec4::ywzy() const { return { y, w, z, y }; }
+inline vec4 vec4::ywzz() const { return { y, w, z, z }; }
+inline vec2 vec4::yx() const { return { y, x }; }
+inline vec3 vec4::yxw() const { return { y, x, w }; }
+inline vec4 vec4::yxww() const { return { y, x, w, w }; }
+inline vec4 vec4::yxwx() const { return { y, x, w, x }; }
+inline vec4 vec4::yxwy() const { return { y, x, w, y }; }
+inline vec4 vec4::yxwz() const { return { y, x, w, z }; }
+inline vec3 vec4::yxx() const { return { y, x, x }; }
+inline vec4 vec4::yxxw() const { return { y, x, x, w }; }
+inline vec4 vec4::yxxx() const { return { y, x, x, x }; }
+inline vec4 vec4::yxxy() const { return { y, x, x, y }; }
+inline vec4 vec4::yxxz() const { return { y, x, x, z }; }
+inline vec3 vec4::yxy() const { return { y, x, y }; }
+inline vec4 vec4::yxyw() const { return { y, x, y, w }; }
+inline vec4 vec4::yxyx() const { return { y, x, y, x }; }
+inline vec4 vec4::yxyy() const { return { y, x, y, y }; }
+inline vec4 vec4::yxyz() const { return { y, x, y, z }; }
+inline vec3 vec4::yxz() const { return { y, x, z }; }
+inline vec4 vec4::yxzw() const { return { y, x, z, w }; }
+inline vec4 vec4::yxzx() const { return { y, x, z, x }; }
+inline vec4 vec4::yxzy() const { return { y, x, z, y }; }
+inline vec4 vec4::yxzz() const { return { y, x, z, z }; }
+inline vec2 vec4::yy() const { return { y, y }; }
+inline vec3 vec4::yyw() const { return { y, y, w }; }
+inline vec4 vec4::yyww() const { return { y, y, w, w }; }
+inline vec4 vec4::yywx() const { return { y, y, w, x }; }
+inline vec4 vec4::yywy() const { return { y, y, w, y }; }
+inline vec4 vec4::yywz() const { return { y, y, w, z }; }
+inline vec3 vec4::yyx() const { return { y, y, x }; }
+inline vec4 vec4::yyxw() const { return { y, y, x, w }; }
+inline vec4 vec4::yyxx() const { return { y, y, x, x }; }
+inline vec4 vec4::yyxy() const { return { y, y, x, y }; }
+inline vec4 vec4::yyxz() const { return { y, y, x, z }; }
+inline vec3 vec4::yyy() const { return { y, y, y }; }
+inline vec4 vec4::yyyw() const { return { y, y, y, w }; }
+inline vec4 vec4::yyyx() const { return { y, y, y, x }; }
+inline vec4 vec4::yyyy() const { return { y, y, y, y }; }
+inline vec4 vec4::yyyz() const { return { y, y, y, z }; }
+inline vec3 vec4::yyz() const { return { y, y, z }; }
+inline vec4 vec4::yyzw() const { return { y, y, z, w }; }
+inline vec4 vec4::yyzx() const { return { y, y, z, x }; }
+inline vec4 vec4::yyzy() const { return { y, y, z, y }; }
+inline vec4 vec4::yyzz() const { return { y, y, z, z }; }
+inline vec2 vec4::yz() const { return { y, z }; }
+inline vec3 vec4::yzw() const { return { y, z, w }; }
+inline vec4 vec4::yzww() const { return { y, z, w, w }; }
+inline vec4 vec4::yzwx() const { return { y, z, w, x }; }
+inline vec4 vec4::yzwy() const { return { y, z, w, y }; }
+inline vec4 vec4::yzwz() const { return { y, z, w, z }; }
+inline vec3 vec4::yzx() const { return { y, z, x }; }
+inline vec4 vec4::yzxw() const { return { y, z, x, w }; }
+inline vec4 vec4::yzxx() const { return { y, z, x, x }; }
+inline vec4 vec4::yzxy() const { return { y, z, x, y }; }
+inline vec4 vec4::yzxz() const { return { y, z, x, z }; }
+inline vec3 vec4::yzy() const { return { y, z, y }; }
+inline vec4 vec4::yzyw() const { return { y, z, y, w }; }
+inline vec4 vec4::yzyx() const { return { y, z, y, x }; }
+inline vec4 vec4::yzyy() const { return { y, z, y, y }; }
+inline vec4 vec4::yzyz() const { return { y, z, y, z }; }
+inline vec3 vec4::yzz() const { return { y, z, z }; }
+inline vec4 vec4::yzzw() const { return { y, z, z, w }; }
+inline vec4 vec4::yzzx() const { return { y, z, z, x }; }
+inline vec4 vec4::yzzy() const { return { y, z, z, y }; }
+inline vec4 vec4::yzzz() const { return { y, z, z, z }; }
+inline vec2 vec4::zw() const { return { z, w }; }
+inline vec3 vec4::zww() const { return { z, w, w }; }
+inline vec4 vec4::zwww() const { return { z, w, w, w }; }
+inline vec4 vec4::zwwx() const { return { z, w, w, x }; }
+inline vec4 vec4::zwwy() const { return { z, w, w, y }; }
+inline vec4 vec4::zwwz() const { return { z, w, w, z }; }
+inline vec3 vec4::zwx() const { return { z, w, x }; }
+inline vec4 vec4::zwxw() const { return { z, w, x, w }; }
+inline vec4 vec4::zwxx() const { return { z, w, x, x }; }
+inline vec4 vec4::zwxy() const { return { z, w, x, y }; }
+inline vec4 vec4::zwxz() const { return { z, w, x, z }; }
+inline vec3 vec4::zwy() const { return { z, w, y }; }
+inline vec4 vec4::zwyw() const { return { z, w, y, w }; }
+inline vec4 vec4::zwyx() const { return { z, w, y, x }; }
+inline vec4 vec4::zwyy() const { return { z, w, y, y }; }
+inline vec4 vec4::zwyz() const { return { z, w, y, z }; }
+inline vec3 vec4::zwz() const { return { z, w, z }; }
+inline vec4 vec4::zwzw() const { return { z, w, z, w }; }
+inline vec4 vec4::zwzx() const { return { z, w, z, x }; }
+inline vec4 vec4::zwzy() const { return { z, w, z, y }; }
+inline vec4 vec4::zwzz() const { return { z, w, z, z }; }
+inline vec2 vec4::zx() const { return { z, x }; }
+inline vec3 vec4::zxw() const { return { z, x, w }; }
+inline vec4 vec4::zxww() const { return { z, x, w, w }; }
+inline vec4 vec4::zxwx() const { return { z, x, w, x }; }
+inline vec4 vec4::zxwy() const { return { z, x, w, y }; }
+inline vec4 vec4::zxwz() const { return { z, x, w, z }; }
+inline vec3 vec4::zxx() const { return { z, x, x }; }
+inline vec4 vec4::zxxw() const { return { z, x, x, w }; }
+inline vec4 vec4::zxxx() const { return { z, x, x, x }; }
+inline vec4 vec4::zxxy() const { return { z, x, x, y }; }
+inline vec4 vec4::zxxz() const { return { z, x, x, z }; }
+inline vec3 vec4::zxy() const { return { z, x, y }; }
+inline vec4 vec4::zxyw() const { return { z, x, y, w }; }
+inline vec4 vec4::zxyx() const { return { z, x, y, x }; }
+inline vec4 vec4::zxyy() const { return { z, x, y, y }; }
+inline vec4 vec4::zxyz() const { return { z, x, y, z }; }
+inline vec3 vec4::zxz() const { return { z, x, z }; }
+inline vec4 vec4::zxzw() const { return { z, x, z, w }; }
+inline vec4 vec4::zxzx() const { return { z, x, z, x }; }
+inline vec4 vec4::zxzy() const { return { z, x, z, y }; }
+inline vec4 vec4::zxzz() const { return { z, x, z, z }; }
+inline vec2 vec4::zy() const { return { z, y }; }
+inline vec3 vec4::zyw() const { return { z, y, w }; }
+inline vec4 vec4::zyww() const { return { z, y, w, w }; }
+inline vec4 vec4::zywx() const { return { z, y, w, x }; }
+inline vec4 vec4::zywy() const { return { z, y, w, y }; }
+inline vec4 vec4::zywz() const { return { z, y, w, z }; }
+inline vec3 vec4::zyx() const { return { z, y, x }; }
+inline vec4 vec4::zyxw() const { return { z, y, x, w }; }
+inline vec4 vec4::zyxx() const { return { z, y, x, x }; }
+inline vec4 vec4::zyxy() const { return { z, y, x, y }; }
+inline vec4 vec4::zyxz() const { return { z, y, x, z }; }
+inline vec3 vec4::zyy() const { return { z, y, y }; }
+inline vec4 vec4::zyyw() const { return { z, y, y, w }; }
+inline vec4 vec4::zyyx() const { return { z, y, y, x }; }
+inline vec4 vec4::zyyy() const { return { z, y, y, y }; }
+inline vec4 vec4::zyyz() const { return { z, y, y, z }; }
+inline vec3 vec4::zyz() const { return { z, y, z }; }
+inline vec4 vec4::zyzw() const { return { z, y, z, w }; }
+inline vec4 vec4::zyzx() const { return { z, y, z, x }; }
+inline vec4 vec4::zyzy() const { return { z, y, z, y }; }
+inline vec4 vec4::zyzz() const { return { z, y, z, z }; }
+inline vec2 vec4::zz() const { return { z, z }; }
+inline vec3 vec4::zzw() const { return { z, z, w }; }
+inline vec4 vec4::zzww() const { return { z, z, w, w }; }
+inline vec4 vec4::zzwx() const { return { z, z, w, x }; }
+inline vec4 vec4::zzwy() const { return { z, z, w, y }; }
+inline vec4 vec4::zzwz() const { return { z, z, w, z }; }
+inline vec3 vec4::zzx() const { return { z, z, x }; }
+inline vec4 vec4::zzxw() const { return { z, z, x, w }; }
+inline vec4 vec4::zzxx() const { return { z, z, x, x }; }
+inline vec4 vec4::zzxy() const { return { z, z, x, y }; }
+inline vec4 vec4::zzxz() const { return { z, z, x, z }; }
+inline vec3 vec4::zzy() const { return { z, z, y }; }
+inline vec4 vec4::zzyw() const { return { z, z, y, w }; }
+inline vec4 vec4::zzyx() const { return { z, z, y, x }; }
+inline vec4 vec4::zzyy() const { return { z, z, y, y }; }
+inline vec4 vec4::zzyz() const { return { z, z, y, z }; }
+inline vec3 vec4::zzz() const { return { z, z, z }; }
+inline vec4 vec4::zzzw() const { return { z, z, z, w }; }
+inline vec4 vec4::zzzx() const { return { z, z, z, x }; }
+inline vec4 vec4::zzzy() const { return { z, z, z, y }; }
+inline vec4 vec4::zzzz() const { return { z, z, z, z }; }
+inline void vec4::ab(const simdfloat& _val0, const simdfloat& _val1) { a = _val0; b = _val1; }
+inline void vec4::ab(const vec2& _val) { a = _val.x; b = _val.y; }
+inline void vec4::ab(const simdfloat& _val) { a = _val; b = _val; }
+inline void vec4::abg(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { a = _val0; b = _val1; g = _val2; }
+inline void vec4::abg(const vec3& _val) { a = _val.x; b = _val.y; g = _val.z; }
+inline void vec4::abg(const simdfloat& _val) { a = _val; b = _val; g = _val; }
+inline void vec4::abgr(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { a = _val0; b = _val1; g = _val2; r = _val3; }
+inline void vec4::abgr(const vec4& _val) { a = _val.x; b = _val.y; g = _val.z; r = _val.w; }
+inline void vec4::abgr(const simdfloat& _val) { a = _val; b = _val; g = _val; r = _val; }
+inline void vec4::abr(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { a = _val0; b = _val1; r = _val2; }
+inline void vec4::abr(const vec3& _val) { a = _val.x; b = _val.y; r = _val.z; }
+inline void vec4::abr(const simdfloat& _val) { a = _val; b = _val; r = _val; }
+inline void vec4::abrg(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { a = _val0; b = _val1; r = _val2; g = _val3; }
+inline void vec4::abrg(const vec4& _val) { a = _val.x; b = _val.y; r = _val.z; g = _val.w; }
+inline void vec4::abrg(const simdfloat& _val) { a = _val; b = _val; r = _val; g = _val; }
+inline void vec4::ag(const simdfloat& _val0, const simdfloat& _val1) { a = _val0; g = _val1; }
+inline void vec4::ag(const vec2& _val) { a = _val.x; g = _val.y; }
+inline void vec4::ag(const simdfloat& _val) { a = _val; g = _val; }
+inline void vec4::agb(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { a = _val0; g = _val1; b = _val2; }
+inline void vec4::agb(const vec3& _val) { a = _val.x; g = _val.y; b = _val.z; }
+inline void vec4::agb(const simdfloat& _val) { a = _val; g = _val; b = _val; }
+inline void vec4::agbr(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { a = _val0; g = _val1; b = _val2; r = _val3; }
+inline void vec4::agbr(const vec4& _val) { a = _val.x; g = _val.y; b = _val.z; r = _val.w; }
+inline void vec4::agbr(const simdfloat& _val) { a = _val; g = _val; b = _val; r = _val; }
+inline void vec4::agr(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { a = _val0; g = _val1; r = _val2; }
+inline void vec4::agr(const vec3& _val) { a = _val.x; g = _val.y; r = _val.z; }
+inline void vec4::agr(const simdfloat& _val) { a = _val; g = _val; r = _val; }
+inline void vec4::agrb(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { a = _val0; g = _val1; r = _val2; b = _val3; }
+inline void vec4::agrb(const vec4& _val) { a = _val.x; g = _val.y; r = _val.z; b = _val.w; }
+inline void vec4::agrb(const simdfloat& _val) { a = _val; g = _val; r = _val; b = _val; }
+inline void vec4::ar(const simdfloat& _val0, const simdfloat& _val1) { a = _val0; r = _val1; }
+inline void vec4::ar(const vec2& _val) { a = _val.x; r = _val.y; }
+inline void vec4::ar(const simdfloat& _val) { a = _val; r = _val; }
+inline void vec4::arb(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { a = _val0; r = _val1; b = _val2; }
+inline void vec4::arb(const vec3& _val) { a = _val.x; r = _val.y; b = _val.z; }
+inline void vec4::arb(const simdfloat& _val) { a = _val; r = _val; b = _val; }
+inline void vec4::arbg(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { a = _val0; r = _val1; b = _val2; g = _val3; }
+inline void vec4::arbg(const vec4& _val) { a = _val.x; r = _val.y; b = _val.z; g = _val.w; }
+inline void vec4::arbg(const simdfloat& _val) { a = _val; r = _val; b = _val; g = _val; }
+inline void vec4::arg(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { a = _val0; r = _val1; g = _val2; }
+inline void vec4::arg(const vec3& _val) { a = _val.x; r = _val.y; g = _val.z; }
+inline void vec4::arg(const simdfloat& _val) { a = _val; r = _val; g = _val; }
+inline void vec4::argb(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { a = _val0; r = _val1; g = _val2; b = _val3; }
+inline void vec4::argb(const vec4& _val) { a = _val.x; r = _val.y; g = _val.z; b = _val.w; }
+inline void vec4::argb(const simdfloat& _val) { a = _val; r = _val; g = _val; b = _val; }
+inline void vec4::ba(const simdfloat& _val0, const simdfloat& _val1) { b = _val0; a = _val1; }
+inline void vec4::ba(const vec2& _val) { b = _val.x; a = _val.y; }
+inline void vec4::ba(const simdfloat& _val) { b = _val; a = _val; }
+inline void vec4::bag(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { b = _val0; a = _val1; g = _val2; }
+inline void vec4::bag(const vec3& _val) { b = _val.x; a = _val.y; g = _val.z; }
+inline void vec4::bag(const simdfloat& _val) { b = _val; a = _val; g = _val; }
+inline void vec4::bagr(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { b = _val0; a = _val1; g = _val2; r = _val3; }
+inline void vec4::bagr(const vec4& _val) { b = _val.x; a = _val.y; g = _val.z; r = _val.w; }
+inline void vec4::bagr(const simdfloat& _val) { b = _val; a = _val; g = _val; r = _val; }
+inline void vec4::bar(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { b = _val0; a = _val1; r = _val2; }
+inline void vec4::bar(const vec3& _val) { b = _val.x; a = _val.y; r = _val.z; }
+inline void vec4::bar(const simdfloat& _val) { b = _val; a = _val; r = _val; }
+inline void vec4::barg(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { b = _val0; a = _val1; r = _val2; g = _val3; }
+inline void vec4::barg(const vec4& _val) { b = _val.x; a = _val.y; r = _val.z; g = _val.w; }
+inline void vec4::barg(const simdfloat& _val) { b = _val; a = _val; r = _val; g = _val; }
+inline void vec4::bg(const simdfloat& _val0, const simdfloat& _val1) { b = _val0; g = _val1; }
+inline void vec4::bg(const vec2& _val) { b = _val.x; g = _val.y; }
+inline void vec4::bg(const simdfloat& _val) { b = _val; g = _val; }
+inline void vec4::bga(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { b = _val0; g = _val1; a = _val2; }
+inline void vec4::bga(const vec3& _val) { b = _val.x; g = _val.y; a = _val.z; }
+inline void vec4::bga(const simdfloat& _val) { b = _val; g = _val; a = _val; }
+inline void vec4::bgar(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { b = _val0; g = _val1; a = _val2; r = _val3; }
+inline void vec4::bgar(const vec4& _val) { b = _val.x; g = _val.y; a = _val.z; r = _val.w; }
+inline void vec4::bgar(const simdfloat& _val) { b = _val; g = _val; a = _val; r = _val; }
+inline void vec4::bgr(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { b = _val0; g = _val1; r = _val2; }
+inline void vec4::bgr(const vec3& _val) { b = _val.x; g = _val.y; r = _val.z; }
+inline void vec4::bgr(const simdfloat& _val) { b = _val; g = _val; r = _val; }
+inline void vec4::bgra(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { b = _val0; g = _val1; r = _val2; a = _val3; }
+inline void vec4::bgra(const vec4& _val) { b = _val.x; g = _val.y; r = _val.z; a = _val.w; }
+inline void vec4::bgra(const simdfloat& _val) { b = _val; g = _val; r = _val; a = _val; }
+inline void vec4::br(const simdfloat& _val0, const simdfloat& _val1) { b = _val0; r = _val1; }
+inline void vec4::br(const vec2& _val) { b = _val.x; r = _val.y; }
+inline void vec4::br(const simdfloat& _val) { b = _val; r = _val; }
+inline void vec4::bra(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { b = _val0; r = _val1; a = _val2; }
+inline void vec4::bra(const vec3& _val) { b = _val.x; r = _val.y; a = _val.z; }
+inline void vec4::bra(const simdfloat& _val) { b = _val; r = _val; a = _val; }
+inline void vec4::brag(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { b = _val0; r = _val1; a = _val2; g = _val3; }
+inline void vec4::brag(const vec4& _val) { b = _val.x; r = _val.y; a = _val.z; g = _val.w; }
+inline void vec4::brag(const simdfloat& _val) { b = _val; r = _val; a = _val; g = _val; }
+inline void vec4::brg(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { b = _val0; r = _val1; g = _val2; }
+inline void vec4::brg(const vec3& _val) { b = _val.x; r = _val.y; g = _val.z; }
+inline void vec4::brg(const simdfloat& _val) { b = _val; r = _val; g = _val; }
+inline void vec4::brga(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { b = _val0; r = _val1; g = _val2; a = _val3; }
+inline void vec4::brga(const vec4& _val) { b = _val.x; r = _val.y; g = _val.z; a = _val.w; }
+inline void vec4::brga(const simdfloat& _val) { b = _val; r = _val; g = _val; a = _val; }
+inline void vec4::ga(const simdfloat& _val0, const simdfloat& _val1) { g = _val0; a = _val1; }
+inline void vec4::ga(const vec2& _val) { g = _val.x; a = _val.y; }
+inline void vec4::ga(const simdfloat& _val) { g = _val; a = _val; }
+inline void vec4::gab(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { g = _val0; a = _val1; b = _val2; }
+inline void vec4::gab(const vec3& _val) { g = _val.x; a = _val.y; b = _val.z; }
+inline void vec4::gab(const simdfloat& _val) { g = _val; a = _val; b = _val; }
+inline void vec4::gabr(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { g = _val0; a = _val1; b = _val2; r = _val3; }
+inline void vec4::gabr(const vec4& _val) { g = _val.x; a = _val.y; b = _val.z; r = _val.w; }
+inline void vec4::gabr(const simdfloat& _val) { g = _val; a = _val; b = _val; r = _val; }
+inline void vec4::gar(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { g = _val0; a = _val1; r = _val2; }
+inline void vec4::gar(const vec3& _val) { g = _val.x; a = _val.y; r = _val.z; }
+inline void vec4::gar(const simdfloat& _val) { g = _val; a = _val; r = _val; }
+inline void vec4::garb(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { g = _val0; a = _val1; r = _val2; b = _val3; }
+inline void vec4::garb(const vec4& _val) { g = _val.x; a = _val.y; r = _val.z; b = _val.w; }
+inline void vec4::garb(const simdfloat& _val) { g = _val; a = _val; r = _val; b = _val; }
+inline void vec4::gb(const simdfloat& _val0, const simdfloat& _val1) { g = _val0; b = _val1; }
+inline void vec4::gb(const vec2& _val) { g = _val.x; b = _val.y; }
+inline void vec4::gb(const simdfloat& _val) { g = _val; b = _val; }
+inline void vec4::gba(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { g = _val0; b = _val1; a = _val2; }
+inline void vec4::gba(const vec3& _val) { g = _val.x; b = _val.y; a = _val.z; }
+inline void vec4::gba(const simdfloat& _val) { g = _val; b = _val; a = _val; }
+inline void vec4::gbar(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { g = _val0; b = _val1; a = _val2; r = _val3; }
+inline void vec4::gbar(const vec4& _val) { g = _val.x; b = _val.y; a = _val.z; r = _val.w; }
+inline void vec4::gbar(const simdfloat& _val) { g = _val; b = _val; a = _val; r = _val; }
+inline void vec4::gbr(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { g = _val0; b = _val1; r = _val2; }
+inline void vec4::gbr(const vec3& _val) { g = _val.x; b = _val.y; r = _val.z; }
+inline void vec4::gbr(const simdfloat& _val) { g = _val; b = _val; r = _val; }
+inline void vec4::gbra(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { g = _val0; b = _val1; r = _val2; a = _val3; }
+inline void vec4::gbra(const vec4& _val) { g = _val.x; b = _val.y; r = _val.z; a = _val.w; }
+inline void vec4::gbra(const simdfloat& _val) { g = _val; b = _val; r = _val; a = _val; }
+inline void vec4::gr(const simdfloat& _val0, const simdfloat& _val1) { g = _val0; r = _val1; }
+inline void vec4::gr(const vec2& _val) { g = _val.x; r = _val.y; }
+inline void vec4::gr(const simdfloat& _val) { g = _val; r = _val; }
+inline void vec4::gra(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { g = _val0; r = _val1; a = _val2; }
+inline void vec4::gra(const vec3& _val) { g = _val.x; r = _val.y; a = _val.z; }
+inline void vec4::gra(const simdfloat& _val) { g = _val; r = _val; a = _val; }
+inline void vec4::grab(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { g = _val0; r = _val1; a = _val2; b = _val3; }
+inline void vec4::grab(const vec4& _val) { g = _val.x; r = _val.y; a = _val.z; b = _val.w; }
+inline void vec4::grab(const simdfloat& _val) { g = _val; r = _val; a = _val; b = _val; }
+inline void vec4::grb(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { g = _val0; r = _val1; b = _val2; }
+inline void vec4::grb(const vec3& _val) { g = _val.x; r = _val.y; b = _val.z; }
+inline void vec4::grb(const simdfloat& _val) { g = _val; r = _val; b = _val; }
+inline void vec4::grba(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { g = _val0; r = _val1; b = _val2; a = _val3; }
+inline void vec4::grba(const vec4& _val) { g = _val.x; r = _val.y; b = _val.z; a = _val.w; }
+inline void vec4::grba(const simdfloat& _val) { g = _val; r = _val; b = _val; a = _val; }
+inline void vec4::ra(const simdfloat& _val0, const simdfloat& _val1) { r = _val0; a = _val1; }
+inline void vec4::ra(const vec2& _val) { r = _val.x; a = _val.y; }
+inline void vec4::ra(const simdfloat& _val) { r = _val; a = _val; }
+inline void vec4::rab(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { r = _val0; a = _val1; b = _val2; }
+inline void vec4::rab(const vec3& _val) { r = _val.x; a = _val.y; b = _val.z; }
+inline void vec4::rab(const simdfloat& _val) { r = _val; a = _val; b = _val; }
+inline void vec4::rabg(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { r = _val0; a = _val1; b = _val2; g = _val3; }
+inline void vec4::rabg(const vec4& _val) { r = _val.x; a = _val.y; b = _val.z; g = _val.w; }
+inline void vec4::rabg(const simdfloat& _val) { r = _val; a = _val; b = _val; g = _val; }
+inline void vec4::rag(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { r = _val0; a = _val1; g = _val2; }
+inline void vec4::rag(const vec3& _val) { r = _val.x; a = _val.y; g = _val.z; }
+inline void vec4::rag(const simdfloat& _val) { r = _val; a = _val; g = _val; }
+inline void vec4::ragb(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { r = _val0; a = _val1; g = _val2; b = _val3; }
+inline void vec4::ragb(const vec4& _val) { r = _val.x; a = _val.y; g = _val.z; b = _val.w; }
+inline void vec4::ragb(const simdfloat& _val) { r = _val; a = _val; g = _val; b = _val; }
+inline void vec4::rb(const simdfloat& _val0, const simdfloat& _val1) { r = _val0; b = _val1; }
+inline void vec4::rb(const vec2& _val) { r = _val.x; b = _val.y; }
+inline void vec4::rb(const simdfloat& _val) { r = _val; b = _val; }
+inline void vec4::rba(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { r = _val0; b = _val1; a = _val2; }
+inline void vec4::rba(const vec3& _val) { r = _val.x; b = _val.y; a = _val.z; }
+inline void vec4::rba(const simdfloat& _val) { r = _val; b = _val; a = _val; }
+inline void vec4::rbag(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { r = _val0; b = _val1; a = _val2; g = _val3; }
+inline void vec4::rbag(const vec4& _val) { r = _val.x; b = _val.y; a = _val.z; g = _val.w; }
+inline void vec4::rbag(const simdfloat& _val) { r = _val; b = _val; a = _val; g = _val; }
+inline void vec4::rbg(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { r = _val0; b = _val1; g = _val2; }
+inline void vec4::rbg(const vec3& _val) { r = _val.x; b = _val.y; g = _val.z; }
+inline void vec4::rbg(const simdfloat& _val) { r = _val; b = _val; g = _val; }
+inline void vec4::rbga(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { r = _val0; b = _val1; g = _val2; a = _val3; }
+inline void vec4::rbga(const vec4& _val) { r = _val.x; b = _val.y; g = _val.z; a = _val.w; }
+inline void vec4::rbga(const simdfloat& _val) { r = _val; b = _val; g = _val; a = _val; }
+inline void vec4::rg(const simdfloat& _val0, const simdfloat& _val1) { r = _val0; g = _val1; }
+inline void vec4::rg(const vec2& _val) { r = _val.x; g = _val.y; }
+inline void vec4::rg(const simdfloat& _val) { r = _val; g = _val; }
+inline void vec4::rga(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { r = _val0; g = _val1; a = _val2; }
+inline void vec4::rga(const vec3& _val) { r = _val.x; g = _val.y; a = _val.z; }
+inline void vec4::rga(const simdfloat& _val) { r = _val; g = _val; a = _val; }
+inline void vec4::rgab(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { r = _val0; g = _val1; a = _val2; b = _val3; }
+inline void vec4::rgab(const vec4& _val) { r = _val.x; g = _val.y; a = _val.z; b = _val.w; }
+inline void vec4::rgab(const simdfloat& _val) { r = _val; g = _val; a = _val; b = _val; }
+inline void vec4::rgb(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { r = _val0; g = _val1; b = _val2; }
+inline void vec4::rgb(const vec3& _val) { r = _val.x; g = _val.y; b = _val.z; }
+inline void vec4::rgb(const simdfloat& _val) { r = _val; g = _val; b = _val; }
+inline void vec4::rgba(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { r = _val0; g = _val1; b = _val2; a = _val3; }
+inline void vec4::rgba(const vec4& _val) { r = _val.x; g = _val.y; b = _val.z; a = _val.w; }
+inline void vec4::rgba(const simdfloat& _val) { r = _val; g = _val; b = _val; a = _val; }
+inline void vec4::wx(const simdfloat& _val0, const simdfloat& _val1) { w = _val0; x = _val1; }
+inline void vec4::wx(const vec2& _val) { w = _val.x; x = _val.y; }
+inline void vec4::wx(const simdfloat& _val) { w = _val; x = _val; }
+inline void vec4::wxy(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { w = _val0; x = _val1; y = _val2; }
+inline void vec4::wxy(const vec3& _val) { w = _val.x; x = _val.y; y = _val.z; }
+inline void vec4::wxy(const simdfloat& _val) { w = _val; x = _val; y = _val; }
+inline void vec4::wxyz(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { w = _val0; x = _val1; y = _val2; z = _val3; }
+inline void vec4::wxyz(const vec4& _val) { w = _val.x; x = _val.y; y = _val.z; z = _val.w; }
+inline void vec4::wxyz(const simdfloat& _val) { w = _val; x = _val; y = _val; z = _val; }
+inline void vec4::wxz(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { w = _val0; x = _val1; z = _val2; }
+inline void vec4::wxz(const vec3& _val) { w = _val.x; x = _val.y; z = _val.z; }
+inline void vec4::wxz(const simdfloat& _val) { w = _val; x = _val; z = _val; }
+inline void vec4::wxzy(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { w = _val0; x = _val1; z = _val2; y = _val3; }
+inline void vec4::wxzy(const vec4& _val) { w = _val.x; x = _val.y; z = _val.z; y = _val.w; }
+inline void vec4::wxzy(const simdfloat& _val) { w = _val; x = _val; z = _val; y = _val; }
+inline void vec4::wy(const simdfloat& _val0, const simdfloat& _val1) { w = _val0; y = _val1; }
+inline void vec4::wy(const vec2& _val) { w = _val.x; y = _val.y; }
+inline void vec4::wy(const simdfloat& _val) { w = _val; y = _val; }
+inline void vec4::wyx(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { w = _val0; y = _val1; x = _val2; }
+inline void vec4::wyx(const vec3& _val) { w = _val.x; y = _val.y; x = _val.z; }
+inline void vec4::wyx(const simdfloat& _val) { w = _val; y = _val; x = _val; }
+inline void vec4::wyxz(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { w = _val0; y = _val1; x = _val2; z = _val3; }
+inline void vec4::wyxz(const vec4& _val) { w = _val.x; y = _val.y; x = _val.z; z = _val.w; }
+inline void vec4::wyxz(const simdfloat& _val) { w = _val; y = _val; x = _val; z = _val; }
+inline void vec4::wyz(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { w = _val0; y = _val1; z = _val2; }
+inline void vec4::wyz(const vec3& _val) { w = _val.x; y = _val.y; z = _val.z; }
+inline void vec4::wyz(const simdfloat& _val) { w = _val; y = _val; z = _val; }
+inline void vec4::wyzx(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { w = _val0; y = _val1; z = _val2; x = _val3; }
+inline void vec4::wyzx(const vec4& _val) { w = _val.x; y = _val.y; z = _val.z; x = _val.w; }
+inline void vec4::wyzx(const simdfloat& _val) { w = _val; y = _val; z = _val; x = _val; }
+inline void vec4::wz(const simdfloat& _val0, const simdfloat& _val1) { w = _val0; z = _val1; }
+inline void vec4::wz(const vec2& _val) { w = _val.x; z = _val.y; }
+inline void vec4::wz(const simdfloat& _val) { w = _val; z = _val; }
+inline void vec4::wzx(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { w = _val0; z = _val1; x = _val2; }
+inline void vec4::wzx(const vec3& _val) { w = _val.x; z = _val.y; x = _val.z; }
+inline void vec4::wzx(const simdfloat& _val) { w = _val; z = _val; x = _val; }
+inline void vec4::wzxy(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { w = _val0; z = _val1; x = _val2; y = _val3; }
+inline void vec4::wzxy(const vec4& _val) { w = _val.x; z = _val.y; x = _val.z; y = _val.w; }
+inline void vec4::wzxy(const simdfloat& _val) { w = _val; z = _val; x = _val; y = _val; }
+inline void vec4::wzy(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { w = _val0; z = _val1; y = _val2; }
+inline void vec4::wzy(const vec3& _val) { w = _val.x; z = _val.y; y = _val.z; }
+inline void vec4::wzy(const simdfloat& _val) { w = _val; z = _val; y = _val; }
+inline void vec4::wzyx(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { w = _val0; z = _val1; y = _val2; x = _val3; }
+inline void vec4::wzyx(const vec4& _val) { w = _val.x; z = _val.y; y = _val.z; x = _val.w; }
+inline void vec4::wzyx(const simdfloat& _val) { w = _val; z = _val; y = _val; x = _val; }
+inline void vec4::xw(const simdfloat& _val0, const simdfloat& _val1) { x = _val0; w = _val1; }
+inline void vec4::xw(const vec2& _val) { x = _val.x; w = _val.y; }
+inline void vec4::xw(const simdfloat& _val) { x = _val; w = _val; }
+inline void vec4::xwy(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { x = _val0; w = _val1; y = _val2; }
+inline void vec4::xwy(const vec3& _val) { x = _val.x; w = _val.y; y = _val.z; }
+inline void vec4::xwy(const simdfloat& _val) { x = _val; w = _val; y = _val; }
+inline void vec4::xwyz(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { x = _val0; w = _val1; y = _val2; z = _val3; }
+inline void vec4::xwyz(const vec4& _val) { x = _val.x; w = _val.y; y = _val.z; z = _val.w; }
+inline void vec4::xwyz(const simdfloat& _val) { x = _val; w = _val; y = _val; z = _val; }
+inline void vec4::xwz(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { x = _val0; w = _val1; z = _val2; }
+inline void vec4::xwz(const vec3& _val) { x = _val.x; w = _val.y; z = _val.z; }
+inline void vec4::xwz(const simdfloat& _val) { x = _val; w = _val; z = _val; }
+inline void vec4::xwzy(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { x = _val0; w = _val1; z = _val2; y = _val3; }
+inline void vec4::xwzy(const vec4& _val) { x = _val.x; w = _val.y; z = _val.z; y = _val.w; }
+inline void vec4::xwzy(const simdfloat& _val) { x = _val; w = _val; z = _val; y = _val; }
+inline void vec4::xy(const simdfloat& _val0, const simdfloat& _val1) { x = _val0; y = _val1; }
+inline void vec4::xy(const vec2& _val) { x = _val.x; y = _val.y; }
+inline void vec4::xy(const simdfloat& _val) { x = _val; y = _val; }
+inline void vec4::xyw(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { x = _val0; y = _val1; w = _val2; }
+inline void vec4::xyw(const vec3& _val) { x = _val.x; y = _val.y; w = _val.z; }
+inline void vec4::xyw(const simdfloat& _val) { x = _val; y = _val; w = _val; }
+inline void vec4::xywz(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { x = _val0; y = _val1; w = _val2; z = _val3; }
+inline void vec4::xywz(const vec4& _val) { x = _val.x; y = _val.y; w = _val.z; z = _val.w; }
+inline void vec4::xywz(const simdfloat& _val) { x = _val; y = _val; w = _val; z = _val; }
+inline void vec4::xyz(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { x = _val0; y = _val1; z = _val2; }
+inline void vec4::xyz(const vec3& _val) { x = _val.x; y = _val.y; z = _val.z; }
+inline void vec4::xyz(const simdfloat& _val) { x = _val; y = _val; z = _val; }
+inline void vec4::xyzw(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { x = _val0; y = _val1; z = _val2; w = _val3; }
+inline void vec4::xyzw(const vec4& _val) { x = _val.x; y = _val.y; z = _val.z; w = _val.w; }
+inline void vec4::xyzw(const simdfloat& _val) { x = _val; y = _val; z = _val; w = _val; }
+inline void vec4::xz(const simdfloat& _val0, const simdfloat& _val1) { x = _val0; z = _val1; }
+inline void vec4::xz(const vec2& _val) { x = _val.x; z = _val.y; }
+inline void vec4::xz(const simdfloat& _val) { x = _val; z = _val; }
+inline void vec4::xzw(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { x = _val0; z = _val1; w = _val2; }
+inline void vec4::xzw(const vec3& _val) { x = _val.x; z = _val.y; w = _val.z; }
+inline void vec4::xzw(const simdfloat& _val) { x = _val; z = _val; w = _val; }
+inline void vec4::xzwy(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { x = _val0; z = _val1; w = _val2; y = _val3; }
+inline void vec4::xzwy(const vec4& _val) { x = _val.x; z = _val.y; w = _val.z; y = _val.w; }
+inline void vec4::xzwy(const simdfloat& _val) { x = _val; z = _val; w = _val; y = _val; }
+inline void vec4::xzy(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { x = _val0; z = _val1; y = _val2; }
+inline void vec4::xzy(const vec3& _val) { x = _val.x; z = _val.y; y = _val.z; }
+inline void vec4::xzy(const simdfloat& _val) { x = _val; z = _val; y = _val; }
+inline void vec4::xzyw(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { x = _val0; z = _val1; y = _val2; w = _val3; }
+inline void vec4::xzyw(const vec4& _val) { x = _val.x; z = _val.y; y = _val.z; w = _val.w; }
+inline void vec4::xzyw(const simdfloat& _val) { x = _val; z = _val; y = _val; w = _val; }
+inline void vec4::yw(const simdfloat& _val0, const simdfloat& _val1) { y = _val0; w = _val1; }
+inline void vec4::yw(const vec2& _val) { y = _val.x; w = _val.y; }
+inline void vec4::yw(const simdfloat& _val) { y = _val; w = _val; }
+inline void vec4::ywx(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { y = _val0; w = _val1; x = _val2; }
+inline void vec4::ywx(const vec3& _val) { y = _val.x; w = _val.y; x = _val.z; }
+inline void vec4::ywx(const simdfloat& _val) { y = _val; w = _val; x = _val; }
+inline void vec4::ywxz(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { y = _val0; w = _val1; x = _val2; z = _val3; }
+inline void vec4::ywxz(const vec4& _val) { y = _val.x; w = _val.y; x = _val.z; z = _val.w; }
+inline void vec4::ywxz(const simdfloat& _val) { y = _val; w = _val; x = _val; z = _val; }
+inline void vec4::ywz(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { y = _val0; w = _val1; z = _val2; }
+inline void vec4::ywz(const vec3& _val) { y = _val.x; w = _val.y; z = _val.z; }
+inline void vec4::ywz(const simdfloat& _val) { y = _val; w = _val; z = _val; }
+inline void vec4::ywzx(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { y = _val0; w = _val1; z = _val2; x = _val3; }
+inline void vec4::ywzx(const vec4& _val) { y = _val.x; w = _val.y; z = _val.z; x = _val.w; }
+inline void vec4::ywzx(const simdfloat& _val) { y = _val; w = _val; z = _val; x = _val; }
+inline void vec4::yx(const simdfloat& _val0, const simdfloat& _val1) { y = _val0; x = _val1; }
+inline void vec4::yx(const vec2& _val) { y = _val.x; x = _val.y; }
+inline void vec4::yx(const simdfloat& _val) { y = _val; x = _val; }
+inline void vec4::yxw(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { y = _val0; x = _val1; w = _val2; }
+inline void vec4::yxw(const vec3& _val) { y = _val.x; x = _val.y; w = _val.z; }
+inline void vec4::yxw(const simdfloat& _val) { y = _val; x = _val; w = _val; }
+inline void vec4::yxwz(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { y = _val0; x = _val1; w = _val2; z = _val3; }
+inline void vec4::yxwz(const vec4& _val) { y = _val.x; x = _val.y; w = _val.z; z = _val.w; }
+inline void vec4::yxwz(const simdfloat& _val) { y = _val; x = _val; w = _val; z = _val; }
+inline void vec4::yxz(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { y = _val0; x = _val1; z = _val2; }
+inline void vec4::yxz(const vec3& _val) { y = _val.x; x = _val.y; z = _val.z; }
+inline void vec4::yxz(const simdfloat& _val) { y = _val; x = _val; z = _val; }
+inline void vec4::yxzw(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { y = _val0; x = _val1; z = _val2; w = _val3; }
+inline void vec4::yxzw(const vec4& _val) { y = _val.x; x = _val.y; z = _val.z; w = _val.w; }
+inline void vec4::yxzw(const simdfloat& _val) { y = _val; x = _val; z = _val; w = _val; }
+inline void vec4::yz(const simdfloat& _val0, const simdfloat& _val1) { y = _val0; z = _val1; }
+inline void vec4::yz(const vec2& _val) { y = _val.x; z = _val.y; }
+inline void vec4::yz(const simdfloat& _val) { y = _val; z = _val; }
+inline void vec4::yzw(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { y = _val0; z = _val1; w = _val2; }
+inline void vec4::yzw(const vec3& _val) { y = _val.x; z = _val.y; w = _val.z; }
+inline void vec4::yzw(const simdfloat& _val) { y = _val; z = _val; w = _val; }
+inline void vec4::yzwx(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { y = _val0; z = _val1; w = _val2; x = _val3; }
+inline void vec4::yzwx(const vec4& _val) { y = _val.x; z = _val.y; w = _val.z; x = _val.w; }
+inline void vec4::yzwx(const simdfloat& _val) { y = _val; z = _val; w = _val; x = _val; }
+inline void vec4::yzx(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { y = _val0; z = _val1; x = _val2; }
+inline void vec4::yzx(const vec3& _val) { y = _val.x; z = _val.y; x = _val.z; }
+inline void vec4::yzx(const simdfloat& _val) { y = _val; z = _val; x = _val; }
+inline void vec4::yzxw(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { y = _val0; z = _val1; x = _val2; w = _val3; }
+inline void vec4::yzxw(const vec4& _val) { y = _val.x; z = _val.y; x = _val.z; w = _val.w; }
+inline void vec4::yzxw(const simdfloat& _val) { y = _val; z = _val; x = _val; w = _val; }
+inline void vec4::zw(const simdfloat& _val0, const simdfloat& _val1) { z = _val0; w = _val1; }
+inline void vec4::zw(const vec2& _val) { z = _val.x; w = _val.y; }
+inline void vec4::zw(const simdfloat& _val) { z = _val; w = _val; }
+inline void vec4::zwx(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { z = _val0; w = _val1; x = _val2; }
+inline void vec4::zwx(const vec3& _val) { z = _val.x; w = _val.y; x = _val.z; }
+inline void vec4::zwx(const simdfloat& _val) { z = _val; w = _val; x = _val; }
+inline void vec4::zwxy(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { z = _val0; w = _val1; x = _val2; y = _val3; }
+inline void vec4::zwxy(const vec4& _val) { z = _val.x; w = _val.y; x = _val.z; y = _val.w; }
+inline void vec4::zwxy(const simdfloat& _val) { z = _val; w = _val; x = _val; y = _val; }
+inline void vec4::zwy(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { z = _val0; w = _val1; y = _val2; }
+inline void vec4::zwy(const vec3& _val) { z = _val.x; w = _val.y; y = _val.z; }
+inline void vec4::zwy(const simdfloat& _val) { z = _val; w = _val; y = _val; }
+inline void vec4::zwyx(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { z = _val0; w = _val1; y = _val2; x = _val3; }
+inline void vec4::zwyx(const vec4& _val) { z = _val.x; w = _val.y; y = _val.z; x = _val.w; }
+inline void vec4::zwyx(const simdfloat& _val) { z = _val; w = _val; y = _val; x = _val; }
+inline void vec4::zx(const simdfloat& _val0, const simdfloat& _val1) { z = _val0; x = _val1; }
+inline void vec4::zx(const vec2& _val) { z = _val.x; x = _val.y; }
+inline void vec4::zx(const simdfloat& _val) { z = _val; x = _val; }
+inline void vec4::zxw(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { z = _val0; x = _val1; w = _val2; }
+inline void vec4::zxw(const vec3& _val) { z = _val.x; x = _val.y; w = _val.z; }
+inline void vec4::zxw(const simdfloat& _val) { z = _val; x = _val; w = _val; }
+inline void vec4::zxwy(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { z = _val0; x = _val1; w = _val2; y = _val3; }
+inline void vec4::zxwy(const vec4& _val) { z = _val.x; x = _val.y; w = _val.z; y = _val.w; }
+inline void vec4::zxwy(const simdfloat& _val) { z = _val; x = _val; w = _val; y = _val; }
+inline void vec4::zxy(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { z = _val0; x = _val1; y = _val2; }
+inline void vec4::zxy(const vec3& _val) { z = _val.x; x = _val.y; y = _val.z; }
+inline void vec4::zxy(const simdfloat& _val) { z = _val; x = _val; y = _val; }
+inline void vec4::zxyw(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { z = _val0; x = _val1; y = _val2; w = _val3; }
+inline void vec4::zxyw(const vec4& _val) { z = _val.x; x = _val.y; y = _val.z; w = _val.w; }
+inline void vec4::zxyw(const simdfloat& _val) { z = _val; x = _val; y = _val; w = _val; }
+inline void vec4::zy(const simdfloat& _val0, const simdfloat& _val1) { z = _val0; y = _val1; }
+inline void vec4::zy(const vec2& _val) { z = _val.x; y = _val.y; }
+inline void vec4::zy(const simdfloat& _val) { z = _val; y = _val; }
+inline void vec4::zyw(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { z = _val0; y = _val1; w = _val2; }
+inline void vec4::zyw(const vec3& _val) { z = _val.x; y = _val.y; w = _val.z; }
+inline void vec4::zyw(const simdfloat& _val) { z = _val; y = _val; w = _val; }
+inline void vec4::zywx(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { z = _val0; y = _val1; w = _val2; x = _val3; }
+inline void vec4::zywx(const vec4& _val) { z = _val.x; y = _val.y; w = _val.z; x = _val.w; }
+inline void vec4::zywx(const simdfloat& _val) { z = _val; y = _val; w = _val; x = _val; }
+inline void vec4::zyx(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2) { z = _val0; y = _val1; x = _val2; }
+inline void vec4::zyx(const vec3& _val) { z = _val.x; y = _val.y; x = _val.z; }
+inline void vec4::zyx(const simdfloat& _val) { z = _val; y = _val; x = _val; }
+inline void vec4::zyxw(const simdfloat& _val0, const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _val3) { z = _val0; y = _val1; x = _val2; w = _val3; }
+inline void vec4::zyxw(const vec4& _val) { z = _val.x; y = _val.y; x = _val.z; w = _val.w; }
+inline void vec4::zyxw(const simdfloat& _val) { z = _val; y = _val; x = _val; w = _val; }
+#ifndef USE_SCALAR
+inline void vec4::ab(const float& _val) { const simdfloat temp = simd_set1_float(_val); a = temp; b = temp; }
+inline void vec4::abg(const float& _val) { const simdfloat temp = simd_set1_float(_val); a = temp; b = temp; g = temp; }
+inline void vec4::abgr(const float& _val) { const simdfloat temp = simd_set1_float(_val); a = temp; b = temp; g = temp; r = temp; }
+inline void vec4::abr(const float& _val) { const simdfloat temp = simd_set1_float(_val); a = temp; b = temp; r = temp; }
+inline void vec4::abrg(const float& _val) { const simdfloat temp = simd_set1_float(_val); a = temp; b = temp; r = temp; g = temp; }
+inline void vec4::ag(const float& _val) { const simdfloat temp = simd_set1_float(_val); a = temp; g = temp; }
+inline void vec4::agb(const float& _val) { const simdfloat temp = simd_set1_float(_val); a = temp; g = temp; b = temp; }
+inline void vec4::agbr(const float& _val) { const simdfloat temp = simd_set1_float(_val); a = temp; g = temp; b = temp; r = temp; }
+inline void vec4::agr(const float& _val) { const simdfloat temp = simd_set1_float(_val); a = temp; g = temp; r = temp; }
+inline void vec4::agrb(const float& _val) { const simdfloat temp = simd_set1_float(_val); a = temp; g = temp; r = temp; b = temp; }
+inline void vec4::ar(const float& _val) { const simdfloat temp = simd_set1_float(_val); a = temp; r = temp; }
+inline void vec4::arb(const float& _val) { const simdfloat temp = simd_set1_float(_val); a = temp; r = temp; b = temp; }
+inline void vec4::arbg(const float& _val) { const simdfloat temp = simd_set1_float(_val); a = temp; r = temp; b = temp; g = temp; }
+inline void vec4::arg(const float& _val) { const simdfloat temp = simd_set1_float(_val); a = temp; r = temp; g = temp; }
+inline void vec4::argb(const float& _val) { const simdfloat temp = simd_set1_float(_val); a = temp; r = temp; g = temp; b = temp; }
+inline void vec4::ba(const float& _val) { const simdfloat temp = simd_set1_float(_val); b = temp; a = temp; }
+inline void vec4::bag(const float& _val) { const simdfloat temp = simd_set1_float(_val); b = temp; a = temp; g = temp; }
+inline void vec4::bagr(const float& _val) { const simdfloat temp = simd_set1_float(_val); b = temp; a = temp; g = temp; r = temp; }
+inline void vec4::bar(const float& _val) { const simdfloat temp = simd_set1_float(_val); b = temp; a = temp; r = temp; }
+inline void vec4::barg(const float& _val) { const simdfloat temp = simd_set1_float(_val); b = temp; a = temp; r = temp; g = temp; }
+inline void vec4::bg(const float& _val) { const simdfloat temp = simd_set1_float(_val); b = temp; g = temp; }
+inline void vec4::bga(const float& _val) { const simdfloat temp = simd_set1_float(_val); b = temp; g = temp; a = temp; }
+inline void vec4::bgar(const float& _val) { const simdfloat temp = simd_set1_float(_val); b = temp; g = temp; a = temp; r = temp; }
+inline void vec4::bgr(const float& _val) { const simdfloat temp = simd_set1_float(_val); b = temp; g = temp; r = temp; }
+inline void vec4::bgra(const float& _val) { const simdfloat temp = simd_set1_float(_val); b = temp; g = temp; r = temp; a = temp; }
+inline void vec4::br(const float& _val) { const simdfloat temp = simd_set1_float(_val); b = temp; r = temp; }
+inline void vec4::bra(const float& _val) { const simdfloat temp = simd_set1_float(_val); b = temp; r = temp; a = temp; }
+inline void vec4::brag(const float& _val) { const simdfloat temp = simd_set1_float(_val); b = temp; r = temp; a = temp; g = temp; }
+inline void vec4::brg(const float& _val) { const simdfloat temp = simd_set1_float(_val); b = temp; r = temp; g = temp; }
+inline void vec4::brga(const float& _val) { const simdfloat temp = simd_set1_float(_val); b = temp; r = temp; g = temp; a = temp; }
+inline void vec4::ga(const float& _val) { const simdfloat temp = simd_set1_float(_val); g = temp; a = temp; }
+inline void vec4::gab(const float& _val) { const simdfloat temp = simd_set1_float(_val); g = temp; a = temp; b = temp; }
+inline void vec4::gabr(const float& _val) { const simdfloat temp = simd_set1_float(_val); g = temp; a = temp; b = temp; r = temp; }
+inline void vec4::gar(const float& _val) { const simdfloat temp = simd_set1_float(_val); g = temp; a = temp; r = temp; }
+inline void vec4::garb(const float& _val) { const simdfloat temp = simd_set1_float(_val); g = temp; a = temp; r = temp; b = temp; }
+inline void vec4::gb(const float& _val) { const simdfloat temp = simd_set1_float(_val); g = temp; b = temp; }
+inline void vec4::gba(const float& _val) { const simdfloat temp = simd_set1_float(_val); g = temp; b = temp; a = temp; }
+inline void vec4::gbar(const float& _val) { const simdfloat temp = simd_set1_float(_val); g = temp; b = temp; a = temp; r = temp; }
+inline void vec4::gbr(const float& _val) { const simdfloat temp = simd_set1_float(_val); g = temp; b = temp; r = temp; }
+inline void vec4::gbra(const float& _val) { const simdfloat temp = simd_set1_float(_val); g = temp; b = temp; r = temp; a = temp; }
+inline void vec4::gr(const float& _val) { const simdfloat temp = simd_set1_float(_val); g = temp; r = temp; }
+inline void vec4::gra(const float& _val) { const simdfloat temp = simd_set1_float(_val); g = temp; r = temp; a = temp; }
+inline void vec4::grab(const float& _val) { const simdfloat temp = simd_set1_float(_val); g = temp; r = temp; a = temp; b = temp; }
+inline void vec4::grb(const float& _val) { const simdfloat temp = simd_set1_float(_val); g = temp; r = temp; b = temp; }
+inline void vec4::grba(const float& _val) { const simdfloat temp = simd_set1_float(_val); g = temp; r = temp; b = temp; a = temp; }
+inline void vec4::ra(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; a = temp; }
+inline void vec4::rab(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; a = temp; b = temp; }
+inline void vec4::rabg(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; a = temp; b = temp; g = temp; }
+inline void vec4::rag(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; a = temp; g = temp; }
+inline void vec4::ragb(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; a = temp; g = temp; b = temp; }
+inline void vec4::rb(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; b = temp; }
+inline void vec4::rba(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; b = temp; a = temp; }
+inline void vec4::rbag(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; b = temp; a = temp; g = temp; }
+inline void vec4::rbg(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; b = temp; g = temp; }
+inline void vec4::rbga(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; b = temp; g = temp; a = temp; }
+inline void vec4::rg(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; g = temp; }
+inline void vec4::rga(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; g = temp; a = temp; }
+inline void vec4::rgab(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; g = temp; a = temp; b = temp; }
+inline void vec4::rgb(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; g = temp; b = temp; }
+inline void vec4::rgba(const float& _val) { const simdfloat temp = simd_set1_float(_val); r = temp; g = temp; b = temp; a = temp; }
+inline void vec4::wx(const float& _val) { const simdfloat temp = simd_set1_float(_val); w = temp; x = temp; }
+inline void vec4::wxy(const float& _val) { const simdfloat temp = simd_set1_float(_val); w = temp; x = temp; y = temp; }
+inline void vec4::wxyz(const float& _val) { const simdfloat temp = simd_set1_float(_val); w = temp; x = temp; y = temp; z = temp; }
+inline void vec4::wxz(const float& _val) { const simdfloat temp = simd_set1_float(_val); w = temp; x = temp; z = temp; }
+inline void vec4::wxzy(const float& _val) { const simdfloat temp = simd_set1_float(_val); w = temp; x = temp; z = temp; y = temp; }
+inline void vec4::wy(const float& _val) { const simdfloat temp = simd_set1_float(_val); w = temp; y = temp; }
+inline void vec4::wyx(const float& _val) { const simdfloat temp = simd_set1_float(_val); w = temp; y = temp; x = temp; }
+inline void vec4::wyxz(const float& _val) { const simdfloat temp = simd_set1_float(_val); w = temp; y = temp; x = temp; z = temp; }
+inline void vec4::wyz(const float& _val) { const simdfloat temp = simd_set1_float(_val); w = temp; y = temp; z = temp; }
+inline void vec4::wyzx(const float& _val) { const simdfloat temp = simd_set1_float(_val); w = temp; y = temp; z = temp; x = temp; }
+inline void vec4::wz(const float& _val) { const simdfloat temp = simd_set1_float(_val); w = temp; z = temp; }
+inline void vec4::wzx(const float& _val) { const simdfloat temp = simd_set1_float(_val); w = temp; z = temp; x = temp; }
+inline void vec4::wzxy(const float& _val) { const simdfloat temp = simd_set1_float(_val); w = temp; z = temp; x = temp; y = temp; }
+inline void vec4::wzy(const float& _val) { const simdfloat temp = simd_set1_float(_val); w = temp; z = temp; y = temp; }
+inline void vec4::wzyx(const float& _val) { const simdfloat temp = simd_set1_float(_val); w = temp; z = temp; y = temp; x = temp; }
+inline void vec4::xw(const float& _val) { const simdfloat temp = simd_set1_float(_val); x = temp; w = temp; }
+inline void vec4::xwy(const float& _val) { const simdfloat temp = simd_set1_float(_val); x = temp; w = temp; y = temp; }
+inline void vec4::xwyz(const float& _val) { const simdfloat temp = simd_set1_float(_val); x = temp; w = temp; y = temp; z = temp; }
+inline void vec4::xwz(const float& _val) { const simdfloat temp = simd_set1_float(_val); x = temp; w = temp; z = temp; }
+inline void vec4::xwzy(const float& _val) { const simdfloat temp = simd_set1_float(_val); x = temp; w = temp; z = temp; y = temp; }
+inline void vec4::xy(const float& _val) { const simdfloat temp = simd_set1_float(_val); x = temp; y = temp; }
+inline void vec4::xyw(const float& _val) { const simdfloat temp = simd_set1_float(_val); x = temp; y = temp; w = temp; }
+inline void vec4::xywz(const float& _val) { const simdfloat temp = simd_set1_float(_val); x = temp; y = temp; w = temp; z = temp; }
+inline void vec4::xyz(const float& _val) { const simdfloat temp = simd_set1_float(_val); x = temp; y = temp; z = temp; }
+inline void vec4::xyzw(const float& _val) { const simdfloat temp = simd_set1_float(_val); x = temp; y = temp; z = temp; w = temp; }
+inline void vec4::xz(const float& _val) { const simdfloat temp = simd_set1_float(_val); x = temp; z = temp; }
+inline void vec4::xzw(const float& _val) { const simdfloat temp = simd_set1_float(_val); x = temp; z = temp; w = temp; }
+inline void vec4::xzwy(const float& _val) { const simdfloat temp = simd_set1_float(_val); x = temp; z = temp; w = temp; y = temp; }
+inline void vec4::xzy(const float& _val) { const simdfloat temp = simd_set1_float(_val); x = temp; z = temp; y = temp; }
+inline void vec4::xzyw(const float& _val) { const simdfloat temp = simd_set1_float(_val); x = temp; z = temp; y = temp; w = temp; }
+inline void vec4::yw(const float& _val) { const simdfloat temp = simd_set1_float(_val); y = temp; w = temp; }
+inline void vec4::ywx(const float& _val) { const simdfloat temp = simd_set1_float(_val); y = temp; w = temp; x = temp; }
+inline void vec4::ywxz(const float& _val) { const simdfloat temp = simd_set1_float(_val); y = temp; w = temp; x = temp; z = temp; }
+inline void vec4::ywz(const float& _val) { const simdfloat temp = simd_set1_float(_val); y = temp; w = temp; z = temp; }
+inline void vec4::ywzx(const float& _val) { const simdfloat temp = simd_set1_float(_val); y = temp; w = temp; z = temp; x = temp; }
+inline void vec4::yx(const float& _val) { const simdfloat temp = simd_set1_float(_val); y = temp; x = temp; }
+inline void vec4::yxw(const float& _val) { const simdfloat temp = simd_set1_float(_val); y = temp; x = temp; w = temp; }
+inline void vec4::yxwz(const float& _val) { const simdfloat temp = simd_set1_float(_val); y = temp; x = temp; w = temp; z = temp; }
+inline void vec4::yxz(const float& _val) { const simdfloat temp = simd_set1_float(_val); y = temp; x = temp; z = temp; }
+inline void vec4::yxzw(const float& _val) { const simdfloat temp = simd_set1_float(_val); y = temp; x = temp; z = temp; w = temp; }
+inline void vec4::yz(const float& _val) { const simdfloat temp = simd_set1_float(_val); y = temp; z = temp; }
+inline void vec4::yzw(const float& _val) { const simdfloat temp = simd_set1_float(_val); y = temp; z = temp; w = temp; }
+inline void vec4::yzwx(const float& _val) { const simdfloat temp = simd_set1_float(_val); y = temp; z = temp; w = temp; x = temp; }
+inline void vec4::yzx(const float& _val) { const simdfloat temp = simd_set1_float(_val); y = temp; z = temp; x = temp; }
+inline void vec4::yzxw(const float& _val) { const simdfloat temp = simd_set1_float(_val); y = temp; z = temp; x = temp; w = temp; }
+inline void vec4::zw(const float& _val) { const simdfloat temp = simd_set1_float(_val); z = temp; w = temp; }
+inline void vec4::zwx(const float& _val) { const simdfloat temp = simd_set1_float(_val); z = temp; w = temp; x = temp; }
+inline void vec4::zwxy(const float& _val) { const simdfloat temp = simd_set1_float(_val); z = temp; w = temp; x = temp; y = temp; }
+inline void vec4::zwy(const float& _val) { const simdfloat temp = simd_set1_float(_val); z = temp; w = temp; y = temp; }
+inline void vec4::zwyx(const float& _val) { const simdfloat temp = simd_set1_float(_val); z = temp; w = temp; y = temp; x = temp; }
+inline void vec4::zx(const float& _val) { const simdfloat temp = simd_set1_float(_val); z = temp; x = temp; }
+inline void vec4::zxw(const float& _val) { const simdfloat temp = simd_set1_float(_val); z = temp; x = temp; w = temp; }
+inline void vec4::zxwy(const float& _val) { const simdfloat temp = simd_set1_float(_val); z = temp; x = temp; w = temp; y = temp; }
+inline void vec4::zxy(const float& _val) { const simdfloat temp = simd_set1_float(_val); z = temp; x = temp; y = temp; }
+inline void vec4::zxyw(const float& _val) { const simdfloat temp = simd_set1_float(_val); z = temp; x = temp; y = temp; w = temp; }
+inline void vec4::zy(const float& _val) { const simdfloat temp = simd_set1_float(_val); z = temp; y = temp; }
+inline void vec4::zyw(const float& _val) { const simdfloat temp = simd_set1_float(_val); z = temp; y = temp; w = temp; }
+inline void vec4::zywx(const float& _val) { const simdfloat temp = simd_set1_float(_val); z = temp; y = temp; w = temp; x = temp; }
+inline void vec4::zyx(const float& _val) { const simdfloat temp = simd_set1_float(_val); z = temp; y = temp; x = temp; }
+inline void vec4::zyxw(const float& _val) { const simdfloat temp = simd_set1_float(_val); z = temp; y = temp; x = temp; w = temp; }
+#endif
+#pragma endregion
+
+
+#pragma region dvec2 swizzle implementations
+// dvec2 swizzle implementations
+inline dvec2 dvec2::gg() const { return { g, g }; }
+inline dvec3 dvec2::ggg() const { return { g, g, g }; }
+inline dvec4 dvec2::gggg() const { return { g, g, g, g }; }
+inline dvec4 dvec2::gggr() const { return { g, g, g, r }; }
+inline dvec3 dvec2::ggr() const { return { g, g, r }; }
+inline dvec4 dvec2::ggrg() const { return { g, g, r, g }; }
+inline dvec4 dvec2::ggrr() const { return { g, g, r, r }; }
+inline dvec2 dvec2::gr() const { return { g, r }; }
+inline dvec3 dvec2::grg() const { return { g, r, g }; }
+inline dvec4 dvec2::grgg() const { return { g, r, g, g }; }
+inline dvec4 dvec2::grgr() const { return { g, r, g, r }; }
+inline dvec3 dvec2::grr() const { return { g, r, r }; }
+inline dvec4 dvec2::grrg() const { return { g, r, r, g }; }
+inline dvec4 dvec2::grrr() const { return { g, r, r, r }; }
+inline dvec2 dvec2::rg() const { return { r, g }; }
+inline dvec3 dvec2::rgg() const { return { r, g, g }; }
+inline dvec4 dvec2::rggg() const { return { r, g, g, g }; }
+inline dvec4 dvec2::rggr() const { return { r, g, g, r }; }
+inline dvec3 dvec2::rgr() const { return { r, g, r }; }
+inline dvec4 dvec2::rgrg() const { return { r, g, r, g }; }
+inline dvec4 dvec2::rgrr() const { return { r, g, r, r }; }
+inline dvec2 dvec2::rr() const { return { r, r }; }
+inline dvec3 dvec2::rrg() const { return { r, r, g }; }
+inline dvec4 dvec2::rrgg() const { return { r, r, g, g }; }
+inline dvec4 dvec2::rrgr() const { return { r, r, g, r }; }
+inline dvec3 dvec2::rrr() const { return { r, r, r }; }
+inline dvec4 dvec2::rrrg() const { return { r, r, r, g }; }
+inline dvec4 dvec2::rrrr() const { return { r, r, r, r }; }
+inline dvec2 dvec2::xx() const { return { x, x }; }
+inline dvec3 dvec2::xxx() const { return { x, x, x }; }
+inline dvec4 dvec2::xxxx() const { return { x, x, x, x }; }
+inline dvec4 dvec2::xxxy() const { return { x, x, x, y }; }
+inline dvec3 dvec2::xxy() const { return { x, x, y }; }
+inline dvec4 dvec2::xxyx() const { return { x, x, y, x }; }
+inline dvec4 dvec2::xxyy() const { return { x, x, y, y }; }
+inline dvec2 dvec2::xy() const { return { x, y }; }
+inline dvec3 dvec2::xyx() const { return { x, y, x }; }
+inline dvec4 dvec2::xyxx() const { return { x, y, x, x }; }
+inline dvec4 dvec2::xyxy() const { return { x, y, x, y }; }
+inline dvec3 dvec2::xyy() const { return { x, y, y }; }
+inline dvec4 dvec2::xyyx() const { return { x, y, y, x }; }
+inline dvec4 dvec2::xyyy() const { return { x, y, y, y }; }
+inline dvec2 dvec2::yx() const { return { y, x }; }
+inline dvec3 dvec2::yxx() const { return { y, x, x }; }
+inline dvec4 dvec2::yxxx() const { return { y, x, x, x }; }
+inline dvec4 dvec2::yxxy() const { return { y, x, x, y }; }
+inline dvec3 dvec2::yxy() const { return { y, x, y }; }
+inline dvec4 dvec2::yxyx() const { return { y, x, y, x }; }
+inline dvec4 dvec2::yxyy() const { return { y, x, y, y }; }
+inline dvec2 dvec2::yy() const { return { y, y }; }
+inline dvec3 dvec2::yyx() const { return { y, y, x }; }
+inline dvec4 dvec2::yyxx() const { return { y, y, x, x }; }
+inline dvec4 dvec2::yyxy() const { return { y, y, x, y }; }
+inline dvec3 dvec2::yyy() const { return { y, y, y }; }
+inline dvec4 dvec2::yyyx() const { return { y, y, y, x }; }
+inline dvec4 dvec2::yyyy() const { return { y, y, y, y }; }
+inline void dvec2::gr(const simddouble& _val0, const simddouble& _val1) { g = _val0; r = _val1; }
+inline void dvec2::gr(const dvec2& _val) { g = _val.x; r = _val.y; }
+inline void dvec2::gr(const simddouble& _val) { g = _val; r = _val; }
+inline void dvec2::rg(const simddouble& _val0, const simddouble& _val1) { r = _val0; g = _val1; }
+inline void dvec2::rg(const dvec2& _val) { r = _val.x; g = _val.y; }
+inline void dvec2::rg(const simddouble& _val) { r = _val; g = _val; }
+inline void dvec2::xy(const simddouble& _val0, const simddouble& _val1) { x = _val0; y = _val1; }
+inline void dvec2::xy(const dvec2& _val) { x = _val.x; y = _val.y; }
+inline void dvec2::xy(const simddouble& _val) { x = _val; y = _val; }
+inline void dvec2::yx(const simddouble& _val0, const simddouble& _val1) { y = _val0; x = _val1; }
+inline void dvec2::yx(const dvec2& _val) { y = _val.x; x = _val.y; }
+inline void dvec2::yx(const simddouble& _val) { y = _val; x = _val; }
+#ifndef USE_SCALAR
+inline void dvec2::gr(const double& _val) { const simddouble temp = simd_set1_double(_val); g = temp; r = temp; }
+inline void dvec2::rg(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; g = temp; }
+inline void dvec2::xy(const double& _val) { const simddouble temp = simd_set1_double(_val); x = temp; y = temp; }
+inline void dvec2::yx(const double& _val) { const simddouble temp = simd_set1_double(_val); y = temp; x = temp; }
+#endif
+
+#pragma endregion
+
+#pragma region dvec3 swizzle implementations
+
+// dvec3 swizzle implementations
+inline dvec2 dvec3::bb() const { return { b, b }; }
+inline dvec3 dvec3::bbb() const { return { b, b, b }; }
+inline dvec4 dvec3::bbbb() const { return { b, b, b, b }; }
+inline dvec4 dvec3::bbbg() const { return { b, b, b, g }; }
+inline dvec4 dvec3::bbbr() const { return { b, b, b, r }; }
+inline dvec3 dvec3::bbg() const { return { b, b, g }; }
+inline dvec4 dvec3::bbgb() const { return { b, b, g, b }; }
+inline dvec4 dvec3::bbgg() const { return { b, b, g, g }; }
+inline dvec4 dvec3::bbgr() const { return { b, b, g, r }; }
+inline dvec3 dvec3::bbr() const { return { b, b, r }; }
+inline dvec4 dvec3::bbrb() const { return { b, b, r, b }; }
+inline dvec4 dvec3::bbrg() const { return { b, b, r, g }; }
+inline dvec4 dvec3::bbrr() const { return { b, b, r, r }; }
+inline dvec2 dvec3::bg() const { return { b, g }; }
+inline dvec3 dvec3::bgb() const { return { b, g, b }; }
+inline dvec4 dvec3::bgbb() const { return { b, g, b, b }; }
+inline dvec4 dvec3::bgbg() const { return { b, g, b, g }; }
+inline dvec4 dvec3::bgbr() const { return { b, g, b, r }; }
+inline dvec3 dvec3::bgg() const { return { b, g, g }; }
+inline dvec4 dvec3::bggb() const { return { b, g, g, b }; }
+inline dvec4 dvec3::bggg() const { return { b, g, g, g }; }
+inline dvec4 dvec3::bggr() const { return { b, g, g, r }; }
+inline dvec3 dvec3::bgr() const { return { b, g, r }; }
+inline dvec4 dvec3::bgrb() const { return { b, g, r, b }; }
+inline dvec4 dvec3::bgrg() const { return { b, g, r, g }; }
+inline dvec4 dvec3::bgrr() const { return { b, g, r, r }; }
+inline dvec2 dvec3::br() const { return { b, r }; }
+inline dvec3 dvec3::brb() const { return { b, r, b }; }
+inline dvec4 dvec3::brbb() const { return { b, r, b, b }; }
+inline dvec4 dvec3::brbg() const { return { b, r, b, g }; }
+inline dvec4 dvec3::brbr() const { return { b, r, b, r }; }
+inline dvec3 dvec3::brg() const { return { b, r, g }; }
+inline dvec4 dvec3::brgb() const { return { b, r, g, b }; }
+inline dvec4 dvec3::brgg() const { return { b, r, g, g }; }
+inline dvec4 dvec3::brgr() const { return { b, r, g, r }; }
+inline dvec3 dvec3::brr() const { return { b, r, r }; }
+inline dvec4 dvec3::brrb() const { return { b, r, r, b }; }
+inline dvec4 dvec3::brrg() const { return { b, r, r, g }; }
+inline dvec4 dvec3::brrr() const { return { b, r, r, r }; }
+inline dvec2 dvec3::gb() const { return { g, b }; }
+inline dvec3 dvec3::gbb() const { return { g, b, b }; }
+inline dvec4 dvec3::gbbb() const { return { g, b, b, b }; }
+inline dvec4 dvec3::gbbg() const { return { g, b, b, g }; }
+inline dvec4 dvec3::gbbr() const { return { g, b, b, r }; }
+inline dvec3 dvec3::gbg() const { return { g, b, g }; }
+inline dvec4 dvec3::gbgb() const { return { g, b, g, b }; }
+inline dvec4 dvec3::gbgg() const { return { g, b, g, g }; }
+inline dvec4 dvec3::gbgr() const { return { g, b, g, r }; }
+inline dvec3 dvec3::gbr() const { return { g, b, r }; }
+inline dvec4 dvec3::gbrb() const { return { g, b, r, b }; }
+inline dvec4 dvec3::gbrg() const { return { g, b, r, g }; }
+inline dvec4 dvec3::gbrr() const { return { g, b, r, r }; }
+inline dvec2 dvec3::gg() const { return { g, g }; }
+inline dvec3 dvec3::ggb() const { return { g, g, b }; }
+inline dvec4 dvec3::ggbb() const { return { g, g, b, b }; }
+inline dvec4 dvec3::ggbg() const { return { g, g, b, g }; }
+inline dvec4 dvec3::ggbr() const { return { g, g, b, r }; }
+inline dvec3 dvec3::ggg() const { return { g, g, g }; }
+inline dvec4 dvec3::gggb() const { return { g, g, g, b }; }
+inline dvec4 dvec3::gggg() const { return { g, g, g, g }; }
+inline dvec4 dvec3::gggr() const { return { g, g, g, r }; }
+inline dvec3 dvec3::ggr() const { return { g, g, r }; }
+inline dvec4 dvec3::ggrb() const { return { g, g, r, b }; }
+inline dvec4 dvec3::ggrg() const { return { g, g, r, g }; }
+inline dvec4 dvec3::ggrr() const { return { g, g, r, r }; }
+inline dvec2 dvec3::gr() const { return { g, r }; }
+inline dvec3 dvec3::grb() const { return { g, r, b }; }
+inline dvec4 dvec3::grbb() const { return { g, r, b, b }; }
+inline dvec4 dvec3::grbg() const { return { g, r, b, g }; }
+inline dvec4 dvec3::grbr() const { return { g, r, b, r }; }
+inline dvec3 dvec3::grg() const { return { g, r, g }; }
+inline dvec4 dvec3::grgb() const { return { g, r, g, b }; }
+inline dvec4 dvec3::grgg() const { return { g, r, g, g }; }
+inline dvec4 dvec3::grgr() const { return { g, r, g, r }; }
+inline dvec3 dvec3::grr() const { return { g, r, r }; }
+inline dvec4 dvec3::grrb() const { return { g, r, r, b }; }
+inline dvec4 dvec3::grrg() const { return { g, r, r, g }; }
+inline dvec4 dvec3::grrr() const { return { g, r, r, r }; }
+inline dvec2 dvec3::rb() const { return { r, b }; }
+inline dvec3 dvec3::rbb() const { return { r, b, b }; }
+inline dvec4 dvec3::rbbb() const { return { r, b, b, b }; }
+inline dvec4 dvec3::rbbg() const { return { r, b, b, g }; }
+inline dvec4 dvec3::rbbr() const { return { r, b, b, r }; }
+inline dvec3 dvec3::rbg() const { return { r, b, g }; }
+inline dvec4 dvec3::rbgb() const { return { r, b, g, b }; }
+inline dvec4 dvec3::rbgg() const { return { r, b, g, g }; }
+inline dvec4 dvec3::rbgr() const { return { r, b, g, r }; }
+inline dvec3 dvec3::rbr() const { return { r, b, r }; }
+inline dvec4 dvec3::rbrb() const { return { r, b, r, b }; }
+inline dvec4 dvec3::rbrg() const { return { r, b, r, g }; }
+inline dvec4 dvec3::rbrr() const { return { r, b, r, r }; }
+inline dvec2 dvec3::rg() const { return { r, g }; }
+inline dvec3 dvec3::rgb() const { return { r, g, b }; }
+inline dvec4 dvec3::rgbb() const { return { r, g, b, b }; }
+inline dvec4 dvec3::rgbg() const { return { r, g, b, g }; }
+inline dvec4 dvec3::rgbr() const { return { r, g, b, r }; }
+inline dvec3 dvec3::rgg() const { return { r, g, g }; }
+inline dvec4 dvec3::rggb() const { return { r, g, g, b }; }
+inline dvec4 dvec3::rggg() const { return { r, g, g, g }; }
+inline dvec4 dvec3::rggr() const { return { r, g, g, r }; }
+inline dvec3 dvec3::rgr() const { return { r, g, r }; }
+inline dvec4 dvec3::rgrb() const { return { r, g, r, b }; }
+inline dvec4 dvec3::rgrg() const { return { r, g, r, g }; }
+inline dvec4 dvec3::rgrr() const { return { r, g, r, r }; }
+inline dvec2 dvec3::rr() const { return { r, r }; }
+inline dvec3 dvec3::rrb() const { return { r, r, b }; }
+inline dvec4 dvec3::rrbb() const { return { r, r, b, b }; }
+inline dvec4 dvec3::rrbg() const { return { r, r, b, g }; }
+inline dvec4 dvec3::rrbr() const { return { r, r, b, r }; }
+inline dvec3 dvec3::rrg() const { return { r, r, g }; }
+inline dvec4 dvec3::rrgb() const { return { r, r, g, b }; }
+inline dvec4 dvec3::rrgg() const { return { r, r, g, g }; }
+inline dvec4 dvec3::rrgr() const { return { r, r, g, r }; }
+inline dvec3 dvec3::rrr() const { return { r, r, r }; }
+inline dvec4 dvec3::rrrb() const { return { r, r, r, b }; }
+inline dvec4 dvec3::rrrg() const { return { r, r, r, g }; }
+inline dvec4 dvec3::rrrr() const { return { r, r, r, r }; }
+inline dvec2 dvec3::xx() const { return { x, x }; }
+inline dvec3 dvec3::xxx() const { return { x, x, x }; }
+inline dvec4 dvec3::xxxx() const { return { x, x, x, x }; }
+inline dvec4 dvec3::xxxy() const { return { x, x, x, y }; }
+inline dvec4 dvec3::xxxz() const { return { x, x, x, z }; }
+inline dvec3 dvec3::xxy() const { return { x, x, y }; }
+inline dvec4 dvec3::xxyx() const { return { x, x, y, x }; }
+inline dvec4 dvec3::xxyy() const { return { x, x, y, y }; }
+inline dvec4 dvec3::xxyz() const { return { x, x, y, z }; }
+inline dvec3 dvec3::xxz() const { return { x, x, z }; }
+inline dvec4 dvec3::xxzx() const { return { x, x, z, x }; }
+inline dvec4 dvec3::xxzy() const { return { x, x, z, y }; }
+inline dvec4 dvec3::xxzz() const { return { x, x, z, z }; }
+inline dvec2 dvec3::xy() const { return { x, y }; }
+inline dvec3 dvec3::xyx() const { return { x, y, x }; }
+inline dvec4 dvec3::xyxx() const { return { x, y, x, x }; }
+inline dvec4 dvec3::xyxy() const { return { x, y, x, y }; }
+inline dvec4 dvec3::xyxz() const { return { x, y, x, z }; }
+inline dvec3 dvec3::xyy() const { return { x, y, y }; }
+inline dvec4 dvec3::xyyx() const { return { x, y, y, x }; }
+inline dvec4 dvec3::xyyy() const { return { x, y, y, y }; }
+inline dvec4 dvec3::xyyz() const { return { x, y, y, z }; }
+inline dvec3 dvec3::xyz() const { return { x, y, z }; }
+inline dvec4 dvec3::xyzx() const { return { x, y, z, x }; }
+inline dvec4 dvec3::xyzy() const { return { x, y, z, y }; }
+inline dvec4 dvec3::xyzz() const { return { x, y, z, z }; }
+inline dvec2 dvec3::xz() const { return { x, z }; }
+inline dvec3 dvec3::xzx() const { return { x, z, x }; }
+inline dvec4 dvec3::xzxx() const { return { x, z, x, x }; }
+inline dvec4 dvec3::xzxy() const { return { x, z, x, y }; }
+inline dvec4 dvec3::xzxz() const { return { x, z, x, z }; }
+inline dvec3 dvec3::xzy() const { return { x, z, y }; }
+inline dvec4 dvec3::xzyx() const { return { x, z, y, x }; }
+inline dvec4 dvec3::xzyy() const { return { x, z, y, y }; }
+inline dvec4 dvec3::xzyz() const { return { x, z, y, z }; }
+inline dvec3 dvec3::xzz() const { return { x, z, z }; }
+inline dvec4 dvec3::xzzx() const { return { x, z, z, x }; }
+inline dvec4 dvec3::xzzy() const { return { x, z, z, y }; }
+inline dvec4 dvec3::xzzz() const { return { x, z, z, z }; }
+inline dvec2 dvec3::yx() const { return { y, x }; }
+inline dvec3 dvec3::yxx() const { return { y, x, x }; }
+inline dvec4 dvec3::yxxx() const { return { y, x, x, x }; }
+inline dvec4 dvec3::yxxy() const { return { y, x, x, y }; }
+inline dvec4 dvec3::yxxz() const { return { y, x, x, z }; }
+inline dvec3 dvec3::yxy() const { return { y, x, y }; }
+inline dvec4 dvec3::yxyx() const { return { y, x, y, x }; }
+inline dvec4 dvec3::yxyy() const { return { y, x, y, y }; }
+inline dvec4 dvec3::yxyz() const { return { y, x, y, z }; }
+inline dvec3 dvec3::yxz() const { return { y, x, z }; }
+inline dvec4 dvec3::yxzx() const { return { y, x, z, x }; }
+inline dvec4 dvec3::yxzy() const { return { y, x, z, y }; }
+inline dvec4 dvec3::yxzz() const { return { y, x, z, z }; }
+inline dvec2 dvec3::yy() const { return { y, y }; }
+inline dvec3 dvec3::yyx() const { return { y, y, x }; }
+inline dvec4 dvec3::yyxx() const { return { y, y, x, x }; }
+inline dvec4 dvec3::yyxy() const { return { y, y, x, y }; }
+inline dvec4 dvec3::yyxz() const { return { y, y, x, z }; }
+inline dvec3 dvec3::yyy() const { return { y, y, y }; }
+inline dvec4 dvec3::yyyx() const { return { y, y, y, x }; }
+inline dvec4 dvec3::yyyy() const { return { y, y, y, y }; }
+inline dvec4 dvec3::yyyz() const { return { y, y, y, z }; }
+inline dvec3 dvec3::yyz() const { return { y, y, z }; }
+inline dvec4 dvec3::yyzx() const { return { y, y, z, x }; }
+inline dvec4 dvec3::yyzy() const { return { y, y, z, y }; }
+inline dvec4 dvec3::yyzz() const { return { y, y, z, z }; }
+inline dvec2 dvec3::yz() const { return { y, z }; }
+inline dvec3 dvec3::yzx() const { return { y, z, x }; }
+inline dvec4 dvec3::yzxx() const { return { y, z, x, x }; }
+inline dvec4 dvec3::yzxy() const { return { y, z, x, y }; }
+inline dvec4 dvec3::yzxz() const { return { y, z, x, z }; }
+inline dvec3 dvec3::yzy() const { return { y, z, y }; }
+inline dvec4 dvec3::yzyx() const { return { y, z, y, x }; }
+inline dvec4 dvec3::yzyy() const { return { y, z, y, y }; }
+inline dvec4 dvec3::yzyz() const { return { y, z, y, z }; }
+inline dvec3 dvec3::yzz() const { return { y, z, z }; }
+inline dvec4 dvec3::yzzx() const { return { y, z, z, x }; }
+inline dvec4 dvec3::yzzy() const { return { y, z, z, y }; }
+inline dvec4 dvec3::yzzz() const { return { y, z, z, z }; }
+inline dvec2 dvec3::zx() const { return { z, x }; }
+inline dvec3 dvec3::zxx() const { return { z, x, x }; }
+inline dvec4 dvec3::zxxx() const { return { z, x, x, x }; }
+inline dvec4 dvec3::zxxy() const { return { z, x, x, y }; }
+inline dvec4 dvec3::zxxz() const { return { z, x, x, z }; }
+inline dvec3 dvec3::zxy() const { return { z, x, y }; }
+inline dvec4 dvec3::zxyx() const { return { z, x, y, x }; }
+inline dvec4 dvec3::zxyy() const { return { z, x, y, y }; }
+inline dvec4 dvec3::zxyz() const { return { z, x, y, z }; }
+inline dvec3 dvec3::zxz() const { return { z, x, z }; }
+inline dvec4 dvec3::zxzx() const { return { z, x, z, x }; }
+inline dvec4 dvec3::zxzy() const { return { z, x, z, y }; }
+inline dvec4 dvec3::zxzz() const { return { z, x, z, z }; }
+inline dvec2 dvec3::zy() const { return { z, y }; }
+inline dvec3 dvec3::zyx() const { return { z, y, x }; }
+inline dvec4 dvec3::zyxx() const { return { z, y, x, x }; }
+inline dvec4 dvec3::zyxy() const { return { z, y, x, y }; }
+inline dvec4 dvec3::zyxz() const { return { z, y, x, z }; }
+inline dvec3 dvec3::zyy() const { return { z, y, y }; }
+inline dvec4 dvec3::zyyx() const { return { z, y, y, x }; }
+inline dvec4 dvec3::zyyy() const { return { z, y, y, y }; }
+inline dvec4 dvec3::zyyz() const { return { z, y, y, z }; }
+inline dvec3 dvec3::zyz() const { return { z, y, z }; }
+inline dvec4 dvec3::zyzx() const { return { z, y, z, x }; }
+inline dvec4 dvec3::zyzy() const { return { z, y, z, y }; }
+inline dvec4 dvec3::zyzz() const { return { z, y, z, z }; }
+inline dvec2 dvec3::zz() const { return { z, z }; }
+inline dvec3 dvec3::zzx() const { return { z, z, x }; }
+inline dvec4 dvec3::zzxx() const { return { z, z, x, x }; }
+inline dvec4 dvec3::zzxy() const { return { z, z, x, y }; }
+inline dvec4 dvec3::zzxz() const { return { z, z, x, z }; }
+inline dvec3 dvec3::zzy() const { return { z, z, y }; }
+inline dvec4 dvec3::zzyx() const { return { z, z, y, x }; }
+inline dvec4 dvec3::zzyy() const { return { z, z, y, y }; }
+inline dvec4 dvec3::zzyz() const { return { z, z, y, z }; }
+inline dvec3 dvec3::zzz() const { return { z, z, z }; }
+inline dvec4 dvec3::zzzx() const { return { z, z, z, x }; }
+inline dvec4 dvec3::zzzy() const { return { z, z, z, y }; }
+inline dvec4 dvec3::zzzz() const { return { z, z, z, z }; }
+inline void dvec3::bg(const simddouble& _val0, const simddouble& _val1) { b = _val0; g = _val1; }
+inline void dvec3::bg(const dvec2& _val) { b = _val.x; g = _val.y; }
+inline void dvec3::bg(const simddouble& _val) { b = _val; g = _val; }
+inline void dvec3::bgr(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { b = _val0; g = _val1; r = _val2; }
+inline void dvec3::bgr(const dvec3& _val) { b = _val.x; g = _val.y; r = _val.z; }
+inline void dvec3::bgr(const simddouble& _val) { b = _val; g = _val; r = _val; }
+inline void dvec3::br(const simddouble& _val0, const simddouble& _val1) { b = _val0; r = _val1; }
+inline void dvec3::br(const dvec2& _val) { b = _val.x; r = _val.y; }
+inline void dvec3::br(const simddouble& _val) { b = _val; r = _val; }
+inline void dvec3::brg(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { b = _val0; r = _val1; g = _val2; }
+inline void dvec3::brg(const dvec3& _val) { b = _val.x; r = _val.y; g = _val.z; }
+inline void dvec3::brg(const simddouble& _val) { b = _val; r = _val; g = _val; }
+inline void dvec3::gb(const simddouble& _val0, const simddouble& _val1) { g = _val0; b = _val1; }
+inline void dvec3::gb(const dvec2& _val) { g = _val.x; b = _val.y; }
+inline void dvec3::gb(const simddouble& _val) { g = _val; b = _val; }
+inline void dvec3::gbr(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { g = _val0; b = _val1; r = _val2; }
+inline void dvec3::gbr(const dvec3& _val) { g = _val.x; b = _val.y; r = _val.z; }
+inline void dvec3::gbr(const simddouble& _val) { g = _val; b = _val; r = _val; }
+inline void dvec3::gr(const simddouble& _val0, const simddouble& _val1) { g = _val0; r = _val1; }
+inline void dvec3::gr(const dvec2& _val) { g = _val.x; r = _val.y; }
+inline void dvec3::gr(const simddouble& _val) { g = _val; r = _val; }
+inline void dvec3::grb(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { g = _val0; r = _val1; b = _val2; }
+inline void dvec3::grb(const dvec3& _val) { g = _val.x; r = _val.y; b = _val.z; }
+inline void dvec3::grb(const simddouble& _val) { g = _val; r = _val; b = _val; }
+inline void dvec3::rb(const simddouble& _val0, const simddouble& _val1) { r = _val0; b = _val1; }
+inline void dvec3::rb(const dvec2& _val) { r = _val.x; b = _val.y; }
+inline void dvec3::rb(const simddouble& _val) { r = _val; b = _val; }
+inline void dvec3::rbg(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { r = _val0; b = _val1; g = _val2; }
+inline void dvec3::rbg(const dvec3& _val) { r = _val.x; b = _val.y; g = _val.z; }
+inline void dvec3::rbg(const simddouble& _val) { r = _val; b = _val; g = _val; }
+inline void dvec3::rg(const simddouble& _val0, const simddouble& _val1) { r = _val0; g = _val1; }
+inline void dvec3::rg(const dvec2& _val) { r = _val.x; g = _val.y; }
+inline void dvec3::rg(const simddouble& _val) { r = _val; g = _val; }
+inline void dvec3::rgb(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { r = _val0; g = _val1; b = _val2; }
+inline void dvec3::rgb(const dvec3& _val) { r = _val.x; g = _val.y; b = _val.z; }
+inline void dvec3::rgb(const simddouble& _val) { r = _val; g = _val; b = _val; }
+inline void dvec3::xy(const simddouble& _val0, const simddouble& _val1) { x = _val0; y = _val1; }
+inline void dvec3::xy(const dvec2& _val) { x = _val.x; y = _val.y; }
+inline void dvec3::xy(const simddouble& _val) { x = _val; y = _val; }
+inline void dvec3::xyz(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { x = _val0; y = _val1; z = _val2; }
+inline void dvec3::xyz(const dvec3& _val) { x = _val.x; y = _val.y; z = _val.z; }
+inline void dvec3::xyz(const simddouble& _val) { x = _val; y = _val; z = _val; }
+inline void dvec3::xz(const simddouble& _val0, const simddouble& _val1) { x = _val0; z = _val1; }
+inline void dvec3::xz(const dvec2& _val) { x = _val.x; z = _val.y; }
+inline void dvec3::xz(const simddouble& _val) { x = _val; z = _val; }
+inline void dvec3::xzy(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { x = _val0; z = _val1; y = _val2; }
+inline void dvec3::xzy(const dvec3& _val) { x = _val.x; z = _val.y; y = _val.z; }
+inline void dvec3::xzy(const simddouble& _val) { x = _val; z = _val; y = _val; }
+inline void dvec3::yx(const simddouble& _val0, const simddouble& _val1) { y = _val0; x = _val1; }
+inline void dvec3::yx(const dvec2& _val) { y = _val.x; x = _val.y; }
+inline void dvec3::yx(const simddouble& _val) { y = _val; x = _val; }
+inline void dvec3::yxz(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { y = _val0; x = _val1; z = _val2; }
+inline void dvec3::yxz(const dvec3& _val) { y = _val.x; x = _val.y; z = _val.z; }
+inline void dvec3::yxz(const simddouble& _val) { y = _val; x = _val; z = _val; }
+inline void dvec3::yz(const simddouble& _val0, const simddouble& _val1) { y = _val0; z = _val1; }
+inline void dvec3::yz(const dvec2& _val) { y = _val.x; z = _val.y; }
+inline void dvec3::yz(const simddouble& _val) { y = _val; z = _val; }
+inline void dvec3::yzx(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { y = _val0; z = _val1; x = _val2; }
+inline void dvec3::yzx(const dvec3& _val) { y = _val.x; z = _val.y; x = _val.z; }
+inline void dvec3::yzx(const simddouble& _val) { y = _val; z = _val; x = _val; }
+inline void dvec3::zx(const simddouble& _val0, const simddouble& _val1) { z = _val0; x = _val1; }
+inline void dvec3::zx(const dvec2& _val) { z = _val.x; x = _val.y; }
+inline void dvec3::zx(const simddouble& _val) { z = _val; x = _val; }
+inline void dvec3::zxy(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { z = _val0; x = _val1; y = _val2; }
+inline void dvec3::zxy(const dvec3& _val) { z = _val.x; x = _val.y; y = _val.z; }
+inline void dvec3::zxy(const simddouble& _val) { z = _val; x = _val; y = _val; }
+inline void dvec3::zy(const simddouble& _val0, const simddouble& _val1) { z = _val0; y = _val1; }
+inline void dvec3::zy(const dvec2& _val) { z = _val.x; y = _val.y; }
+inline void dvec3::zy(const simddouble& _val) { z = _val; y = _val; }
+inline void dvec3::zyx(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { z = _val0; y = _val1; x = _val2; }
+inline void dvec3::zyx(const dvec3& _val) { z = _val.x; y = _val.y; x = _val.z; }
+inline void dvec3::zyx(const simddouble& _val) { z = _val; y = _val; x = _val; }
+#ifndef USE_SCALAR
+inline void dvec3::bg(const double& _val) { const simddouble temp = simd_set1_double(_val); b = temp; g = temp; }
+inline void dvec3::bgr(const double& _val) { const simddouble temp = simd_set1_double(_val); b = temp; g = temp; r = temp; }
+inline void dvec3::br(const double& _val) { const simddouble temp = simd_set1_double(_val); b = temp; r = temp; }
+inline void dvec3::brg(const double& _val) { const simddouble temp = simd_set1_double(_val); b = temp; r = temp; g = temp; }
+inline void dvec3::gb(const double& _val) { const simddouble temp = simd_set1_double(_val); g = temp; b = temp; }
+inline void dvec3::gbr(const double& _val) { const simddouble temp = simd_set1_double(_val); g = temp; b = temp; r = temp; }
+inline void dvec3::gr(const double& _val) { const simddouble temp = simd_set1_double(_val); g = temp; r = temp; }
+inline void dvec3::grb(const double& _val) { const simddouble temp = simd_set1_double(_val); g = temp; r = temp; b = temp; }
+inline void dvec3::rb(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; b = temp; }
+inline void dvec3::rbg(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; b = temp; g = temp; }
+inline void dvec3::rg(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; g = temp; }
+inline void dvec3::rgb(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; g = temp; b = temp; }
+inline void dvec3::xy(const double& _val) { const simddouble temp = simd_set1_double(_val); x = temp; y = temp; }
+inline void dvec3::xyz(const double& _val) { const simddouble temp = simd_set1_double(_val); x = temp; y = temp; z = temp; }
+inline void dvec3::xz(const double& _val) { const simddouble temp = simd_set1_double(_val); x = temp; z = temp; }
+inline void dvec3::xzy(const double& _val) { const simddouble temp = simd_set1_double(_val); x = temp; z = temp; y = temp; }
+inline void dvec3::yx(const double& _val) { const simddouble temp = simd_set1_double(_val); y = temp; x = temp; }
+inline void dvec3::yxz(const double& _val) { const simddouble temp = simd_set1_double(_val); y = temp; x = temp; z = temp; }
+inline void dvec3::yz(const double& _val) { const simddouble temp = simd_set1_double(_val); y = temp; z = temp; }
+inline void dvec3::yzx(const double& _val) { const simddouble temp = simd_set1_double(_val); y = temp; z = temp; x = temp; }
+inline void dvec3::zx(const double& _val) { const simddouble temp = simd_set1_double(_val); z = temp; x = temp; }
+inline void dvec3::zxy(const double& _val) { const simddouble temp = simd_set1_double(_val); z = temp; x = temp; y = temp; }
+inline void dvec3::zy(const double& _val) { const simddouble temp = simd_set1_double(_val); z = temp; y = temp; }
+inline void dvec3::zyx(const double& _val) { const simddouble temp = simd_set1_double(_val); z = temp; y = temp; x = temp; }
+#endif
+
+#pragma endregion
+
+#pragma region dvec4 swizzle implementations
+
+// dvec4 swizzle implementations
+inline dvec2 dvec4::aa() const { return { a, a }; }
+inline dvec3 dvec4::aaa() const { return { a, a, a }; }
+inline dvec4 dvec4::aaaa() const { return { a, a, a, a }; }
+inline dvec4 dvec4::aaab() const { return { a, a, a, b }; }
+inline dvec4 dvec4::aaag() const { return { a, a, a, g }; }
+inline dvec4 dvec4::aaar() const { return { a, a, a, r }; }
+inline dvec3 dvec4::aab() const { return { a, a, b }; }
+inline dvec4 dvec4::aaba() const { return { a, a, b, a }; }
+inline dvec4 dvec4::aabb() const { return { a, a, b, b }; }
+inline dvec4 dvec4::aabg() const { return { a, a, b, g }; }
+inline dvec4 dvec4::aabr() const { return { a, a, b, r }; }
+inline dvec3 dvec4::aag() const { return { a, a, g }; }
+inline dvec4 dvec4::aaga() const { return { a, a, g, a }; }
+inline dvec4 dvec4::aagb() const { return { a, a, g, b }; }
+inline dvec4 dvec4::aagg() const { return { a, a, g, g }; }
+inline dvec4 dvec4::aagr() const { return { a, a, g, r }; }
+inline dvec3 dvec4::aar() const { return { a, a, r }; }
+inline dvec4 dvec4::aara() const { return { a, a, r, a }; }
+inline dvec4 dvec4::aarb() const { return { a, a, r, b }; }
+inline dvec4 dvec4::aarg() const { return { a, a, r, g }; }
+inline dvec4 dvec4::aarr() const { return { a, a, r, r }; }
+inline dvec2 dvec4::ab() const { return { a, b }; }
+inline dvec3 dvec4::aba() const { return { a, b, a }; }
+inline dvec4 dvec4::abaa() const { return { a, b, a, a }; }
+inline dvec4 dvec4::abab() const { return { a, b, a, b }; }
+inline dvec4 dvec4::abag() const { return { a, b, a, g }; }
+inline dvec4 dvec4::abar() const { return { a, b, a, r }; }
+inline dvec3 dvec4::abb() const { return { a, b, b }; }
+inline dvec4 dvec4::abba() const { return { a, b, b, a }; }
+inline dvec4 dvec4::abbb() const { return { a, b, b, b }; }
+inline dvec4 dvec4::abbg() const { return { a, b, b, g }; }
+inline dvec4 dvec4::abbr() const { return { a, b, b, r }; }
+inline dvec3 dvec4::abg() const { return { a, b, g }; }
+inline dvec4 dvec4::abga() const { return { a, b, g, a }; }
+inline dvec4 dvec4::abgb() const { return { a, b, g, b }; }
+inline dvec4 dvec4::abgg() const { return { a, b, g, g }; }
+inline dvec4 dvec4::abgr() const { return { a, b, g, r }; }
+inline dvec3 dvec4::abr() const { return { a, b, r }; }
+inline dvec4 dvec4::abra() const { return { a, b, r, a }; }
+inline dvec4 dvec4::abrb() const { return { a, b, r, b }; }
+inline dvec4 dvec4::abrg() const { return { a, b, r, g }; }
+inline dvec4 dvec4::abrr() const { return { a, b, r, r }; }
+inline dvec2 dvec4::ag() const { return { a, g }; }
+inline dvec3 dvec4::aga() const { return { a, g, a }; }
+inline dvec4 dvec4::agaa() const { return { a, g, a, a }; }
+inline dvec4 dvec4::agab() const { return { a, g, a, b }; }
+inline dvec4 dvec4::agag() const { return { a, g, a, g }; }
+inline dvec4 dvec4::agar() const { return { a, g, a, r }; }
+inline dvec3 dvec4::agb() const { return { a, g, b }; }
+inline dvec4 dvec4::agba() const { return { a, g, b, a }; }
+inline dvec4 dvec4::agbb() const { return { a, g, b, b }; }
+inline dvec4 dvec4::agbg() const { return { a, g, b, g }; }
+inline dvec4 dvec4::agbr() const { return { a, g, b, r }; }
+inline dvec3 dvec4::agg() const { return { a, g, g }; }
+inline dvec4 dvec4::agga() const { return { a, g, g, a }; }
+inline dvec4 dvec4::aggb() const { return { a, g, g, b }; }
+inline dvec4 dvec4::aggg() const { return { a, g, g, g }; }
+inline dvec4 dvec4::aggr() const { return { a, g, g, r }; }
+inline dvec3 dvec4::agr() const { return { a, g, r }; }
+inline dvec4 dvec4::agra() const { return { a, g, r, a }; }
+inline dvec4 dvec4::agrb() const { return { a, g, r, b }; }
+inline dvec4 dvec4::agrg() const { return { a, g, r, g }; }
+inline dvec4 dvec4::agrr() const { return { a, g, r, r }; }
+inline dvec2 dvec4::ar() const { return { a, r }; }
+inline dvec3 dvec4::ara() const { return { a, r, a }; }
+inline dvec4 dvec4::araa() const { return { a, r, a, a }; }
+inline dvec4 dvec4::arab() const { return { a, r, a, b }; }
+inline dvec4 dvec4::arag() const { return { a, r, a, g }; }
+inline dvec4 dvec4::arar() const { return { a, r, a, r }; }
+inline dvec3 dvec4::arb() const { return { a, r, b }; }
+inline dvec4 dvec4::arba() const { return { a, r, b, a }; }
+inline dvec4 dvec4::arbb() const { return { a, r, b, b }; }
+inline dvec4 dvec4::arbg() const { return { a, r, b, g }; }
+inline dvec4 dvec4::arbr() const { return { a, r, b, r }; }
+inline dvec3 dvec4::arg() const { return { a, r, g }; }
+inline dvec4 dvec4::arga() const { return { a, r, g, a }; }
+inline dvec4 dvec4::argb() const { return { a, r, g, b }; }
+inline dvec4 dvec4::argg() const { return { a, r, g, g }; }
+inline dvec4 dvec4::argr() const { return { a, r, g, r }; }
+inline dvec3 dvec4::arr() const { return { a, r, r }; }
+inline dvec4 dvec4::arra() const { return { a, r, r, a }; }
+inline dvec4 dvec4::arrb() const { return { a, r, r, b }; }
+inline dvec4 dvec4::arrg() const { return { a, r, r, g }; }
+inline dvec4 dvec4::arrr() const { return { a, r, r, r }; }
+inline dvec2 dvec4::ba() const { return { b, a }; }
+inline dvec3 dvec4::baa() const { return { b, a, a }; }
+inline dvec4 dvec4::baaa() const { return { b, a, a, a }; }
+inline dvec4 dvec4::baab() const { return { b, a, a, b }; }
+inline dvec4 dvec4::baag() const { return { b, a, a, g }; }
+inline dvec4 dvec4::baar() const { return { b, a, a, r }; }
+inline dvec3 dvec4::bab() const { return { b, a, b }; }
+inline dvec4 dvec4::baba() const { return { b, a, b, a }; }
+inline dvec4 dvec4::babb() const { return { b, a, b, b }; }
+inline dvec4 dvec4::babg() const { return { b, a, b, g }; }
+inline dvec4 dvec4::babr() const { return { b, a, b, r }; }
+inline dvec3 dvec4::bag() const { return { b, a, g }; }
+inline dvec4 dvec4::baga() const { return { b, a, g, a }; }
+inline dvec4 dvec4::bagb() const { return { b, a, g, b }; }
+inline dvec4 dvec4::bagg() const { return { b, a, g, g }; }
+inline dvec4 dvec4::bagr() const { return { b, a, g, r }; }
+inline dvec3 dvec4::bar() const { return { b, a, r }; }
+inline dvec4 dvec4::bara() const { return { b, a, r, a }; }
+inline dvec4 dvec4::barb() const { return { b, a, r, b }; }
+inline dvec4 dvec4::barg() const { return { b, a, r, g }; }
+inline dvec4 dvec4::barr() const { return { b, a, r, r }; }
+inline dvec2 dvec4::bb() const { return { b, b }; }
+inline dvec3 dvec4::bba() const { return { b, b, a }; }
+inline dvec4 dvec4::bbaa() const { return { b, b, a, a }; }
+inline dvec4 dvec4::bbab() const { return { b, b, a, b }; }
+inline dvec4 dvec4::bbag() const { return { b, b, a, g }; }
+inline dvec4 dvec4::bbar() const { return { b, b, a, r }; }
+inline dvec3 dvec4::bbb() const { return { b, b, b }; }
+inline dvec4 dvec4::bbba() const { return { b, b, b, a }; }
+inline dvec4 dvec4::bbbb() const { return { b, b, b, b }; }
+inline dvec4 dvec4::bbbg() const { return { b, b, b, g }; }
+inline dvec4 dvec4::bbbr() const { return { b, b, b, r }; }
+inline dvec3 dvec4::bbg() const { return { b, b, g }; }
+inline dvec4 dvec4::bbga() const { return { b, b, g, a }; }
+inline dvec4 dvec4::bbgb() const { return { b, b, g, b }; }
+inline dvec4 dvec4::bbgg() const { return { b, b, g, g }; }
+inline dvec4 dvec4::bbgr() const { return { b, b, g, r }; }
+inline dvec3 dvec4::bbr() const { return { b, b, r }; }
+inline dvec4 dvec4::bbra() const { return { b, b, r, a }; }
+inline dvec4 dvec4::bbrb() const { return { b, b, r, b }; }
+inline dvec4 dvec4::bbrg() const { return { b, b, r, g }; }
+inline dvec4 dvec4::bbrr() const { return { b, b, r, r }; }
+inline dvec2 dvec4::bg() const { return { b, g }; }
+inline dvec3 dvec4::bga() const { return { b, g, a }; }
+inline dvec4 dvec4::bgaa() const { return { b, g, a, a }; }
+inline dvec4 dvec4::bgab() const { return { b, g, a, b }; }
+inline dvec4 dvec4::bgag() const { return { b, g, a, g }; }
+inline dvec4 dvec4::bgar() const { return { b, g, a, r }; }
+inline dvec3 dvec4::bgb() const { return { b, g, b }; }
+inline dvec4 dvec4::bgba() const { return { b, g, b, a }; }
+inline dvec4 dvec4::bgbb() const { return { b, g, b, b }; }
+inline dvec4 dvec4::bgbg() const { return { b, g, b, g }; }
+inline dvec4 dvec4::bgbr() const { return { b, g, b, r }; }
+inline dvec3 dvec4::bgg() const { return { b, g, g }; }
+inline dvec4 dvec4::bgga() const { return { b, g, g, a }; }
+inline dvec4 dvec4::bggb() const { return { b, g, g, b }; }
+inline dvec4 dvec4::bggg() const { return { b, g, g, g }; }
+inline dvec4 dvec4::bggr() const { return { b, g, g, r }; }
+inline dvec3 dvec4::bgr() const { return { b, g, r }; }
+inline dvec4 dvec4::bgra() const { return { b, g, r, a }; }
+inline dvec4 dvec4::bgrb() const { return { b, g, r, b }; }
+inline dvec4 dvec4::bgrg() const { return { b, g, r, g }; }
+inline dvec4 dvec4::bgrr() const { return { b, g, r, r }; }
+inline dvec2 dvec4::br() const { return { b, r }; }
+inline dvec3 dvec4::bra() const { return { b, r, a }; }
+inline dvec4 dvec4::braa() const { return { b, r, a, a }; }
+inline dvec4 dvec4::brab() const { return { b, r, a, b }; }
+inline dvec4 dvec4::brag() const { return { b, r, a, g }; }
+inline dvec4 dvec4::brar() const { return { b, r, a, r }; }
+inline dvec3 dvec4::brb() const { return { b, r, b }; }
+inline dvec4 dvec4::brba() const { return { b, r, b, a }; }
+inline dvec4 dvec4::brbb() const { return { b, r, b, b }; }
+inline dvec4 dvec4::brbg() const { return { b, r, b, g }; }
+inline dvec4 dvec4::brbr() const { return { b, r, b, r }; }
+inline dvec3 dvec4::brg() const { return { b, r, g }; }
+inline dvec4 dvec4::brga() const { return { b, r, g, a }; }
+inline dvec4 dvec4::brgb() const { return { b, r, g, b }; }
+inline dvec4 dvec4::brgg() const { return { b, r, g, g }; }
+inline dvec4 dvec4::brgr() const { return { b, r, g, r }; }
+inline dvec3 dvec4::brr() const { return { b, r, r }; }
+inline dvec4 dvec4::brra() const { return { b, r, r, a }; }
+inline dvec4 dvec4::brrb() const { return { b, r, r, b }; }
+inline dvec4 dvec4::brrg() const { return { b, r, r, g }; }
+inline dvec4 dvec4::brrr() const { return { b, r, r, r }; }
+inline dvec2 dvec4::ga() const { return { g, a }; }
+inline dvec3 dvec4::gaa() const { return { g, a, a }; }
+inline dvec4 dvec4::gaaa() const { return { g, a, a, a }; }
+inline dvec4 dvec4::gaab() const { return { g, a, a, b }; }
+inline dvec4 dvec4::gaag() const { return { g, a, a, g }; }
+inline dvec4 dvec4::gaar() const { return { g, a, a, r }; }
+inline dvec3 dvec4::gab() const { return { g, a, b }; }
+inline dvec4 dvec4::gaba() const { return { g, a, b, a }; }
+inline dvec4 dvec4::gabb() const { return { g, a, b, b }; }
+inline dvec4 dvec4::gabg() const { return { g, a, b, g }; }
+inline dvec4 dvec4::gabr() const { return { g, a, b, r }; }
+inline dvec3 dvec4::gag() const { return { g, a, g }; }
+inline dvec4 dvec4::gaga() const { return { g, a, g, a }; }
+inline dvec4 dvec4::gagb() const { return { g, a, g, b }; }
+inline dvec4 dvec4::gagg() const { return { g, a, g, g }; }
+inline dvec4 dvec4::gagr() const { return { g, a, g, r }; }
+inline dvec3 dvec4::gar() const { return { g, a, r }; }
+inline dvec4 dvec4::gara() const { return { g, a, r, a }; }
+inline dvec4 dvec4::garb() const { return { g, a, r, b }; }
+inline dvec4 dvec4::garg() const { return { g, a, r, g }; }
+inline dvec4 dvec4::garr() const { return { g, a, r, r }; }
+inline dvec2 dvec4::gb() const { return { g, b }; }
+inline dvec3 dvec4::gba() const { return { g, b, a }; }
+inline dvec4 dvec4::gbaa() const { return { g, b, a, a }; }
+inline dvec4 dvec4::gbab() const { return { g, b, a, b }; }
+inline dvec4 dvec4::gbag() const { return { g, b, a, g }; }
+inline dvec4 dvec4::gbar() const { return { g, b, a, r }; }
+inline dvec3 dvec4::gbb() const { return { g, b, b }; }
+inline dvec4 dvec4::gbba() const { return { g, b, b, a }; }
+inline dvec4 dvec4::gbbb() const { return { g, b, b, b }; }
+inline dvec4 dvec4::gbbg() const { return { g, b, b, g }; }
+inline dvec4 dvec4::gbbr() const { return { g, b, b, r }; }
+inline dvec3 dvec4::gbg() const { return { g, b, g }; }
+inline dvec4 dvec4::gbga() const { return { g, b, g, a }; }
+inline dvec4 dvec4::gbgb() const { return { g, b, g, b }; }
+inline dvec4 dvec4::gbgg() const { return { g, b, g, g }; }
+inline dvec4 dvec4::gbgr() const { return { g, b, g, r }; }
+inline dvec3 dvec4::gbr() const { return { g, b, r }; }
+inline dvec4 dvec4::gbra() const { return { g, b, r, a }; }
+inline dvec4 dvec4::gbrb() const { return { g, b, r, b }; }
+inline dvec4 dvec4::gbrg() const { return { g, b, r, g }; }
+inline dvec4 dvec4::gbrr() const { return { g, b, r, r }; }
+inline dvec2 dvec4::gg() const { return { g, g }; }
+inline dvec3 dvec4::gga() const { return { g, g, a }; }
+inline dvec4 dvec4::ggaa() const { return { g, g, a, a }; }
+inline dvec4 dvec4::ggab() const { return { g, g, a, b }; }
+inline dvec4 dvec4::ggag() const { return { g, g, a, g }; }
+inline dvec4 dvec4::ggar() const { return { g, g, a, r }; }
+inline dvec3 dvec4::ggb() const { return { g, g, b }; }
+inline dvec4 dvec4::ggba() const { return { g, g, b, a }; }
+inline dvec4 dvec4::ggbb() const { return { g, g, b, b }; }
+inline dvec4 dvec4::ggbg() const { return { g, g, b, g }; }
+inline dvec4 dvec4::ggbr() const { return { g, g, b, r }; }
+inline dvec3 dvec4::ggg() const { return { g, g, g }; }
+inline dvec4 dvec4::ggga() const { return { g, g, g, a }; }
+inline dvec4 dvec4::gggb() const { return { g, g, g, b }; }
+inline dvec4 dvec4::gggg() const { return { g, g, g, g }; }
+inline dvec4 dvec4::gggr() const { return { g, g, g, r }; }
+inline dvec3 dvec4::ggr() const { return { g, g, r }; }
+inline dvec4 dvec4::ggra() const { return { g, g, r, a }; }
+inline dvec4 dvec4::ggrb() const { return { g, g, r, b }; }
+inline dvec4 dvec4::ggrg() const { return { g, g, r, g }; }
+inline dvec4 dvec4::ggrr() const { return { g, g, r, r }; }
+inline dvec2 dvec4::gr() const { return { g, r }; }
+inline dvec3 dvec4::gra() const { return { g, r, a }; }
+inline dvec4 dvec4::graa() const { return { g, r, a, a }; }
+inline dvec4 dvec4::grab() const { return { g, r, a, b }; }
+inline dvec4 dvec4::grag() const { return { g, r, a, g }; }
+inline dvec4 dvec4::grar() const { return { g, r, a, r }; }
+inline dvec3 dvec4::grb() const { return { g, r, b }; }
+inline dvec4 dvec4::grba() const { return { g, r, b, a }; }
+inline dvec4 dvec4::grbb() const { return { g, r, b, b }; }
+inline dvec4 dvec4::grbg() const { return { g, r, b, g }; }
+inline dvec4 dvec4::grbr() const { return { g, r, b, r }; }
+inline dvec3 dvec4::grg() const { return { g, r, g }; }
+inline dvec4 dvec4::grga() const { return { g, r, g, a }; }
+inline dvec4 dvec4::grgb() const { return { g, r, g, b }; }
+inline dvec4 dvec4::grgg() const { return { g, r, g, g }; }
+inline dvec4 dvec4::grgr() const { return { g, r, g, r }; }
+inline dvec3 dvec4::grr() const { return { g, r, r }; }
+inline dvec4 dvec4::grra() const { return { g, r, r, a }; }
+inline dvec4 dvec4::grrb() const { return { g, r, r, b }; }
+inline dvec4 dvec4::grrg() const { return { g, r, r, g }; }
+inline dvec4 dvec4::grrr() const { return { g, r, r, r }; }
+inline dvec2 dvec4::ra() const { return { r, a }; }
+inline dvec3 dvec4::raa() const { return { r, a, a }; }
+inline dvec4 dvec4::raaa() const { return { r, a, a, a }; }
+inline dvec4 dvec4::raab() const { return { r, a, a, b }; }
+inline dvec4 dvec4::raag() const { return { r, a, a, g }; }
+inline dvec4 dvec4::raar() const { return { r, a, a, r }; }
+inline dvec3 dvec4::rab() const { return { r, a, b }; }
+inline dvec4 dvec4::raba() const { return { r, a, b, a }; }
+inline dvec4 dvec4::rabb() const { return { r, a, b, b }; }
+inline dvec4 dvec4::rabg() const { return { r, a, b, g }; }
+inline dvec4 dvec4::rabr() const { return { r, a, b, r }; }
+inline dvec3 dvec4::rag() const { return { r, a, g }; }
+inline dvec4 dvec4::raga() const { return { r, a, g, a }; }
+inline dvec4 dvec4::ragb() const { return { r, a, g, b }; }
+inline dvec4 dvec4::ragg() const { return { r, a, g, g }; }
+inline dvec4 dvec4::ragr() const { return { r, a, g, r }; }
+inline dvec3 dvec4::rar() const { return { r, a, r }; }
+inline dvec4 dvec4::rara() const { return { r, a, r, a }; }
+inline dvec4 dvec4::rarb() const { return { r, a, r, b }; }
+inline dvec4 dvec4::rarg() const { return { r, a, r, g }; }
+inline dvec4 dvec4::rarr() const { return { r, a, r, r }; }
+inline dvec2 dvec4::rb() const { return { r, b }; }
+inline dvec3 dvec4::rba() const { return { r, b, a }; }
+inline dvec4 dvec4::rbaa() const { return { r, b, a, a }; }
+inline dvec4 dvec4::rbab() const { return { r, b, a, b }; }
+inline dvec4 dvec4::rbag() const { return { r, b, a, g }; }
+inline dvec4 dvec4::rbar() const { return { r, b, a, r }; }
+inline dvec3 dvec4::rbb() const { return { r, b, b }; }
+inline dvec4 dvec4::rbba() const { return { r, b, b, a }; }
+inline dvec4 dvec4::rbbb() const { return { r, b, b, b }; }
+inline dvec4 dvec4::rbbg() const { return { r, b, b, g }; }
+inline dvec4 dvec4::rbbr() const { return { r, b, b, r }; }
+inline dvec3 dvec4::rbg() const { return { r, b, g }; }
+inline dvec4 dvec4::rbga() const { return { r, b, g, a }; }
+inline dvec4 dvec4::rbgb() const { return { r, b, g, b }; }
+inline dvec4 dvec4::rbgg() const { return { r, b, g, g }; }
+inline dvec4 dvec4::rbgr() const { return { r, b, g, r }; }
+inline dvec3 dvec4::rbr() const { return { r, b, r }; }
+inline dvec4 dvec4::rbra() const { return { r, b, r, a }; }
+inline dvec4 dvec4::rbrb() const { return { r, b, r, b }; }
+inline dvec4 dvec4::rbrg() const { return { r, b, r, g }; }
+inline dvec4 dvec4::rbrr() const { return { r, b, r, r }; }
+inline dvec2 dvec4::rg() const { return { r, g }; }
+inline dvec3 dvec4::rga() const { return { r, g, a }; }
+inline dvec4 dvec4::rgaa() const { return { r, g, a, a }; }
+inline dvec4 dvec4::rgab() const { return { r, g, a, b }; }
+inline dvec4 dvec4::rgag() const { return { r, g, a, g }; }
+inline dvec4 dvec4::rgar() const { return { r, g, a, r }; }
+inline dvec3 dvec4::rgb() const { return { r, g, b }; }
+inline dvec4 dvec4::rgba() const { return { r, g, b, a }; }
+inline dvec4 dvec4::rgbb() const { return { r, g, b, b }; }
+inline dvec4 dvec4::rgbg() const { return { r, g, b, g }; }
+inline dvec4 dvec4::rgbr() const { return { r, g, b, r }; }
+inline dvec3 dvec4::rgg() const { return { r, g, g }; }
+inline dvec4 dvec4::rgga() const { return { r, g, g, a }; }
+inline dvec4 dvec4::rggb() const { return { r, g, g, b }; }
+inline dvec4 dvec4::rggg() const { return { r, g, g, g }; }
+inline dvec4 dvec4::rggr() const { return { r, g, g, r }; }
+inline dvec3 dvec4::rgr() const { return { r, g, r }; }
+inline dvec4 dvec4::rgra() const { return { r, g, r, a }; }
+inline dvec4 dvec4::rgrb() const { return { r, g, r, b }; }
+inline dvec4 dvec4::rgrg() const { return { r, g, r, g }; }
+inline dvec4 dvec4::rgrr() const { return { r, g, r, r }; }
+inline dvec2 dvec4::rr() const { return { r, r }; }
+inline dvec3 dvec4::rra() const { return { r, r, a }; }
+inline dvec4 dvec4::rraa() const { return { r, r, a, a }; }
+inline dvec4 dvec4::rrab() const { return { r, r, a, b }; }
+inline dvec4 dvec4::rrag() const { return { r, r, a, g }; }
+inline dvec4 dvec4::rrar() const { return { r, r, a, r }; }
+inline dvec3 dvec4::rrb() const { return { r, r, b }; }
+inline dvec4 dvec4::rrba() const { return { r, r, b, a }; }
+inline dvec4 dvec4::rrbb() const { return { r, r, b, b }; }
+inline dvec4 dvec4::rrbg() const { return { r, r, b, g }; }
+inline dvec4 dvec4::rrbr() const { return { r, r, b, r }; }
+inline dvec3 dvec4::rrg() const { return { r, r, g }; }
+inline dvec4 dvec4::rrga() const { return { r, r, g, a }; }
+inline dvec4 dvec4::rrgb() const { return { r, r, g, b }; }
+inline dvec4 dvec4::rrgg() const { return { r, r, g, g }; }
+inline dvec4 dvec4::rrgr() const { return { r, r, g, r }; }
+inline dvec3 dvec4::rrr() const { return { r, r, r }; }
+inline dvec4 dvec4::rrra() const { return { r, r, r, a }; }
+inline dvec4 dvec4::rrrb() const { return { r, r, r, b }; }
+inline dvec4 dvec4::rrrg() const { return { r, r, r, g }; }
+inline dvec4 dvec4::rrrr() const { return { r, r, r, r }; }
+inline dvec2 dvec4::ww() const { return { w, w }; }
+inline dvec3 dvec4::www() const { return { w, w, w }; }
+inline dvec4 dvec4::wwww() const { return { w, w, w, w }; }
+inline dvec4 dvec4::wwwx() const { return { w, w, w, x }; }
+inline dvec4 dvec4::wwwy() const { return { w, w, w, y }; }
+inline dvec4 dvec4::wwwz() const { return { w, w, w, z }; }
+inline dvec3 dvec4::wwx() const { return { w, w, x }; }
+inline dvec4 dvec4::wwxw() const { return { w, w, x, w }; }
+inline dvec4 dvec4::wwxx() const { return { w, w, x, x }; }
+inline dvec4 dvec4::wwxy() const { return { w, w, x, y }; }
+inline dvec4 dvec4::wwxz() const { return { w, w, x, z }; }
+inline dvec3 dvec4::wwy() const { return { w, w, y }; }
+inline dvec4 dvec4::wwyw() const { return { w, w, y, w }; }
+inline dvec4 dvec4::wwyx() const { return { w, w, y, x }; }
+inline dvec4 dvec4::wwyy() const { return { w, w, y, y }; }
+inline dvec4 dvec4::wwyz() const { return { w, w, y, z }; }
+inline dvec3 dvec4::wwz() const { return { w, w, z }; }
+inline dvec4 dvec4::wwzw() const { return { w, w, z, w }; }
+inline dvec4 dvec4::wwzx() const { return { w, w, z, x }; }
+inline dvec4 dvec4::wwzy() const { return { w, w, z, y }; }
+inline dvec4 dvec4::wwzz() const { return { w, w, z, z }; }
+inline dvec2 dvec4::wx() const { return { w, x }; }
+inline dvec3 dvec4::wxw() const { return { w, x, w }; }
+inline dvec4 dvec4::wxww() const { return { w, x, w, w }; }
+inline dvec4 dvec4::wxwx() const { return { w, x, w, x }; }
+inline dvec4 dvec4::wxwy() const { return { w, x, w, y }; }
+inline dvec4 dvec4::wxwz() const { return { w, x, w, z }; }
+inline dvec3 dvec4::wxx() const { return { w, x, x }; }
+inline dvec4 dvec4::wxxw() const { return { w, x, x, w }; }
+inline dvec4 dvec4::wxxx() const { return { w, x, x, x }; }
+inline dvec4 dvec4::wxxy() const { return { w, x, x, y }; }
+inline dvec4 dvec4::wxxz() const { return { w, x, x, z }; }
+inline dvec3 dvec4::wxy() const { return { w, x, y }; }
+inline dvec4 dvec4::wxyw() const { return { w, x, y, w }; }
+inline dvec4 dvec4::wxyx() const { return { w, x, y, x }; }
+inline dvec4 dvec4::wxyy() const { return { w, x, y, y }; }
+inline dvec4 dvec4::wxyz() const { return { w, x, y, z }; }
+inline dvec3 dvec4::wxz() const { return { w, x, z }; }
+inline dvec4 dvec4::wxzw() const { return { w, x, z, w }; }
+inline dvec4 dvec4::wxzx() const { return { w, x, z, x }; }
+inline dvec4 dvec4::wxzy() const { return { w, x, z, y }; }
+inline dvec4 dvec4::wxzz() const { return { w, x, z, z }; }
+inline dvec2 dvec4::wy() const { return { w, y }; }
+inline dvec3 dvec4::wyw() const { return { w, y, w }; }
+inline dvec4 dvec4::wyww() const { return { w, y, w, w }; }
+inline dvec4 dvec4::wywx() const { return { w, y, w, x }; }
+inline dvec4 dvec4::wywy() const { return { w, y, w, y }; }
+inline dvec4 dvec4::wywz() const { return { w, y, w, z }; }
+inline dvec3 dvec4::wyx() const { return { w, y, x }; }
+inline dvec4 dvec4::wyxw() const { return { w, y, x, w }; }
+inline dvec4 dvec4::wyxx() const { return { w, y, x, x }; }
+inline dvec4 dvec4::wyxy() const { return { w, y, x, y }; }
+inline dvec4 dvec4::wyxz() const { return { w, y, x, z }; }
+inline dvec3 dvec4::wyy() const { return { w, y, y }; }
+inline dvec4 dvec4::wyyw() const { return { w, y, y, w }; }
+inline dvec4 dvec4::wyyx() const { return { w, y, y, x }; }
+inline dvec4 dvec4::wyyy() const { return { w, y, y, y }; }
+inline dvec4 dvec4::wyyz() const { return { w, y, y, z }; }
+inline dvec3 dvec4::wyz() const { return { w, y, z }; }
+inline dvec4 dvec4::wyzw() const { return { w, y, z, w }; }
+inline dvec4 dvec4::wyzx() const { return { w, y, z, x }; }
+inline dvec4 dvec4::wyzy() const { return { w, y, z, y }; }
+inline dvec4 dvec4::wyzz() const { return { w, y, z, z }; }
+inline dvec2 dvec4::wz() const { return { w, z }; }
+inline dvec3 dvec4::wzw() const { return { w, z, w }; }
+inline dvec4 dvec4::wzww() const { return { w, z, w, w }; }
+inline dvec4 dvec4::wzwx() const { return { w, z, w, x }; }
+inline dvec4 dvec4::wzwy() const { return { w, z, w, y }; }
+inline dvec4 dvec4::wzwz() const { return { w, z, w, z }; }
+inline dvec3 dvec4::wzx() const { return { w, z, x }; }
+inline dvec4 dvec4::wzxw() const { return { w, z, x, w }; }
+inline dvec4 dvec4::wzxx() const { return { w, z, x, x }; }
+inline dvec4 dvec4::wzxy() const { return { w, z, x, y }; }
+inline dvec4 dvec4::wzxz() const { return { w, z, x, z }; }
+inline dvec3 dvec4::wzy() const { return { w, z, y }; }
+inline dvec4 dvec4::wzyw() const { return { w, z, y, w }; }
+inline dvec4 dvec4::wzyx() const { return { w, z, y, x }; }
+inline dvec4 dvec4::wzyy() const { return { w, z, y, y }; }
+inline dvec4 dvec4::wzyz() const { return { w, z, y, z }; }
+inline dvec3 dvec4::wzz() const { return { w, z, z }; }
+inline dvec4 dvec4::wzzw() const { return { w, z, z, w }; }
+inline dvec4 dvec4::wzzx() const { return { w, z, z, x }; }
+inline dvec4 dvec4::wzzy() const { return { w, z, z, y }; }
+inline dvec4 dvec4::wzzz() const { return { w, z, z, z }; }
+inline dvec2 dvec4::xw() const { return { x, w }; }
+inline dvec3 dvec4::xww() const { return { x, w, w }; }
+inline dvec4 dvec4::xwww() const { return { x, w, w, w }; }
+inline dvec4 dvec4::xwwx() const { return { x, w, w, x }; }
+inline dvec4 dvec4::xwwy() const { return { x, w, w, y }; }
+inline dvec4 dvec4::xwwz() const { return { x, w, w, z }; }
+inline dvec3 dvec4::xwx() const { return { x, w, x }; }
+inline dvec4 dvec4::xwxw() const { return { x, w, x, w }; }
+inline dvec4 dvec4::xwxx() const { return { x, w, x, x }; }
+inline dvec4 dvec4::xwxy() const { return { x, w, x, y }; }
+inline dvec4 dvec4::xwxz() const { return { x, w, x, z }; }
+inline dvec3 dvec4::xwy() const { return { x, w, y }; }
+inline dvec4 dvec4::xwyw() const { return { x, w, y, w }; }
+inline dvec4 dvec4::xwyx() const { return { x, w, y, x }; }
+inline dvec4 dvec4::xwyy() const { return { x, w, y, y }; }
+inline dvec4 dvec4::xwyz() const { return { x, w, y, z }; }
+inline dvec3 dvec4::xwz() const { return { x, w, z }; }
+inline dvec4 dvec4::xwzw() const { return { x, w, z, w }; }
+inline dvec4 dvec4::xwzx() const { return { x, w, z, x }; }
+inline dvec4 dvec4::xwzy() const { return { x, w, z, y }; }
+inline dvec4 dvec4::xwzz() const { return { x, w, z, z }; }
+inline dvec2 dvec4::xx() const { return { x, x }; }
+inline dvec3 dvec4::xxw() const { return { x, x, w }; }
+inline dvec4 dvec4::xxww() const { return { x, x, w, w }; }
+inline dvec4 dvec4::xxwx() const { return { x, x, w, x }; }
+inline dvec4 dvec4::xxwy() const { return { x, x, w, y }; }
+inline dvec4 dvec4::xxwz() const { return { x, x, w, z }; }
+inline dvec3 dvec4::xxx() const { return { x, x, x }; }
+inline dvec4 dvec4::xxxw() const { return { x, x, x, w }; }
+inline dvec4 dvec4::xxxx() const { return { x, x, x, x }; }
+inline dvec4 dvec4::xxxy() const { return { x, x, x, y }; }
+inline dvec4 dvec4::xxxz() const { return { x, x, x, z }; }
+inline dvec3 dvec4::xxy() const { return { x, x, y }; }
+inline dvec4 dvec4::xxyw() const { return { x, x, y, w }; }
+inline dvec4 dvec4::xxyx() const { return { x, x, y, x }; }
+inline dvec4 dvec4::xxyy() const { return { x, x, y, y }; }
+inline dvec4 dvec4::xxyz() const { return { x, x, y, z }; }
+inline dvec3 dvec4::xxz() const { return { x, x, z }; }
+inline dvec4 dvec4::xxzw() const { return { x, x, z, w }; }
+inline dvec4 dvec4::xxzx() const { return { x, x, z, x }; }
+inline dvec4 dvec4::xxzy() const { return { x, x, z, y }; }
+inline dvec4 dvec4::xxzz() const { return { x, x, z, z }; }
+inline dvec2 dvec4::xy() const { return { x, y }; }
+inline dvec3 dvec4::xyw() const { return { x, y, w }; }
+inline dvec4 dvec4::xyww() const { return { x, y, w, w }; }
+inline dvec4 dvec4::xywx() const { return { x, y, w, x }; }
+inline dvec4 dvec4::xywy() const { return { x, y, w, y }; }
+inline dvec4 dvec4::xywz() const { return { x, y, w, z }; }
+inline dvec3 dvec4::xyx() const { return { x, y, x }; }
+inline dvec4 dvec4::xyxw() const { return { x, y, x, w }; }
+inline dvec4 dvec4::xyxx() const { return { x, y, x, x }; }
+inline dvec4 dvec4::xyxy() const { return { x, y, x, y }; }
+inline dvec4 dvec4::xyxz() const { return { x, y, x, z }; }
+inline dvec3 dvec4::xyy() const { return { x, y, y }; }
+inline dvec4 dvec4::xyyw() const { return { x, y, y, w }; }
+inline dvec4 dvec4::xyyx() const { return { x, y, y, x }; }
+inline dvec4 dvec4::xyyy() const { return { x, y, y, y }; }
+inline dvec4 dvec4::xyyz() const { return { x, y, y, z }; }
+inline dvec3 dvec4::xyz() const { return { x, y, z }; }
+inline dvec4 dvec4::xyzw() const { return { x, y, z, w }; }
+inline dvec4 dvec4::xyzx() const { return { x, y, z, x }; }
+inline dvec4 dvec4::xyzy() const { return { x, y, z, y }; }
+inline dvec4 dvec4::xyzz() const { return { x, y, z, z }; }
+inline dvec2 dvec4::xz() const { return { x, z }; }
+inline dvec3 dvec4::xzw() const { return { x, z, w }; }
+inline dvec4 dvec4::xzww() const { return { x, z, w, w }; }
+inline dvec4 dvec4::xzwx() const { return { x, z, w, x }; }
+inline dvec4 dvec4::xzwy() const { return { x, z, w, y }; }
+inline dvec4 dvec4::xzwz() const { return { x, z, w, z }; }
+inline dvec3 dvec4::xzx() const { return { x, z, x }; }
+inline dvec4 dvec4::xzxw() const { return { x, z, x, w }; }
+inline dvec4 dvec4::xzxx() const { return { x, z, x, x }; }
+inline dvec4 dvec4::xzxy() const { return { x, z, x, y }; }
+inline dvec4 dvec4::xzxz() const { return { x, z, x, z }; }
+inline dvec3 dvec4::xzy() const { return { x, z, y }; }
+inline dvec4 dvec4::xzyw() const { return { x, z, y, w }; }
+inline dvec4 dvec4::xzyx() const { return { x, z, y, x }; }
+inline dvec4 dvec4::xzyy() const { return { x, z, y, y }; }
+inline dvec4 dvec4::xzyz() const { return { x, z, y, z }; }
+inline dvec3 dvec4::xzz() const { return { x, z, z }; }
+inline dvec4 dvec4::xzzw() const { return { x, z, z, w }; }
+inline dvec4 dvec4::xzzx() const { return { x, z, z, x }; }
+inline dvec4 dvec4::xzzy() const { return { x, z, z, y }; }
+inline dvec4 dvec4::xzzz() const { return { x, z, z, z }; }
+inline dvec2 dvec4::yw() const { return { y, w }; }
+inline dvec3 dvec4::yww() const { return { y, w, w }; }
+inline dvec4 dvec4::ywww() const { return { y, w, w, w }; }
+inline dvec4 dvec4::ywwx() const { return { y, w, w, x }; }
+inline dvec4 dvec4::ywwy() const { return { y, w, w, y }; }
+inline dvec4 dvec4::ywwz() const { return { y, w, w, z }; }
+inline dvec3 dvec4::ywx() const { return { y, w, x }; }
+inline dvec4 dvec4::ywxw() const { return { y, w, x, w }; }
+inline dvec4 dvec4::ywxx() const { return { y, w, x, x }; }
+inline dvec4 dvec4::ywxy() const { return { y, w, x, y }; }
+inline dvec4 dvec4::ywxz() const { return { y, w, x, z }; }
+inline dvec3 dvec4::ywy() const { return { y, w, y }; }
+inline dvec4 dvec4::ywyw() const { return { y, w, y, w }; }
+inline dvec4 dvec4::ywyx() const { return { y, w, y, x }; }
+inline dvec4 dvec4::ywyy() const { return { y, w, y, y }; }
+inline dvec4 dvec4::ywyz() const { return { y, w, y, z }; }
+inline dvec3 dvec4::ywz() const { return { y, w, z }; }
+inline dvec4 dvec4::ywzw() const { return { y, w, z, w }; }
+inline dvec4 dvec4::ywzx() const { return { y, w, z, x }; }
+inline dvec4 dvec4::ywzy() const { return { y, w, z, y }; }
+inline dvec4 dvec4::ywzz() const { return { y, w, z, z }; }
+inline dvec2 dvec4::yx() const { return { y, x }; }
+inline dvec3 dvec4::yxw() const { return { y, x, w }; }
+inline dvec4 dvec4::yxww() const { return { y, x, w, w }; }
+inline dvec4 dvec4::yxwx() const { return { y, x, w, x }; }
+inline dvec4 dvec4::yxwy() const { return { y, x, w, y }; }
+inline dvec4 dvec4::yxwz() const { return { y, x, w, z }; }
+inline dvec3 dvec4::yxx() const { return { y, x, x }; }
+inline dvec4 dvec4::yxxw() const { return { y, x, x, w }; }
+inline dvec4 dvec4::yxxx() const { return { y, x, x, x }; }
+inline dvec4 dvec4::yxxy() const { return { y, x, x, y }; }
+inline dvec4 dvec4::yxxz() const { return { y, x, x, z }; }
+inline dvec3 dvec4::yxy() const { return { y, x, y }; }
+inline dvec4 dvec4::yxyw() const { return { y, x, y, w }; }
+inline dvec4 dvec4::yxyx() const { return { y, x, y, x }; }
+inline dvec4 dvec4::yxyy() const { return { y, x, y, y }; }
+inline dvec4 dvec4::yxyz() const { return { y, x, y, z }; }
+inline dvec3 dvec4::yxz() const { return { y, x, z }; }
+inline dvec4 dvec4::yxzw() const { return { y, x, z, w }; }
+inline dvec4 dvec4::yxzx() const { return { y, x, z, x }; }
+inline dvec4 dvec4::yxzy() const { return { y, x, z, y }; }
+inline dvec4 dvec4::yxzz() const { return { y, x, z, z }; }
+inline dvec2 dvec4::yy() const { return { y, y }; }
+inline dvec3 dvec4::yyw() const { return { y, y, w }; }
+inline dvec4 dvec4::yyww() const { return { y, y, w, w }; }
+inline dvec4 dvec4::yywx() const { return { y, y, w, x }; }
+inline dvec4 dvec4::yywy() const { return { y, y, w, y }; }
+inline dvec4 dvec4::yywz() const { return { y, y, w, z }; }
+inline dvec3 dvec4::yyx() const { return { y, y, x }; }
+inline dvec4 dvec4::yyxw() const { return { y, y, x, w }; }
+inline dvec4 dvec4::yyxx() const { return { y, y, x, x }; }
+inline dvec4 dvec4::yyxy() const { return { y, y, x, y }; }
+inline dvec4 dvec4::yyxz() const { return { y, y, x, z }; }
+inline dvec3 dvec4::yyy() const { return { y, y, y }; }
+inline dvec4 dvec4::yyyw() const { return { y, y, y, w }; }
+inline dvec4 dvec4::yyyx() const { return { y, y, y, x }; }
+inline dvec4 dvec4::yyyy() const { return { y, y, y, y }; }
+inline dvec4 dvec4::yyyz() const { return { y, y, y, z }; }
+inline dvec3 dvec4::yyz() const { return { y, y, z }; }
+inline dvec4 dvec4::yyzw() const { return { y, y, z, w }; }
+inline dvec4 dvec4::yyzx() const { return { y, y, z, x }; }
+inline dvec4 dvec4::yyzy() const { return { y, y, z, y }; }
+inline dvec4 dvec4::yyzz() const { return { y, y, z, z }; }
+inline dvec2 dvec4::yz() const { return { y, z }; }
+inline dvec3 dvec4::yzw() const { return { y, z, w }; }
+inline dvec4 dvec4::yzww() const { return { y, z, w, w }; }
+inline dvec4 dvec4::yzwx() const { return { y, z, w, x }; }
+inline dvec4 dvec4::yzwy() const { return { y, z, w, y }; }
+inline dvec4 dvec4::yzwz() const { return { y, z, w, z }; }
+inline dvec3 dvec4::yzx() const { return { y, z, x }; }
+inline dvec4 dvec4::yzxw() const { return { y, z, x, w }; }
+inline dvec4 dvec4::yzxx() const { return { y, z, x, x }; }
+inline dvec4 dvec4::yzxy() const { return { y, z, x, y }; }
+inline dvec4 dvec4::yzxz() const { return { y, z, x, z }; }
+inline dvec3 dvec4::yzy() const { return { y, z, y }; }
+inline dvec4 dvec4::yzyw() const { return { y, z, y, w }; }
+inline dvec4 dvec4::yzyx() const { return { y, z, y, x }; }
+inline dvec4 dvec4::yzyy() const { return { y, z, y, y }; }
+inline dvec4 dvec4::yzyz() const { return { y, z, y, z }; }
+inline dvec3 dvec4::yzz() const { return { y, z, z }; }
+inline dvec4 dvec4::yzzw() const { return { y, z, z, w }; }
+inline dvec4 dvec4::yzzx() const { return { y, z, z, x }; }
+inline dvec4 dvec4::yzzy() const { return { y, z, z, y }; }
+inline dvec4 dvec4::yzzz() const { return { y, z, z, z }; }
+inline dvec2 dvec4::zw() const { return { z, w }; }
+inline dvec3 dvec4::zww() const { return { z, w, w }; }
+inline dvec4 dvec4::zwww() const { return { z, w, w, w }; }
+inline dvec4 dvec4::zwwx() const { return { z, w, w, x }; }
+inline dvec4 dvec4::zwwy() const { return { z, w, w, y }; }
+inline dvec4 dvec4::zwwz() const { return { z, w, w, z }; }
+inline dvec3 dvec4::zwx() const { return { z, w, x }; }
+inline dvec4 dvec4::zwxw() const { return { z, w, x, w }; }
+inline dvec4 dvec4::zwxx() const { return { z, w, x, x }; }
+inline dvec4 dvec4::zwxy() const { return { z, w, x, y }; }
+inline dvec4 dvec4::zwxz() const { return { z, w, x, z }; }
+inline dvec3 dvec4::zwy() const { return { z, w, y }; }
+inline dvec4 dvec4::zwyw() const { return { z, w, y, w }; }
+inline dvec4 dvec4::zwyx() const { return { z, w, y, x }; }
+inline dvec4 dvec4::zwyy() const { return { z, w, y, y }; }
+inline dvec4 dvec4::zwyz() const { return { z, w, y, z }; }
+inline dvec3 dvec4::zwz() const { return { z, w, z }; }
+inline dvec4 dvec4::zwzw() const { return { z, w, z, w }; }
+inline dvec4 dvec4::zwzx() const { return { z, w, z, x }; }
+inline dvec4 dvec4::zwzy() const { return { z, w, z, y }; }
+inline dvec4 dvec4::zwzz() const { return { z, w, z, z }; }
+inline dvec2 dvec4::zx() const { return { z, x }; }
+inline dvec3 dvec4::zxw() const { return { z, x, w }; }
+inline dvec4 dvec4::zxww() const { return { z, x, w, w }; }
+inline dvec4 dvec4::zxwx() const { return { z, x, w, x }; }
+inline dvec4 dvec4::zxwy() const { return { z, x, w, y }; }
+inline dvec4 dvec4::zxwz() const { return { z, x, w, z }; }
+inline dvec3 dvec4::zxx() const { return { z, x, x }; }
+inline dvec4 dvec4::zxxw() const { return { z, x, x, w }; }
+inline dvec4 dvec4::zxxx() const { return { z, x, x, x }; }
+inline dvec4 dvec4::zxxy() const { return { z, x, x, y }; }
+inline dvec4 dvec4::zxxz() const { return { z, x, x, z }; }
+inline dvec3 dvec4::zxy() const { return { z, x, y }; }
+inline dvec4 dvec4::zxyw() const { return { z, x, y, w }; }
+inline dvec4 dvec4::zxyx() const { return { z, x, y, x }; }
+inline dvec4 dvec4::zxyy() const { return { z, x, y, y }; }
+inline dvec4 dvec4::zxyz() const { return { z, x, y, z }; }
+inline dvec3 dvec4::zxz() const { return { z, x, z }; }
+inline dvec4 dvec4::zxzw() const { return { z, x, z, w }; }
+inline dvec4 dvec4::zxzx() const { return { z, x, z, x }; }
+inline dvec4 dvec4::zxzy() const { return { z, x, z, y }; }
+inline dvec4 dvec4::zxzz() const { return { z, x, z, z }; }
+inline dvec2 dvec4::zy() const { return { z, y }; }
+inline dvec3 dvec4::zyw() const { return { z, y, w }; }
+inline dvec4 dvec4::zyww() const { return { z, y, w, w }; }
+inline dvec4 dvec4::zywx() const { return { z, y, w, x }; }
+inline dvec4 dvec4::zywy() const { return { z, y, w, y }; }
+inline dvec4 dvec4::zywz() const { return { z, y, w, z }; }
+inline dvec3 dvec4::zyx() const { return { z, y, x }; }
+inline dvec4 dvec4::zyxw() const { return { z, y, x, w }; }
+inline dvec4 dvec4::zyxx() const { return { z, y, x, x }; }
+inline dvec4 dvec4::zyxy() const { return { z, y, x, y }; }
+inline dvec4 dvec4::zyxz() const { return { z, y, x, z }; }
+inline dvec3 dvec4::zyy() const { return { z, y, y }; }
+inline dvec4 dvec4::zyyw() const { return { z, y, y, w }; }
+inline dvec4 dvec4::zyyx() const { return { z, y, y, x }; }
+inline dvec4 dvec4::zyyy() const { return { z, y, y, y }; }
+inline dvec4 dvec4::zyyz() const { return { z, y, y, z }; }
+inline dvec3 dvec4::zyz() const { return { z, y, z }; }
+inline dvec4 dvec4::zyzw() const { return { z, y, z, w }; }
+inline dvec4 dvec4::zyzx() const { return { z, y, z, x }; }
+inline dvec4 dvec4::zyzy() const { return { z, y, z, y }; }
+inline dvec4 dvec4::zyzz() const { return { z, y, z, z }; }
+inline dvec2 dvec4::zz() const { return { z, z }; }
+inline dvec3 dvec4::zzw() const { return { z, z, w }; }
+inline dvec4 dvec4::zzww() const { return { z, z, w, w }; }
+inline dvec4 dvec4::zzwx() const { return { z, z, w, x }; }
+inline dvec4 dvec4::zzwy() const { return { z, z, w, y }; }
+inline dvec4 dvec4::zzwz() const { return { z, z, w, z }; }
+inline dvec3 dvec4::zzx() const { return { z, z, x }; }
+inline dvec4 dvec4::zzxw() const { return { z, z, x, w }; }
+inline dvec4 dvec4::zzxx() const { return { z, z, x, x }; }
+inline dvec4 dvec4::zzxy() const { return { z, z, x, y }; }
+inline dvec4 dvec4::zzxz() const { return { z, z, x, z }; }
+inline dvec3 dvec4::zzy() const { return { z, z, y }; }
+inline dvec4 dvec4::zzyw() const { return { z, z, y, w }; }
+inline dvec4 dvec4::zzyx() const { return { z, z, y, x }; }
+inline dvec4 dvec4::zzyy() const { return { z, z, y, y }; }
+inline dvec4 dvec4::zzyz() const { return { z, z, y, z }; }
+inline dvec3 dvec4::zzz() const { return { z, z, z }; }
+inline dvec4 dvec4::zzzw() const { return { z, z, z, w }; }
+inline dvec4 dvec4::zzzx() const { return { z, z, z, x }; }
+inline dvec4 dvec4::zzzy() const { return { z, z, z, y }; }
+inline dvec4 dvec4::zzzz() const { return { z, z, z, z }; }
+inline void dvec4::ab(const simddouble& _val0, const simddouble& _val1) { a = _val0; b = _val1; }
+inline void dvec4::ab(const dvec2& _val) { a = _val.x; b = _val.y; }
+inline void dvec4::ab(const simddouble& _val) { a = _val; b = _val; }
+inline void dvec4::abg(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { a = _val0; b = _val1; g = _val2; }
+inline void dvec4::abg(const dvec3& _val) { a = _val.x; b = _val.y; g = _val.z; }
+inline void dvec4::abg(const simddouble& _val) { a = _val; b = _val; g = _val; }
+inline void dvec4::abgr(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { a = _val0; b = _val1; g = _val2; r = _val3; }
+inline void dvec4::abgr(const dvec4& _val) { a = _val.x; b = _val.y; g = _val.z; r = _val.w; }
+inline void dvec4::abgr(const simddouble& _val) { a = _val; b = _val; g = _val; r = _val; }
+inline void dvec4::abr(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { a = _val0; b = _val1; r = _val2; }
+inline void dvec4::abr(const dvec3& _val) { a = _val.x; b = _val.y; r = _val.z; }
+inline void dvec4::abr(const simddouble& _val) { a = _val; b = _val; r = _val; }
+inline void dvec4::abrg(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { a = _val0; b = _val1; r = _val2; g = _val3; }
+inline void dvec4::abrg(const dvec4& _val) { a = _val.x; b = _val.y; r = _val.z; g = _val.w; }
+inline void dvec4::abrg(const simddouble& _val) { a = _val; b = _val; r = _val; g = _val; }
+inline void dvec4::ag(const simddouble& _val0, const simddouble& _val1) { a = _val0; g = _val1; }
+inline void dvec4::ag(const dvec2& _val) { a = _val.x; g = _val.y; }
+inline void dvec4::ag(const simddouble& _val) { a = _val; g = _val; }
+inline void dvec4::agb(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { a = _val0; g = _val1; b = _val2; }
+inline void dvec4::agb(const dvec3& _val) { a = _val.x; g = _val.y; b = _val.z; }
+inline void dvec4::agb(const simddouble& _val) { a = _val; g = _val; b = _val; }
+inline void dvec4::agbr(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { a = _val0; g = _val1; b = _val2; r = _val3; }
+inline void dvec4::agbr(const dvec4& _val) { a = _val.x; g = _val.y; b = _val.z; r = _val.w; }
+inline void dvec4::agbr(const simddouble& _val) { a = _val; g = _val; b = _val; r = _val; }
+inline void dvec4::agr(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { a = _val0; g = _val1; r = _val2; }
+inline void dvec4::agr(const dvec3& _val) { a = _val.x; g = _val.y; r = _val.z; }
+inline void dvec4::agr(const simddouble& _val) { a = _val; g = _val; r = _val; }
+inline void dvec4::agrb(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { a = _val0; g = _val1; r = _val2; b = _val3; }
+inline void dvec4::agrb(const dvec4& _val) { a = _val.x; g = _val.y; r = _val.z; b = _val.w; }
+inline void dvec4::agrb(const simddouble& _val) { a = _val; g = _val; r = _val; b = _val; }
+inline void dvec4::ar(const simddouble& _val0, const simddouble& _val1) { a = _val0; r = _val1; }
+inline void dvec4::ar(const dvec2& _val) { a = _val.x; r = _val.y; }
+inline void dvec4::ar(const simddouble& _val) { a = _val; r = _val; }
+inline void dvec4::arb(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { a = _val0; r = _val1; b = _val2; }
+inline void dvec4::arb(const dvec3& _val) { a = _val.x; r = _val.y; b = _val.z; }
+inline void dvec4::arb(const simddouble& _val) { a = _val; r = _val; b = _val; }
+inline void dvec4::arbg(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { a = _val0; r = _val1; b = _val2; g = _val3; }
+inline void dvec4::arbg(const dvec4& _val) { a = _val.x; r = _val.y; b = _val.z; g = _val.w; }
+inline void dvec4::arbg(const simddouble& _val) { a = _val; r = _val; b = _val; g = _val; }
+inline void dvec4::arg(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { a = _val0; r = _val1; g = _val2; }
+inline void dvec4::arg(const dvec3& _val) { a = _val.x; r = _val.y; g = _val.z; }
+inline void dvec4::arg(const simddouble& _val) { a = _val; r = _val; g = _val; }
+inline void dvec4::argb(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { a = _val0; r = _val1; g = _val2; b = _val3; }
+inline void dvec4::argb(const dvec4& _val) { a = _val.x; r = _val.y; g = _val.z; b = _val.w; }
+inline void dvec4::argb(const simddouble& _val) { a = _val; r = _val; g = _val; b = _val; }
+inline void dvec4::ba(const simddouble& _val0, const simddouble& _val1) { b = _val0; a = _val1; }
+inline void dvec4::ba(const dvec2& _val) { b = _val.x; a = _val.y; }
+inline void dvec4::ba(const simddouble& _val) { b = _val; a = _val; }
+inline void dvec4::bag(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { b = _val0; a = _val1; g = _val2; }
+inline void dvec4::bag(const dvec3& _val) { b = _val.x; a = _val.y; g = _val.z; }
+inline void dvec4::bag(const simddouble& _val) { b = _val; a = _val; g = _val; }
+inline void dvec4::bagr(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { b = _val0; a = _val1; g = _val2; r = _val3; }
+inline void dvec4::bagr(const dvec4& _val) { b = _val.x; a = _val.y; g = _val.z; r = _val.w; }
+inline void dvec4::bagr(const simddouble& _val) { b = _val; a = _val; g = _val; r = _val; }
+inline void dvec4::bar(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { b = _val0; a = _val1; r = _val2; }
+inline void dvec4::bar(const dvec3& _val) { b = _val.x; a = _val.y; r = _val.z; }
+inline void dvec4::bar(const simddouble& _val) { b = _val; a = _val; r = _val; }
+inline void dvec4::barg(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { b = _val0; a = _val1; r = _val2; g = _val3; }
+inline void dvec4::barg(const dvec4& _val) { b = _val.x; a = _val.y; r = _val.z; g = _val.w; }
+inline void dvec4::barg(const simddouble& _val) { b = _val; a = _val; r = _val; g = _val; }
+inline void dvec4::bg(const simddouble& _val0, const simddouble& _val1) { b = _val0; g = _val1; }
+inline void dvec4::bg(const dvec2& _val) { b = _val.x; g = _val.y; }
+inline void dvec4::bg(const simddouble& _val) { b = _val; g = _val; }
+inline void dvec4::bga(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { b = _val0; g = _val1; a = _val2; }
+inline void dvec4::bga(const dvec3& _val) { b = _val.x; g = _val.y; a = _val.z; }
+inline void dvec4::bga(const simddouble& _val) { b = _val; g = _val; a = _val; }
+inline void dvec4::bgar(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { b = _val0; g = _val1; a = _val2; r = _val3; }
+inline void dvec4::bgar(const dvec4& _val) { b = _val.x; g = _val.y; a = _val.z; r = _val.w; }
+inline void dvec4::bgar(const simddouble& _val) { b = _val; g = _val; a = _val; r = _val; }
+inline void dvec4::bgr(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { b = _val0; g = _val1; r = _val2; }
+inline void dvec4::bgr(const dvec3& _val) { b = _val.x; g = _val.y; r = _val.z; }
+inline void dvec4::bgr(const simddouble& _val) { b = _val; g = _val; r = _val; }
+inline void dvec4::bgra(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { b = _val0; g = _val1; r = _val2; a = _val3; }
+inline void dvec4::bgra(const dvec4& _val) { b = _val.x; g = _val.y; r = _val.z; a = _val.w; }
+inline void dvec4::bgra(const simddouble& _val) { b = _val; g = _val; r = _val; a = _val; }
+inline void dvec4::br(const simddouble& _val0, const simddouble& _val1) { b = _val0; r = _val1; }
+inline void dvec4::br(const dvec2& _val) { b = _val.x; r = _val.y; }
+inline void dvec4::br(const simddouble& _val) { b = _val; r = _val; }
+inline void dvec4::bra(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { b = _val0; r = _val1; a = _val2; }
+inline void dvec4::bra(const dvec3& _val) { b = _val.x; r = _val.y; a = _val.z; }
+inline void dvec4::bra(const simddouble& _val) { b = _val; r = _val; a = _val; }
+inline void dvec4::brag(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { b = _val0; r = _val1; a = _val2; g = _val3; }
+inline void dvec4::brag(const dvec4& _val) { b = _val.x; r = _val.y; a = _val.z; g = _val.w; }
+inline void dvec4::brag(const simddouble& _val) { b = _val; r = _val; a = _val; g = _val; }
+inline void dvec4::brg(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { b = _val0; r = _val1; g = _val2; }
+inline void dvec4::brg(const dvec3& _val) { b = _val.x; r = _val.y; g = _val.z; }
+inline void dvec4::brg(const simddouble& _val) { b = _val; r = _val; g = _val; }
+inline void dvec4::brga(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { b = _val0; r = _val1; g = _val2; a = _val3; }
+inline void dvec4::brga(const dvec4& _val) { b = _val.x; r = _val.y; g = _val.z; a = _val.w; }
+inline void dvec4::brga(const simddouble& _val) { b = _val; r = _val; g = _val; a = _val; }
+inline void dvec4::ga(const simddouble& _val0, const simddouble& _val1) { g = _val0; a = _val1; }
+inline void dvec4::ga(const dvec2& _val) { g = _val.x; a = _val.y; }
+inline void dvec4::ga(const simddouble& _val) { g = _val; a = _val; }
+inline void dvec4::gab(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { g = _val0; a = _val1; b = _val2; }
+inline void dvec4::gab(const dvec3& _val) { g = _val.x; a = _val.y; b = _val.z; }
+inline void dvec4::gab(const simddouble& _val) { g = _val; a = _val; b = _val; }
+inline void dvec4::gabr(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { g = _val0; a = _val1; b = _val2; r = _val3; }
+inline void dvec4::gabr(const dvec4& _val) { g = _val.x; a = _val.y; b = _val.z; r = _val.w; }
+inline void dvec4::gabr(const simddouble& _val) { g = _val; a = _val; b = _val; r = _val; }
+inline void dvec4::gar(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { g = _val0; a = _val1; r = _val2; }
+inline void dvec4::gar(const dvec3& _val) { g = _val.x; a = _val.y; r = _val.z; }
+inline void dvec4::gar(const simddouble& _val) { g = _val; a = _val; r = _val; }
+inline void dvec4::garb(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { g = _val0; a = _val1; r = _val2; b = _val3; }
+inline void dvec4::garb(const dvec4& _val) { g = _val.x; a = _val.y; r = _val.z; b = _val.w; }
+inline void dvec4::garb(const simddouble& _val) { g = _val; a = _val; r = _val; b = _val; }
+inline void dvec4::gb(const simddouble& _val0, const simddouble& _val1) { g = _val0; b = _val1; }
+inline void dvec4::gb(const dvec2& _val) { g = _val.x; b = _val.y; }
+inline void dvec4::gb(const simddouble& _val) { g = _val; b = _val; }
+inline void dvec4::gba(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { g = _val0; b = _val1; a = _val2; }
+inline void dvec4::gba(const dvec3& _val) { g = _val.x; b = _val.y; a = _val.z; }
+inline void dvec4::gba(const simddouble& _val) { g = _val; b = _val; a = _val; }
+inline void dvec4::gbar(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { g = _val0; b = _val1; a = _val2; r = _val3; }
+inline void dvec4::gbar(const dvec4& _val) { g = _val.x; b = _val.y; a = _val.z; r = _val.w; }
+inline void dvec4::gbar(const simddouble& _val) { g = _val; b = _val; a = _val; r = _val; }
+inline void dvec4::gbr(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { g = _val0; b = _val1; r = _val2; }
+inline void dvec4::gbr(const dvec3& _val) { g = _val.x; b = _val.y; r = _val.z; }
+inline void dvec4::gbr(const simddouble& _val) { g = _val; b = _val; r = _val; }
+inline void dvec4::gbra(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { g = _val0; b = _val1; r = _val2; a = _val3; }
+inline void dvec4::gbra(const dvec4& _val) { g = _val.x; b = _val.y; r = _val.z; a = _val.w; }
+inline void dvec4::gbra(const simddouble& _val) { g = _val; b = _val; r = _val; a = _val; }
+inline void dvec4::gr(const simddouble& _val0, const simddouble& _val1) { g = _val0; r = _val1; }
+inline void dvec4::gr(const dvec2& _val) { g = _val.x; r = _val.y; }
+inline void dvec4::gr(const simddouble& _val) { g = _val; r = _val; }
+inline void dvec4::gra(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { g = _val0; r = _val1; a = _val2; }
+inline void dvec4::gra(const dvec3& _val) { g = _val.x; r = _val.y; a = _val.z; }
+inline void dvec4::gra(const simddouble& _val) { g = _val; r = _val; a = _val; }
+inline void dvec4::grab(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { g = _val0; r = _val1; a = _val2; b = _val3; }
+inline void dvec4::grab(const dvec4& _val) { g = _val.x; r = _val.y; a = _val.z; b = _val.w; }
+inline void dvec4::grab(const simddouble& _val) { g = _val; r = _val; a = _val; b = _val; }
+inline void dvec4::grb(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { g = _val0; r = _val1; b = _val2; }
+inline void dvec4::grb(const dvec3& _val) { g = _val.x; r = _val.y; b = _val.z; }
+inline void dvec4::grb(const simddouble& _val) { g = _val; r = _val; b = _val; }
+inline void dvec4::grba(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { g = _val0; r = _val1; b = _val2; a = _val3; }
+inline void dvec4::grba(const dvec4& _val) { g = _val.x; r = _val.y; b = _val.z; a = _val.w; }
+inline void dvec4::grba(const simddouble& _val) { g = _val; r = _val; b = _val; a = _val; }
+inline void dvec4::ra(const simddouble& _val0, const simddouble& _val1) { r = _val0; a = _val1; }
+inline void dvec4::ra(const dvec2& _val) { r = _val.x; a = _val.y; }
+inline void dvec4::ra(const simddouble& _val) { r = _val; a = _val; }
+inline void dvec4::rab(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { r = _val0; a = _val1; b = _val2; }
+inline void dvec4::rab(const dvec3& _val) { r = _val.x; a = _val.y; b = _val.z; }
+inline void dvec4::rab(const simddouble& _val) { r = _val; a = _val; b = _val; }
+inline void dvec4::rabg(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { r = _val0; a = _val1; b = _val2; g = _val3; }
+inline void dvec4::rabg(const dvec4& _val) { r = _val.x; a = _val.y; b = _val.z; g = _val.w; }
+inline void dvec4::rabg(const simddouble& _val) { r = _val; a = _val; b = _val; g = _val; }
+inline void dvec4::rag(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { r = _val0; a = _val1; g = _val2; }
+inline void dvec4::rag(const dvec3& _val) { r = _val.x; a = _val.y; g = _val.z; }
+inline void dvec4::rag(const simddouble& _val) { r = _val; a = _val; g = _val; }
+inline void dvec4::ragb(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { r = _val0; a = _val1; g = _val2; b = _val3; }
+inline void dvec4::ragb(const dvec4& _val) { r = _val.x; a = _val.y; g = _val.z; b = _val.w; }
+inline void dvec4::ragb(const simddouble& _val) { r = _val; a = _val; g = _val; b = _val; }
+inline void dvec4::rb(const simddouble& _val0, const simddouble& _val1) { r = _val0; b = _val1; }
+inline void dvec4::rb(const dvec2& _val) { r = _val.x; b = _val.y; }
+inline void dvec4::rb(const simddouble& _val) { r = _val; b = _val; }
+inline void dvec4::rba(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { r = _val0; b = _val1; a = _val2; }
+inline void dvec4::rba(const dvec3& _val) { r = _val.x; b = _val.y; a = _val.z; }
+inline void dvec4::rba(const simddouble& _val) { r = _val; b = _val; a = _val; }
+inline void dvec4::rbag(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { r = _val0; b = _val1; a = _val2; g = _val3; }
+inline void dvec4::rbag(const dvec4& _val) { r = _val.x; b = _val.y; a = _val.z; g = _val.w; }
+inline void dvec4::rbag(const simddouble& _val) { r = _val; b = _val; a = _val; g = _val; }
+inline void dvec4::rbg(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { r = _val0; b = _val1; g = _val2; }
+inline void dvec4::rbg(const dvec3& _val) { r = _val.x; b = _val.y; g = _val.z; }
+inline void dvec4::rbg(const simddouble& _val) { r = _val; b = _val; g = _val; }
+inline void dvec4::rbga(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { r = _val0; b = _val1; g = _val2; a = _val3; }
+inline void dvec4::rbga(const dvec4& _val) { r = _val.x; b = _val.y; g = _val.z; a = _val.w; }
+inline void dvec4::rbga(const simddouble& _val) { r = _val; b = _val; g = _val; a = _val; }
+inline void dvec4::rg(const simddouble& _val0, const simddouble& _val1) { r = _val0; g = _val1; }
+inline void dvec4::rg(const dvec2& _val) { r = _val.x; g = _val.y; }
+inline void dvec4::rg(const simddouble& _val) { r = _val; g = _val; }
+inline void dvec4::rga(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { r = _val0; g = _val1; a = _val2; }
+inline void dvec4::rga(const dvec3& _val) { r = _val.x; g = _val.y; a = _val.z; }
+inline void dvec4::rga(const simddouble& _val) { r = _val; g = _val; a = _val; }
+inline void dvec4::rgab(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { r = _val0; g = _val1; a = _val2; b = _val3; }
+inline void dvec4::rgab(const dvec4& _val) { r = _val.x; g = _val.y; a = _val.z; b = _val.w; }
+inline void dvec4::rgab(const simddouble& _val) { r = _val; g = _val; a = _val; b = _val; }
+inline void dvec4::rgb(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { r = _val0; g = _val1; b = _val2; }
+inline void dvec4::rgb(const dvec3& _val) { r = _val.x; g = _val.y; b = _val.z; }
+inline void dvec4::rgb(const simddouble& _val) { r = _val; g = _val; b = _val; }
+inline void dvec4::rgba(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { r = _val0; g = _val1; b = _val2; a = _val3; }
+inline void dvec4::rgba(const dvec4& _val) { r = _val.x; g = _val.y; b = _val.z; a = _val.w; }
+inline void dvec4::rgba(const simddouble& _val) { r = _val; g = _val; b = _val; a = _val; }
+inline void dvec4::wx(const simddouble& _val0, const simddouble& _val1) { w = _val0; x = _val1; }
+inline void dvec4::wx(const dvec2& _val) { w = _val.x; x = _val.y; }
+inline void dvec4::wx(const simddouble& _val) { w = _val; x = _val; }
+inline void dvec4::wxy(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { w = _val0; x = _val1; y = _val2; }
+inline void dvec4::wxy(const dvec3& _val) { w = _val.x; x = _val.y; y = _val.z; }
+inline void dvec4::wxy(const simddouble& _val) { w = _val; x = _val; y = _val; }
+inline void dvec4::wxyz(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { w = _val0; x = _val1; y = _val2; z = _val3; }
+inline void dvec4::wxyz(const dvec4& _val) { w = _val.x; x = _val.y; y = _val.z; z = _val.w; }
+inline void dvec4::wxyz(const simddouble& _val) { w = _val; x = _val; y = _val; z = _val; }
+inline void dvec4::wxz(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { w = _val0; x = _val1; z = _val2; }
+inline void dvec4::wxz(const dvec3& _val) { w = _val.x; x = _val.y; z = _val.z; }
+inline void dvec4::wxz(const simddouble& _val) { w = _val; x = _val; z = _val; }
+inline void dvec4::wxzy(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { w = _val0; x = _val1; z = _val2; y = _val3; }
+inline void dvec4::wxzy(const dvec4& _val) { w = _val.x; x = _val.y; z = _val.z; y = _val.w; }
+inline void dvec4::wxzy(const simddouble& _val) { w = _val; x = _val; z = _val; y = _val; }
+inline void dvec4::wy(const simddouble& _val0, const simddouble& _val1) { w = _val0; y = _val1; }
+inline void dvec4::wy(const dvec2& _val) { w = _val.x; y = _val.y; }
+inline void dvec4::wy(const simddouble& _val) { w = _val; y = _val; }
+inline void dvec4::wyx(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { w = _val0; y = _val1; x = _val2; }
+inline void dvec4::wyx(const dvec3& _val) { w = _val.x; y = _val.y; x = _val.z; }
+inline void dvec4::wyx(const simddouble& _val) { w = _val; y = _val; x = _val; }
+inline void dvec4::wyxz(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { w = _val0; y = _val1; x = _val2; z = _val3; }
+inline void dvec4::wyxz(const dvec4& _val) { w = _val.x; y = _val.y; x = _val.z; z = _val.w; }
+inline void dvec4::wyxz(const simddouble& _val) { w = _val; y = _val; x = _val; z = _val; }
+inline void dvec4::wyz(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { w = _val0; y = _val1; z = _val2; }
+inline void dvec4::wyz(const dvec3& _val) { w = _val.x; y = _val.y; z = _val.z; }
+inline void dvec4::wyz(const simddouble& _val) { w = _val; y = _val; z = _val; }
+inline void dvec4::wyzx(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { w = _val0; y = _val1; z = _val2; x = _val3; }
+inline void dvec4::wyzx(const dvec4& _val) { w = _val.x; y = _val.y; z = _val.z; x = _val.w; }
+inline void dvec4::wyzx(const simddouble& _val) { w = _val; y = _val; z = _val; x = _val; }
+inline void dvec4::wz(const simddouble& _val0, const simddouble& _val1) { w = _val0; z = _val1; }
+inline void dvec4::wz(const dvec2& _val) { w = _val.x; z = _val.y; }
+inline void dvec4::wz(const simddouble& _val) { w = _val; z = _val; }
+inline void dvec4::wzx(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { w = _val0; z = _val1; x = _val2; }
+inline void dvec4::wzx(const dvec3& _val) { w = _val.x; z = _val.y; x = _val.z; }
+inline void dvec4::wzx(const simddouble& _val) { w = _val; z = _val; x = _val; }
+inline void dvec4::wzxy(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { w = _val0; z = _val1; x = _val2; y = _val3; }
+inline void dvec4::wzxy(const dvec4& _val) { w = _val.x; z = _val.y; x = _val.z; y = _val.w; }
+inline void dvec4::wzxy(const simddouble& _val) { w = _val; z = _val; x = _val; y = _val; }
+inline void dvec4::wzy(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { w = _val0; z = _val1; y = _val2; }
+inline void dvec4::wzy(const dvec3& _val) { w = _val.x; z = _val.y; y = _val.z; }
+inline void dvec4::wzy(const simddouble& _val) { w = _val; z = _val; y = _val; }
+inline void dvec4::wzyx(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { w = _val0; z = _val1; y = _val2; x = _val3; }
+inline void dvec4::wzyx(const dvec4& _val) { w = _val.x; z = _val.y; y = _val.z; x = _val.w; }
+inline void dvec4::wzyx(const simddouble& _val) { w = _val; z = _val; y = _val; x = _val; }
+inline void dvec4::xw(const simddouble& _val0, const simddouble& _val1) { x = _val0; w = _val1; }
+inline void dvec4::xw(const dvec2& _val) { x = _val.x; w = _val.y; }
+inline void dvec4::xw(const simddouble& _val) { x = _val; w = _val; }
+inline void dvec4::xwy(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { x = _val0; w = _val1; y = _val2; }
+inline void dvec4::xwy(const dvec3& _val) { x = _val.x; w = _val.y; y = _val.z; }
+inline void dvec4::xwy(const simddouble& _val) { x = _val; w = _val; y = _val; }
+inline void dvec4::xwyz(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { x = _val0; w = _val1; y = _val2; z = _val3; }
+inline void dvec4::xwyz(const dvec4& _val) { x = _val.x; w = _val.y; y = _val.z; z = _val.w; }
+inline void dvec4::xwyz(const simddouble& _val) { x = _val; w = _val; y = _val; z = _val; }
+inline void dvec4::xwz(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { x = _val0; w = _val1; z = _val2; }
+inline void dvec4::xwz(const dvec3& _val) { x = _val.x; w = _val.y; z = _val.z; }
+inline void dvec4::xwz(const simddouble& _val) { x = _val; w = _val; z = _val; }
+inline void dvec4::xwzy(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { x = _val0; w = _val1; z = _val2; y = _val3; }
+inline void dvec4::xwzy(const dvec4& _val) { x = _val.x; w = _val.y; z = _val.z; y = _val.w; }
+inline void dvec4::xwzy(const simddouble& _val) { x = _val; w = _val; z = _val; y = _val; }
+inline void dvec4::xy(const simddouble& _val0, const simddouble& _val1) { x = _val0; y = _val1; }
+inline void dvec4::xy(const dvec2& _val) { x = _val.x; y = _val.y; }
+inline void dvec4::xy(const simddouble& _val) { x = _val; y = _val; }
+inline void dvec4::xyw(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { x = _val0; y = _val1; w = _val2; }
+inline void dvec4::xyw(const dvec3& _val) { x = _val.x; y = _val.y; w = _val.z; }
+inline void dvec4::xyw(const simddouble& _val) { x = _val; y = _val; w = _val; }
+inline void dvec4::xywz(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { x = _val0; y = _val1; w = _val2; z = _val3; }
+inline void dvec4::xywz(const dvec4& _val) { x = _val.x; y = _val.y; w = _val.z; z = _val.w; }
+inline void dvec4::xywz(const simddouble& _val) { x = _val; y = _val; w = _val; z = _val; }
+inline void dvec4::xyz(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { x = _val0; y = _val1; z = _val2; }
+inline void dvec4::xyz(const dvec3& _val) { x = _val.x; y = _val.y; z = _val.z; }
+inline void dvec4::xyz(const simddouble& _val) { x = _val; y = _val; z = _val; }
+inline void dvec4::xyzw(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { x = _val0; y = _val1; z = _val2; w = _val3; }
+inline void dvec4::xyzw(const dvec4& _val) { x = _val.x; y = _val.y; z = _val.z; w = _val.w; }
+inline void dvec4::xyzw(const simddouble& _val) { x = _val; y = _val; z = _val; w = _val; }
+inline void dvec4::xz(const simddouble& _val0, const simddouble& _val1) { x = _val0; z = _val1; }
+inline void dvec4::xz(const dvec2& _val) { x = _val.x; z = _val.y; }
+inline void dvec4::xz(const simddouble& _val) { x = _val; z = _val; }
+inline void dvec4::xzw(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { x = _val0; z = _val1; w = _val2; }
+inline void dvec4::xzw(const dvec3& _val) { x = _val.x; z = _val.y; w = _val.z; }
+inline void dvec4::xzw(const simddouble& _val) { x = _val; z = _val; w = _val; }
+inline void dvec4::xzwy(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { x = _val0; z = _val1; w = _val2; y = _val3; }
+inline void dvec4::xzwy(const dvec4& _val) { x = _val.x; z = _val.y; w = _val.z; y = _val.w; }
+inline void dvec4::xzwy(const simddouble& _val) { x = _val; z = _val; w = _val; y = _val; }
+inline void dvec4::xzy(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { x = _val0; z = _val1; y = _val2; }
+inline void dvec4::xzy(const dvec3& _val) { x = _val.x; z = _val.y; y = _val.z; }
+inline void dvec4::xzy(const simddouble& _val) { x = _val; z = _val; y = _val; }
+inline void dvec4::xzyw(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { x = _val0; z = _val1; y = _val2; w = _val3; }
+inline void dvec4::xzyw(const dvec4& _val) { x = _val.x; z = _val.y; y = _val.z; w = _val.w; }
+inline void dvec4::xzyw(const simddouble& _val) { x = _val; z = _val; y = _val; w = _val; }
+inline void dvec4::yw(const simddouble& _val0, const simddouble& _val1) { y = _val0; w = _val1; }
+inline void dvec4::yw(const dvec2& _val) { y = _val.x; w = _val.y; }
+inline void dvec4::yw(const simddouble& _val) { y = _val; w = _val; }
+inline void dvec4::ywx(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { y = _val0; w = _val1; x = _val2; }
+inline void dvec4::ywx(const dvec3& _val) { y = _val.x; w = _val.y; x = _val.z; }
+inline void dvec4::ywx(const simddouble& _val) { y = _val; w = _val; x = _val; }
+inline void dvec4::ywxz(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { y = _val0; w = _val1; x = _val2; z = _val3; }
+inline void dvec4::ywxz(const dvec4& _val) { y = _val.x; w = _val.y; x = _val.z; z = _val.w; }
+inline void dvec4::ywxz(const simddouble& _val) { y = _val; w = _val; x = _val; z = _val; }
+inline void dvec4::ywz(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { y = _val0; w = _val1; z = _val2; }
+inline void dvec4::ywz(const dvec3& _val) { y = _val.x; w = _val.y; z = _val.z; }
+inline void dvec4::ywz(const simddouble& _val) { y = _val; w = _val; z = _val; }
+inline void dvec4::ywzx(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { y = _val0; w = _val1; z = _val2; x = _val3; }
+inline void dvec4::ywzx(const dvec4& _val) { y = _val.x; w = _val.y; z = _val.z; x = _val.w; }
+inline void dvec4::ywzx(const simddouble& _val) { y = _val; w = _val; z = _val; x = _val; }
+inline void dvec4::yx(const simddouble& _val0, const simddouble& _val1) { y = _val0; x = _val1; }
+inline void dvec4::yx(const dvec2& _val) { y = _val.x; x = _val.y; }
+inline void dvec4::yx(const simddouble& _val) { y = _val; x = _val; }
+inline void dvec4::yxw(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { y = _val0; x = _val1; w = _val2; }
+inline void dvec4::yxw(const dvec3& _val) { y = _val.x; x = _val.y; w = _val.z; }
+inline void dvec4::yxw(const simddouble& _val) { y = _val; x = _val; w = _val; }
+inline void dvec4::yxwz(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { y = _val0; x = _val1; w = _val2; z = _val3; }
+inline void dvec4::yxwz(const dvec4& _val) { y = _val.x; x = _val.y; w = _val.z; z = _val.w; }
+inline void dvec4::yxwz(const simddouble& _val) { y = _val; x = _val; w = _val; z = _val; }
+inline void dvec4::yxz(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { y = _val0; x = _val1; z = _val2; }
+inline void dvec4::yxz(const dvec3& _val) { y = _val.x; x = _val.y; z = _val.z; }
+inline void dvec4::yxz(const simddouble& _val) { y = _val; x = _val; z = _val; }
+inline void dvec4::yxzw(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { y = _val0; x = _val1; z = _val2; w = _val3; }
+inline void dvec4::yxzw(const dvec4& _val) { y = _val.x; x = _val.y; z = _val.z; w = _val.w; }
+inline void dvec4::yxzw(const simddouble& _val) { y = _val; x = _val; z = _val; w = _val; }
+inline void dvec4::yz(const simddouble& _val0, const simddouble& _val1) { y = _val0; z = _val1; }
+inline void dvec4::yz(const dvec2& _val) { y = _val.x; z = _val.y; }
+inline void dvec4::yz(const simddouble& _val) { y = _val; z = _val; }
+inline void dvec4::yzw(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { y = _val0; z = _val1; w = _val2; }
+inline void dvec4::yzw(const dvec3& _val) { y = _val.x; z = _val.y; w = _val.z; }
+inline void dvec4::yzw(const simddouble& _val) { y = _val; z = _val; w = _val; }
+inline void dvec4::yzwx(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { y = _val0; z = _val1; w = _val2; x = _val3; }
+inline void dvec4::yzwx(const dvec4& _val) { y = _val.x; z = _val.y; w = _val.z; x = _val.w; }
+inline void dvec4::yzwx(const simddouble& _val) { y = _val; z = _val; w = _val; x = _val; }
+inline void dvec4::yzx(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { y = _val0; z = _val1; x = _val2; }
+inline void dvec4::yzx(const dvec3& _val) { y = _val.x; z = _val.y; x = _val.z; }
+inline void dvec4::yzx(const simddouble& _val) { y = _val; z = _val; x = _val; }
+inline void dvec4::yzxw(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { y = _val0; z = _val1; x = _val2; w = _val3; }
+inline void dvec4::yzxw(const dvec4& _val) { y = _val.x; z = _val.y; x = _val.z; w = _val.w; }
+inline void dvec4::yzxw(const simddouble& _val) { y = _val; z = _val; x = _val; w = _val; }
+inline void dvec4::zw(const simddouble& _val0, const simddouble& _val1) { z = _val0; w = _val1; }
+inline void dvec4::zw(const dvec2& _val) { z = _val.x; w = _val.y; }
+inline void dvec4::zw(const simddouble& _val) { z = _val; w = _val; }
+inline void dvec4::zwx(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { z = _val0; w = _val1; x = _val2; }
+inline void dvec4::zwx(const dvec3& _val) { z = _val.x; w = _val.y; x = _val.z; }
+inline void dvec4::zwx(const simddouble& _val) { z = _val; w = _val; x = _val; }
+inline void dvec4::zwxy(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { z = _val0; w = _val1; x = _val2; y = _val3; }
+inline void dvec4::zwxy(const dvec4& _val) { z = _val.x; w = _val.y; x = _val.z; y = _val.w; }
+inline void dvec4::zwxy(const simddouble& _val) { z = _val; w = _val; x = _val; y = _val; }
+inline void dvec4::zwy(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { z = _val0; w = _val1; y = _val2; }
+inline void dvec4::zwy(const dvec3& _val) { z = _val.x; w = _val.y; y = _val.z; }
+inline void dvec4::zwy(const simddouble& _val) { z = _val; w = _val; y = _val; }
+inline void dvec4::zwyx(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { z = _val0; w = _val1; y = _val2; x = _val3; }
+inline void dvec4::zwyx(const dvec4& _val) { z = _val.x; w = _val.y; y = _val.z; x = _val.w; }
+inline void dvec4::zwyx(const simddouble& _val) { z = _val; w = _val; y = _val; x = _val; }
+inline void dvec4::zx(const simddouble& _val0, const simddouble& _val1) { z = _val0; x = _val1; }
+inline void dvec4::zx(const dvec2& _val) { z = _val.x; x = _val.y; }
+inline void dvec4::zx(const simddouble& _val) { z = _val; x = _val; }
+inline void dvec4::zxw(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { z = _val0; x = _val1; w = _val2; }
+inline void dvec4::zxw(const dvec3& _val) { z = _val.x; x = _val.y; w = _val.z; }
+inline void dvec4::zxw(const simddouble& _val) { z = _val; x = _val; w = _val; }
+inline void dvec4::zxwy(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { z = _val0; x = _val1; w = _val2; y = _val3; }
+inline void dvec4::zxwy(const dvec4& _val) { z = _val.x; x = _val.y; w = _val.z; y = _val.w; }
+inline void dvec4::zxwy(const simddouble& _val) { z = _val; x = _val; w = _val; y = _val; }
+inline void dvec4::zxy(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { z = _val0; x = _val1; y = _val2; }
+inline void dvec4::zxy(const dvec3& _val) { z = _val.x; x = _val.y; y = _val.z; }
+inline void dvec4::zxy(const simddouble& _val) { z = _val; x = _val; y = _val; }
+inline void dvec4::zxyw(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { z = _val0; x = _val1; y = _val2; w = _val3; }
+inline void dvec4::zxyw(const dvec4& _val) { z = _val.x; x = _val.y; y = _val.z; w = _val.w; }
+inline void dvec4::zxyw(const simddouble& _val) { z = _val; x = _val; y = _val; w = _val; }
+inline void dvec4::zy(const simddouble& _val0, const simddouble& _val1) { z = _val0; y = _val1; }
+inline void dvec4::zy(const dvec2& _val) { z = _val.x; y = _val.y; }
+inline void dvec4::zy(const simddouble& _val) { z = _val; y = _val; }
+inline void dvec4::zyw(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { z = _val0; y = _val1; w = _val2; }
+inline void dvec4::zyw(const dvec3& _val) { z = _val.x; y = _val.y; w = _val.z; }
+inline void dvec4::zyw(const simddouble& _val) { z = _val; y = _val; w = _val; }
+inline void dvec4::zywx(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { z = _val0; y = _val1; w = _val2; x = _val3; }
+inline void dvec4::zywx(const dvec4& _val) { z = _val.x; y = _val.y; w = _val.z; x = _val.w; }
+inline void dvec4::zywx(const simddouble& _val) { z = _val; y = _val; w = _val; x = _val; }
+inline void dvec4::zyx(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2) { z = _val0; y = _val1; x = _val2; }
+inline void dvec4::zyx(const dvec3& _val) { z = _val.x; y = _val.y; x = _val.z; }
+inline void dvec4::zyx(const simddouble& _val) { z = _val; y = _val; x = _val; }
+inline void dvec4::zyxw(const simddouble& _val0, const simddouble& _val1, const simddouble& _val2, const simddouble& _val3) { z = _val0; y = _val1; x = _val2; w = _val3; }
+inline void dvec4::zyxw(const dvec4& _val) { z = _val.x; y = _val.y; x = _val.z; w = _val.w; }
+inline void dvec4::zyxw(const simddouble& _val) { z = _val; y = _val; x = _val; w = _val; }
+#ifndef USE_SCALAR
+inline void dvec4::ab(const double& _val) { const simddouble temp = simd_set1_double(_val); a = temp; b = temp; }
+inline void dvec4::abg(const double& _val) { const simddouble temp = simd_set1_double(_val); a = temp; b = temp; g = temp; }
+inline void dvec4::abgr(const double& _val) { const simddouble temp = simd_set1_double(_val); a = temp; b = temp; g = temp; r = temp; }
+inline void dvec4::abr(const double& _val) { const simddouble temp = simd_set1_double(_val); a = temp; b = temp; r = temp; }
+inline void dvec4::abrg(const double& _val) { const simddouble temp = simd_set1_double(_val); a = temp; b = temp; r = temp; g = temp; }
+inline void dvec4::ag(const double& _val) { const simddouble temp = simd_set1_double(_val); a = temp; g = temp; }
+inline void dvec4::agb(const double& _val) { const simddouble temp = simd_set1_double(_val); a = temp; g = temp; b = temp; }
+inline void dvec4::agbr(const double& _val) { const simddouble temp = simd_set1_double(_val); a = temp; g = temp; b = temp; r = temp; }
+inline void dvec4::agr(const double& _val) { const simddouble temp = simd_set1_double(_val); a = temp; g = temp; r = temp; }
+inline void dvec4::agrb(const double& _val) { const simddouble temp = simd_set1_double(_val); a = temp; g = temp; r = temp; b = temp; }
+inline void dvec4::ar(const double& _val) { const simddouble temp = simd_set1_double(_val); a = temp; r = temp; }
+inline void dvec4::arb(const double& _val) { const simddouble temp = simd_set1_double(_val); a = temp; r = temp; b = temp; }
+inline void dvec4::arbg(const double& _val) { const simddouble temp = simd_set1_double(_val); a = temp; r = temp; b = temp; g = temp; }
+inline void dvec4::arg(const double& _val) { const simddouble temp = simd_set1_double(_val); a = temp; r = temp; g = temp; }
+inline void dvec4::argb(const double& _val) { const simddouble temp = simd_set1_double(_val); a = temp; r = temp; g = temp; b = temp; }
+inline void dvec4::ba(const double& _val) { const simddouble temp = simd_set1_double(_val); b = temp; a = temp; }
+inline void dvec4::bag(const double& _val) { const simddouble temp = simd_set1_double(_val); b = temp; a = temp; g = temp; }
+inline void dvec4::bagr(const double& _val) { const simddouble temp = simd_set1_double(_val); b = temp; a = temp; g = temp; r = temp; }
+inline void dvec4::bar(const double& _val) { const simddouble temp = simd_set1_double(_val); b = temp; a = temp; r = temp; }
+inline void dvec4::barg(const double& _val) { const simddouble temp = simd_set1_double(_val); b = temp; a = temp; r = temp; g = temp; }
+inline void dvec4::bg(const double& _val) { const simddouble temp = simd_set1_double(_val); b = temp; g = temp; }
+inline void dvec4::bga(const double& _val) { const simddouble temp = simd_set1_double(_val); b = temp; g = temp; a = temp; }
+inline void dvec4::bgar(const double& _val) { const simddouble temp = simd_set1_double(_val); b = temp; g = temp; a = temp; r = temp; }
+inline void dvec4::bgr(const double& _val) { const simddouble temp = simd_set1_double(_val); b = temp; g = temp; r = temp; }
+inline void dvec4::bgra(const double& _val) { const simddouble temp = simd_set1_double(_val); b = temp; g = temp; r = temp; a = temp; }
+inline void dvec4::br(const double& _val) { const simddouble temp = simd_set1_double(_val); b = temp; r = temp; }
+inline void dvec4::bra(const double& _val) { const simddouble temp = simd_set1_double(_val); b = temp; r = temp; a = temp; }
+inline void dvec4::brag(const double& _val) { const simddouble temp = simd_set1_double(_val); b = temp; r = temp; a = temp; g = temp; }
+inline void dvec4::brg(const double& _val) { const simddouble temp = simd_set1_double(_val); b = temp; r = temp; g = temp; }
+inline void dvec4::brga(const double& _val) { const simddouble temp = simd_set1_double(_val); b = temp; r = temp; g = temp; a = temp; }
+inline void dvec4::ga(const double& _val) { const simddouble temp = simd_set1_double(_val); g = temp; a = temp; }
+inline void dvec4::gab(const double& _val) { const simddouble temp = simd_set1_double(_val); g = temp; a = temp; b = temp; }
+inline void dvec4::gabr(const double& _val) { const simddouble temp = simd_set1_double(_val); g = temp; a = temp; b = temp; r = temp; }
+inline void dvec4::gar(const double& _val) { const simddouble temp = simd_set1_double(_val); g = temp; a = temp; r = temp; }
+inline void dvec4::garb(const double& _val) { const simddouble temp = simd_set1_double(_val); g = temp; a = temp; r = temp; b = temp; }
+inline void dvec4::gb(const double& _val) { const simddouble temp = simd_set1_double(_val); g = temp; b = temp; }
+inline void dvec4::gba(const double& _val) { const simddouble temp = simd_set1_double(_val); g = temp; b = temp; a = temp; }
+inline void dvec4::gbar(const double& _val) { const simddouble temp = simd_set1_double(_val); g = temp; b = temp; a = temp; r = temp; }
+inline void dvec4::gbr(const double& _val) { const simddouble temp = simd_set1_double(_val); g = temp; b = temp; r = temp; }
+inline void dvec4::gbra(const double& _val) { const simddouble temp = simd_set1_double(_val); g = temp; b = temp; r = temp; a = temp; }
+inline void dvec4::gr(const double& _val) { const simddouble temp = simd_set1_double(_val); g = temp; r = temp; }
+inline void dvec4::gra(const double& _val) { const simddouble temp = simd_set1_double(_val); g = temp; r = temp; a = temp; }
+inline void dvec4::grab(const double& _val) { const simddouble temp = simd_set1_double(_val); g = temp; r = temp; a = temp; b = temp; }
+inline void dvec4::grb(const double& _val) { const simddouble temp = simd_set1_double(_val); g = temp; r = temp; b = temp; }
+inline void dvec4::grba(const double& _val) { const simddouble temp = simd_set1_double(_val); g = temp; r = temp; b = temp; a = temp; }
+inline void dvec4::ra(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; a = temp; }
+inline void dvec4::rab(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; a = temp; b = temp; }
+inline void dvec4::rabg(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; a = temp; b = temp; g = temp; }
+inline void dvec4::rag(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; a = temp; g = temp; }
+inline void dvec4::ragb(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; a = temp; g = temp; b = temp; }
+inline void dvec4::rb(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; b = temp; }
+inline void dvec4::rba(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; b = temp; a = temp; }
+inline void dvec4::rbag(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; b = temp; a = temp; g = temp; }
+inline void dvec4::rbg(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; b = temp; g = temp; }
+inline void dvec4::rbga(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; b = temp; g = temp; a = temp; }
+inline void dvec4::rg(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; g = temp; }
+inline void dvec4::rga(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; g = temp; a = temp; }
+inline void dvec4::rgab(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; g = temp; a = temp; b = temp; }
+inline void dvec4::rgb(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; g = temp; b = temp; }
+inline void dvec4::rgba(const double& _val) { const simddouble temp = simd_set1_double(_val); r = temp; g = temp; b = temp; a = temp; }
+inline void dvec4::wx(const double& _val) { const simddouble temp = simd_set1_double(_val); w = temp; x = temp; }
+inline void dvec4::wxy(const double& _val) { const simddouble temp = simd_set1_double(_val); w = temp; x = temp; y = temp; }
+inline void dvec4::wxyz(const double& _val) { const simddouble temp = simd_set1_double(_val); w = temp; x = temp; y = temp; z = temp; }
+inline void dvec4::wxz(const double& _val) { const simddouble temp = simd_set1_double(_val); w = temp; x = temp; z = temp; }
+inline void dvec4::wxzy(const double& _val) { const simddouble temp = simd_set1_double(_val); w = temp; x = temp; z = temp; y = temp; }
+inline void dvec4::wy(const double& _val) { const simddouble temp = simd_set1_double(_val); w = temp; y = temp; }
+inline void dvec4::wyx(const double& _val) { const simddouble temp = simd_set1_double(_val); w = temp; y = temp; x = temp; }
+inline void dvec4::wyxz(const double& _val) { const simddouble temp = simd_set1_double(_val); w = temp; y = temp; x = temp; z = temp; }
+inline void dvec4::wyz(const double& _val) { const simddouble temp = simd_set1_double(_val); w = temp; y = temp; z = temp; }
+inline void dvec4::wyzx(const double& _val) { const simddouble temp = simd_set1_double(_val); w = temp; y = temp; z = temp; x = temp; }
+inline void dvec4::wz(const double& _val) { const simddouble temp = simd_set1_double(_val); w = temp; z = temp; }
+inline void dvec4::wzx(const double& _val) { const simddouble temp = simd_set1_double(_val); w = temp; z = temp; x = temp; }
+inline void dvec4::wzxy(const double& _val) { const simddouble temp = simd_set1_double(_val); w = temp; z = temp; x = temp; y = temp; }
+inline void dvec4::wzy(const double& _val) { const simddouble temp = simd_set1_double(_val); w = temp; z = temp; y = temp; }
+inline void dvec4::wzyx(const double& _val) { const simddouble temp = simd_set1_double(_val); w = temp; z = temp; y = temp; x = temp; }
+inline void dvec4::xw(const double& _val) { const simddouble temp = simd_set1_double(_val); x = temp; w = temp; }
+inline void dvec4::xwy(const double& _val) { const simddouble temp = simd_set1_double(_val); x = temp; w = temp; y = temp; }
+inline void dvec4::xwyz(const double& _val) { const simddouble temp = simd_set1_double(_val); x = temp; w = temp; y = temp; z = temp; }
+inline void dvec4::xwz(const double& _val) { const simddouble temp = simd_set1_double(_val); x = temp; w = temp; z = temp; }
+inline void dvec4::xwzy(const double& _val) { const simddouble temp = simd_set1_double(_val); x = temp; w = temp; z = temp; y = temp; }
+inline void dvec4::xy(const double& _val) { const simddouble temp = simd_set1_double(_val); x = temp; y = temp; }
+inline void dvec4::xyw(const double& _val) { const simddouble temp = simd_set1_double(_val); x = temp; y = temp; w = temp; }
+inline void dvec4::xywz(const double& _val) { const simddouble temp = simd_set1_double(_val); x = temp; y = temp; w = temp; z = temp; }
+inline void dvec4::xyz(const double& _val) { const simddouble temp = simd_set1_double(_val); x = temp; y = temp; z = temp; }
+inline void dvec4::xyzw(const double& _val) { const simddouble temp = simd_set1_double(_val); x = temp; y = temp; z = temp; w = temp; }
+inline void dvec4::xz(const double& _val) { const simddouble temp = simd_set1_double(_val); x = temp; z = temp; }
+inline void dvec4::xzw(const double& _val) { const simddouble temp = simd_set1_double(_val); x = temp; z = temp; w = temp; }
+inline void dvec4::xzwy(const double& _val) { const simddouble temp = simd_set1_double(_val); x = temp; z = temp; w = temp; y = temp; }
+inline void dvec4::xzy(const double& _val) { const simddouble temp = simd_set1_double(_val); x = temp; z = temp; y = temp; }
+inline void dvec4::xzyw(const double& _val) { const simddouble temp = simd_set1_double(_val); x = temp; z = temp; y = temp; w = temp; }
+inline void dvec4::yw(const double& _val) { const simddouble temp = simd_set1_double(_val); y = temp; w = temp; }
+inline void dvec4::ywx(const double& _val) { const simddouble temp = simd_set1_double(_val); y = temp; w = temp; x = temp; }
+inline void dvec4::ywxz(const double& _val) { const simddouble temp = simd_set1_double(_val); y = temp; w = temp; x = temp; z = temp; }
+inline void dvec4::ywz(const double& _val) { const simddouble temp = simd_set1_double(_val); y = temp; w = temp; z = temp; }
+inline void dvec4::ywzx(const double& _val) { const simddouble temp = simd_set1_double(_val); y = temp; w = temp; z = temp; x = temp; }
+inline void dvec4::yx(const double& _val) { const simddouble temp = simd_set1_double(_val); y = temp; x = temp; }
+inline void dvec4::yxw(const double& _val) { const simddouble temp = simd_set1_double(_val); y = temp; x = temp; w = temp; }
+inline void dvec4::yxwz(const double& _val) { const simddouble temp = simd_set1_double(_val); y = temp; x = temp; w = temp; z = temp; }
+inline void dvec4::yxz(const double& _val) { const simddouble temp = simd_set1_double(_val); y = temp; x = temp; z = temp; }
+inline void dvec4::yxzw(const double& _val) { const simddouble temp = simd_set1_double(_val); y = temp; x = temp; z = temp; w = temp; }
+inline void dvec4::yz(const double& _val) { const simddouble temp = simd_set1_double(_val); y = temp; z = temp; }
+inline void dvec4::yzw(const double& _val) { const simddouble temp = simd_set1_double(_val); y = temp; z = temp; w = temp; }
+inline void dvec4::yzwx(const double& _val) { const simddouble temp = simd_set1_double(_val); y = temp; z = temp; w = temp; x = temp; }
+inline void dvec4::yzx(const double& _val) { const simddouble temp = simd_set1_double(_val); y = temp; z = temp; x = temp; }
+inline void dvec4::yzxw(const double& _val) { const simddouble temp = simd_set1_double(_val); y = temp; z = temp; x = temp; w = temp; }
+inline void dvec4::zw(const double& _val) { const simddouble temp = simd_set1_double(_val); z = temp; w = temp; }
+inline void dvec4::zwx(const double& _val) { const simddouble temp = simd_set1_double(_val); z = temp; w = temp; x = temp; }
+inline void dvec4::zwxy(const double& _val) { const simddouble temp = simd_set1_double(_val); z = temp; w = temp; x = temp; y = temp; }
+inline void dvec4::zwy(const double& _val) { const simddouble temp = simd_set1_double(_val); z = temp; w = temp; y = temp; }
+inline void dvec4::zwyx(const double& _val) { const simddouble temp = simd_set1_double(_val); z = temp; w = temp; y = temp; x = temp; }
+inline void dvec4::zx(const double& _val) { const simddouble temp = simd_set1_double(_val); z = temp; x = temp; }
+inline void dvec4::zxw(const double& _val) { const simddouble temp = simd_set1_double(_val); z = temp; x = temp; w = temp; }
+inline void dvec4::zxwy(const double& _val) { const simddouble temp = simd_set1_double(_val); z = temp; x = temp; w = temp; y = temp; }
+inline void dvec4::zxy(const double& _val) { const simddouble temp = simd_set1_double(_val); z = temp; x = temp; y = temp; }
+inline void dvec4::zxyw(const double& _val) { const simddouble temp = simd_set1_double(_val); z = temp; x = temp; y = temp; w = temp; }
+inline void dvec4::zy(const double& _val) { const simddouble temp = simd_set1_double(_val); z = temp; y = temp; }
+inline void dvec4::zyw(const double& _val) { const simddouble temp = simd_set1_double(_val); z = temp; y = temp; w = temp; }
+inline void dvec4::zywx(const double& _val) { const simddouble temp = simd_set1_double(_val); z = temp; y = temp; w = temp; x = temp; }
+inline void dvec4::zyx(const double& _val) { const simddouble temp = simd_set1_double(_val); z = temp; y = temp; x = temp; }
+inline void dvec4::zyxw(const double& _val) { const simddouble temp = simd_set1_double(_val); z = temp; y = temp; x = temp; w = temp; }
+#endif
+#pragma endregion
+
+
+#pragma region ivec2 swizzle implementations
+// ivec2 swizzle implementations
+inline ivec2 ivec2::gg() const { return { g, g }; }
+inline ivec3 ivec2::ggg() const { return { g, g, g }; }
+inline ivec4 ivec2::gggg() const { return { g, g, g, g }; }
+inline ivec4 ivec2::gggr() const { return { g, g, g, r }; }
+inline ivec3 ivec2::ggr() const { return { g, g, r }; }
+inline ivec4 ivec2::ggrg() const { return { g, g, r, g }; }
+inline ivec4 ivec2::ggrr() const { return { g, g, r, r }; }
+inline ivec2 ivec2::gr() const { return { g, r }; }
+inline ivec3 ivec2::grg() const { return { g, r, g }; }
+inline ivec4 ivec2::grgg() const { return { g, r, g, g }; }
+inline ivec4 ivec2::grgr() const { return { g, r, g, r }; }
+inline ivec3 ivec2::grr() const { return { g, r, r }; }
+inline ivec4 ivec2::grrg() const { return { g, r, r, g }; }
+inline ivec4 ivec2::grrr() const { return { g, r, r, r }; }
+inline ivec2 ivec2::rg() const { return { r, g }; }
+inline ivec3 ivec2::rgg() const { return { r, g, g }; }
+inline ivec4 ivec2::rggg() const { return { r, g, g, g }; }
+inline ivec4 ivec2::rggr() const { return { r, g, g, r }; }
+inline ivec3 ivec2::rgr() const { return { r, g, r }; }
+inline ivec4 ivec2::rgrg() const { return { r, g, r, g }; }
+inline ivec4 ivec2::rgrr() const { return { r, g, r, r }; }
+inline ivec2 ivec2::rr() const { return { r, r }; }
+inline ivec3 ivec2::rrg() const { return { r, r, g }; }
+inline ivec4 ivec2::rrgg() const { return { r, r, g, g }; }
+inline ivec4 ivec2::rrgr() const { return { r, r, g, r }; }
+inline ivec3 ivec2::rrr() const { return { r, r, r }; }
+inline ivec4 ivec2::rrrg() const { return { r, r, r, g }; }
+inline ivec4 ivec2::rrrr() const { return { r, r, r, r }; }
+inline ivec2 ivec2::xx() const { return { x, x }; }
+inline ivec3 ivec2::xxx() const { return { x, x, x }; }
+inline ivec4 ivec2::xxxx() const { return { x, x, x, x }; }
+inline ivec4 ivec2::xxxy() const { return { x, x, x, y }; }
+inline ivec3 ivec2::xxy() const { return { x, x, y }; }
+inline ivec4 ivec2::xxyx() const { return { x, x, y, x }; }
+inline ivec4 ivec2::xxyy() const { return { x, x, y, y }; }
+inline ivec2 ivec2::xy() const { return { x, y }; }
+inline ivec3 ivec2::xyx() const { return { x, y, x }; }
+inline ivec4 ivec2::xyxx() const { return { x, y, x, x }; }
+inline ivec4 ivec2::xyxy() const { return { x, y, x, y }; }
+inline ivec3 ivec2::xyy() const { return { x, y, y }; }
+inline ivec4 ivec2::xyyx() const { return { x, y, y, x }; }
+inline ivec4 ivec2::xyyy() const { return { x, y, y, y }; }
+inline ivec2 ivec2::yx() const { return { y, x }; }
+inline ivec3 ivec2::yxx() const { return { y, x, x }; }
+inline ivec4 ivec2::yxxx() const { return { y, x, x, x }; }
+inline ivec4 ivec2::yxxy() const { return { y, x, x, y }; }
+inline ivec3 ivec2::yxy() const { return { y, x, y }; }
+inline ivec4 ivec2::yxyx() const { return { y, x, y, x }; }
+inline ivec4 ivec2::yxyy() const { return { y, x, y, y }; }
+inline ivec2 ivec2::yy() const { return { y, y }; }
+inline ivec3 ivec2::yyx() const { return { y, y, x }; }
+inline ivec4 ivec2::yyxx() const { return { y, y, x, x }; }
+inline ivec4 ivec2::yyxy() const { return { y, y, x, y }; }
+inline ivec3 ivec2::yyy() const { return { y, y, y }; }
+inline ivec4 ivec2::yyyx() const { return { y, y, y, x }; }
+inline ivec4 ivec2::yyyy() const { return { y, y, y, y }; }
+inline void ivec2::gr(const simdint& _val0, const simdint& _val1) { g = _val0; r = _val1; }
+inline void ivec2::gr(const ivec2& _val) { g = _val.x; r = _val.y; }
+inline void ivec2::gr(const simdint& _val) { g = _val; r = _val; }
+inline void ivec2::rg(const simdint& _val0, const simdint& _val1) { r = _val0; g = _val1; }
+inline void ivec2::rg(const ivec2& _val) { r = _val.x; g = _val.y; }
+inline void ivec2::rg(const simdint& _val) { r = _val; g = _val; }
+inline void ivec2::xy(const simdint& _val0, const simdint& _val1) { x = _val0; y = _val1; }
+inline void ivec2::xy(const ivec2& _val) { x = _val.x; y = _val.y; }
+inline void ivec2::xy(const simdint& _val) { x = _val; y = _val; }
+inline void ivec2::yx(const simdint& _val0, const simdint& _val1) { y = _val0; x = _val1; }
+inline void ivec2::yx(const ivec2& _val) { y = _val.x; x = _val.y; }
+inline void ivec2::yx(const simdint& _val) { y = _val; x = _val; }
+#ifndef USE_SCALAR
+inline void ivec2::gr(const int& _val) { const simdint temp = simd_set1_int(_val); g = temp; r = temp; }
+inline void ivec2::rg(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; g = temp; }
+inline void ivec2::xy(const int& _val) { const simdint temp = simd_set1_int(_val); x = temp; y = temp; }
+inline void ivec2::yx(const int& _val) { const simdint temp = simd_set1_int(_val); y = temp; x = temp; }
+#endif
+
+#pragma endregion
+
+#pragma region ivec3 swizzle implementations
+
+// ivec3 swizzle implementations
+inline ivec2 ivec3::bb() const { return { b, b }; }
+inline ivec3 ivec3::bbb() const { return { b, b, b }; }
+inline ivec4 ivec3::bbbb() const { return { b, b, b, b }; }
+inline ivec4 ivec3::bbbg() const { return { b, b, b, g }; }
+inline ivec4 ivec3::bbbr() const { return { b, b, b, r }; }
+inline ivec3 ivec3::bbg() const { return { b, b, g }; }
+inline ivec4 ivec3::bbgb() const { return { b, b, g, b }; }
+inline ivec4 ivec3::bbgg() const { return { b, b, g, g }; }
+inline ivec4 ivec3::bbgr() const { return { b, b, g, r }; }
+inline ivec3 ivec3::bbr() const { return { b, b, r }; }
+inline ivec4 ivec3::bbrb() const { return { b, b, r, b }; }
+inline ivec4 ivec3::bbrg() const { return { b, b, r, g }; }
+inline ivec4 ivec3::bbrr() const { return { b, b, r, r }; }
+inline ivec2 ivec3::bg() const { return { b, g }; }
+inline ivec3 ivec3::bgb() const { return { b, g, b }; }
+inline ivec4 ivec3::bgbb() const { return { b, g, b, b }; }
+inline ivec4 ivec3::bgbg() const { return { b, g, b, g }; }
+inline ivec4 ivec3::bgbr() const { return { b, g, b, r }; }
+inline ivec3 ivec3::bgg() const { return { b, g, g }; }
+inline ivec4 ivec3::bggb() const { return { b, g, g, b }; }
+inline ivec4 ivec3::bggg() const { return { b, g, g, g }; }
+inline ivec4 ivec3::bggr() const { return { b, g, g, r }; }
+inline ivec3 ivec3::bgr() const { return { b, g, r }; }
+inline ivec4 ivec3::bgrb() const { return { b, g, r, b }; }
+inline ivec4 ivec3::bgrg() const { return { b, g, r, g }; }
+inline ivec4 ivec3::bgrr() const { return { b, g, r, r }; }
+inline ivec2 ivec3::br() const { return { b, r }; }
+inline ivec3 ivec3::brb() const { return { b, r, b }; }
+inline ivec4 ivec3::brbb() const { return { b, r, b, b }; }
+inline ivec4 ivec3::brbg() const { return { b, r, b, g }; }
+inline ivec4 ivec3::brbr() const { return { b, r, b, r }; }
+inline ivec3 ivec3::brg() const { return { b, r, g }; }
+inline ivec4 ivec3::brgb() const { return { b, r, g, b }; }
+inline ivec4 ivec3::brgg() const { return { b, r, g, g }; }
+inline ivec4 ivec3::brgr() const { return { b, r, g, r }; }
+inline ivec3 ivec3::brr() const { return { b, r, r }; }
+inline ivec4 ivec3::brrb() const { return { b, r, r, b }; }
+inline ivec4 ivec3::brrg() const { return { b, r, r, g }; }
+inline ivec4 ivec3::brrr() const { return { b, r, r, r }; }
+inline ivec2 ivec3::gb() const { return { g, b }; }
+inline ivec3 ivec3::gbb() const { return { g, b, b }; }
+inline ivec4 ivec3::gbbb() const { return { g, b, b, b }; }
+inline ivec4 ivec3::gbbg() const { return { g, b, b, g }; }
+inline ivec4 ivec3::gbbr() const { return { g, b, b, r }; }
+inline ivec3 ivec3::gbg() const { return { g, b, g }; }
+inline ivec4 ivec3::gbgb() const { return { g, b, g, b }; }
+inline ivec4 ivec3::gbgg() const { return { g, b, g, g }; }
+inline ivec4 ivec3::gbgr() const { return { g, b, g, r }; }
+inline ivec3 ivec3::gbr() const { return { g, b, r }; }
+inline ivec4 ivec3::gbrb() const { return { g, b, r, b }; }
+inline ivec4 ivec3::gbrg() const { return { g, b, r, g }; }
+inline ivec4 ivec3::gbrr() const { return { g, b, r, r }; }
+inline ivec2 ivec3::gg() const { return { g, g }; }
+inline ivec3 ivec3::ggb() const { return { g, g, b }; }
+inline ivec4 ivec3::ggbb() const { return { g, g, b, b }; }
+inline ivec4 ivec3::ggbg() const { return { g, g, b, g }; }
+inline ivec4 ivec3::ggbr() const { return { g, g, b, r }; }
+inline ivec3 ivec3::ggg() const { return { g, g, g }; }
+inline ivec4 ivec3::gggb() const { return { g, g, g, b }; }
+inline ivec4 ivec3::gggg() const { return { g, g, g, g }; }
+inline ivec4 ivec3::gggr() const { return { g, g, g, r }; }
+inline ivec3 ivec3::ggr() const { return { g, g, r }; }
+inline ivec4 ivec3::ggrb() const { return { g, g, r, b }; }
+inline ivec4 ivec3::ggrg() const { return { g, g, r, g }; }
+inline ivec4 ivec3::ggrr() const { return { g, g, r, r }; }
+inline ivec2 ivec3::gr() const { return { g, r }; }
+inline ivec3 ivec3::grb() const { return { g, r, b }; }
+inline ivec4 ivec3::grbb() const { return { g, r, b, b }; }
+inline ivec4 ivec3::grbg() const { return { g, r, b, g }; }
+inline ivec4 ivec3::grbr() const { return { g, r, b, r }; }
+inline ivec3 ivec3::grg() const { return { g, r, g }; }
+inline ivec4 ivec3::grgb() const { return { g, r, g, b }; }
+inline ivec4 ivec3::grgg() const { return { g, r, g, g }; }
+inline ivec4 ivec3::grgr() const { return { g, r, g, r }; }
+inline ivec3 ivec3::grr() const { return { g, r, r }; }
+inline ivec4 ivec3::grrb() const { return { g, r, r, b }; }
+inline ivec4 ivec3::grrg() const { return { g, r, r, g }; }
+inline ivec4 ivec3::grrr() const { return { g, r, r, r }; }
+inline ivec2 ivec3::rb() const { return { r, b }; }
+inline ivec3 ivec3::rbb() const { return { r, b, b }; }
+inline ivec4 ivec3::rbbb() const { return { r, b, b, b }; }
+inline ivec4 ivec3::rbbg() const { return { r, b, b, g }; }
+inline ivec4 ivec3::rbbr() const { return { r, b, b, r }; }
+inline ivec3 ivec3::rbg() const { return { r, b, g }; }
+inline ivec4 ivec3::rbgb() const { return { r, b, g, b }; }
+inline ivec4 ivec3::rbgg() const { return { r, b, g, g }; }
+inline ivec4 ivec3::rbgr() const { return { r, b, g, r }; }
+inline ivec3 ivec3::rbr() const { return { r, b, r }; }
+inline ivec4 ivec3::rbrb() const { return { r, b, r, b }; }
+inline ivec4 ivec3::rbrg() const { return { r, b, r, g }; }
+inline ivec4 ivec3::rbrr() const { return { r, b, r, r }; }
+inline ivec2 ivec3::rg() const { return { r, g }; }
+inline ivec3 ivec3::rgb() const { return { r, g, b }; }
+inline ivec4 ivec3::rgbb() const { return { r, g, b, b }; }
+inline ivec4 ivec3::rgbg() const { return { r, g, b, g }; }
+inline ivec4 ivec3::rgbr() const { return { r, g, b, r }; }
+inline ivec3 ivec3::rgg() const { return { r, g, g }; }
+inline ivec4 ivec3::rggb() const { return { r, g, g, b }; }
+inline ivec4 ivec3::rggg() const { return { r, g, g, g }; }
+inline ivec4 ivec3::rggr() const { return { r, g, g, r }; }
+inline ivec3 ivec3::rgr() const { return { r, g, r }; }
+inline ivec4 ivec3::rgrb() const { return { r, g, r, b }; }
+inline ivec4 ivec3::rgrg() const { return { r, g, r, g }; }
+inline ivec4 ivec3::rgrr() const { return { r, g, r, r }; }
+inline ivec2 ivec3::rr() const { return { r, r }; }
+inline ivec3 ivec3::rrb() const { return { r, r, b }; }
+inline ivec4 ivec3::rrbb() const { return { r, r, b, b }; }
+inline ivec4 ivec3::rrbg() const { return { r, r, b, g }; }
+inline ivec4 ivec3::rrbr() const { return { r, r, b, r }; }
+inline ivec3 ivec3::rrg() const { return { r, r, g }; }
+inline ivec4 ivec3::rrgb() const { return { r, r, g, b }; }
+inline ivec4 ivec3::rrgg() const { return { r, r, g, g }; }
+inline ivec4 ivec3::rrgr() const { return { r, r, g, r }; }
+inline ivec3 ivec3::rrr() const { return { r, r, r }; }
+inline ivec4 ivec3::rrrb() const { return { r, r, r, b }; }
+inline ivec4 ivec3::rrrg() const { return { r, r, r, g }; }
+inline ivec4 ivec3::rrrr() const { return { r, r, r, r }; }
+inline ivec2 ivec3::xx() const { return { x, x }; }
+inline ivec3 ivec3::xxx() const { return { x, x, x }; }
+inline ivec4 ivec3::xxxx() const { return { x, x, x, x }; }
+inline ivec4 ivec3::xxxy() const { return { x, x, x, y }; }
+inline ivec4 ivec3::xxxz() const { return { x, x, x, z }; }
+inline ivec3 ivec3::xxy() const { return { x, x, y }; }
+inline ivec4 ivec3::xxyx() const { return { x, x, y, x }; }
+inline ivec4 ivec3::xxyy() const { return { x, x, y, y }; }
+inline ivec4 ivec3::xxyz() const { return { x, x, y, z }; }
+inline ivec3 ivec3::xxz() const { return { x, x, z }; }
+inline ivec4 ivec3::xxzx() const { return { x, x, z, x }; }
+inline ivec4 ivec3::xxzy() const { return { x, x, z, y }; }
+inline ivec4 ivec3::xxzz() const { return { x, x, z, z }; }
+inline ivec2 ivec3::xy() const { return { x, y }; }
+inline ivec3 ivec3::xyx() const { return { x, y, x }; }
+inline ivec4 ivec3::xyxx() const { return { x, y, x, x }; }
+inline ivec4 ivec3::xyxy() const { return { x, y, x, y }; }
+inline ivec4 ivec3::xyxz() const { return { x, y, x, z }; }
+inline ivec3 ivec3::xyy() const { return { x, y, y }; }
+inline ivec4 ivec3::xyyx() const { return { x, y, y, x }; }
+inline ivec4 ivec3::xyyy() const { return { x, y, y, y }; }
+inline ivec4 ivec3::xyyz() const { return { x, y, y, z }; }
+inline ivec3 ivec3::xyz() const { return { x, y, z }; }
+inline ivec4 ivec3::xyzx() const { return { x, y, z, x }; }
+inline ivec4 ivec3::xyzy() const { return { x, y, z, y }; }
+inline ivec4 ivec3::xyzz() const { return { x, y, z, z }; }
+inline ivec2 ivec3::xz() const { return { x, z }; }
+inline ivec3 ivec3::xzx() const { return { x, z, x }; }
+inline ivec4 ivec3::xzxx() const { return { x, z, x, x }; }
+inline ivec4 ivec3::xzxy() const { return { x, z, x, y }; }
+inline ivec4 ivec3::xzxz() const { return { x, z, x, z }; }
+inline ivec3 ivec3::xzy() const { return { x, z, y }; }
+inline ivec4 ivec3::xzyx() const { return { x, z, y, x }; }
+inline ivec4 ivec3::xzyy() const { return { x, z, y, y }; }
+inline ivec4 ivec3::xzyz() const { return { x, z, y, z }; }
+inline ivec3 ivec3::xzz() const { return { x, z, z }; }
+inline ivec4 ivec3::xzzx() const { return { x, z, z, x }; }
+inline ivec4 ivec3::xzzy() const { return { x, z, z, y }; }
+inline ivec4 ivec3::xzzz() const { return { x, z, z, z }; }
+inline ivec2 ivec3::yx() const { return { y, x }; }
+inline ivec3 ivec3::yxx() const { return { y, x, x }; }
+inline ivec4 ivec3::yxxx() const { return { y, x, x, x }; }
+inline ivec4 ivec3::yxxy() const { return { y, x, x, y }; }
+inline ivec4 ivec3::yxxz() const { return { y, x, x, z }; }
+inline ivec3 ivec3::yxy() const { return { y, x, y }; }
+inline ivec4 ivec3::yxyx() const { return { y, x, y, x }; }
+inline ivec4 ivec3::yxyy() const { return { y, x, y, y }; }
+inline ivec4 ivec3::yxyz() const { return { y, x, y, z }; }
+inline ivec3 ivec3::yxz() const { return { y, x, z }; }
+inline ivec4 ivec3::yxzx() const { return { y, x, z, x }; }
+inline ivec4 ivec3::yxzy() const { return { y, x, z, y }; }
+inline ivec4 ivec3::yxzz() const { return { y, x, z, z }; }
+inline ivec2 ivec3::yy() const { return { y, y }; }
+inline ivec3 ivec3::yyx() const { return { y, y, x }; }
+inline ivec4 ivec3::yyxx() const { return { y, y, x, x }; }
+inline ivec4 ivec3::yyxy() const { return { y, y, x, y }; }
+inline ivec4 ivec3::yyxz() const { return { y, y, x, z }; }
+inline ivec3 ivec3::yyy() const { return { y, y, y }; }
+inline ivec4 ivec3::yyyx() const { return { y, y, y, x }; }
+inline ivec4 ivec3::yyyy() const { return { y, y, y, y }; }
+inline ivec4 ivec3::yyyz() const { return { y, y, y, z }; }
+inline ivec3 ivec3::yyz() const { return { y, y, z }; }
+inline ivec4 ivec3::yyzx() const { return { y, y, z, x }; }
+inline ivec4 ivec3::yyzy() const { return { y, y, z, y }; }
+inline ivec4 ivec3::yyzz() const { return { y, y, z, z }; }
+inline ivec2 ivec3::yz() const { return { y, z }; }
+inline ivec3 ivec3::yzx() const { return { y, z, x }; }
+inline ivec4 ivec3::yzxx() const { return { y, z, x, x }; }
+inline ivec4 ivec3::yzxy() const { return { y, z, x, y }; }
+inline ivec4 ivec3::yzxz() const { return { y, z, x, z }; }
+inline ivec3 ivec3::yzy() const { return { y, z, y }; }
+inline ivec4 ivec3::yzyx() const { return { y, z, y, x }; }
+inline ivec4 ivec3::yzyy() const { return { y, z, y, y }; }
+inline ivec4 ivec3::yzyz() const { return { y, z, y, z }; }
+inline ivec3 ivec3::yzz() const { return { y, z, z }; }
+inline ivec4 ivec3::yzzx() const { return { y, z, z, x }; }
+inline ivec4 ivec3::yzzy() const { return { y, z, z, y }; }
+inline ivec4 ivec3::yzzz() const { return { y, z, z, z }; }
+inline ivec2 ivec3::zx() const { return { z, x }; }
+inline ivec3 ivec3::zxx() const { return { z, x, x }; }
+inline ivec4 ivec3::zxxx() const { return { z, x, x, x }; }
+inline ivec4 ivec3::zxxy() const { return { z, x, x, y }; }
+inline ivec4 ivec3::zxxz() const { return { z, x, x, z }; }
+inline ivec3 ivec3::zxy() const { return { z, x, y }; }
+inline ivec4 ivec3::zxyx() const { return { z, x, y, x }; }
+inline ivec4 ivec3::zxyy() const { return { z, x, y, y }; }
+inline ivec4 ivec3::zxyz() const { return { z, x, y, z }; }
+inline ivec3 ivec3::zxz() const { return { z, x, z }; }
+inline ivec4 ivec3::zxzx() const { return { z, x, z, x }; }
+inline ivec4 ivec3::zxzy() const { return { z, x, z, y }; }
+inline ivec4 ivec3::zxzz() const { return { z, x, z, z }; }
+inline ivec2 ivec3::zy() const { return { z, y }; }
+inline ivec3 ivec3::zyx() const { return { z, y, x }; }
+inline ivec4 ivec3::zyxx() const { return { z, y, x, x }; }
+inline ivec4 ivec3::zyxy() const { return { z, y, x, y }; }
+inline ivec4 ivec3::zyxz() const { return { z, y, x, z }; }
+inline ivec3 ivec3::zyy() const { return { z, y, y }; }
+inline ivec4 ivec3::zyyx() const { return { z, y, y, x }; }
+inline ivec4 ivec3::zyyy() const { return { z, y, y, y }; }
+inline ivec4 ivec3::zyyz() const { return { z, y, y, z }; }
+inline ivec3 ivec3::zyz() const { return { z, y, z }; }
+inline ivec4 ivec3::zyzx() const { return { z, y, z, x }; }
+inline ivec4 ivec3::zyzy() const { return { z, y, z, y }; }
+inline ivec4 ivec3::zyzz() const { return { z, y, z, z }; }
+inline ivec2 ivec3::zz() const { return { z, z }; }
+inline ivec3 ivec3::zzx() const { return { z, z, x }; }
+inline ivec4 ivec3::zzxx() const { return { z, z, x, x }; }
+inline ivec4 ivec3::zzxy() const { return { z, z, x, y }; }
+inline ivec4 ivec3::zzxz() const { return { z, z, x, z }; }
+inline ivec3 ivec3::zzy() const { return { z, z, y }; }
+inline ivec4 ivec3::zzyx() const { return { z, z, y, x }; }
+inline ivec4 ivec3::zzyy() const { return { z, z, y, y }; }
+inline ivec4 ivec3::zzyz() const { return { z, z, y, z }; }
+inline ivec3 ivec3::zzz() const { return { z, z, z }; }
+inline ivec4 ivec3::zzzx() const { return { z, z, z, x }; }
+inline ivec4 ivec3::zzzy() const { return { z, z, z, y }; }
+inline ivec4 ivec3::zzzz() const { return { z, z, z, z }; }
+inline void ivec3::bg(const simdint& _val0, const simdint& _val1) { b = _val0; g = _val1; }
+inline void ivec3::bg(const ivec2& _val) { b = _val.x; g = _val.y; }
+inline void ivec3::bg(const simdint& _val) { b = _val; g = _val; }
+inline void ivec3::bgr(const simdint& _val0, const simdint& _val1, const simdint& _val2) { b = _val0; g = _val1; r = _val2; }
+inline void ivec3::bgr(const ivec3& _val) { b = _val.x; g = _val.y; r = _val.z; }
+inline void ivec3::bgr(const simdint& _val) { b = _val; g = _val; r = _val; }
+inline void ivec3::br(const simdint& _val0, const simdint& _val1) { b = _val0; r = _val1; }
+inline void ivec3::br(const ivec2& _val) { b = _val.x; r = _val.y; }
+inline void ivec3::br(const simdint& _val) { b = _val; r = _val; }
+inline void ivec3::brg(const simdint& _val0, const simdint& _val1, const simdint& _val2) { b = _val0; r = _val1; g = _val2; }
+inline void ivec3::brg(const ivec3& _val) { b = _val.x; r = _val.y; g = _val.z; }
+inline void ivec3::brg(const simdint& _val) { b = _val; r = _val; g = _val; }
+inline void ivec3::gb(const simdint& _val0, const simdint& _val1) { g = _val0; b = _val1; }
+inline void ivec3::gb(const ivec2& _val) { g = _val.x; b = _val.y; }
+inline void ivec3::gb(const simdint& _val) { g = _val; b = _val; }
+inline void ivec3::gbr(const simdint& _val0, const simdint& _val1, const simdint& _val2) { g = _val0; b = _val1; r = _val2; }
+inline void ivec3::gbr(const ivec3& _val) { g = _val.x; b = _val.y; r = _val.z; }
+inline void ivec3::gbr(const simdint& _val) { g = _val; b = _val; r = _val; }
+inline void ivec3::gr(const simdint& _val0, const simdint& _val1) { g = _val0; r = _val1; }
+inline void ivec3::gr(const ivec2& _val) { g = _val.x; r = _val.y; }
+inline void ivec3::gr(const simdint& _val) { g = _val; r = _val; }
+inline void ivec3::grb(const simdint& _val0, const simdint& _val1, const simdint& _val2) { g = _val0; r = _val1; b = _val2; }
+inline void ivec3::grb(const ivec3& _val) { g = _val.x; r = _val.y; b = _val.z; }
+inline void ivec3::grb(const simdint& _val) { g = _val; r = _val; b = _val; }
+inline void ivec3::rb(const simdint& _val0, const simdint& _val1) { r = _val0; b = _val1; }
+inline void ivec3::rb(const ivec2& _val) { r = _val.x; b = _val.y; }
+inline void ivec3::rb(const simdint& _val) { r = _val; b = _val; }
+inline void ivec3::rbg(const simdint& _val0, const simdint& _val1, const simdint& _val2) { r = _val0; b = _val1; g = _val2; }
+inline void ivec3::rbg(const ivec3& _val) { r = _val.x; b = _val.y; g = _val.z; }
+inline void ivec3::rbg(const simdint& _val) { r = _val; b = _val; g = _val; }
+inline void ivec3::rg(const simdint& _val0, const simdint& _val1) { r = _val0; g = _val1; }
+inline void ivec3::rg(const ivec2& _val) { r = _val.x; g = _val.y; }
+inline void ivec3::rg(const simdint& _val) { r = _val; g = _val; }
+inline void ivec3::rgb(const simdint& _val0, const simdint& _val1, const simdint& _val2) { r = _val0; g = _val1; b = _val2; }
+inline void ivec3::rgb(const ivec3& _val) { r = _val.x; g = _val.y; b = _val.z; }
+inline void ivec3::rgb(const simdint& _val) { r = _val; g = _val; b = _val; }
+inline void ivec3::xy(const simdint& _val0, const simdint& _val1) { x = _val0; y = _val1; }
+inline void ivec3::xy(const ivec2& _val) { x = _val.x; y = _val.y; }
+inline void ivec3::xy(const simdint& _val) { x = _val; y = _val; }
+inline void ivec3::xyz(const simdint& _val0, const simdint& _val1, const simdint& _val2) { x = _val0; y = _val1; z = _val2; }
+inline void ivec3::xyz(const ivec3& _val) { x = _val.x; y = _val.y; z = _val.z; }
+inline void ivec3::xyz(const simdint& _val) { x = _val; y = _val; z = _val; }
+inline void ivec3::xz(const simdint& _val0, const simdint& _val1) { x = _val0; z = _val1; }
+inline void ivec3::xz(const ivec2& _val) { x = _val.x; z = _val.y; }
+inline void ivec3::xz(const simdint& _val) { x = _val; z = _val; }
+inline void ivec3::xzy(const simdint& _val0, const simdint& _val1, const simdint& _val2) { x = _val0; z = _val1; y = _val2; }
+inline void ivec3::xzy(const ivec3& _val) { x = _val.x; z = _val.y; y = _val.z; }
+inline void ivec3::xzy(const simdint& _val) { x = _val; z = _val; y = _val; }
+inline void ivec3::yx(const simdint& _val0, const simdint& _val1) { y = _val0; x = _val1; }
+inline void ivec3::yx(const ivec2& _val) { y = _val.x; x = _val.y; }
+inline void ivec3::yx(const simdint& _val) { y = _val; x = _val; }
+inline void ivec3::yxz(const simdint& _val0, const simdint& _val1, const simdint& _val2) { y = _val0; x = _val1; z = _val2; }
+inline void ivec3::yxz(const ivec3& _val) { y = _val.x; x = _val.y; z = _val.z; }
+inline void ivec3::yxz(const simdint& _val) { y = _val; x = _val; z = _val; }
+inline void ivec3::yz(const simdint& _val0, const simdint& _val1) { y = _val0; z = _val1; }
+inline void ivec3::yz(const ivec2& _val) { y = _val.x; z = _val.y; }
+inline void ivec3::yz(const simdint& _val) { y = _val; z = _val; }
+inline void ivec3::yzx(const simdint& _val0, const simdint& _val1, const simdint& _val2) { y = _val0; z = _val1; x = _val2; }
+inline void ivec3::yzx(const ivec3& _val) { y = _val.x; z = _val.y; x = _val.z; }
+inline void ivec3::yzx(const simdint& _val) { y = _val; z = _val; x = _val; }
+inline void ivec3::zx(const simdint& _val0, const simdint& _val1) { z = _val0; x = _val1; }
+inline void ivec3::zx(const ivec2& _val) { z = _val.x; x = _val.y; }
+inline void ivec3::zx(const simdint& _val) { z = _val; x = _val; }
+inline void ivec3::zxy(const simdint& _val0, const simdint& _val1, const simdint& _val2) { z = _val0; x = _val1; y = _val2; }
+inline void ivec3::zxy(const ivec3& _val) { z = _val.x; x = _val.y; y = _val.z; }
+inline void ivec3::zxy(const simdint& _val) { z = _val; x = _val; y = _val; }
+inline void ivec3::zy(const simdint& _val0, const simdint& _val1) { z = _val0; y = _val1; }
+inline void ivec3::zy(const ivec2& _val) { z = _val.x; y = _val.y; }
+inline void ivec3::zy(const simdint& _val) { z = _val; y = _val; }
+inline void ivec3::zyx(const simdint& _val0, const simdint& _val1, const simdint& _val2) { z = _val0; y = _val1; x = _val2; }
+inline void ivec3::zyx(const ivec3& _val) { z = _val.x; y = _val.y; x = _val.z; }
+inline void ivec3::zyx(const simdint& _val) { z = _val; y = _val; x = _val; }
+#ifndef USE_SCALAR
+inline void ivec3::bg(const int& _val) { const simdint temp = simd_set1_int(_val); b = temp; g = temp; }
+inline void ivec3::bgr(const int& _val) { const simdint temp = simd_set1_int(_val); b = temp; g = temp; r = temp; }
+inline void ivec3::br(const int& _val) { const simdint temp = simd_set1_int(_val); b = temp; r = temp; }
+inline void ivec3::brg(const int& _val) { const simdint temp = simd_set1_int(_val); b = temp; r = temp; g = temp; }
+inline void ivec3::gb(const int& _val) { const simdint temp = simd_set1_int(_val); g = temp; b = temp; }
+inline void ivec3::gbr(const int& _val) { const simdint temp = simd_set1_int(_val); g = temp; b = temp; r = temp; }
+inline void ivec3::gr(const int& _val) { const simdint temp = simd_set1_int(_val); g = temp; r = temp; }
+inline void ivec3::grb(const int& _val) { const simdint temp = simd_set1_int(_val); g = temp; r = temp; b = temp; }
+inline void ivec3::rb(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; b = temp; }
+inline void ivec3::rbg(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; b = temp; g = temp; }
+inline void ivec3::rg(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; g = temp; }
+inline void ivec3::rgb(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; g = temp; b = temp; }
+inline void ivec3::xy(const int& _val) { const simdint temp = simd_set1_int(_val); x = temp; y = temp; }
+inline void ivec3::xyz(const int& _val) { const simdint temp = simd_set1_int(_val); x = temp; y = temp; z = temp; }
+inline void ivec3::xz(const int& _val) { const simdint temp = simd_set1_int(_val); x = temp; z = temp; }
+inline void ivec3::xzy(const int& _val) { const simdint temp = simd_set1_int(_val); x = temp; z = temp; y = temp; }
+inline void ivec3::yx(const int& _val) { const simdint temp = simd_set1_int(_val); y = temp; x = temp; }
+inline void ivec3::yxz(const int& _val) { const simdint temp = simd_set1_int(_val); y = temp; x = temp; z = temp; }
+inline void ivec3::yz(const int& _val) { const simdint temp = simd_set1_int(_val); y = temp; z = temp; }
+inline void ivec3::yzx(const int& _val) { const simdint temp = simd_set1_int(_val); y = temp; z = temp; x = temp; }
+inline void ivec3::zx(const int& _val) { const simdint temp = simd_set1_int(_val); z = temp; x = temp; }
+inline void ivec3::zxy(const int& _val) { const simdint temp = simd_set1_int(_val); z = temp; x = temp; y = temp; }
+inline void ivec3::zy(const int& _val) { const simdint temp = simd_set1_int(_val); z = temp; y = temp; }
+inline void ivec3::zyx(const int& _val) { const simdint temp = simd_set1_int(_val); z = temp; y = temp; x = temp; }
+#endif
+
+#pragma endregion
+
+#pragma region ivec4 swizzle implementations
+
+// ivec4 swizzle implementations
+inline ivec2 ivec4::aa() const { return { a, a }; }
+inline ivec3 ivec4::aaa() const { return { a, a, a }; }
+inline ivec4 ivec4::aaaa() const { return { a, a, a, a }; }
+inline ivec4 ivec4::aaab() const { return { a, a, a, b }; }
+inline ivec4 ivec4::aaag() const { return { a, a, a, g }; }
+inline ivec4 ivec4::aaar() const { return { a, a, a, r }; }
+inline ivec3 ivec4::aab() const { return { a, a, b }; }
+inline ivec4 ivec4::aaba() const { return { a, a, b, a }; }
+inline ivec4 ivec4::aabb() const { return { a, a, b, b }; }
+inline ivec4 ivec4::aabg() const { return { a, a, b, g }; }
+inline ivec4 ivec4::aabr() const { return { a, a, b, r }; }
+inline ivec3 ivec4::aag() const { return { a, a, g }; }
+inline ivec4 ivec4::aaga() const { return { a, a, g, a }; }
+inline ivec4 ivec4::aagb() const { return { a, a, g, b }; }
+inline ivec4 ivec4::aagg() const { return { a, a, g, g }; }
+inline ivec4 ivec4::aagr() const { return { a, a, g, r }; }
+inline ivec3 ivec4::aar() const { return { a, a, r }; }
+inline ivec4 ivec4::aara() const { return { a, a, r, a }; }
+inline ivec4 ivec4::aarb() const { return { a, a, r, b }; }
+inline ivec4 ivec4::aarg() const { return { a, a, r, g }; }
+inline ivec4 ivec4::aarr() const { return { a, a, r, r }; }
+inline ivec2 ivec4::ab() const { return { a, b }; }
+inline ivec3 ivec4::aba() const { return { a, b, a }; }
+inline ivec4 ivec4::abaa() const { return { a, b, a, a }; }
+inline ivec4 ivec4::abab() const { return { a, b, a, b }; }
+inline ivec4 ivec4::abag() const { return { a, b, a, g }; }
+inline ivec4 ivec4::abar() const { return { a, b, a, r }; }
+inline ivec3 ivec4::abb() const { return { a, b, b }; }
+inline ivec4 ivec4::abba() const { return { a, b, b, a }; }
+inline ivec4 ivec4::abbb() const { return { a, b, b, b }; }
+inline ivec4 ivec4::abbg() const { return { a, b, b, g }; }
+inline ivec4 ivec4::abbr() const { return { a, b, b, r }; }
+inline ivec3 ivec4::abg() const { return { a, b, g }; }
+inline ivec4 ivec4::abga() const { return { a, b, g, a }; }
+inline ivec4 ivec4::abgb() const { return { a, b, g, b }; }
+inline ivec4 ivec4::abgg() const { return { a, b, g, g }; }
+inline ivec4 ivec4::abgr() const { return { a, b, g, r }; }
+inline ivec3 ivec4::abr() const { return { a, b, r }; }
+inline ivec4 ivec4::abra() const { return { a, b, r, a }; }
+inline ivec4 ivec4::abrb() const { return { a, b, r, b }; }
+inline ivec4 ivec4::abrg() const { return { a, b, r, g }; }
+inline ivec4 ivec4::abrr() const { return { a, b, r, r }; }
+inline ivec2 ivec4::ag() const { return { a, g }; }
+inline ivec3 ivec4::aga() const { return { a, g, a }; }
+inline ivec4 ivec4::agaa() const { return { a, g, a, a }; }
+inline ivec4 ivec4::agab() const { return { a, g, a, b }; }
+inline ivec4 ivec4::agag() const { return { a, g, a, g }; }
+inline ivec4 ivec4::agar() const { return { a, g, a, r }; }
+inline ivec3 ivec4::agb() const { return { a, g, b }; }
+inline ivec4 ivec4::agba() const { return { a, g, b, a }; }
+inline ivec4 ivec4::agbb() const { return { a, g, b, b }; }
+inline ivec4 ivec4::agbg() const { return { a, g, b, g }; }
+inline ivec4 ivec4::agbr() const { return { a, g, b, r }; }
+inline ivec3 ivec4::agg() const { return { a, g, g }; }
+inline ivec4 ivec4::agga() const { return { a, g, g, a }; }
+inline ivec4 ivec4::aggb() const { return { a, g, g, b }; }
+inline ivec4 ivec4::aggg() const { return { a, g, g, g }; }
+inline ivec4 ivec4::aggr() const { return { a, g, g, r }; }
+inline ivec3 ivec4::agr() const { return { a, g, r }; }
+inline ivec4 ivec4::agra() const { return { a, g, r, a }; }
+inline ivec4 ivec4::agrb() const { return { a, g, r, b }; }
+inline ivec4 ivec4::agrg() const { return { a, g, r, g }; }
+inline ivec4 ivec4::agrr() const { return { a, g, r, r }; }
+inline ivec2 ivec4::ar() const { return { a, r }; }
+inline ivec3 ivec4::ara() const { return { a, r, a }; }
+inline ivec4 ivec4::araa() const { return { a, r, a, a }; }
+inline ivec4 ivec4::arab() const { return { a, r, a, b }; }
+inline ivec4 ivec4::arag() const { return { a, r, a, g }; }
+inline ivec4 ivec4::arar() const { return { a, r, a, r }; }
+inline ivec3 ivec4::arb() const { return { a, r, b }; }
+inline ivec4 ivec4::arba() const { return { a, r, b, a }; }
+inline ivec4 ivec4::arbb() const { return { a, r, b, b }; }
+inline ivec4 ivec4::arbg() const { return { a, r, b, g }; }
+inline ivec4 ivec4::arbr() const { return { a, r, b, r }; }
+inline ivec3 ivec4::arg() const { return { a, r, g }; }
+inline ivec4 ivec4::arga() const { return { a, r, g, a }; }
+inline ivec4 ivec4::argb() const { return { a, r, g, b }; }
+inline ivec4 ivec4::argg() const { return { a, r, g, g }; }
+inline ivec4 ivec4::argr() const { return { a, r, g, r }; }
+inline ivec3 ivec4::arr() const { return { a, r, r }; }
+inline ivec4 ivec4::arra() const { return { a, r, r, a }; }
+inline ivec4 ivec4::arrb() const { return { a, r, r, b }; }
+inline ivec4 ivec4::arrg() const { return { a, r, r, g }; }
+inline ivec4 ivec4::arrr() const { return { a, r, r, r }; }
+inline ivec2 ivec4::ba() const { return { b, a }; }
+inline ivec3 ivec4::baa() const { return { b, a, a }; }
+inline ivec4 ivec4::baaa() const { return { b, a, a, a }; }
+inline ivec4 ivec4::baab() const { return { b, a, a, b }; }
+inline ivec4 ivec4::baag() const { return { b, a, a, g }; }
+inline ivec4 ivec4::baar() const { return { b, a, a, r }; }
+inline ivec3 ivec4::bab() const { return { b, a, b }; }
+inline ivec4 ivec4::baba() const { return { b, a, b, a }; }
+inline ivec4 ivec4::babb() const { return { b, a, b, b }; }
+inline ivec4 ivec4::babg() const { return { b, a, b, g }; }
+inline ivec4 ivec4::babr() const { return { b, a, b, r }; }
+inline ivec3 ivec4::bag() const { return { b, a, g }; }
+inline ivec4 ivec4::baga() const { return { b, a, g, a }; }
+inline ivec4 ivec4::bagb() const { return { b, a, g, b }; }
+inline ivec4 ivec4::bagg() const { return { b, a, g, g }; }
+inline ivec4 ivec4::bagr() const { return { b, a, g, r }; }
+inline ivec3 ivec4::bar() const { return { b, a, r }; }
+inline ivec4 ivec4::bara() const { return { b, a, r, a }; }
+inline ivec4 ivec4::barb() const { return { b, a, r, b }; }
+inline ivec4 ivec4::barg() const { return { b, a, r, g }; }
+inline ivec4 ivec4::barr() const { return { b, a, r, r }; }
+inline ivec2 ivec4::bb() const { return { b, b }; }
+inline ivec3 ivec4::bba() const { return { b, b, a }; }
+inline ivec4 ivec4::bbaa() const { return { b, b, a, a }; }
+inline ivec4 ivec4::bbab() const { return { b, b, a, b }; }
+inline ivec4 ivec4::bbag() const { return { b, b, a, g }; }
+inline ivec4 ivec4::bbar() const { return { b, b, a, r }; }
+inline ivec3 ivec4::bbb() const { return { b, b, b }; }
+inline ivec4 ivec4::bbba() const { return { b, b, b, a }; }
+inline ivec4 ivec4::bbbb() const { return { b, b, b, b }; }
+inline ivec4 ivec4::bbbg() const { return { b, b, b, g }; }
+inline ivec4 ivec4::bbbr() const { return { b, b, b, r }; }
+inline ivec3 ivec4::bbg() const { return { b, b, g }; }
+inline ivec4 ivec4::bbga() const { return { b, b, g, a }; }
+inline ivec4 ivec4::bbgb() const { return { b, b, g, b }; }
+inline ivec4 ivec4::bbgg() const { return { b, b, g, g }; }
+inline ivec4 ivec4::bbgr() const { return { b, b, g, r }; }
+inline ivec3 ivec4::bbr() const { return { b, b, r }; }
+inline ivec4 ivec4::bbra() const { return { b, b, r, a }; }
+inline ivec4 ivec4::bbrb() const { return { b, b, r, b }; }
+inline ivec4 ivec4::bbrg() const { return { b, b, r, g }; }
+inline ivec4 ivec4::bbrr() const { return { b, b, r, r }; }
+inline ivec2 ivec4::bg() const { return { b, g }; }
+inline ivec3 ivec4::bga() const { return { b, g, a }; }
+inline ivec4 ivec4::bgaa() const { return { b, g, a, a }; }
+inline ivec4 ivec4::bgab() const { return { b, g, a, b }; }
+inline ivec4 ivec4::bgag() const { return { b, g, a, g }; }
+inline ivec4 ivec4::bgar() const { return { b, g, a, r }; }
+inline ivec3 ivec4::bgb() const { return { b, g, b }; }
+inline ivec4 ivec4::bgba() const { return { b, g, b, a }; }
+inline ivec4 ivec4::bgbb() const { return { b, g, b, b }; }
+inline ivec4 ivec4::bgbg() const { return { b, g, b, g }; }
+inline ivec4 ivec4::bgbr() const { return { b, g, b, r }; }
+inline ivec3 ivec4::bgg() const { return { b, g, g }; }
+inline ivec4 ivec4::bgga() const { return { b, g, g, a }; }
+inline ivec4 ivec4::bggb() const { return { b, g, g, b }; }
+inline ivec4 ivec4::bggg() const { return { b, g, g, g }; }
+inline ivec4 ivec4::bggr() const { return { b, g, g, r }; }
+inline ivec3 ivec4::bgr() const { return { b, g, r }; }
+inline ivec4 ivec4::bgra() const { return { b, g, r, a }; }
+inline ivec4 ivec4::bgrb() const { return { b, g, r, b }; }
+inline ivec4 ivec4::bgrg() const { return { b, g, r, g }; }
+inline ivec4 ivec4::bgrr() const { return { b, g, r, r }; }
+inline ivec2 ivec4::br() const { return { b, r }; }
+inline ivec3 ivec4::bra() const { return { b, r, a }; }
+inline ivec4 ivec4::braa() const { return { b, r, a, a }; }
+inline ivec4 ivec4::brab() const { return { b, r, a, b }; }
+inline ivec4 ivec4::brag() const { return { b, r, a, g }; }
+inline ivec4 ivec4::brar() const { return { b, r, a, r }; }
+inline ivec3 ivec4::brb() const { return { b, r, b }; }
+inline ivec4 ivec4::brba() const { return { b, r, b, a }; }
+inline ivec4 ivec4::brbb() const { return { b, r, b, b }; }
+inline ivec4 ivec4::brbg() const { return { b, r, b, g }; }
+inline ivec4 ivec4::brbr() const { return { b, r, b, r }; }
+inline ivec3 ivec4::brg() const { return { b, r, g }; }
+inline ivec4 ivec4::brga() const { return { b, r, g, a }; }
+inline ivec4 ivec4::brgb() const { return { b, r, g, b }; }
+inline ivec4 ivec4::brgg() const { return { b, r, g, g }; }
+inline ivec4 ivec4::brgr() const { return { b, r, g, r }; }
+inline ivec3 ivec4::brr() const { return { b, r, r }; }
+inline ivec4 ivec4::brra() const { return { b, r, r, a }; }
+inline ivec4 ivec4::brrb() const { return { b, r, r, b }; }
+inline ivec4 ivec4::brrg() const { return { b, r, r, g }; }
+inline ivec4 ivec4::brrr() const { return { b, r, r, r }; }
+inline ivec2 ivec4::ga() const { return { g, a }; }
+inline ivec3 ivec4::gaa() const { return { g, a, a }; }
+inline ivec4 ivec4::gaaa() const { return { g, a, a, a }; }
+inline ivec4 ivec4::gaab() const { return { g, a, a, b }; }
+inline ivec4 ivec4::gaag() const { return { g, a, a, g }; }
+inline ivec4 ivec4::gaar() const { return { g, a, a, r }; }
+inline ivec3 ivec4::gab() const { return { g, a, b }; }
+inline ivec4 ivec4::gaba() const { return { g, a, b, a }; }
+inline ivec4 ivec4::gabb() const { return { g, a, b, b }; }
+inline ivec4 ivec4::gabg() const { return { g, a, b, g }; }
+inline ivec4 ivec4::gabr() const { return { g, a, b, r }; }
+inline ivec3 ivec4::gag() const { return { g, a, g }; }
+inline ivec4 ivec4::gaga() const { return { g, a, g, a }; }
+inline ivec4 ivec4::gagb() const { return { g, a, g, b }; }
+inline ivec4 ivec4::gagg() const { return { g, a, g, g }; }
+inline ivec4 ivec4::gagr() const { return { g, a, g, r }; }
+inline ivec3 ivec4::gar() const { return { g, a, r }; }
+inline ivec4 ivec4::gara() const { return { g, a, r, a }; }
+inline ivec4 ivec4::garb() const { return { g, a, r, b }; }
+inline ivec4 ivec4::garg() const { return { g, a, r, g }; }
+inline ivec4 ivec4::garr() const { return { g, a, r, r }; }
+inline ivec2 ivec4::gb() const { return { g, b }; }
+inline ivec3 ivec4::gba() const { return { g, b, a }; }
+inline ivec4 ivec4::gbaa() const { return { g, b, a, a }; }
+inline ivec4 ivec4::gbab() const { return { g, b, a, b }; }
+inline ivec4 ivec4::gbag() const { return { g, b, a, g }; }
+inline ivec4 ivec4::gbar() const { return { g, b, a, r }; }
+inline ivec3 ivec4::gbb() const { return { g, b, b }; }
+inline ivec4 ivec4::gbba() const { return { g, b, b, a }; }
+inline ivec4 ivec4::gbbb() const { return { g, b, b, b }; }
+inline ivec4 ivec4::gbbg() const { return { g, b, b, g }; }
+inline ivec4 ivec4::gbbr() const { return { g, b, b, r }; }
+inline ivec3 ivec4::gbg() const { return { g, b, g }; }
+inline ivec4 ivec4::gbga() const { return { g, b, g, a }; }
+inline ivec4 ivec4::gbgb() const { return { g, b, g, b }; }
+inline ivec4 ivec4::gbgg() const { return { g, b, g, g }; }
+inline ivec4 ivec4::gbgr() const { return { g, b, g, r }; }
+inline ivec3 ivec4::gbr() const { return { g, b, r }; }
+inline ivec4 ivec4::gbra() const { return { g, b, r, a }; }
+inline ivec4 ivec4::gbrb() const { return { g, b, r, b }; }
+inline ivec4 ivec4::gbrg() const { return { g, b, r, g }; }
+inline ivec4 ivec4::gbrr() const { return { g, b, r, r }; }
+inline ivec2 ivec4::gg() const { return { g, g }; }
+inline ivec3 ivec4::gga() const { return { g, g, a }; }
+inline ivec4 ivec4::ggaa() const { return { g, g, a, a }; }
+inline ivec4 ivec4::ggab() const { return { g, g, a, b }; }
+inline ivec4 ivec4::ggag() const { return { g, g, a, g }; }
+inline ivec4 ivec4::ggar() const { return { g, g, a, r }; }
+inline ivec3 ivec4::ggb() const { return { g, g, b }; }
+inline ivec4 ivec4::ggba() const { return { g, g, b, a }; }
+inline ivec4 ivec4::ggbb() const { return { g, g, b, b }; }
+inline ivec4 ivec4::ggbg() const { return { g, g, b, g }; }
+inline ivec4 ivec4::ggbr() const { return { g, g, b, r }; }
+inline ivec3 ivec4::ggg() const { return { g, g, g }; }
+inline ivec4 ivec4::ggga() const { return { g, g, g, a }; }
+inline ivec4 ivec4::gggb() const { return { g, g, g, b }; }
+inline ivec4 ivec4::gggg() const { return { g, g, g, g }; }
+inline ivec4 ivec4::gggr() const { return { g, g, g, r }; }
+inline ivec3 ivec4::ggr() const { return { g, g, r }; }
+inline ivec4 ivec4::ggra() const { return { g, g, r, a }; }
+inline ivec4 ivec4::ggrb() const { return { g, g, r, b }; }
+inline ivec4 ivec4::ggrg() const { return { g, g, r, g }; }
+inline ivec4 ivec4::ggrr() const { return { g, g, r, r }; }
+inline ivec2 ivec4::gr() const { return { g, r }; }
+inline ivec3 ivec4::gra() const { return { g, r, a }; }
+inline ivec4 ivec4::graa() const { return { g, r, a, a }; }
+inline ivec4 ivec4::grab() const { return { g, r, a, b }; }
+inline ivec4 ivec4::grag() const { return { g, r, a, g }; }
+inline ivec4 ivec4::grar() const { return { g, r, a, r }; }
+inline ivec3 ivec4::grb() const { return { g, r, b }; }
+inline ivec4 ivec4::grba() const { return { g, r, b, a }; }
+inline ivec4 ivec4::grbb() const { return { g, r, b, b }; }
+inline ivec4 ivec4::grbg() const { return { g, r, b, g }; }
+inline ivec4 ivec4::grbr() const { return { g, r, b, r }; }
+inline ivec3 ivec4::grg() const { return { g, r, g }; }
+inline ivec4 ivec4::grga() const { return { g, r, g, a }; }
+inline ivec4 ivec4::grgb() const { return { g, r, g, b }; }
+inline ivec4 ivec4::grgg() const { return { g, r, g, g }; }
+inline ivec4 ivec4::grgr() const { return { g, r, g, r }; }
+inline ivec3 ivec4::grr() const { return { g, r, r }; }
+inline ivec4 ivec4::grra() const { return { g, r, r, a }; }
+inline ivec4 ivec4::grrb() const { return { g, r, r, b }; }
+inline ivec4 ivec4::grrg() const { return { g, r, r, g }; }
+inline ivec4 ivec4::grrr() const { return { g, r, r, r }; }
+inline ivec2 ivec4::ra() const { return { r, a }; }
+inline ivec3 ivec4::raa() const { return { r, a, a }; }
+inline ivec4 ivec4::raaa() const { return { r, a, a, a }; }
+inline ivec4 ivec4::raab() const { return { r, a, a, b }; }
+inline ivec4 ivec4::raag() const { return { r, a, a, g }; }
+inline ivec4 ivec4::raar() const { return { r, a, a, r }; }
+inline ivec3 ivec4::rab() const { return { r, a, b }; }
+inline ivec4 ivec4::raba() const { return { r, a, b, a }; }
+inline ivec4 ivec4::rabb() const { return { r, a, b, b }; }
+inline ivec4 ivec4::rabg() const { return { r, a, b, g }; }
+inline ivec4 ivec4::rabr() const { return { r, a, b, r }; }
+inline ivec3 ivec4::rag() const { return { r, a, g }; }
+inline ivec4 ivec4::raga() const { return { r, a, g, a }; }
+inline ivec4 ivec4::ragb() const { return { r, a, g, b }; }
+inline ivec4 ivec4::ragg() const { return { r, a, g, g }; }
+inline ivec4 ivec4::ragr() const { return { r, a, g, r }; }
+inline ivec3 ivec4::rar() const { return { r, a, r }; }
+inline ivec4 ivec4::rara() const { return { r, a, r, a }; }
+inline ivec4 ivec4::rarb() const { return { r, a, r, b }; }
+inline ivec4 ivec4::rarg() const { return { r, a, r, g }; }
+inline ivec4 ivec4::rarr() const { return { r, a, r, r }; }
+inline ivec2 ivec4::rb() const { return { r, b }; }
+inline ivec3 ivec4::rba() const { return { r, b, a }; }
+inline ivec4 ivec4::rbaa() const { return { r, b, a, a }; }
+inline ivec4 ivec4::rbab() const { return { r, b, a, b }; }
+inline ivec4 ivec4::rbag() const { return { r, b, a, g }; }
+inline ivec4 ivec4::rbar() const { return { r, b, a, r }; }
+inline ivec3 ivec4::rbb() const { return { r, b, b }; }
+inline ivec4 ivec4::rbba() const { return { r, b, b, a }; }
+inline ivec4 ivec4::rbbb() const { return { r, b, b, b }; }
+inline ivec4 ivec4::rbbg() const { return { r, b, b, g }; }
+inline ivec4 ivec4::rbbr() const { return { r, b, b, r }; }
+inline ivec3 ivec4::rbg() const { return { r, b, g }; }
+inline ivec4 ivec4::rbga() const { return { r, b, g, a }; }
+inline ivec4 ivec4::rbgb() const { return { r, b, g, b }; }
+inline ivec4 ivec4::rbgg() const { return { r, b, g, g }; }
+inline ivec4 ivec4::rbgr() const { return { r, b, g, r }; }
+inline ivec3 ivec4::rbr() const { return { r, b, r }; }
+inline ivec4 ivec4::rbra() const { return { r, b, r, a }; }
+inline ivec4 ivec4::rbrb() const { return { r, b, r, b }; }
+inline ivec4 ivec4::rbrg() const { return { r, b, r, g }; }
+inline ivec4 ivec4::rbrr() const { return { r, b, r, r }; }
+inline ivec2 ivec4::rg() const { return { r, g }; }
+inline ivec3 ivec4::rga() const { return { r, g, a }; }
+inline ivec4 ivec4::rgaa() const { return { r, g, a, a }; }
+inline ivec4 ivec4::rgab() const { return { r, g, a, b }; }
+inline ivec4 ivec4::rgag() const { return { r, g, a, g }; }
+inline ivec4 ivec4::rgar() const { return { r, g, a, r }; }
+inline ivec3 ivec4::rgb() const { return { r, g, b }; }
+inline ivec4 ivec4::rgba() const { return { r, g, b, a }; }
+inline ivec4 ivec4::rgbb() const { return { r, g, b, b }; }
+inline ivec4 ivec4::rgbg() const { return { r, g, b, g }; }
+inline ivec4 ivec4::rgbr() const { return { r, g, b, r }; }
+inline ivec3 ivec4::rgg() const { return { r, g, g }; }
+inline ivec4 ivec4::rgga() const { return { r, g, g, a }; }
+inline ivec4 ivec4::rggb() const { return { r, g, g, b }; }
+inline ivec4 ivec4::rggg() const { return { r, g, g, g }; }
+inline ivec4 ivec4::rggr() const { return { r, g, g, r }; }
+inline ivec3 ivec4::rgr() const { return { r, g, r }; }
+inline ivec4 ivec4::rgra() const { return { r, g, r, a }; }
+inline ivec4 ivec4::rgrb() const { return { r, g, r, b }; }
+inline ivec4 ivec4::rgrg() const { return { r, g, r, g }; }
+inline ivec4 ivec4::rgrr() const { return { r, g, r, r }; }
+inline ivec2 ivec4::rr() const { return { r, r }; }
+inline ivec3 ivec4::rra() const { return { r, r, a }; }
+inline ivec4 ivec4::rraa() const { return { r, r, a, a }; }
+inline ivec4 ivec4::rrab() const { return { r, r, a, b }; }
+inline ivec4 ivec4::rrag() const { return { r, r, a, g }; }
+inline ivec4 ivec4::rrar() const { return { r, r, a, r }; }
+inline ivec3 ivec4::rrb() const { return { r, r, b }; }
+inline ivec4 ivec4::rrba() const { return { r, r, b, a }; }
+inline ivec4 ivec4::rrbb() const { return { r, r, b, b }; }
+inline ivec4 ivec4::rrbg() const { return { r, r, b, g }; }
+inline ivec4 ivec4::rrbr() const { return { r, r, b, r }; }
+inline ivec3 ivec4::rrg() const { return { r, r, g }; }
+inline ivec4 ivec4::rrga() const { return { r, r, g, a }; }
+inline ivec4 ivec4::rrgb() const { return { r, r, g, b }; }
+inline ivec4 ivec4::rrgg() const { return { r, r, g, g }; }
+inline ivec4 ivec4::rrgr() const { return { r, r, g, r }; }
+inline ivec3 ivec4::rrr() const { return { r, r, r }; }
+inline ivec4 ivec4::rrra() const { return { r, r, r, a }; }
+inline ivec4 ivec4::rrrb() const { return { r, r, r, b }; }
+inline ivec4 ivec4::rrrg() const { return { r, r, r, g }; }
+inline ivec4 ivec4::rrrr() const { return { r, r, r, r }; }
+inline ivec2 ivec4::ww() const { return { w, w }; }
+inline ivec3 ivec4::www() const { return { w, w, w }; }
+inline ivec4 ivec4::wwww() const { return { w, w, w, w }; }
+inline ivec4 ivec4::wwwx() const { return { w, w, w, x }; }
+inline ivec4 ivec4::wwwy() const { return { w, w, w, y }; }
+inline ivec4 ivec4::wwwz() const { return { w, w, w, z }; }
+inline ivec3 ivec4::wwx() const { return { w, w, x }; }
+inline ivec4 ivec4::wwxw() const { return { w, w, x, w }; }
+inline ivec4 ivec4::wwxx() const { return { w, w, x, x }; }
+inline ivec4 ivec4::wwxy() const { return { w, w, x, y }; }
+inline ivec4 ivec4::wwxz() const { return { w, w, x, z }; }
+inline ivec3 ivec4::wwy() const { return { w, w, y }; }
+inline ivec4 ivec4::wwyw() const { return { w, w, y, w }; }
+inline ivec4 ivec4::wwyx() const { return { w, w, y, x }; }
+inline ivec4 ivec4::wwyy() const { return { w, w, y, y }; }
+inline ivec4 ivec4::wwyz() const { return { w, w, y, z }; }
+inline ivec3 ivec4::wwz() const { return { w, w, z }; }
+inline ivec4 ivec4::wwzw() const { return { w, w, z, w }; }
+inline ivec4 ivec4::wwzx() const { return { w, w, z, x }; }
+inline ivec4 ivec4::wwzy() const { return { w, w, z, y }; }
+inline ivec4 ivec4::wwzz() const { return { w, w, z, z }; }
+inline ivec2 ivec4::wx() const { return { w, x }; }
+inline ivec3 ivec4::wxw() const { return { w, x, w }; }
+inline ivec4 ivec4::wxww() const { return { w, x, w, w }; }
+inline ivec4 ivec4::wxwx() const { return { w, x, w, x }; }
+inline ivec4 ivec4::wxwy() const { return { w, x, w, y }; }
+inline ivec4 ivec4::wxwz() const { return { w, x, w, z }; }
+inline ivec3 ivec4::wxx() const { return { w, x, x }; }
+inline ivec4 ivec4::wxxw() const { return { w, x, x, w }; }
+inline ivec4 ivec4::wxxx() const { return { w, x, x, x }; }
+inline ivec4 ivec4::wxxy() const { return { w, x, x, y }; }
+inline ivec4 ivec4::wxxz() const { return { w, x, x, z }; }
+inline ivec3 ivec4::wxy() const { return { w, x, y }; }
+inline ivec4 ivec4::wxyw() const { return { w, x, y, w }; }
+inline ivec4 ivec4::wxyx() const { return { w, x, y, x }; }
+inline ivec4 ivec4::wxyy() const { return { w, x, y, y }; }
+inline ivec4 ivec4::wxyz() const { return { w, x, y, z }; }
+inline ivec3 ivec4::wxz() const { return { w, x, z }; }
+inline ivec4 ivec4::wxzw() const { return { w, x, z, w }; }
+inline ivec4 ivec4::wxzx() const { return { w, x, z, x }; }
+inline ivec4 ivec4::wxzy() const { return { w, x, z, y }; }
+inline ivec4 ivec4::wxzz() const { return { w, x, z, z }; }
+inline ivec2 ivec4::wy() const { return { w, y }; }
+inline ivec3 ivec4::wyw() const { return { w, y, w }; }
+inline ivec4 ivec4::wyww() const { return { w, y, w, w }; }
+inline ivec4 ivec4::wywx() const { return { w, y, w, x }; }
+inline ivec4 ivec4::wywy() const { return { w, y, w, y }; }
+inline ivec4 ivec4::wywz() const { return { w, y, w, z }; }
+inline ivec3 ivec4::wyx() const { return { w, y, x }; }
+inline ivec4 ivec4::wyxw() const { return { w, y, x, w }; }
+inline ivec4 ivec4::wyxx() const { return { w, y, x, x }; }
+inline ivec4 ivec4::wyxy() const { return { w, y, x, y }; }
+inline ivec4 ivec4::wyxz() const { return { w, y, x, z }; }
+inline ivec3 ivec4::wyy() const { return { w, y, y }; }
+inline ivec4 ivec4::wyyw() const { return { w, y, y, w }; }
+inline ivec4 ivec4::wyyx() const { return { w, y, y, x }; }
+inline ivec4 ivec4::wyyy() const { return { w, y, y, y }; }
+inline ivec4 ivec4::wyyz() const { return { w, y, y, z }; }
+inline ivec3 ivec4::wyz() const { return { w, y, z }; }
+inline ivec4 ivec4::wyzw() const { return { w, y, z, w }; }
+inline ivec4 ivec4::wyzx() const { return { w, y, z, x }; }
+inline ivec4 ivec4::wyzy() const { return { w, y, z, y }; }
+inline ivec4 ivec4::wyzz() const { return { w, y, z, z }; }
+inline ivec2 ivec4::wz() const { return { w, z }; }
+inline ivec3 ivec4::wzw() const { return { w, z, w }; }
+inline ivec4 ivec4::wzww() const { return { w, z, w, w }; }
+inline ivec4 ivec4::wzwx() const { return { w, z, w, x }; }
+inline ivec4 ivec4::wzwy() const { return { w, z, w, y }; }
+inline ivec4 ivec4::wzwz() const { return { w, z, w, z }; }
+inline ivec3 ivec4::wzx() const { return { w, z, x }; }
+inline ivec4 ivec4::wzxw() const { return { w, z, x, w }; }
+inline ivec4 ivec4::wzxx() const { return { w, z, x, x }; }
+inline ivec4 ivec4::wzxy() const { return { w, z, x, y }; }
+inline ivec4 ivec4::wzxz() const { return { w, z, x, z }; }
+inline ivec3 ivec4::wzy() const { return { w, z, y }; }
+inline ivec4 ivec4::wzyw() const { return { w, z, y, w }; }
+inline ivec4 ivec4::wzyx() const { return { w, z, y, x }; }
+inline ivec4 ivec4::wzyy() const { return { w, z, y, y }; }
+inline ivec4 ivec4::wzyz() const { return { w, z, y, z }; }
+inline ivec3 ivec4::wzz() const { return { w, z, z }; }
+inline ivec4 ivec4::wzzw() const { return { w, z, z, w }; }
+inline ivec4 ivec4::wzzx() const { return { w, z, z, x }; }
+inline ivec4 ivec4::wzzy() const { return { w, z, z, y }; }
+inline ivec4 ivec4::wzzz() const { return { w, z, z, z }; }
+inline ivec2 ivec4::xw() const { return { x, w }; }
+inline ivec3 ivec4::xww() const { return { x, w, w }; }
+inline ivec4 ivec4::xwww() const { return { x, w, w, w }; }
+inline ivec4 ivec4::xwwx() const { return { x, w, w, x }; }
+inline ivec4 ivec4::xwwy() const { return { x, w, w, y }; }
+inline ivec4 ivec4::xwwz() const { return { x, w, w, z }; }
+inline ivec3 ivec4::xwx() const { return { x, w, x }; }
+inline ivec4 ivec4::xwxw() const { return { x, w, x, w }; }
+inline ivec4 ivec4::xwxx() const { return { x, w, x, x }; }
+inline ivec4 ivec4::xwxy() const { return { x, w, x, y }; }
+inline ivec4 ivec4::xwxz() const { return { x, w, x, z }; }
+inline ivec3 ivec4::xwy() const { return { x, w, y }; }
+inline ivec4 ivec4::xwyw() const { return { x, w, y, w }; }
+inline ivec4 ivec4::xwyx() const { return { x, w, y, x }; }
+inline ivec4 ivec4::xwyy() const { return { x, w, y, y }; }
+inline ivec4 ivec4::xwyz() const { return { x, w, y, z }; }
+inline ivec3 ivec4::xwz() const { return { x, w, z }; }
+inline ivec4 ivec4::xwzw() const { return { x, w, z, w }; }
+inline ivec4 ivec4::xwzx() const { return { x, w, z, x }; }
+inline ivec4 ivec4::xwzy() const { return { x, w, z, y }; }
+inline ivec4 ivec4::xwzz() const { return { x, w, z, z }; }
+inline ivec2 ivec4::xx() const { return { x, x }; }
+inline ivec3 ivec4::xxw() const { return { x, x, w }; }
+inline ivec4 ivec4::xxww() const { return { x, x, w, w }; }
+inline ivec4 ivec4::xxwx() const { return { x, x, w, x }; }
+inline ivec4 ivec4::xxwy() const { return { x, x, w, y }; }
+inline ivec4 ivec4::xxwz() const { return { x, x, w, z }; }
+inline ivec3 ivec4::xxx() const { return { x, x, x }; }
+inline ivec4 ivec4::xxxw() const { return { x, x, x, w }; }
+inline ivec4 ivec4::xxxx() const { return { x, x, x, x }; }
+inline ivec4 ivec4::xxxy() const { return { x, x, x, y }; }
+inline ivec4 ivec4::xxxz() const { return { x, x, x, z }; }
+inline ivec3 ivec4::xxy() const { return { x, x, y }; }
+inline ivec4 ivec4::xxyw() const { return { x, x, y, w }; }
+inline ivec4 ivec4::xxyx() const { return { x, x, y, x }; }
+inline ivec4 ivec4::xxyy() const { return { x, x, y, y }; }
+inline ivec4 ivec4::xxyz() const { return { x, x, y, z }; }
+inline ivec3 ivec4::xxz() const { return { x, x, z }; }
+inline ivec4 ivec4::xxzw() const { return { x, x, z, w }; }
+inline ivec4 ivec4::xxzx() const { return { x, x, z, x }; }
+inline ivec4 ivec4::xxzy() const { return { x, x, z, y }; }
+inline ivec4 ivec4::xxzz() const { return { x, x, z, z }; }
+inline ivec2 ivec4::xy() const { return { x, y }; }
+inline ivec3 ivec4::xyw() const { return { x, y, w }; }
+inline ivec4 ivec4::xyww() const { return { x, y, w, w }; }
+inline ivec4 ivec4::xywx() const { return { x, y, w, x }; }
+inline ivec4 ivec4::xywy() const { return { x, y, w, y }; }
+inline ivec4 ivec4::xywz() const { return { x, y, w, z }; }
+inline ivec3 ivec4::xyx() const { return { x, y, x }; }
+inline ivec4 ivec4::xyxw() const { return { x, y, x, w }; }
+inline ivec4 ivec4::xyxx() const { return { x, y, x, x }; }
+inline ivec4 ivec4::xyxy() const { return { x, y, x, y }; }
+inline ivec4 ivec4::xyxz() const { return { x, y, x, z }; }
+inline ivec3 ivec4::xyy() const { return { x, y, y }; }
+inline ivec4 ivec4::xyyw() const { return { x, y, y, w }; }
+inline ivec4 ivec4::xyyx() const { return { x, y, y, x }; }
+inline ivec4 ivec4::xyyy() const { return { x, y, y, y }; }
+inline ivec4 ivec4::xyyz() const { return { x, y, y, z }; }
+inline ivec3 ivec4::xyz() const { return { x, y, z }; }
+inline ivec4 ivec4::xyzw() const { return { x, y, z, w }; }
+inline ivec4 ivec4::xyzx() const { return { x, y, z, x }; }
+inline ivec4 ivec4::xyzy() const { return { x, y, z, y }; }
+inline ivec4 ivec4::xyzz() const { return { x, y, z, z }; }
+inline ivec2 ivec4::xz() const { return { x, z }; }
+inline ivec3 ivec4::xzw() const { return { x, z, w }; }
+inline ivec4 ivec4::xzww() const { return { x, z, w, w }; }
+inline ivec4 ivec4::xzwx() const { return { x, z, w, x }; }
+inline ivec4 ivec4::xzwy() const { return { x, z, w, y }; }
+inline ivec4 ivec4::xzwz() const { return { x, z, w, z }; }
+inline ivec3 ivec4::xzx() const { return { x, z, x }; }
+inline ivec4 ivec4::xzxw() const { return { x, z, x, w }; }
+inline ivec4 ivec4::xzxx() const { return { x, z, x, x }; }
+inline ivec4 ivec4::xzxy() const { return { x, z, x, y }; }
+inline ivec4 ivec4::xzxz() const { return { x, z, x, z }; }
+inline ivec3 ivec4::xzy() const { return { x, z, y }; }
+inline ivec4 ivec4::xzyw() const { return { x, z, y, w }; }
+inline ivec4 ivec4::xzyx() const { return { x, z, y, x }; }
+inline ivec4 ivec4::xzyy() const { return { x, z, y, y }; }
+inline ivec4 ivec4::xzyz() const { return { x, z, y, z }; }
+inline ivec3 ivec4::xzz() const { return { x, z, z }; }
+inline ivec4 ivec4::xzzw() const { return { x, z, z, w }; }
+inline ivec4 ivec4::xzzx() const { return { x, z, z, x }; }
+inline ivec4 ivec4::xzzy() const { return { x, z, z, y }; }
+inline ivec4 ivec4::xzzz() const { return { x, z, z, z }; }
+inline ivec2 ivec4::yw() const { return { y, w }; }
+inline ivec3 ivec4::yww() const { return { y, w, w }; }
+inline ivec4 ivec4::ywww() const { return { y, w, w, w }; }
+inline ivec4 ivec4::ywwx() const { return { y, w, w, x }; }
+inline ivec4 ivec4::ywwy() const { return { y, w, w, y }; }
+inline ivec4 ivec4::ywwz() const { return { y, w, w, z }; }
+inline ivec3 ivec4::ywx() const { return { y, w, x }; }
+inline ivec4 ivec4::ywxw() const { return { y, w, x, w }; }
+inline ivec4 ivec4::ywxx() const { return { y, w, x, x }; }
+inline ivec4 ivec4::ywxy() const { return { y, w, x, y }; }
+inline ivec4 ivec4::ywxz() const { return { y, w, x, z }; }
+inline ivec3 ivec4::ywy() const { return { y, w, y }; }
+inline ivec4 ivec4::ywyw() const { return { y, w, y, w }; }
+inline ivec4 ivec4::ywyx() const { return { y, w, y, x }; }
+inline ivec4 ivec4::ywyy() const { return { y, w, y, y }; }
+inline ivec4 ivec4::ywyz() const { return { y, w, y, z }; }
+inline ivec3 ivec4::ywz() const { return { y, w, z }; }
+inline ivec4 ivec4::ywzw() const { return { y, w, z, w }; }
+inline ivec4 ivec4::ywzx() const { return { y, w, z, x }; }
+inline ivec4 ivec4::ywzy() const { return { y, w, z, y }; }
+inline ivec4 ivec4::ywzz() const { return { y, w, z, z }; }
+inline ivec2 ivec4::yx() const { return { y, x }; }
+inline ivec3 ivec4::yxw() const { return { y, x, w }; }
+inline ivec4 ivec4::yxww() const { return { y, x, w, w }; }
+inline ivec4 ivec4::yxwx() const { return { y, x, w, x }; }
+inline ivec4 ivec4::yxwy() const { return { y, x, w, y }; }
+inline ivec4 ivec4::yxwz() const { return { y, x, w, z }; }
+inline ivec3 ivec4::yxx() const { return { y, x, x }; }
+inline ivec4 ivec4::yxxw() const { return { y, x, x, w }; }
+inline ivec4 ivec4::yxxx() const { return { y, x, x, x }; }
+inline ivec4 ivec4::yxxy() const { return { y, x, x, y }; }
+inline ivec4 ivec4::yxxz() const { return { y, x, x, z }; }
+inline ivec3 ivec4::yxy() const { return { y, x, y }; }
+inline ivec4 ivec4::yxyw() const { return { y, x, y, w }; }
+inline ivec4 ivec4::yxyx() const { return { y, x, y, x }; }
+inline ivec4 ivec4::yxyy() const { return { y, x, y, y }; }
+inline ivec4 ivec4::yxyz() const { return { y, x, y, z }; }
+inline ivec3 ivec4::yxz() const { return { y, x, z }; }
+inline ivec4 ivec4::yxzw() const { return { y, x, z, w }; }
+inline ivec4 ivec4::yxzx() const { return { y, x, z, x }; }
+inline ivec4 ivec4::yxzy() const { return { y, x, z, y }; }
+inline ivec4 ivec4::yxzz() const { return { y, x, z, z }; }
+inline ivec2 ivec4::yy() const { return { y, y }; }
+inline ivec3 ivec4::yyw() const { return { y, y, w }; }
+inline ivec4 ivec4::yyww() const { return { y, y, w, w }; }
+inline ivec4 ivec4::yywx() const { return { y, y, w, x }; }
+inline ivec4 ivec4::yywy() const { return { y, y, w, y }; }
+inline ivec4 ivec4::yywz() const { return { y, y, w, z }; }
+inline ivec3 ivec4::yyx() const { return { y, y, x }; }
+inline ivec4 ivec4::yyxw() const { return { y, y, x, w }; }
+inline ivec4 ivec4::yyxx() const { return { y, y, x, x }; }
+inline ivec4 ivec4::yyxy() const { return { y, y, x, y }; }
+inline ivec4 ivec4::yyxz() const { return { y, y, x, z }; }
+inline ivec3 ivec4::yyy() const { return { y, y, y }; }
+inline ivec4 ivec4::yyyw() const { return { y, y, y, w }; }
+inline ivec4 ivec4::yyyx() const { return { y, y, y, x }; }
+inline ivec4 ivec4::yyyy() const { return { y, y, y, y }; }
+inline ivec4 ivec4::yyyz() const { return { y, y, y, z }; }
+inline ivec3 ivec4::yyz() const { return { y, y, z }; }
+inline ivec4 ivec4::yyzw() const { return { y, y, z, w }; }
+inline ivec4 ivec4::yyzx() const { return { y, y, z, x }; }
+inline ivec4 ivec4::yyzy() const { return { y, y, z, y }; }
+inline ivec4 ivec4::yyzz() const { return { y, y, z, z }; }
+inline ivec2 ivec4::yz() const { return { y, z }; }
+inline ivec3 ivec4::yzw() const { return { y, z, w }; }
+inline ivec4 ivec4::yzww() const { return { y, z, w, w }; }
+inline ivec4 ivec4::yzwx() const { return { y, z, w, x }; }
+inline ivec4 ivec4::yzwy() const { return { y, z, w, y }; }
+inline ivec4 ivec4::yzwz() const { return { y, z, w, z }; }
+inline ivec3 ivec4::yzx() const { return { y, z, x }; }
+inline ivec4 ivec4::yzxw() const { return { y, z, x, w }; }
+inline ivec4 ivec4::yzxx() const { return { y, z, x, x }; }
+inline ivec4 ivec4::yzxy() const { return { y, z, x, y }; }
+inline ivec4 ivec4::yzxz() const { return { y, z, x, z }; }
+inline ivec3 ivec4::yzy() const { return { y, z, y }; }
+inline ivec4 ivec4::yzyw() const { return { y, z, y, w }; }
+inline ivec4 ivec4::yzyx() const { return { y, z, y, x }; }
+inline ivec4 ivec4::yzyy() const { return { y, z, y, y }; }
+inline ivec4 ivec4::yzyz() const { return { y, z, y, z }; }
+inline ivec3 ivec4::yzz() const { return { y, z, z }; }
+inline ivec4 ivec4::yzzw() const { return { y, z, z, w }; }
+inline ivec4 ivec4::yzzx() const { return { y, z, z, x }; }
+inline ivec4 ivec4::yzzy() const { return { y, z, z, y }; }
+inline ivec4 ivec4::yzzz() const { return { y, z, z, z }; }
+inline ivec2 ivec4::zw() const { return { z, w }; }
+inline ivec3 ivec4::zww() const { return { z, w, w }; }
+inline ivec4 ivec4::zwww() const { return { z, w, w, w }; }
+inline ivec4 ivec4::zwwx() const { return { z, w, w, x }; }
+inline ivec4 ivec4::zwwy() const { return { z, w, w, y }; }
+inline ivec4 ivec4::zwwz() const { return { z, w, w, z }; }
+inline ivec3 ivec4::zwx() const { return { z, w, x }; }
+inline ivec4 ivec4::zwxw() const { return { z, w, x, w }; }
+inline ivec4 ivec4::zwxx() const { return { z, w, x, x }; }
+inline ivec4 ivec4::zwxy() const { return { z, w, x, y }; }
+inline ivec4 ivec4::zwxz() const { return { z, w, x, z }; }
+inline ivec3 ivec4::zwy() const { return { z, w, y }; }
+inline ivec4 ivec4::zwyw() const { return { z, w, y, w }; }
+inline ivec4 ivec4::zwyx() const { return { z, w, y, x }; }
+inline ivec4 ivec4::zwyy() const { return { z, w, y, y }; }
+inline ivec4 ivec4::zwyz() const { return { z, w, y, z }; }
+inline ivec3 ivec4::zwz() const { return { z, w, z }; }
+inline ivec4 ivec4::zwzw() const { return { z, w, z, w }; }
+inline ivec4 ivec4::zwzx() const { return { z, w, z, x }; }
+inline ivec4 ivec4::zwzy() const { return { z, w, z, y }; }
+inline ivec4 ivec4::zwzz() const { return { z, w, z, z }; }
+inline ivec2 ivec4::zx() const { return { z, x }; }
+inline ivec3 ivec4::zxw() const { return { z, x, w }; }
+inline ivec4 ivec4::zxww() const { return { z, x, w, w }; }
+inline ivec4 ivec4::zxwx() const { return { z, x, w, x }; }
+inline ivec4 ivec4::zxwy() const { return { z, x, w, y }; }
+inline ivec4 ivec4::zxwz() const { return { z, x, w, z }; }
+inline ivec3 ivec4::zxx() const { return { z, x, x }; }
+inline ivec4 ivec4::zxxw() const { return { z, x, x, w }; }
+inline ivec4 ivec4::zxxx() const { return { z, x, x, x }; }
+inline ivec4 ivec4::zxxy() const { return { z, x, x, y }; }
+inline ivec4 ivec4::zxxz() const { return { z, x, x, z }; }
+inline ivec3 ivec4::zxy() const { return { z, x, y }; }
+inline ivec4 ivec4::zxyw() const { return { z, x, y, w }; }
+inline ivec4 ivec4::zxyx() const { return { z, x, y, x }; }
+inline ivec4 ivec4::zxyy() const { return { z, x, y, y }; }
+inline ivec4 ivec4::zxyz() const { return { z, x, y, z }; }
+inline ivec3 ivec4::zxz() const { return { z, x, z }; }
+inline ivec4 ivec4::zxzw() const { return { z, x, z, w }; }
+inline ivec4 ivec4::zxzx() const { return { z, x, z, x }; }
+inline ivec4 ivec4::zxzy() const { return { z, x, z, y }; }
+inline ivec4 ivec4::zxzz() const { return { z, x, z, z }; }
+inline ivec2 ivec4::zy() const { return { z, y }; }
+inline ivec3 ivec4::zyw() const { return { z, y, w }; }
+inline ivec4 ivec4::zyww() const { return { z, y, w, w }; }
+inline ivec4 ivec4::zywx() const { return { z, y, w, x }; }
+inline ivec4 ivec4::zywy() const { return { z, y, w, y }; }
+inline ivec4 ivec4::zywz() const { return { z, y, w, z }; }
+inline ivec3 ivec4::zyx() const { return { z, y, x }; }
+inline ivec4 ivec4::zyxw() const { return { z, y, x, w }; }
+inline ivec4 ivec4::zyxx() const { return { z, y, x, x }; }
+inline ivec4 ivec4::zyxy() const { return { z, y, x, y }; }
+inline ivec4 ivec4::zyxz() const { return { z, y, x, z }; }
+inline ivec3 ivec4::zyy() const { return { z, y, y }; }
+inline ivec4 ivec4::zyyw() const { return { z, y, y, w }; }
+inline ivec4 ivec4::zyyx() const { return { z, y, y, x }; }
+inline ivec4 ivec4::zyyy() const { return { z, y, y, y }; }
+inline ivec4 ivec4::zyyz() const { return { z, y, y, z }; }
+inline ivec3 ivec4::zyz() const { return { z, y, z }; }
+inline ivec4 ivec4::zyzw() const { return { z, y, z, w }; }
+inline ivec4 ivec4::zyzx() const { return { z, y, z, x }; }
+inline ivec4 ivec4::zyzy() const { return { z, y, z, y }; }
+inline ivec4 ivec4::zyzz() const { return { z, y, z, z }; }
+inline ivec2 ivec4::zz() const { return { z, z }; }
+inline ivec3 ivec4::zzw() const { return { z, z, w }; }
+inline ivec4 ivec4::zzww() const { return { z, z, w, w }; }
+inline ivec4 ivec4::zzwx() const { return { z, z, w, x }; }
+inline ivec4 ivec4::zzwy() const { return { z, z, w, y }; }
+inline ivec4 ivec4::zzwz() const { return { z, z, w, z }; }
+inline ivec3 ivec4::zzx() const { return { z, z, x }; }
+inline ivec4 ivec4::zzxw() const { return { z, z, x, w }; }
+inline ivec4 ivec4::zzxx() const { return { z, z, x, x }; }
+inline ivec4 ivec4::zzxy() const { return { z, z, x, y }; }
+inline ivec4 ivec4::zzxz() const { return { z, z, x, z }; }
+inline ivec3 ivec4::zzy() const { return { z, z, y }; }
+inline ivec4 ivec4::zzyw() const { return { z, z, y, w }; }
+inline ivec4 ivec4::zzyx() const { return { z, z, y, x }; }
+inline ivec4 ivec4::zzyy() const { return { z, z, y, y }; }
+inline ivec4 ivec4::zzyz() const { return { z, z, y, z }; }
+inline ivec3 ivec4::zzz() const { return { z, z, z }; }
+inline ivec4 ivec4::zzzw() const { return { z, z, z, w }; }
+inline ivec4 ivec4::zzzx() const { return { z, z, z, x }; }
+inline ivec4 ivec4::zzzy() const { return { z, z, z, y }; }
+inline ivec4 ivec4::zzzz() const { return { z, z, z, z }; }
+inline void ivec4::ab(const simdint& _val0, const simdint& _val1) { a = _val0; b = _val1; }
+inline void ivec4::ab(const ivec2& _val) { a = _val.x; b = _val.y; }
+inline void ivec4::ab(const simdint& _val) { a = _val; b = _val; }
+inline void ivec4::abg(const simdint& _val0, const simdint& _val1, const simdint& _val2) { a = _val0; b = _val1; g = _val2; }
+inline void ivec4::abg(const ivec3& _val) { a = _val.x; b = _val.y; g = _val.z; }
+inline void ivec4::abg(const simdint& _val) { a = _val; b = _val; g = _val; }
+inline void ivec4::abgr(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { a = _val0; b = _val1; g = _val2; r = _val3; }
+inline void ivec4::abgr(const ivec4& _val) { a = _val.x; b = _val.y; g = _val.z; r = _val.w; }
+inline void ivec4::abgr(const simdint& _val) { a = _val; b = _val; g = _val; r = _val; }
+inline void ivec4::abr(const simdint& _val0, const simdint& _val1, const simdint& _val2) { a = _val0; b = _val1; r = _val2; }
+inline void ivec4::abr(const ivec3& _val) { a = _val.x; b = _val.y; r = _val.z; }
+inline void ivec4::abr(const simdint& _val) { a = _val; b = _val; r = _val; }
+inline void ivec4::abrg(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { a = _val0; b = _val1; r = _val2; g = _val3; }
+inline void ivec4::abrg(const ivec4& _val) { a = _val.x; b = _val.y; r = _val.z; g = _val.w; }
+inline void ivec4::abrg(const simdint& _val) { a = _val; b = _val; r = _val; g = _val; }
+inline void ivec4::ag(const simdint& _val0, const simdint& _val1) { a = _val0; g = _val1; }
+inline void ivec4::ag(const ivec2& _val) { a = _val.x; g = _val.y; }
+inline void ivec4::ag(const simdint& _val) { a = _val; g = _val; }
+inline void ivec4::agb(const simdint& _val0, const simdint& _val1, const simdint& _val2) { a = _val0; g = _val1; b = _val2; }
+inline void ivec4::agb(const ivec3& _val) { a = _val.x; g = _val.y; b = _val.z; }
+inline void ivec4::agb(const simdint& _val) { a = _val; g = _val; b = _val; }
+inline void ivec4::agbr(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { a = _val0; g = _val1; b = _val2; r = _val3; }
+inline void ivec4::agbr(const ivec4& _val) { a = _val.x; g = _val.y; b = _val.z; r = _val.w; }
+inline void ivec4::agbr(const simdint& _val) { a = _val; g = _val; b = _val; r = _val; }
+inline void ivec4::agr(const simdint& _val0, const simdint& _val1, const simdint& _val2) { a = _val0; g = _val1; r = _val2; }
+inline void ivec4::agr(const ivec3& _val) { a = _val.x; g = _val.y; r = _val.z; }
+inline void ivec4::agr(const simdint& _val) { a = _val; g = _val; r = _val; }
+inline void ivec4::agrb(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { a = _val0; g = _val1; r = _val2; b = _val3; }
+inline void ivec4::agrb(const ivec4& _val) { a = _val.x; g = _val.y; r = _val.z; b = _val.w; }
+inline void ivec4::agrb(const simdint& _val) { a = _val; g = _val; r = _val; b = _val; }
+inline void ivec4::ar(const simdint& _val0, const simdint& _val1) { a = _val0; r = _val1; }
+inline void ivec4::ar(const ivec2& _val) { a = _val.x; r = _val.y; }
+inline void ivec4::ar(const simdint& _val) { a = _val; r = _val; }
+inline void ivec4::arb(const simdint& _val0, const simdint& _val1, const simdint& _val2) { a = _val0; r = _val1; b = _val2; }
+inline void ivec4::arb(const ivec3& _val) { a = _val.x; r = _val.y; b = _val.z; }
+inline void ivec4::arb(const simdint& _val) { a = _val; r = _val; b = _val; }
+inline void ivec4::arbg(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { a = _val0; r = _val1; b = _val2; g = _val3; }
+inline void ivec4::arbg(const ivec4& _val) { a = _val.x; r = _val.y; b = _val.z; g = _val.w; }
+inline void ivec4::arbg(const simdint& _val) { a = _val; r = _val; b = _val; g = _val; }
+inline void ivec4::arg(const simdint& _val0, const simdint& _val1, const simdint& _val2) { a = _val0; r = _val1; g = _val2; }
+inline void ivec4::arg(const ivec3& _val) { a = _val.x; r = _val.y; g = _val.z; }
+inline void ivec4::arg(const simdint& _val) { a = _val; r = _val; g = _val; }
+inline void ivec4::argb(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { a = _val0; r = _val1; g = _val2; b = _val3; }
+inline void ivec4::argb(const ivec4& _val) { a = _val.x; r = _val.y; g = _val.z; b = _val.w; }
+inline void ivec4::argb(const simdint& _val) { a = _val; r = _val; g = _val; b = _val; }
+inline void ivec4::ba(const simdint& _val0, const simdint& _val1) { b = _val0; a = _val1; }
+inline void ivec4::ba(const ivec2& _val) { b = _val.x; a = _val.y; }
+inline void ivec4::ba(const simdint& _val) { b = _val; a = _val; }
+inline void ivec4::bag(const simdint& _val0, const simdint& _val1, const simdint& _val2) { b = _val0; a = _val1; g = _val2; }
+inline void ivec4::bag(const ivec3& _val) { b = _val.x; a = _val.y; g = _val.z; }
+inline void ivec4::bag(const simdint& _val) { b = _val; a = _val; g = _val; }
+inline void ivec4::bagr(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { b = _val0; a = _val1; g = _val2; r = _val3; }
+inline void ivec4::bagr(const ivec4& _val) { b = _val.x; a = _val.y; g = _val.z; r = _val.w; }
+inline void ivec4::bagr(const simdint& _val) { b = _val; a = _val; g = _val; r = _val; }
+inline void ivec4::bar(const simdint& _val0, const simdint& _val1, const simdint& _val2) { b = _val0; a = _val1; r = _val2; }
+inline void ivec4::bar(const ivec3& _val) { b = _val.x; a = _val.y; r = _val.z; }
+inline void ivec4::bar(const simdint& _val) { b = _val; a = _val; r = _val; }
+inline void ivec4::barg(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { b = _val0; a = _val1; r = _val2; g = _val3; }
+inline void ivec4::barg(const ivec4& _val) { b = _val.x; a = _val.y; r = _val.z; g = _val.w; }
+inline void ivec4::barg(const simdint& _val) { b = _val; a = _val; r = _val; g = _val; }
+inline void ivec4::bg(const simdint& _val0, const simdint& _val1) { b = _val0; g = _val1; }
+inline void ivec4::bg(const ivec2& _val) { b = _val.x; g = _val.y; }
+inline void ivec4::bg(const simdint& _val) { b = _val; g = _val; }
+inline void ivec4::bga(const simdint& _val0, const simdint& _val1, const simdint& _val2) { b = _val0; g = _val1; a = _val2; }
+inline void ivec4::bga(const ivec3& _val) { b = _val.x; g = _val.y; a = _val.z; }
+inline void ivec4::bga(const simdint& _val) { b = _val; g = _val; a = _val; }
+inline void ivec4::bgar(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { b = _val0; g = _val1; a = _val2; r = _val3; }
+inline void ivec4::bgar(const ivec4& _val) { b = _val.x; g = _val.y; a = _val.z; r = _val.w; }
+inline void ivec4::bgar(const simdint& _val) { b = _val; g = _val; a = _val; r = _val; }
+inline void ivec4::bgr(const simdint& _val0, const simdint& _val1, const simdint& _val2) { b = _val0; g = _val1; r = _val2; }
+inline void ivec4::bgr(const ivec3& _val) { b = _val.x; g = _val.y; r = _val.z; }
+inline void ivec4::bgr(const simdint& _val) { b = _val; g = _val; r = _val; }
+inline void ivec4::bgra(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { b = _val0; g = _val1; r = _val2; a = _val3; }
+inline void ivec4::bgra(const ivec4& _val) { b = _val.x; g = _val.y; r = _val.z; a = _val.w; }
+inline void ivec4::bgra(const simdint& _val) { b = _val; g = _val; r = _val; a = _val; }
+inline void ivec4::br(const simdint& _val0, const simdint& _val1) { b = _val0; r = _val1; }
+inline void ivec4::br(const ivec2& _val) { b = _val.x; r = _val.y; }
+inline void ivec4::br(const simdint& _val) { b = _val; r = _val; }
+inline void ivec4::bra(const simdint& _val0, const simdint& _val1, const simdint& _val2) { b = _val0; r = _val1; a = _val2; }
+inline void ivec4::bra(const ivec3& _val) { b = _val.x; r = _val.y; a = _val.z; }
+inline void ivec4::bra(const simdint& _val) { b = _val; r = _val; a = _val; }
+inline void ivec4::brag(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { b = _val0; r = _val1; a = _val2; g = _val3; }
+inline void ivec4::brag(const ivec4& _val) { b = _val.x; r = _val.y; a = _val.z; g = _val.w; }
+inline void ivec4::brag(const simdint& _val) { b = _val; r = _val; a = _val; g = _val; }
+inline void ivec4::brg(const simdint& _val0, const simdint& _val1, const simdint& _val2) { b = _val0; r = _val1; g = _val2; }
+inline void ivec4::brg(const ivec3& _val) { b = _val.x; r = _val.y; g = _val.z; }
+inline void ivec4::brg(const simdint& _val) { b = _val; r = _val; g = _val; }
+inline void ivec4::brga(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { b = _val0; r = _val1; g = _val2; a = _val3; }
+inline void ivec4::brga(const ivec4& _val) { b = _val.x; r = _val.y; g = _val.z; a = _val.w; }
+inline void ivec4::brga(const simdint& _val) { b = _val; r = _val; g = _val; a = _val; }
+inline void ivec4::ga(const simdint& _val0, const simdint& _val1) { g = _val0; a = _val1; }
+inline void ivec4::ga(const ivec2& _val) { g = _val.x; a = _val.y; }
+inline void ivec4::ga(const simdint& _val) { g = _val; a = _val; }
+inline void ivec4::gab(const simdint& _val0, const simdint& _val1, const simdint& _val2) { g = _val0; a = _val1; b = _val2; }
+inline void ivec4::gab(const ivec3& _val) { g = _val.x; a = _val.y; b = _val.z; }
+inline void ivec4::gab(const simdint& _val) { g = _val; a = _val; b = _val; }
+inline void ivec4::gabr(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { g = _val0; a = _val1; b = _val2; r = _val3; }
+inline void ivec4::gabr(const ivec4& _val) { g = _val.x; a = _val.y; b = _val.z; r = _val.w; }
+inline void ivec4::gabr(const simdint& _val) { g = _val; a = _val; b = _val; r = _val; }
+inline void ivec4::gar(const simdint& _val0, const simdint& _val1, const simdint& _val2) { g = _val0; a = _val1; r = _val2; }
+inline void ivec4::gar(const ivec3& _val) { g = _val.x; a = _val.y; r = _val.z; }
+inline void ivec4::gar(const simdint& _val) { g = _val; a = _val; r = _val; }
+inline void ivec4::garb(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { g = _val0; a = _val1; r = _val2; b = _val3; }
+inline void ivec4::garb(const ivec4& _val) { g = _val.x; a = _val.y; r = _val.z; b = _val.w; }
+inline void ivec4::garb(const simdint& _val) { g = _val; a = _val; r = _val; b = _val; }
+inline void ivec4::gb(const simdint& _val0, const simdint& _val1) { g = _val0; b = _val1; }
+inline void ivec4::gb(const ivec2& _val) { g = _val.x; b = _val.y; }
+inline void ivec4::gb(const simdint& _val) { g = _val; b = _val; }
+inline void ivec4::gba(const simdint& _val0, const simdint& _val1, const simdint& _val2) { g = _val0; b = _val1; a = _val2; }
+inline void ivec4::gba(const ivec3& _val) { g = _val.x; b = _val.y; a = _val.z; }
+inline void ivec4::gba(const simdint& _val) { g = _val; b = _val; a = _val; }
+inline void ivec4::gbar(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { g = _val0; b = _val1; a = _val2; r = _val3; }
+inline void ivec4::gbar(const ivec4& _val) { g = _val.x; b = _val.y; a = _val.z; r = _val.w; }
+inline void ivec4::gbar(const simdint& _val) { g = _val; b = _val; a = _val; r = _val; }
+inline void ivec4::gbr(const simdint& _val0, const simdint& _val1, const simdint& _val2) { g = _val0; b = _val1; r = _val2; }
+inline void ivec4::gbr(const ivec3& _val) { g = _val.x; b = _val.y; r = _val.z; }
+inline void ivec4::gbr(const simdint& _val) { g = _val; b = _val; r = _val; }
+inline void ivec4::gbra(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { g = _val0; b = _val1; r = _val2; a = _val3; }
+inline void ivec4::gbra(const ivec4& _val) { g = _val.x; b = _val.y; r = _val.z; a = _val.w; }
+inline void ivec4::gbra(const simdint& _val) { g = _val; b = _val; r = _val; a = _val; }
+inline void ivec4::gr(const simdint& _val0, const simdint& _val1) { g = _val0; r = _val1; }
+inline void ivec4::gr(const ivec2& _val) { g = _val.x; r = _val.y; }
+inline void ivec4::gr(const simdint& _val) { g = _val; r = _val; }
+inline void ivec4::gra(const simdint& _val0, const simdint& _val1, const simdint& _val2) { g = _val0; r = _val1; a = _val2; }
+inline void ivec4::gra(const ivec3& _val) { g = _val.x; r = _val.y; a = _val.z; }
+inline void ivec4::gra(const simdint& _val) { g = _val; r = _val; a = _val; }
+inline void ivec4::grab(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { g = _val0; r = _val1; a = _val2; b = _val3; }
+inline void ivec4::grab(const ivec4& _val) { g = _val.x; r = _val.y; a = _val.z; b = _val.w; }
+inline void ivec4::grab(const simdint& _val) { g = _val; r = _val; a = _val; b = _val; }
+inline void ivec4::grb(const simdint& _val0, const simdint& _val1, const simdint& _val2) { g = _val0; r = _val1; b = _val2; }
+inline void ivec4::grb(const ivec3& _val) { g = _val.x; r = _val.y; b = _val.z; }
+inline void ivec4::grb(const simdint& _val) { g = _val; r = _val; b = _val; }
+inline void ivec4::grba(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { g = _val0; r = _val1; b = _val2; a = _val3; }
+inline void ivec4::grba(const ivec4& _val) { g = _val.x; r = _val.y; b = _val.z; a = _val.w; }
+inline void ivec4::grba(const simdint& _val) { g = _val; r = _val; b = _val; a = _val; }
+inline void ivec4::ra(const simdint& _val0, const simdint& _val1) { r = _val0; a = _val1; }
+inline void ivec4::ra(const ivec2& _val) { r = _val.x; a = _val.y; }
+inline void ivec4::ra(const simdint& _val) { r = _val; a = _val; }
+inline void ivec4::rab(const simdint& _val0, const simdint& _val1, const simdint& _val2) { r = _val0; a = _val1; b = _val2; }
+inline void ivec4::rab(const ivec3& _val) { r = _val.x; a = _val.y; b = _val.z; }
+inline void ivec4::rab(const simdint& _val) { r = _val; a = _val; b = _val; }
+inline void ivec4::rabg(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { r = _val0; a = _val1; b = _val2; g = _val3; }
+inline void ivec4::rabg(const ivec4& _val) { r = _val.x; a = _val.y; b = _val.z; g = _val.w; }
+inline void ivec4::rabg(const simdint& _val) { r = _val; a = _val; b = _val; g = _val; }
+inline void ivec4::rag(const simdint& _val0, const simdint& _val1, const simdint& _val2) { r = _val0; a = _val1; g = _val2; }
+inline void ivec4::rag(const ivec3& _val) { r = _val.x; a = _val.y; g = _val.z; }
+inline void ivec4::rag(const simdint& _val) { r = _val; a = _val; g = _val; }
+inline void ivec4::ragb(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { r = _val0; a = _val1; g = _val2; b = _val3; }
+inline void ivec4::ragb(const ivec4& _val) { r = _val.x; a = _val.y; g = _val.z; b = _val.w; }
+inline void ivec4::ragb(const simdint& _val) { r = _val; a = _val; g = _val; b = _val; }
+inline void ivec4::rb(const simdint& _val0, const simdint& _val1) { r = _val0; b = _val1; }
+inline void ivec4::rb(const ivec2& _val) { r = _val.x; b = _val.y; }
+inline void ivec4::rb(const simdint& _val) { r = _val; b = _val; }
+inline void ivec4::rba(const simdint& _val0, const simdint& _val1, const simdint& _val2) { r = _val0; b = _val1; a = _val2; }
+inline void ivec4::rba(const ivec3& _val) { r = _val.x; b = _val.y; a = _val.z; }
+inline void ivec4::rba(const simdint& _val) { r = _val; b = _val; a = _val; }
+inline void ivec4::rbag(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { r = _val0; b = _val1; a = _val2; g = _val3; }
+inline void ivec4::rbag(const ivec4& _val) { r = _val.x; b = _val.y; a = _val.z; g = _val.w; }
+inline void ivec4::rbag(const simdint& _val) { r = _val; b = _val; a = _val; g = _val; }
+inline void ivec4::rbg(const simdint& _val0, const simdint& _val1, const simdint& _val2) { r = _val0; b = _val1; g = _val2; }
+inline void ivec4::rbg(const ivec3& _val) { r = _val.x; b = _val.y; g = _val.z; }
+inline void ivec4::rbg(const simdint& _val) { r = _val; b = _val; g = _val; }
+inline void ivec4::rbga(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { r = _val0; b = _val1; g = _val2; a = _val3; }
+inline void ivec4::rbga(const ivec4& _val) { r = _val.x; b = _val.y; g = _val.z; a = _val.w; }
+inline void ivec4::rbga(const simdint& _val) { r = _val; b = _val; g = _val; a = _val; }
+inline void ivec4::rg(const simdint& _val0, const simdint& _val1) { r = _val0; g = _val1; }
+inline void ivec4::rg(const ivec2& _val) { r = _val.x; g = _val.y; }
+inline void ivec4::rg(const simdint& _val) { r = _val; g = _val; }
+inline void ivec4::rga(const simdint& _val0, const simdint& _val1, const simdint& _val2) { r = _val0; g = _val1; a = _val2; }
+inline void ivec4::rga(const ivec3& _val) { r = _val.x; g = _val.y; a = _val.z; }
+inline void ivec4::rga(const simdint& _val) { r = _val; g = _val; a = _val; }
+inline void ivec4::rgab(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { r = _val0; g = _val1; a = _val2; b = _val3; }
+inline void ivec4::rgab(const ivec4& _val) { r = _val.x; g = _val.y; a = _val.z; b = _val.w; }
+inline void ivec4::rgab(const simdint& _val) { r = _val; g = _val; a = _val; b = _val; }
+inline void ivec4::rgb(const simdint& _val0, const simdint& _val1, const simdint& _val2) { r = _val0; g = _val1; b = _val2; }
+inline void ivec4::rgb(const ivec3& _val) { r = _val.x; g = _val.y; b = _val.z; }
+inline void ivec4::rgb(const simdint& _val) { r = _val; g = _val; b = _val; }
+inline void ivec4::rgba(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { r = _val0; g = _val1; b = _val2; a = _val3; }
+inline void ivec4::rgba(const ivec4& _val) { r = _val.x; g = _val.y; b = _val.z; a = _val.w; }
+inline void ivec4::rgba(const simdint& _val) { r = _val; g = _val; b = _val; a = _val; }
+inline void ivec4::wx(const simdint& _val0, const simdint& _val1) { w = _val0; x = _val1; }
+inline void ivec4::wx(const ivec2& _val) { w = _val.x; x = _val.y; }
+inline void ivec4::wx(const simdint& _val) { w = _val; x = _val; }
+inline void ivec4::wxy(const simdint& _val0, const simdint& _val1, const simdint& _val2) { w = _val0; x = _val1; y = _val2; }
+inline void ivec4::wxy(const ivec3& _val) { w = _val.x; x = _val.y; y = _val.z; }
+inline void ivec4::wxy(const simdint& _val) { w = _val; x = _val; y = _val; }
+inline void ivec4::wxyz(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { w = _val0; x = _val1; y = _val2; z = _val3; }
+inline void ivec4::wxyz(const ivec4& _val) { w = _val.x; x = _val.y; y = _val.z; z = _val.w; }
+inline void ivec4::wxyz(const simdint& _val) { w = _val; x = _val; y = _val; z = _val; }
+inline void ivec4::wxz(const simdint& _val0, const simdint& _val1, const simdint& _val2) { w = _val0; x = _val1; z = _val2; }
+inline void ivec4::wxz(const ivec3& _val) { w = _val.x; x = _val.y; z = _val.z; }
+inline void ivec4::wxz(const simdint& _val) { w = _val; x = _val; z = _val; }
+inline void ivec4::wxzy(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { w = _val0; x = _val1; z = _val2; y = _val3; }
+inline void ivec4::wxzy(const ivec4& _val) { w = _val.x; x = _val.y; z = _val.z; y = _val.w; }
+inline void ivec4::wxzy(const simdint& _val) { w = _val; x = _val; z = _val; y = _val; }
+inline void ivec4::wy(const simdint& _val0, const simdint& _val1) { w = _val0; y = _val1; }
+inline void ivec4::wy(const ivec2& _val) { w = _val.x; y = _val.y; }
+inline void ivec4::wy(const simdint& _val) { w = _val; y = _val; }
+inline void ivec4::wyx(const simdint& _val0, const simdint& _val1, const simdint& _val2) { w = _val0; y = _val1; x = _val2; }
+inline void ivec4::wyx(const ivec3& _val) { w = _val.x; y = _val.y; x = _val.z; }
+inline void ivec4::wyx(const simdint& _val) { w = _val; y = _val; x = _val; }
+inline void ivec4::wyxz(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { w = _val0; y = _val1; x = _val2; z = _val3; }
+inline void ivec4::wyxz(const ivec4& _val) { w = _val.x; y = _val.y; x = _val.z; z = _val.w; }
+inline void ivec4::wyxz(const simdint& _val) { w = _val; y = _val; x = _val; z = _val; }
+inline void ivec4::wyz(const simdint& _val0, const simdint& _val1, const simdint& _val2) { w = _val0; y = _val1; z = _val2; }
+inline void ivec4::wyz(const ivec3& _val) { w = _val.x; y = _val.y; z = _val.z; }
+inline void ivec4::wyz(const simdint& _val) { w = _val; y = _val; z = _val; }
+inline void ivec4::wyzx(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { w = _val0; y = _val1; z = _val2; x = _val3; }
+inline void ivec4::wyzx(const ivec4& _val) { w = _val.x; y = _val.y; z = _val.z; x = _val.w; }
+inline void ivec4::wyzx(const simdint& _val) { w = _val; y = _val; z = _val; x = _val; }
+inline void ivec4::wz(const simdint& _val0, const simdint& _val1) { w = _val0; z = _val1; }
+inline void ivec4::wz(const ivec2& _val) { w = _val.x; z = _val.y; }
+inline void ivec4::wz(const simdint& _val) { w = _val; z = _val; }
+inline void ivec4::wzx(const simdint& _val0, const simdint& _val1, const simdint& _val2) { w = _val0; z = _val1; x = _val2; }
+inline void ivec4::wzx(const ivec3& _val) { w = _val.x; z = _val.y; x = _val.z; }
+inline void ivec4::wzx(const simdint& _val) { w = _val; z = _val; x = _val; }
+inline void ivec4::wzxy(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { w = _val0; z = _val1; x = _val2; y = _val3; }
+inline void ivec4::wzxy(const ivec4& _val) { w = _val.x; z = _val.y; x = _val.z; y = _val.w; }
+inline void ivec4::wzxy(const simdint& _val) { w = _val; z = _val; x = _val; y = _val; }
+inline void ivec4::wzy(const simdint& _val0, const simdint& _val1, const simdint& _val2) { w = _val0; z = _val1; y = _val2; }
+inline void ivec4::wzy(const ivec3& _val) { w = _val.x; z = _val.y; y = _val.z; }
+inline void ivec4::wzy(const simdint& _val) { w = _val; z = _val; y = _val; }
+inline void ivec4::wzyx(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { w = _val0; z = _val1; y = _val2; x = _val3; }
+inline void ivec4::wzyx(const ivec4& _val) { w = _val.x; z = _val.y; y = _val.z; x = _val.w; }
+inline void ivec4::wzyx(const simdint& _val) { w = _val; z = _val; y = _val; x = _val; }
+inline void ivec4::xw(const simdint& _val0, const simdint& _val1) { x = _val0; w = _val1; }
+inline void ivec4::xw(const ivec2& _val) { x = _val.x; w = _val.y; }
+inline void ivec4::xw(const simdint& _val) { x = _val; w = _val; }
+inline void ivec4::xwy(const simdint& _val0, const simdint& _val1, const simdint& _val2) { x = _val0; w = _val1; y = _val2; }
+inline void ivec4::xwy(const ivec3& _val) { x = _val.x; w = _val.y; y = _val.z; }
+inline void ivec4::xwy(const simdint& _val) { x = _val; w = _val; y = _val; }
+inline void ivec4::xwyz(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { x = _val0; w = _val1; y = _val2; z = _val3; }
+inline void ivec4::xwyz(const ivec4& _val) { x = _val.x; w = _val.y; y = _val.z; z = _val.w; }
+inline void ivec4::xwyz(const simdint& _val) { x = _val; w = _val; y = _val; z = _val; }
+inline void ivec4::xwz(const simdint& _val0, const simdint& _val1, const simdint& _val2) { x = _val0; w = _val1; z = _val2; }
+inline void ivec4::xwz(const ivec3& _val) { x = _val.x; w = _val.y; z = _val.z; }
+inline void ivec4::xwz(const simdint& _val) { x = _val; w = _val; z = _val; }
+inline void ivec4::xwzy(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { x = _val0; w = _val1; z = _val2; y = _val3; }
+inline void ivec4::xwzy(const ivec4& _val) { x = _val.x; w = _val.y; z = _val.z; y = _val.w; }
+inline void ivec4::xwzy(const simdint& _val) { x = _val; w = _val; z = _val; y = _val; }
+inline void ivec4::xy(const simdint& _val0, const simdint& _val1) { x = _val0; y = _val1; }
+inline void ivec4::xy(const ivec2& _val) { x = _val.x; y = _val.y; }
+inline void ivec4::xy(const simdint& _val) { x = _val; y = _val; }
+inline void ivec4::xyw(const simdint& _val0, const simdint& _val1, const simdint& _val2) { x = _val0; y = _val1; w = _val2; }
+inline void ivec4::xyw(const ivec3& _val) { x = _val.x; y = _val.y; w = _val.z; }
+inline void ivec4::xyw(const simdint& _val) { x = _val; y = _val; w = _val; }
+inline void ivec4::xywz(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { x = _val0; y = _val1; w = _val2; z = _val3; }
+inline void ivec4::xywz(const ivec4& _val) { x = _val.x; y = _val.y; w = _val.z; z = _val.w; }
+inline void ivec4::xywz(const simdint& _val) { x = _val; y = _val; w = _val; z = _val; }
+inline void ivec4::xyz(const simdint& _val0, const simdint& _val1, const simdint& _val2) { x = _val0; y = _val1; z = _val2; }
+inline void ivec4::xyz(const ivec3& _val) { x = _val.x; y = _val.y; z = _val.z; }
+inline void ivec4::xyz(const simdint& _val) { x = _val; y = _val; z = _val; }
+inline void ivec4::xyzw(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { x = _val0; y = _val1; z = _val2; w = _val3; }
+inline void ivec4::xyzw(const ivec4& _val) { x = _val.x; y = _val.y; z = _val.z; w = _val.w; }
+inline void ivec4::xyzw(const simdint& _val) { x = _val; y = _val; z = _val; w = _val; }
+inline void ivec4::xz(const simdint& _val0, const simdint& _val1) { x = _val0; z = _val1; }
+inline void ivec4::xz(const ivec2& _val) { x = _val.x; z = _val.y; }
+inline void ivec4::xz(const simdint& _val) { x = _val; z = _val; }
+inline void ivec4::xzw(const simdint& _val0, const simdint& _val1, const simdint& _val2) { x = _val0; z = _val1; w = _val2; }
+inline void ivec4::xzw(const ivec3& _val) { x = _val.x; z = _val.y; w = _val.z; }
+inline void ivec4::xzw(const simdint& _val) { x = _val; z = _val; w = _val; }
+inline void ivec4::xzwy(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { x = _val0; z = _val1; w = _val2; y = _val3; }
+inline void ivec4::xzwy(const ivec4& _val) { x = _val.x; z = _val.y; w = _val.z; y = _val.w; }
+inline void ivec4::xzwy(const simdint& _val) { x = _val; z = _val; w = _val; y = _val; }
+inline void ivec4::xzy(const simdint& _val0, const simdint& _val1, const simdint& _val2) { x = _val0; z = _val1; y = _val2; }
+inline void ivec4::xzy(const ivec3& _val) { x = _val.x; z = _val.y; y = _val.z; }
+inline void ivec4::xzy(const simdint& _val) { x = _val; z = _val; y = _val; }
+inline void ivec4::xzyw(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { x = _val0; z = _val1; y = _val2; w = _val3; }
+inline void ivec4::xzyw(const ivec4& _val) { x = _val.x; z = _val.y; y = _val.z; w = _val.w; }
+inline void ivec4::xzyw(const simdint& _val) { x = _val; z = _val; y = _val; w = _val; }
+inline void ivec4::yw(const simdint& _val0, const simdint& _val1) { y = _val0; w = _val1; }
+inline void ivec4::yw(const ivec2& _val) { y = _val.x; w = _val.y; }
+inline void ivec4::yw(const simdint& _val) { y = _val; w = _val; }
+inline void ivec4::ywx(const simdint& _val0, const simdint& _val1, const simdint& _val2) { y = _val0; w = _val1; x = _val2; }
+inline void ivec4::ywx(const ivec3& _val) { y = _val.x; w = _val.y; x = _val.z; }
+inline void ivec4::ywx(const simdint& _val) { y = _val; w = _val; x = _val; }
+inline void ivec4::ywxz(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { y = _val0; w = _val1; x = _val2; z = _val3; }
+inline void ivec4::ywxz(const ivec4& _val) { y = _val.x; w = _val.y; x = _val.z; z = _val.w; }
+inline void ivec4::ywxz(const simdint& _val) { y = _val; w = _val; x = _val; z = _val; }
+inline void ivec4::ywz(const simdint& _val0, const simdint& _val1, const simdint& _val2) { y = _val0; w = _val1; z = _val2; }
+inline void ivec4::ywz(const ivec3& _val) { y = _val.x; w = _val.y; z = _val.z; }
+inline void ivec4::ywz(const simdint& _val) { y = _val; w = _val; z = _val; }
+inline void ivec4::ywzx(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { y = _val0; w = _val1; z = _val2; x = _val3; }
+inline void ivec4::ywzx(const ivec4& _val) { y = _val.x; w = _val.y; z = _val.z; x = _val.w; }
+inline void ivec4::ywzx(const simdint& _val) { y = _val; w = _val; z = _val; x = _val; }
+inline void ivec4::yx(const simdint& _val0, const simdint& _val1) { y = _val0; x = _val1; }
+inline void ivec4::yx(const ivec2& _val) { y = _val.x; x = _val.y; }
+inline void ivec4::yx(const simdint& _val) { y = _val; x = _val; }
+inline void ivec4::yxw(const simdint& _val0, const simdint& _val1, const simdint& _val2) { y = _val0; x = _val1; w = _val2; }
+inline void ivec4::yxw(const ivec3& _val) { y = _val.x; x = _val.y; w = _val.z; }
+inline void ivec4::yxw(const simdint& _val) { y = _val; x = _val; w = _val; }
+inline void ivec4::yxwz(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { y = _val0; x = _val1; w = _val2; z = _val3; }
+inline void ivec4::yxwz(const ivec4& _val) { y = _val.x; x = _val.y; w = _val.z; z = _val.w; }
+inline void ivec4::yxwz(const simdint& _val) { y = _val; x = _val; w = _val; z = _val; }
+inline void ivec4::yxz(const simdint& _val0, const simdint& _val1, const simdint& _val2) { y = _val0; x = _val1; z = _val2; }
+inline void ivec4::yxz(const ivec3& _val) { y = _val.x; x = _val.y; z = _val.z; }
+inline void ivec4::yxz(const simdint& _val) { y = _val; x = _val; z = _val; }
+inline void ivec4::yxzw(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { y = _val0; x = _val1; z = _val2; w = _val3; }
+inline void ivec4::yxzw(const ivec4& _val) { y = _val.x; x = _val.y; z = _val.z; w = _val.w; }
+inline void ivec4::yxzw(const simdint& _val) { y = _val; x = _val; z = _val; w = _val; }
+inline void ivec4::yz(const simdint& _val0, const simdint& _val1) { y = _val0; z = _val1; }
+inline void ivec4::yz(const ivec2& _val) { y = _val.x; z = _val.y; }
+inline void ivec4::yz(const simdint& _val) { y = _val; z = _val; }
+inline void ivec4::yzw(const simdint& _val0, const simdint& _val1, const simdint& _val2) { y = _val0; z = _val1; w = _val2; }
+inline void ivec4::yzw(const ivec3& _val) { y = _val.x; z = _val.y; w = _val.z; }
+inline void ivec4::yzw(const simdint& _val) { y = _val; z = _val; w = _val; }
+inline void ivec4::yzwx(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { y = _val0; z = _val1; w = _val2; x = _val3; }
+inline void ivec4::yzwx(const ivec4& _val) { y = _val.x; z = _val.y; w = _val.z; x = _val.w; }
+inline void ivec4::yzwx(const simdint& _val) { y = _val; z = _val; w = _val; x = _val; }
+inline void ivec4::yzx(const simdint& _val0, const simdint& _val1, const simdint& _val2) { y = _val0; z = _val1; x = _val2; }
+inline void ivec4::yzx(const ivec3& _val) { y = _val.x; z = _val.y; x = _val.z; }
+inline void ivec4::yzx(const simdint& _val) { y = _val; z = _val; x = _val; }
+inline void ivec4::yzxw(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { y = _val0; z = _val1; x = _val2; w = _val3; }
+inline void ivec4::yzxw(const ivec4& _val) { y = _val.x; z = _val.y; x = _val.z; w = _val.w; }
+inline void ivec4::yzxw(const simdint& _val) { y = _val; z = _val; x = _val; w = _val; }
+inline void ivec4::zw(const simdint& _val0, const simdint& _val1) { z = _val0; w = _val1; }
+inline void ivec4::zw(const ivec2& _val) { z = _val.x; w = _val.y; }
+inline void ivec4::zw(const simdint& _val) { z = _val; w = _val; }
+inline void ivec4::zwx(const simdint& _val0, const simdint& _val1, const simdint& _val2) { z = _val0; w = _val1; x = _val2; }
+inline void ivec4::zwx(const ivec3& _val) { z = _val.x; w = _val.y; x = _val.z; }
+inline void ivec4::zwx(const simdint& _val) { z = _val; w = _val; x = _val; }
+inline void ivec4::zwxy(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { z = _val0; w = _val1; x = _val2; y = _val3; }
+inline void ivec4::zwxy(const ivec4& _val) { z = _val.x; w = _val.y; x = _val.z; y = _val.w; }
+inline void ivec4::zwxy(const simdint& _val) { z = _val; w = _val; x = _val; y = _val; }
+inline void ivec4::zwy(const simdint& _val0, const simdint& _val1, const simdint& _val2) { z = _val0; w = _val1; y = _val2; }
+inline void ivec4::zwy(const ivec3& _val) { z = _val.x; w = _val.y; y = _val.z; }
+inline void ivec4::zwy(const simdint& _val) { z = _val; w = _val; y = _val; }
+inline void ivec4::zwyx(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { z = _val0; w = _val1; y = _val2; x = _val3; }
+inline void ivec4::zwyx(const ivec4& _val) { z = _val.x; w = _val.y; y = _val.z; x = _val.w; }
+inline void ivec4::zwyx(const simdint& _val) { z = _val; w = _val; y = _val; x = _val; }
+inline void ivec4::zx(const simdint& _val0, const simdint& _val1) { z = _val0; x = _val1; }
+inline void ivec4::zx(const ivec2& _val) { z = _val.x; x = _val.y; }
+inline void ivec4::zx(const simdint& _val) { z = _val; x = _val; }
+inline void ivec4::zxw(const simdint& _val0, const simdint& _val1, const simdint& _val2) { z = _val0; x = _val1; w = _val2; }
+inline void ivec4::zxw(const ivec3& _val) { z = _val.x; x = _val.y; w = _val.z; }
+inline void ivec4::zxw(const simdint& _val) { z = _val; x = _val; w = _val; }
+inline void ivec4::zxwy(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { z = _val0; x = _val1; w = _val2; y = _val3; }
+inline void ivec4::zxwy(const ivec4& _val) { z = _val.x; x = _val.y; w = _val.z; y = _val.w; }
+inline void ivec4::zxwy(const simdint& _val) { z = _val; x = _val; w = _val; y = _val; }
+inline void ivec4::zxy(const simdint& _val0, const simdint& _val1, const simdint& _val2) { z = _val0; x = _val1; y = _val2; }
+inline void ivec4::zxy(const ivec3& _val) { z = _val.x; x = _val.y; y = _val.z; }
+inline void ivec4::zxy(const simdint& _val) { z = _val; x = _val; y = _val; }
+inline void ivec4::zxyw(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { z = _val0; x = _val1; y = _val2; w = _val3; }
+inline void ivec4::zxyw(const ivec4& _val) { z = _val.x; x = _val.y; y = _val.z; w = _val.w; }
+inline void ivec4::zxyw(const simdint& _val) { z = _val; x = _val; y = _val; w = _val; }
+inline void ivec4::zy(const simdint& _val0, const simdint& _val1) { z = _val0; y = _val1; }
+inline void ivec4::zy(const ivec2& _val) { z = _val.x; y = _val.y; }
+inline void ivec4::zy(const simdint& _val) { z = _val; y = _val; }
+inline void ivec4::zyw(const simdint& _val0, const simdint& _val1, const simdint& _val2) { z = _val0; y = _val1; w = _val2; }
+inline void ivec4::zyw(const ivec3& _val) { z = _val.x; y = _val.y; w = _val.z; }
+inline void ivec4::zyw(const simdint& _val) { z = _val; y = _val; w = _val; }
+inline void ivec4::zywx(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { z = _val0; y = _val1; w = _val2; x = _val3; }
+inline void ivec4::zywx(const ivec4& _val) { z = _val.x; y = _val.y; w = _val.z; x = _val.w; }
+inline void ivec4::zywx(const simdint& _val) { z = _val; y = _val; w = _val; x = _val; }
+inline void ivec4::zyx(const simdint& _val0, const simdint& _val1, const simdint& _val2) { z = _val0; y = _val1; x = _val2; }
+inline void ivec4::zyx(const ivec3& _val) { z = _val.x; y = _val.y; x = _val.z; }
+inline void ivec4::zyx(const simdint& _val) { z = _val; y = _val; x = _val; }
+inline void ivec4::zyxw(const simdint& _val0, const simdint& _val1, const simdint& _val2, const simdint& _val3) { z = _val0; y = _val1; x = _val2; w = _val3; }
+inline void ivec4::zyxw(const ivec4& _val) { z = _val.x; y = _val.y; x = _val.z; w = _val.w; }
+inline void ivec4::zyxw(const simdint& _val) { z = _val; y = _val; x = _val; w = _val; }
+#ifndef USE_SCALAR
+inline void ivec4::ab(const int& _val) { const simdint temp = simd_set1_int(_val); a = temp; b = temp; }
+inline void ivec4::abg(const int& _val) { const simdint temp = simd_set1_int(_val); a = temp; b = temp; g = temp; }
+inline void ivec4::abgr(const int& _val) { const simdint temp = simd_set1_int(_val); a = temp; b = temp; g = temp; r = temp; }
+inline void ivec4::abr(const int& _val) { const simdint temp = simd_set1_int(_val); a = temp; b = temp; r = temp; }
+inline void ivec4::abrg(const int& _val) { const simdint temp = simd_set1_int(_val); a = temp; b = temp; r = temp; g = temp; }
+inline void ivec4::ag(const int& _val) { const simdint temp = simd_set1_int(_val); a = temp; g = temp; }
+inline void ivec4::agb(const int& _val) { const simdint temp = simd_set1_int(_val); a = temp; g = temp; b = temp; }
+inline void ivec4::agbr(const int& _val) { const simdint temp = simd_set1_int(_val); a = temp; g = temp; b = temp; r = temp; }
+inline void ivec4::agr(const int& _val) { const simdint temp = simd_set1_int(_val); a = temp; g = temp; r = temp; }
+inline void ivec4::agrb(const int& _val) { const simdint temp = simd_set1_int(_val); a = temp; g = temp; r = temp; b = temp; }
+inline void ivec4::ar(const int& _val) { const simdint temp = simd_set1_int(_val); a = temp; r = temp; }
+inline void ivec4::arb(const int& _val) { const simdint temp = simd_set1_int(_val); a = temp; r = temp; b = temp; }
+inline void ivec4::arbg(const int& _val) { const simdint temp = simd_set1_int(_val); a = temp; r = temp; b = temp; g = temp; }
+inline void ivec4::arg(const int& _val) { const simdint temp = simd_set1_int(_val); a = temp; r = temp; g = temp; }
+inline void ivec4::argb(const int& _val) { const simdint temp = simd_set1_int(_val); a = temp; r = temp; g = temp; b = temp; }
+inline void ivec4::ba(const int& _val) { const simdint temp = simd_set1_int(_val); b = temp; a = temp; }
+inline void ivec4::bag(const int& _val) { const simdint temp = simd_set1_int(_val); b = temp; a = temp; g = temp; }
+inline void ivec4::bagr(const int& _val) { const simdint temp = simd_set1_int(_val); b = temp; a = temp; g = temp; r = temp; }
+inline void ivec4::bar(const int& _val) { const simdint temp = simd_set1_int(_val); b = temp; a = temp; r = temp; }
+inline void ivec4::barg(const int& _val) { const simdint temp = simd_set1_int(_val); b = temp; a = temp; r = temp; g = temp; }
+inline void ivec4::bg(const int& _val) { const simdint temp = simd_set1_int(_val); b = temp; g = temp; }
+inline void ivec4::bga(const int& _val) { const simdint temp = simd_set1_int(_val); b = temp; g = temp; a = temp; }
+inline void ivec4::bgar(const int& _val) { const simdint temp = simd_set1_int(_val); b = temp; g = temp; a = temp; r = temp; }
+inline void ivec4::bgr(const int& _val) { const simdint temp = simd_set1_int(_val); b = temp; g = temp; r = temp; }
+inline void ivec4::bgra(const int& _val) { const simdint temp = simd_set1_int(_val); b = temp; g = temp; r = temp; a = temp; }
+inline void ivec4::br(const int& _val) { const simdint temp = simd_set1_int(_val); b = temp; r = temp; }
+inline void ivec4::bra(const int& _val) { const simdint temp = simd_set1_int(_val); b = temp; r = temp; a = temp; }
+inline void ivec4::brag(const int& _val) { const simdint temp = simd_set1_int(_val); b = temp; r = temp; a = temp; g = temp; }
+inline void ivec4::brg(const int& _val) { const simdint temp = simd_set1_int(_val); b = temp; r = temp; g = temp; }
+inline void ivec4::brga(const int& _val) { const simdint temp = simd_set1_int(_val); b = temp; r = temp; g = temp; a = temp; }
+inline void ivec4::ga(const int& _val) { const simdint temp = simd_set1_int(_val); g = temp; a = temp; }
+inline void ivec4::gab(const int& _val) { const simdint temp = simd_set1_int(_val); g = temp; a = temp; b = temp; }
+inline void ivec4::gabr(const int& _val) { const simdint temp = simd_set1_int(_val); g = temp; a = temp; b = temp; r = temp; }
+inline void ivec4::gar(const int& _val) { const simdint temp = simd_set1_int(_val); g = temp; a = temp; r = temp; }
+inline void ivec4::garb(const int& _val) { const simdint temp = simd_set1_int(_val); g = temp; a = temp; r = temp; b = temp; }
+inline void ivec4::gb(const int& _val) { const simdint temp = simd_set1_int(_val); g = temp; b = temp; }
+inline void ivec4::gba(const int& _val) { const simdint temp = simd_set1_int(_val); g = temp; b = temp; a = temp; }
+inline void ivec4::gbar(const int& _val) { const simdint temp = simd_set1_int(_val); g = temp; b = temp; a = temp; r = temp; }
+inline void ivec4::gbr(const int& _val) { const simdint temp = simd_set1_int(_val); g = temp; b = temp; r = temp; }
+inline void ivec4::gbra(const int& _val) { const simdint temp = simd_set1_int(_val); g = temp; b = temp; r = temp; a = temp; }
+inline void ivec4::gr(const int& _val) { const simdint temp = simd_set1_int(_val); g = temp; r = temp; }
+inline void ivec4::gra(const int& _val) { const simdint temp = simd_set1_int(_val); g = temp; r = temp; a = temp; }
+inline void ivec4::grab(const int& _val) { const simdint temp = simd_set1_int(_val); g = temp; r = temp; a = temp; b = temp; }
+inline void ivec4::grb(const int& _val) { const simdint temp = simd_set1_int(_val); g = temp; r = temp; b = temp; }
+inline void ivec4::grba(const int& _val) { const simdint temp = simd_set1_int(_val); g = temp; r = temp; b = temp; a = temp; }
+inline void ivec4::ra(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; a = temp; }
+inline void ivec4::rab(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; a = temp; b = temp; }
+inline void ivec4::rabg(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; a = temp; b = temp; g = temp; }
+inline void ivec4::rag(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; a = temp; g = temp; }
+inline void ivec4::ragb(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; a = temp; g = temp; b = temp; }
+inline void ivec4::rb(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; b = temp; }
+inline void ivec4::rba(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; b = temp; a = temp; }
+inline void ivec4::rbag(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; b = temp; a = temp; g = temp; }
+inline void ivec4::rbg(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; b = temp; g = temp; }
+inline void ivec4::rbga(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; b = temp; g = temp; a = temp; }
+inline void ivec4::rg(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; g = temp; }
+inline void ivec4::rga(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; g = temp; a = temp; }
+inline void ivec4::rgab(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; g = temp; a = temp; b = temp; }
+inline void ivec4::rgb(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; g = temp; b = temp; }
+inline void ivec4::rgba(const int& _val) { const simdint temp = simd_set1_int(_val); r = temp; g = temp; b = temp; a = temp; }
+inline void ivec4::wx(const int& _val) { const simdint temp = simd_set1_int(_val); w = temp; x = temp; }
+inline void ivec4::wxy(const int& _val) { const simdint temp = simd_set1_int(_val); w = temp; x = temp; y = temp; }
+inline void ivec4::wxyz(const int& _val) { const simdint temp = simd_set1_int(_val); w = temp; x = temp; y = temp; z = temp; }
+inline void ivec4::wxz(const int& _val) { const simdint temp = simd_set1_int(_val); w = temp; x = temp; z = temp; }
+inline void ivec4::wxzy(const int& _val) { const simdint temp = simd_set1_int(_val); w = temp; x = temp; z = temp; y = temp; }
+inline void ivec4::wy(const int& _val) { const simdint temp = simd_set1_int(_val); w = temp; y = temp; }
+inline void ivec4::wyx(const int& _val) { const simdint temp = simd_set1_int(_val); w = temp; y = temp; x = temp; }
+inline void ivec4::wyxz(const int& _val) { const simdint temp = simd_set1_int(_val); w = temp; y = temp; x = temp; z = temp; }
+inline void ivec4::wyz(const int& _val) { const simdint temp = simd_set1_int(_val); w = temp; y = temp; z = temp; }
+inline void ivec4::wyzx(const int& _val) { const simdint temp = simd_set1_int(_val); w = temp; y = temp; z = temp; x = temp; }
+inline void ivec4::wz(const int& _val) { const simdint temp = simd_set1_int(_val); w = temp; z = temp; }
+inline void ivec4::wzx(const int& _val) { const simdint temp = simd_set1_int(_val); w = temp; z = temp; x = temp; }
+inline void ivec4::wzxy(const int& _val) { const simdint temp = simd_set1_int(_val); w = temp; z = temp; x = temp; y = temp; }
+inline void ivec4::wzy(const int& _val) { const simdint temp = simd_set1_int(_val); w = temp; z = temp; y = temp; }
+inline void ivec4::wzyx(const int& _val) { const simdint temp = simd_set1_int(_val); w = temp; z = temp; y = temp; x = temp; }
+inline void ivec4::xw(const int& _val) { const simdint temp = simd_set1_int(_val); x = temp; w = temp; }
+inline void ivec4::xwy(const int& _val) { const simdint temp = simd_set1_int(_val); x = temp; w = temp; y = temp; }
+inline void ivec4::xwyz(const int& _val) { const simdint temp = simd_set1_int(_val); x = temp; w = temp; y = temp; z = temp; }
+inline void ivec4::xwz(const int& _val) { const simdint temp = simd_set1_int(_val); x = temp; w = temp; z = temp; }
+inline void ivec4::xwzy(const int& _val) { const simdint temp = simd_set1_int(_val); x = temp; w = temp; z = temp; y = temp; }
+inline void ivec4::xy(const int& _val) { const simdint temp = simd_set1_int(_val); x = temp; y = temp; }
+inline void ivec4::xyw(const int& _val) { const simdint temp = simd_set1_int(_val); x = temp; y = temp; w = temp; }
+inline void ivec4::xywz(const int& _val) { const simdint temp = simd_set1_int(_val); x = temp; y = temp; w = temp; z = temp; }
+inline void ivec4::xyz(const int& _val) { const simdint temp = simd_set1_int(_val); x = temp; y = temp; z = temp; }
+inline void ivec4::xyzw(const int& _val) { const simdint temp = simd_set1_int(_val); x = temp; y = temp; z = temp; w = temp; }
+inline void ivec4::xz(const int& _val) { const simdint temp = simd_set1_int(_val); x = temp; z = temp; }
+inline void ivec4::xzw(const int& _val) { const simdint temp = simd_set1_int(_val); x = temp; z = temp; w = temp; }
+inline void ivec4::xzwy(const int& _val) { const simdint temp = simd_set1_int(_val); x = temp; z = temp; w = temp; y = temp; }
+inline void ivec4::xzy(const int& _val) { const simdint temp = simd_set1_int(_val); x = temp; z = temp; y = temp; }
+inline void ivec4::xzyw(const int& _val) { const simdint temp = simd_set1_int(_val); x = temp; z = temp; y = temp; w = temp; }
+inline void ivec4::yw(const int& _val) { const simdint temp = simd_set1_int(_val); y = temp; w = temp; }
+inline void ivec4::ywx(const int& _val) { const simdint temp = simd_set1_int(_val); y = temp; w = temp; x = temp; }
+inline void ivec4::ywxz(const int& _val) { const simdint temp = simd_set1_int(_val); y = temp; w = temp; x = temp; z = temp; }
+inline void ivec4::ywz(const int& _val) { const simdint temp = simd_set1_int(_val); y = temp; w = temp; z = temp; }
+inline void ivec4::ywzx(const int& _val) { const simdint temp = simd_set1_int(_val); y = temp; w = temp; z = temp; x = temp; }
+inline void ivec4::yx(const int& _val) { const simdint temp = simd_set1_int(_val); y = temp; x = temp; }
+inline void ivec4::yxw(const int& _val) { const simdint temp = simd_set1_int(_val); y = temp; x = temp; w = temp; }
+inline void ivec4::yxwz(const int& _val) { const simdint temp = simd_set1_int(_val); y = temp; x = temp; w = temp; z = temp; }
+inline void ivec4::yxz(const int& _val) { const simdint temp = simd_set1_int(_val); y = temp; x = temp; z = temp; }
+inline void ivec4::yxzw(const int& _val) { const simdint temp = simd_set1_int(_val); y = temp; x = temp; z = temp; w = temp; }
+inline void ivec4::yz(const int& _val) { const simdint temp = simd_set1_int(_val); y = temp; z = temp; }
+inline void ivec4::yzw(const int& _val) { const simdint temp = simd_set1_int(_val); y = temp; z = temp; w = temp; }
+inline void ivec4::yzwx(const int& _val) { const simdint temp = simd_set1_int(_val); y = temp; z = temp; w = temp; x = temp; }
+inline void ivec4::yzx(const int& _val) { const simdint temp = simd_set1_int(_val); y = temp; z = temp; x = temp; }
+inline void ivec4::yzxw(const int& _val) { const simdint temp = simd_set1_int(_val); y = temp; z = temp; x = temp; w = temp; }
+inline void ivec4::zw(const int& _val) { const simdint temp = simd_set1_int(_val); z = temp; w = temp; }
+inline void ivec4::zwx(const int& _val) { const simdint temp = simd_set1_int(_val); z = temp; w = temp; x = temp; }
+inline void ivec4::zwxy(const int& _val) { const simdint temp = simd_set1_int(_val); z = temp; w = temp; x = temp; y = temp; }
+inline void ivec4::zwy(const int& _val) { const simdint temp = simd_set1_int(_val); z = temp; w = temp; y = temp; }
+inline void ivec4::zwyx(const int& _val) { const simdint temp = simd_set1_int(_val); z = temp; w = temp; y = temp; x = temp; }
+inline void ivec4::zx(const int& _val) { const simdint temp = simd_set1_int(_val); z = temp; x = temp; }
+inline void ivec4::zxw(const int& _val) { const simdint temp = simd_set1_int(_val); z = temp; x = temp; w = temp; }
+inline void ivec4::zxwy(const int& _val) { const simdint temp = simd_set1_int(_val); z = temp; x = temp; w = temp; y = temp; }
+inline void ivec4::zxy(const int& _val) { const simdint temp = simd_set1_int(_val); z = temp; x = temp; y = temp; }
+inline void ivec4::zxyw(const int& _val) { const simdint temp = simd_set1_int(_val); z = temp; x = temp; y = temp; w = temp; }
+inline void ivec4::zy(const int& _val) { const simdint temp = simd_set1_int(_val); z = temp; y = temp; }
+inline void ivec4::zyw(const int& _val) { const simdint temp = simd_set1_int(_val); z = temp; y = temp; w = temp; }
+inline void ivec4::zywx(const int& _val) { const simdint temp = simd_set1_int(_val); z = temp; y = temp; w = temp; x = temp; }
+inline void ivec4::zyx(const int& _val) { const simdint temp = simd_set1_int(_val); z = temp; y = temp; x = temp; }
+inline void ivec4::zyxw(const int& _val) { const simdint temp = simd_set1_int(_val); z = temp; y = temp; x = temp; w = temp; }
+#endif
+#pragma endregion
+
+
+
+
+#pragma region float functions
+
+
+// acosh functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the inverse hyperbolic cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat acosh(const simdfloat& _x)
+{
+#ifndef __GNUC__
+	return simd_acosh_float(_x);
+
+#else
+	alignas(64) float tempTab[simdwidth];
+	simd_store_float(tempTab, _x);
+	for (int i = 0; i < simdwidth; i++)
+	{
+		tempTab[i] = std::acosh(tempTab[i]);
+	}
+	return simd_load_float(tempTab);
+#endif
+}
+
+/**
+ * @brief Computes the inverse hyperbolic cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat acosh(const float& _x)
+{
+	return simd_set1_float(std::acosh(_x));
+}
+#endif
+
+/**
+ * @brief Computes the inverse hyperbolic cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline vec2 acosh(const vec2& _x)
+{
+	return { acosh(_x.x), acosh(_x.y) };
+}
+
+/**
+ * @brief Computes the inverse hyperbolic cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline vec3 acosh(const vec3& _x)
+{
+	return { acosh(_x.x), acosh(_x.y), acosh(_x.z) };
+}
+
+/**
+ * @brief Computes the inverse hyperbolic cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline vec4 acosh(const vec4& _x)
+{
+	return { acosh(_x.x), acosh(_x.y), acosh(_x.z), acosh(_x.w) };
+}
+
+
+
+// asinh functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the inverse hyperbolic sine of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat asinh(const simdfloat& _x)
+{
+#ifndef __GNUC__
+	return simd_asinh_float(_x);
+#else
+	alignas(64) float tempTab[simdwidth];
+	simd_store_float(tempTab, _x);
+	for (int i = 0; i < simdwidth; i++)
+	{
+		tempTab[i] = std::asinh(tempTab[i]);
+	}
+	return simd_load_float(tempTab);
+#endif
+}
+
+/**
+ * @brief Computes the inverse hyperbolic sine of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat asinh(const float& _x)
+{
+	return simd_set1_float(std::asinh(_x));
+}
+#endif
+
+/**
+ * @brief Computes the inverse hyperbolic sine of each component.
+ * @param _x The input value or vector.
+ */
+inline vec2 asinh(const vec2& _x)
+{
+	return { asinh(_x.x), asinh(_x.y) };
+}
+
+/**
+ * @brief Computes the inverse hyperbolic sine of each component.
+ * @param _x The input value or vector.
+ */
+inline vec3 asinh(const vec3& _x)
+{
+	return { asinh(_x.x), asinh(_x.y), asinh(_x.z) };
+}
+
+/**
+ * @brief Computes the inverse hyperbolic sine of each component.
+ * @param _x The input value or vector.
+ */
+inline vec4 asinh(const vec4& _x)
+{
+	return { asinh(_x.x), asinh(_x.y), asinh(_x.z), asinh(_x.w) };
+}
+
+// atan functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the inverse tangent.
+ * @param _x The input value or vector.
+ */
+inline simdfloat atan(const simdfloat& _x)
+{
+#ifndef __GNUC__
+	return simd_atan_float(_x);
+#else
+	alignas(64) float tempTab[simdwidth];
+	simd_store_float(tempTab, _x);
+	for (int i = 0; i < simdwidth; i++)
+	{
+		tempTab[i] = std::atan(tempTab[i]);
+	}
+	return simd_load_float(tempTab);
+#endif
+}
+
+/**
+ * @brief Computes the inverse tangent.
+ * @param _x The input value or vector.
+ */
+inline simdfloat atan(const float& _x)
+{
+	return simd_set1_float(std::atan(_x));
+}
+#endif
+
+/**
+ * @brief Computes the inverse tangent.
+ * @param _x The input value or vector.
+ */
+inline vec2 atan(const vec2& _x)
+{
+	return { atan(_x.x), atan(_x.y) };
+}
+
+/**
+ * @brief Computes the inverse tangent.
+ * @param _x The input value or vector.
+ */
+inline vec3 atan(const vec3& _x)
+{
+	return { atan(_x.x), atan(_x.y), atan(_x.z) };
+}
+
+/**
+ * @brief Computes the inverse tangent.
+ * @param _x The input value or vector.
+ */
+inline vec4 atan(const vec4& _x)
+{
+	return { atan(_x.x), atan(_x.y), atan(_x.z), atan(_x.w) };
+}
+
+// atan2 functions
+/**
+ * @brief Computes the 2-argument inverse tangent.
+ * @param _y The y-component for 2-argument atan.
+ * @param _x The input value or vector.
+ */
+inline simdfloat atan(const simdfloat& _y, const simdfloat& _x)
+{
+#ifndef __GNUC__
+	return simd_atan2_float(_y, _x);
+#else
+	alignas(64) float tempTaba[simdwidth];
+	alignas(64) float tempTabb[simdwidth];
+	simd_store_float(tempTaba, _y);
+	simd_store_float(tempTabb, _x);
+	for (int i = 0; i < simdwidth; i++)
+	{
+		tempTaba[i] = std::atan2(tempTaba[i], tempTabb[i]);
+	}
+	return simd_load_float(tempTaba);
+#endif
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the 2-argument inverse tangent.
+ * @param _y The y-component for 2-argument atan.
+ * @param _x The input value or vector.
+ */
+inline simdfloat atan(const float& _y, const float& _x)
+{
+	return simd_set1_float(std::atan2(_y, _x));
+}
+#endif
+
+/**
+ * @brief Computes the 2-argument inverse tangent.
+ * @param _y The y-component for 2-argument atan.
+ * @param _x The input value or vector.
+ */
+inline vec2 atan(const vec2& _y, const vec2& _x)
+{
+	return { atan(_y.x, _x.x), atan(_y.y, _x.y) };
+}
+
+/**
+ * @brief Computes the 2-argument inverse tangent.
+ * @param _y The y-component for 2-argument atan.
+ * @param _x The input value or vector.
+ */
+inline vec3 atan(const vec3& _y, const vec3& _x)
+{
+	return { atan(_y.x, _x.x), atan(_y.y, _x.y), atan(_y.z, _x.z) };
+}
+
+/**
+ * @brief Computes the 2-argument inverse tangent.
+ * @param _y The y-component for 2-argument atan.
+ * @param _x The input value or vector.
+ */
+inline vec4 atan(const vec4& _y, const vec4& _x)
+{
+	return { atan(_y.x, _x.x), atan(_y.y, _x.y), atan(_y.z, _x.z), atan(_y.w, _x.w) };
+}
+
+// atanh functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the inverse hyperbolic tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat atanh(const simdfloat& _x)
+{
+#ifndef __GNUC__
+	return simd_atanh_float(_x);
+#else
+	alignas(64) float tempTab[simdwidth];
+	simd_store_float(tempTab, _x);
+	for (int i = 0; i < simdwidth; i++)
+	{
+		tempTab[i] = std::atanh(tempTab[i]);
+	}
+	return simd_load_float(tempTab);
+#endif
+}
+
+/**
+ * @brief Computes the inverse hyperbolic tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat atanh(const float& _x)
+{
+	return simd_set1_float(std::atanh(_x));
+}
+#endif
+
+/**
+ * @brief Computes the inverse hyperbolic tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline vec2 atanh(const vec2& _x)
+{
+	return { atanh(_x.x), atanh(_x.y) };
+}
+
+/**
+ * @brief Computes the inverse hyperbolic tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline vec3 atanh(const vec3& _x)
+{
+	return { atanh(_x.x), atanh(_x.y), atanh(_x.z) };
+}
+
+/**
+ * @brief Computes the inverse hyperbolic tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline vec4 atanh(const vec4& _x)
+{
+	return { atanh(_x.x), atanh(_x.y), atanh(_x.z), atanh(_x.w) };
+}
+
+// blendv functions
+/**
+ * @brief Blends two values based on a mask.
+ * @param _false_val The value to use when the mask is false.
+ * @param _true_val The value to use when the mask is true.
+ * @param _mask The selection mask.
+ */
+inline simdfloat blendv(const simdfloat& _false_val, const simdfloat& _true_val, const simdmask& _mask)
+{
+#ifdef USE_AVX512
+	return _mm512_mask_blend_ps(_mask, _false_val, _true_val);
+#else
+	return simd_blendv_float(_false_val, _true_val, _mask);
+#endif
+}
+
+/**
+ * @brief Blends two values based on a mask.
+ * @param _false_val The value to use when the mask is false.
+ * @param _true_val The value to use when the mask is true.
+ * @param _mask The selection mask.
+ */
+inline vec2 blendv(const vec2& _false_val, const vec2& _true_val, const simdmask& _mask)
+{
+	return {
+		blendv(_false_val.x, _true_val.x, _mask),
+		blendv(_false_val.y, _true_val.y, _mask)
+	};
+}
+
+/**
+ * @brief Blends two values based on a mask.
+ * @param _false_val The value to use when the mask is false.
+ * @param _true_val The value to use when the mask is true.
+ * @param _mask The selection mask.
+ */
+inline vec3 blendv(const vec3& _false_val, const vec3& _true_val, const simdmask& _mask)
+{
+	return {
+		blendv(_false_val.x, _true_val.x, _mask),
+		blendv(_false_val.y, _true_val.y, _mask),
+		blendv(_false_val.z, _true_val.z, _mask)
+	};
+}
+
+/**
+ * @brief Blends two values based on a mask.
+ * @param _false_val The value to use when the mask is false.
+ * @param _true_val The value to use when the mask is true.
+ * @param _mask The selection mask.
+ */
+inline vec4 blendv(const vec4& _false_val, const vec4& _true_val, const simdmask& _mask)
+{
+	return {
+		blendv(_false_val.x, _true_val.x, _mask),
+		blendv(_false_val.y, _true_val.y, _mask),
+		blendv(_false_val.z, _true_val.z, _mask),
+		blendv(_false_val.w, _true_val.w, _mask)
+	};
+}
+
+// abs functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the absolute value of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat abs(const simdfloat& _x)
+{
+	return blendv(_x, -_x, _x < 0);
+}
+#endif
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the absolute value of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat abs(const float& _x)
+{
+	return simd_set1_float(std::fabs(_x));
+}
+#endif
+
+/**
+ * @brief Computes the absolute value of each component.
+ * @param _x The input value or vector.
+ */
+inline vec2 abs(const vec2& _x)
+{
+	return { abs(_x.x), abs(_x.y) };
+}
+
+/**
+ * @brief Computes the absolute value of each component.
+ * @param _x The input value or vector.
+ */
+inline vec3 abs(const vec3& _x)
+{
+	return { abs(_x.x), abs(_x.y), abs(_x.z) };
+}
+
+/**
+ * @brief Computes the absolute value of each component.
+ * @param _x The input value or vector.
+ */
+inline vec4 abs(const vec4& _x)
+{
+	return { abs(_x.x), abs(_x.y), abs(_x.z), abs(_x.w) };
+}
+
+// ceil functions
+#ifndef USE_SCALAR
+/**
+ * @brief Rounds each component up to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline simdfloat ceil(const simdfloat& _x)
+{
+	return simd_ceil_float(_x);
+}
+
+/**
+ * @brief Rounds each component up to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline simdfloat ceil(const float& _x)
+{
+	return simd_set1_float(std::ceil(_x));
+}
+#endif
+
+/**
+ * @brief Rounds each component up to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline vec2 ceil(const vec2& _x)
+{
+	return { ceil(_x.x), ceil(_x.y) };
+}
+
+/**
+ * @brief Rounds each component up to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline vec3 ceil(const vec3& _x)
+{
+	return { ceil(_x.x), ceil(_x.y), ceil(_x.z) };
+}
+
+/**
+ * @brief Rounds each component up to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline vec4 ceil(const vec4& _x)
+{
+	return { ceil(_x.x), ceil(_x.y), ceil(_x.z), ceil(_x.w) };
+}
+
+// max functions
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simdfloat max(const simdfloat& _val1, const simdfloat& _val2)
+{
+	return simd_max_float(_val1, _val2);
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simdfloat max(const simdfloat& _val1, const float& _val2)
+{
+	return max(_val1, simd_set1_float(_val2));
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simdfloat max(const float& _val1, const simdfloat& _val2)
+{
+	return max(simd_set1_float(_val1), _val2);
+}
+#endif
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec2 max(const vec2& _val1, const simdfloat& _val2)
+{
+	return {
+		max(_val1.x, _val2),
+		max(_val1.y, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec2 max(const simdfloat& _val1, const vec2& _val2)
+{
+	return {
+		max(_val1, _val2.x),
+		max(_val1, _val2.y)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec2 max(const vec2& _val1, const float& _val2)
+{
+	return {
+		max(_val1.x, _val2),
+		max(_val1.y, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec2 max(const float& _val1, const vec2& _val2)
+{
+	return {
+		max(_val1, _val2.x),
+		max(_val1, _val2.y)
+	};
+}
+#endif
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec2 max(const vec2& _val1, const vec2& _val2)
+{
+	return {
+		max(_val1.x, _val2.x),
+		max(_val1.y, _val2.y)
+	};
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec3 max(const vec3& _val1, const simdfloat& _val2)
+{
+	return {
+		max(_val1.x, _val2),
+		max(_val1.y, _val2),
+		max(_val1.z, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec3 max(const simdfloat& _val1, const vec3& _val2)
+{
+	return {
+		max(_val1, _val2.x),
+		max(_val1, _val2.y),
+		max(_val1, _val2.z)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec3 max(const vec3& _val1, const float& _val2)
+{
+	return {
+		max(_val1.x, _val2),
+		max(_val1.y, _val2),
+		max(_val1.z, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec3 max(const float& _val1, const vec3& _val2)
+{
+	return {
+		max(_val1, _val2.x),
+		max(_val1, _val2.y),
+		max(_val1, _val2.z)
+	};
+}
+#endif
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec3 max(const vec3& _val1, const vec3& _val2)
+{
+	return {
+		max(_val1.x, _val2.x),
+		max(_val1.y, _val2.y),
+		max(_val1.z, _val2.z)
+	};
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec4 max(const vec4& _val1, const simdfloat& _val2)
+{
+	return {
+		max(_val1.x, _val2),
+		max(_val1.y, _val2),
+		max(_val1.z, _val2),
+		max(_val1.w, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec4 max(const simdfloat& _val1, const vec4& _val2)
+{
+	return {
+		max(_val1, _val2.x),
+		max(_val1, _val2.y),
+		max(_val1, _val2.z),
+		max(_val1, _val2.w)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec4 max(const vec4& _val1, const float& _val2)
+{
+	return {
+		max(_val1.x, _val2),
+		max(_val1.y, _val2),
+		max(_val1.z, _val2),
+		max(_val1.w, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec4 max(const float& _val1, const vec4& _val2)
+{
+	return {
+		max(_val1, _val2.x),
+		max(_val1, _val2.y),
+		max(_val1, _val2.z),
+		max(_val1, _val2.w)
+	};
+}
+#endif
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec4 max(const vec4& _val1, const vec4& _val2)
+{
+	return {
+		max(_val1.x, _val2.x),
+		max(_val1.y, _val2.y),
+		max(_val1.z, _val2.z),
+		max(_val1.w, _val2.w)
+	};
+}
+
+// min functions
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simdfloat min(const simdfloat& _val1, const simdfloat& _val2)
+{
+	return simd_min_float(_val1, _val2);
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simdfloat min(const simdfloat& _val1, const float& _val2)
+{
+	return min(_val1, simd_set1_float(_val2));
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simdfloat min(const float& _val1, const simdfloat& _val2)
+{
+	return min(simd_set1_float(_val1), _val2);
+}
+#endif
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec2 min(const vec2& _val1, const simdfloat& _val2)
+{
+	return {
+		min(_val1.x, _val2),
+		min(_val1.y, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec2 min(const simdfloat& _val1, const vec2& _val2)
+{
+	return {
+		min(_val1, _val2.x),
+		min(_val1, _val2.y)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec2 min(const vec2& _val1, const float& _val2)
+{
+	return {
+		min(_val1.x, _val2),
+		min(_val1.y, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec2 min(const float& _val1, const vec2& _val2)
+{
+	return {
+		min(_val1, _val2.x),
+		min(_val1, _val2.y)
+	};
+}
+#endif
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec2 min(const vec2& _val1, const vec2& _val2)
+{
+	return {
+		min(_val1.x, _val2.x),
+		min(_val1.y, _val2.y)
+	};
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec3 min(const vec3& _val1, const simdfloat& _val2)
+{
+	return {
+		min(_val1.x, _val2),
+		min(_val1.y, _val2),
+		min(_val1.z, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec3 min(const simdfloat& _val1, const vec3& _val2)
+{
+	return {
+		min(_val1, _val2.x),
+		min(_val1, _val2.y),
+		min(_val1, _val2.z)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec3 min(const vec3& _val1, const float& _val2)
+{
+	return {
+		min(_val1.x, _val2),
+		min(_val1.y, _val2),
+		min(_val1.z, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec3 min(const float& _val1, const vec3& _val2)
+{
+	return {
+		min(_val1, _val2.x),
+		min(_val1, _val2.y),
+		min(_val1, _val2.z)
+	};
+}
+#endif
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec3 min(const vec3& _val1, const vec3& _val2)
+{
+	return {
+		min(_val1.x, _val2.x),
+		min(_val1.y, _val2.y),
+		min(_val1.z, _val2.z)
+	};
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec4 min(const vec4& _val1, const simdfloat& _val2)
+{
+	return {
+		min(_val1.x, _val2),
+		min(_val1.y, _val2),
+		min(_val1.z, _val2),
+		min(_val1.w, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec4 min(const simdfloat& _val1, const vec4& _val2)
+{
+	return {
+		min(_val1, _val2.x),
+		min(_val1, _val2.y),
+		min(_val1, _val2.z),
+		min(_val1, _val2.w)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec4 min(const vec4& _val1, const float& _val2)
+{
+	return {
+		min(_val1.x, _val2),
+		min(_val1.y, _val2),
+		min(_val1.z, _val2),
+		min(_val1.w, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec4 min(const float& _val1, const vec4& _val2)
+{
+	return {
+		min(_val1, _val2.x),
+		min(_val1, _val2.y),
+		min(_val1, _val2.z),
+		min(_val1, _val2.w)
+	};
+}
+#endif
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec4 min(const vec4& _val1, const vec4& _val2)
+{
+	return {
+		min(_val1.x, _val2.x),
+		min(_val1.y, _val2.y),
+		min(_val1.z, _val2.z),
+		min(_val1.w, _val2.w)
+	};
+}
+
+// clamp functions
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline float clamp(const float& _x, const float& _min_val, const float& _max_val)
+{
+	return std::max(std::min(_x, _max_val), _min_val);
+}
+#ifndef USE_SCALAR
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline simdfloat clamp(const simdfloat& _x, const simdfloat& _min_val, const simdfloat& _max_val)
+{
+	return max(min(_x, _max_val), _min_val);
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline simdfloat clamp(const simdfloat& _x, const float& _min_val, const float& _max_val)
+{
+	return clamp(_x, simd_set1_float(_min_val), simd_set1_float(_max_val));
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline vec2 clamp(const vec2& _x, const simdfloat& _min_val, const simdfloat& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val, _max_val),
+		clamp(_x.y, _min_val, _max_val)
+	};
+}
+#endif
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline vec2 clamp(const vec2& _x, const float& _min_val, const float& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val, _max_val),
+		clamp(_x.y, _min_val, _max_val)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline vec2 clamp(const vec2& _x, const vec2& _min_val, const vec2& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val.x, _max_val.x),
+		clamp(_x.y, _min_val.y, _max_val.y)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline vec3 clamp(const vec3& _x, const simdfloat& _min_val, const simdfloat& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val, _max_val),
+		clamp(_x.y, _min_val, _max_val),
+		clamp(_x.z, _min_val, _max_val)
+	};
+}
+#endif
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline vec3 clamp(const vec3& _x, const float& _min_val, const float& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val, _max_val),
+		clamp(_x.y, _min_val, _max_val),
+		clamp(_x.z, _min_val, _max_val)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline vec3 clamp(const vec3& _x, const vec3& _min_val, const vec3& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val.x, _max_val.x),
+		clamp(_x.y, _min_val.y, _max_val.y),
+		clamp(_x.z, _min_val.z, _max_val.z)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline vec4 clamp(const vec4& _x, const simdfloat& _min_val, const simdfloat& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val, _max_val),
+		clamp(_x.y, _min_val, _max_val),
+		clamp(_x.z, _min_val, _max_val),
+		clamp(_x.w, _min_val, _max_val)
+	};
+}
+#endif
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline vec4 clamp(const vec4& _x, const float& _min_val, const float& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val, _max_val),
+		clamp(_x.y, _min_val, _max_val),
+		clamp(_x.z, _min_val, _max_val),
+		clamp(_x.w, _min_val, _max_val)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline vec4 clamp(const vec4& _x, const vec4& _min_val, const vec4& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val.x, _max_val.x),
+		clamp(_x.y, _min_val.y, _max_val.y),
+		clamp(_x.z, _min_val.z, _max_val.z),
+		clamp(_x.w, _min_val.w, _max_val.w)
+	};
+}
+
+
+// acos functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the inverse cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat acos(const simdfloat& _x)
+{
+#ifndef __GNUC__
+	return simd_acos_float(_x);
+#else
+#ifndef GCC_FASTCOS
+	alignas(64) float tempTab[simdwidth];
+	simd_store_float(tempTab, _x);
+	for (int i = 0; i < simdwidth; i++)
+	{
+		tempTab[i] = std::acos(tempTab[i]);
+	}
+	return simd_load_float(tempTab);
+#else
+	// Clamp input
+	simdfloat x = clamp(_x, 1.0f, -1.0f);
+
+	simdfloat x2 = x * x;
+	simdfloat x3 = x2 * x;
+	simdfloat x4 = x2 * x2;
+	simdfloat x5 = x3 * x2;
+
+	return SIMDHALFPI
+		- x * 1.0f
+		- x3 * 0.16666586685f
+		- x5 * 0.074953002686f;
+#endif
+#endif
+}
+#endif
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the inverse cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat acos(const float& _x)
+{
+	return simd_set1_float(std::acos(_x));
+}
+#endif
+
+/**
+ * @brief Computes the inverse cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline vec2 acos(const vec2& _x)
+{
+	return { acos(_x.x), acos(_x.y) };
+}
+
+/**
+ * @brief Computes the inverse cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline vec3 acos(const vec3& _x)
+{
+	return { acos(_x.x), acos(_x.y), acos(_x.z) };
+}
+
+/**
+ * @brief Computes the inverse cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline vec4 acos(const vec4& _x)
+{
+	return { acos(_x.x), acos(_x.y), acos(_x.z), acos(_x.w) };
+}
+
+// asin functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the inverse sine of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat asin(const simdfloat& _x)
+{
+#ifndef __GNUC__
+	return simd_asin_float(_x);
+#else
+#ifndef GCC_FASTCOS
+	alignas(64) float tempTab[simdwidth];
+	simd_store_float(tempTab, _x);
+	for (int i = 0; i < simdwidth; i++)
+	{
+		tempTab[i] = std::asin(tempTab[i]);
+	}
+	return simd_load_float(tempTab);
+#else
+	return acos(_x - SIMDHALFPI);
+#endif
+#endif
+}
+#endif
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the inverse sine of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat asin(const float& _x)
+{
+	return simd_set1_float(std::asin(_x));
+}
+#endif
+
+/**
+ * @brief Computes the inverse sine of each component.
+ * @param _x The input value or vector.
+ */
+inline vec2 asin(const vec2& _x)
+{
+	return { asin(_x.x), asin(_x.y) };
+}
+
+/**
+ * @brief Computes the inverse sine of each component.
+ * @param _x The input value or vector.
+ */
+inline vec3 asin(const vec3& _x)
+{
+	return { asin(_x.x), asin(_x.y), asin(_x.z) };
+}
+
+/**
+ * @brief Computes the inverse sine of each component.
+ * @param _x The input value or vector.
+ */
+inline vec4 asin(const vec4& _x)
+{
+	return { asin(_x.x), asin(_x.y), asin(_x.z), asin(_x.w) };
+}
+
+// floor functions
+#ifndef USE_SCALAR
+/**
+ * @brief Rounds each component down to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline simdfloat floor(const simdfloat& _x)
+{
+	return simd_floor_float(_x);
+}
+
+/**
+ * @brief Rounds each component down to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline simdfloat floor(const float& _x)
+{
+	return simd_set1_float(std::floor(_x));
+}
+#endif
+
+/**
+ * @brief Rounds each component down to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline vec2 floor(const vec2& _x)
+{
+	return { floor(_x.x), floor(_x.y) };
+}
+
+/**
+ * @brief Rounds each component down to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline vec3 floor(const vec3& _x)
+{
+	return { floor(_x.x), floor(_x.y), floor(_x.z) };
+}
+
+/**
+ * @brief Rounds each component down to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline vec4 floor(const vec4& _x)
+{
+	return { floor(_x.x), floor(_x.y), floor(_x.z), floor(_x.w) };
+}
+
+
+// mod functions
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline simdfloat mod(const simdfloat& _value, const simdfloat& _modulus)
+{
+	return _value - (simd_floor_float( _value / _modulus ) * _modulus);
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline simdfloat mod(const simdfloat& _value, const float& _modulus)
+{
+	return _value - floor(_value / simd_set1_float(_modulus)) * _modulus;
+}
+
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline simdfloat mod(const float& _value, const simdfloat& _modulus)
+{
+	return simd_set1_float(_value) - floor(simd_set1_float(_value) / _modulus) * _modulus;
+}
+
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline simdfloat mod(const float& _value, const float& _modulus)
+{
+	return simd_set1_float(_value - std::floor(_value / _modulus) * _modulus);
+}
+#endif
+
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline vec2 mod(const vec2& _value, const vec2& _modulus)
+{
+	return { mod(_value.x, _modulus.x), mod(_value.y, _modulus.y) };
+}
+
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline vec3 mod(const vec3& _value, const vec3& _modulus)
+{
+	return { mod(_value.x, _modulus.x), mod(_value.y, _modulus.y), mod(_value.z, _modulus.z) };
+}
+
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline vec4 mod(const vec4& _value, const vec4& _modulus)
+{
+	return { mod(_value.x, _modulus.x), mod(_value.y, _modulus.y), mod(_value.z, _modulus.z), mod(_value.w, _modulus.w) };
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat cos(const simdfloat& _x)
+{
+#ifndef __GNUC__
+	return simd_cos_float(_x);
+#else
+#ifndef GCC_FASTCOS
+	alignas(64) float tabVal[simdwidth];
+	simd_store_float(tabVal, _x);
+
+	alignas(64) float tabResult[simdwidth];
+	for (int i = 0; i < simdwidth; i++)
+	{
+		tabResult[i] = std::cos(tabVal[i]);
+	}
+
+	return simd_load_float(tabResult);
+#else
+	simdfloat moda = mod(_x, SIMDTWOPI);
+	moda = blendv(moda, moda + SIMDTWOPI, moda < -SIMDPI);
+	moda = blendv(moda, moda - SIMDTWOPI,  moda > SIMDPI);
+
+	moda = abs(moda);
+
+	simdmask mask1 = moda > SIMDHALFPI;
+	moda = blendv(moda, SIMDPI - moda, mask1);
+	simdfloat sign = blendv(simd_set1_float(1.0f), simd_set1_float(-1.0f),  mask1);
+
+	simdfloat x2 = moda * moda;
+	simdfloat x4 = x2 * x2;
+	simdfloat x6 = x4 * x2;
+	simdfloat x8 = x6 * x2;
+
+	return (1.0f
+		- 0.5f * x2
+		+ 0.0416666666666666666667f * x4
+		- 0.00138888888888888888889f * x6
+		+ 2.4801588e-5f * x8) * sign;
+#endif
+#endif
+}
+#endif
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat cos(const float& _x)
+{
+	return simd_set1_float(std::cos(_x));
+}
+#endif
+
+/**
+ * @brief Computes the cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline vec2 cos(const vec2& _x)
+{
+	return { cos(_x.x), cos(_x.y) };
+}
+
+/**
+ * @brief Computes the cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline vec3 cos(const vec3& _x)
+{
+	return { cos(_x.x), cos(_x.y), cos(_x.z) };
+}
+
+/**
+ * @brief Computes the cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline vec4 cos(const vec4& _x)
+{
+	return { cos(_x.x), cos(_x.y), cos(_x.z), cos(_x.w) };
+}
+
+// cosh functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the hyperbolic cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat cosh(const simdfloat& _x)
+{
+#ifndef __GNUC__
+	return simd_cosh_float(_x);
+#else
+	alignas(64) float tempTab[simdwidth];
+	simd_store_float(tempTab, _x);
+	for (int i = 0; i < simdwidth; i++)
+	{
+		tempTab[i] = std::cosh(tempTab[i]);
+	}
+	return simd_load_float(tempTab);
+#endif
+}
+
+/**
+ * @brief Computes the hyperbolic cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat cosh(const float& _x)
+{
+	return simd_set1_float(std::cosh(_x));
+}
+#endif
+
+/**
+ * @brief Computes the hyperbolic cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline vec2 cosh(const vec2& _x)
+{
+	return { cosh(_x.x), cosh(_x.y) };
+}
+
+/**
+ * @brief Computes the hyperbolic cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline vec3 cosh(const vec3& _x)
+{
+	return { cosh(_x.x), cosh(_x.y), cosh(_x.z) };
+}
+
+/**
+ * @brief Computes the hyperbolic cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline vec4 cosh(const vec4& _x)
+{
+	return { cosh(_x.x), cosh(_x.y), cosh(_x.z), cosh(_x.w) };
+}
+
+// cross functions
+/**
+ * @brief Computes the cross product of two 3D vectors.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline vec3 cross(const vec3& _val1, const vec3& _val2)
+{
+	return { _val1.y * _val2.z - _val1.z * _val2.y, _val1.z * _val2.x - _val1.x * _val2.z, _val1.x * _val2.y - _val1.y * _val2.x };
+}
+
+// degrees functions
+/**
+ * @brief Converts radians to degrees for each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat degrees(const simdfloat& _x)
+{
+	return simd_mul_float(_x, simd_set1_float(180.0f / 3.1415927f));
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Converts radians to degrees for each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat degrees(const float& _x)
+{
+	return simd_set1_float(_x * (180.0f / 3.1415927f));
+}
+#endif
+
+/**
+ * @brief Converts radians to degrees for each component.
+ * @param _x The input value or vector.
+ */
+inline vec2 degrees(const vec2& _x)
+{
+	return { degrees(_x.x), degrees(_x.y) };
+}
+
+/**
+ * @brief Converts radians to degrees for each component.
+ * @param _x The input value or vector.
+ */
+inline vec3 degrees(const vec3& _x)
+{
+	return { degrees(_x.x), degrees(_x.y), degrees(_x.z) };
+}
+
+/**
+ * @brief Converts radians to degrees for each component.
+ * @param _x The input value or vector.
+ */
+inline vec4 degrees(const vec4& _x)
+{
+	return { degrees(_x.x), degrees(_x.y), degrees(_x.z), degrees(_x.w) };
+}
+
+// distance functions
+/**
+ * @brief Computes the distance between two points.
+ * @param _point_a The first point.
+ * @param _point_b The second point.
+ */
+inline simdfloat distance(const simdfloat& _point_a, const simdfloat& _point_b)
+{
+	return simd_sqrt_float(simd_mul_float(simd_sub_float(_point_a, _point_b), simd_sub_float(_point_a, _point_b)));
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the distance between two points.
+ * @param _point_a The first point.
+ * @param _point_b The second point.
+ */
+inline simdfloat distance(const float& _point_a, const float& _point_b)
+{
+	return simd_set1_float(std::sqrt((_point_a - _point_b) * (_point_a - _point_b)));
+}
+#endif
+
+/**
+ * @brief Computes the distance between two points.
+ * @param _point_a The first point.
+ * @param _point_b The second point.
+ */
+inline simdfloat distance(const vec2& _point_a, const vec2& _point_b)
+{
+	return simd_sqrt_float(simd_add_float(simd_mul_float(simd_sub_float(_point_a.x, _point_b.x), simd_sub_float(_point_a.x, _point_b.x)), simd_mul_float(simd_sub_float(_point_a.y, _point_b.y), simd_sub_float(_point_a.y, _point_b.y))));
+}
+
+/**
+ * @brief Computes the distance between two points.
+ * @param _point_a The first point.
+ * @param _point_b The second point.
+ */
+inline simdfloat distance(const vec3& _point_a, const vec3& _point_b)
+{
+	return simd_sqrt_float(simd_add_float(simd_add_float(simd_mul_float(simd_sub_float(_point_a.x, _point_b.x), simd_sub_float(_point_a.x, _point_b.x)), simd_mul_float(simd_sub_float(_point_a.y, _point_b.y), simd_sub_float(_point_a.y, _point_b.y))), simd_mul_float(simd_sub_float(_point_a.z, _point_b.z), simd_sub_float(_point_a.z, _point_b.z))));
+}
+
+/**
+ * @brief Computes the distance between two points.
+ * @param _point_a The first point.
+ * @param _point_b The second point.
+ */
+inline simdfloat distance(const vec4& _point_a, const vec4& _point_b)
+{
+	return simd_sqrt_float(simd_add_float(simd_add_float(simd_add_float(simd_mul_float(simd_sub_float(_point_a.x, _point_b.x), simd_sub_float(_point_a.x, _point_b.x)), simd_mul_float(simd_sub_float(_point_a.y, _point_b.y), simd_sub_float(_point_a.y, _point_b.y))), simd_mul_float(simd_sub_float(_point_a.z, _point_b.z), simd_sub_float(_point_a.z, _point_b.z))), simd_mul_float(simd_sub_float(_point_a.w, _point_b.w), simd_sub_float(_point_a.w, _point_b.w))));
+}
+
+// dot functions
+/**
+ * @brief Computes the dot product of two vectors.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simdfloat dot(const vec2& _val1, const vec2& _val2)
+{
+	return simd_add_float(simd_mul_float(_val1.x, _val2.x), simd_mul_float(_val1.y, _val2.y));
+}
+
+/**
+ * @brief Computes the dot product of two vectors.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simdfloat dot(const vec3& _val1, const vec3& _val2)
+{
+	return simd_add_float(simd_add_float(simd_mul_float(_val1.x, _val2.x), simd_mul_float(_val1.y, _val2.y)), simd_mul_float(_val1.z, _val2.z));
+}
+
+/**
+ * @brief Computes the dot product of two vectors.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simdfloat dot(const vec4& _val1, const vec4& _val2)
+{
+	return simd_add_float(simd_add_float(simd_add_float(simd_mul_float(_val1.x, _val2.x), simd_mul_float(_val1.y, _val2.y)), simd_mul_float(_val1.z, _val2.z)), simd_mul_float(_val1.w, _val2.w));
+}
+
+// exp functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the base-e exponential of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat exp(const simdfloat& _x)
+{
+#ifndef __GNUC__
+	return simd_exp_float(_x);
+#else
+	alignas(64) float tempTab[simdwidth];
+	simd_store_float(tempTab, _x);
+	for (int i = 0; i < simdwidth; i++)
+	{
+		tempTab[i] = std::exp(tempTab[i]);
+	}
+	return simd_load_float(tempTab);
+#endif
+}
+#endif
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the base-e exponential of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat exp(const float& _x)
+{
+	return simd_set1_float(std::exp(_x));
+}
+#endif
+
+/**
+ * @brief Computes the base-e exponential of each component.
+ * @param _x The input value or vector.
+ */
+inline vec2 exp(const vec2& _x)
+{
+	return { exp(_x.x), exp(_x.y) };
+}
+
+/**
+ * @brief Computes the base-e exponential of each component.
+ * @param _x The input value or vector.
+ */
+inline vec3 exp(const vec3& _x)
+{
+	return { exp(_x.x), exp(_x.y), exp(_x.z) };
+}
+
+/**
+ * @brief Computes the base-e exponential of each component.
+ * @param _x The input value or vector.
+ */
+inline vec4 exp(const vec4& _x)
+{
+	return { exp(_x.x), exp(_x.y), exp(_x.z), exp(_x.w) };
+}
+
+// exp2 functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the base-2 exponential of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat exp2(const simdfloat& _x)
+{
+#ifndef __GNUC__
+	return simd_exp2_float(_x);
+#else
+	alignas(64) float tempTab[simdwidth];
+	simd_store_float(tempTab, _x);
+	for (int i = 0; i < simdwidth; i++)
+	{
+		tempTab[i] = exp2(tempTab[i]);
+	}
+	return simd_load_float(tempTab);
+#endif
+}
+
+/**
+ * @brief Computes the base-2 exponential of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat exp2(const float& _x)
+{
+	return simd_set1_float(exp2f(_x));
+}
+#endif
+
+/**
+ * @brief Computes the base-2 exponential of each component.
+ * @param _x The input value or vector.
+ */
+inline vec2 exp2(const vec2& _x)
+{
+	return { exp2(_x.x), exp2(_x.y) };
+}
+
+/**
+ * @brief Computes the base-2 exponential of each component.
+ * @param _x The input value or vector.
+ */
+inline vec3 exp2(const vec3& _x)
+{
+	return { exp2(_x.x), exp2(_x.y), exp2(_x.z) };
+}
+
+/**
+ * @brief Computes the base-2 exponential of each component.
+ * @param _x The input value or vector.
+ */
+inline vec4 exp2(const vec4& _x)
+{
+	return { exp2(_x.x), exp2(_x.y), exp2(_x.z), exp2(_x.w) };
+}
+
+// fma functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes fused multiply-add (a * b + c).
+ * @param _val1 The first factor for multiplication.
+ * @param _val2 The second factor for multiplication.
+ * @param _addend The value to add.
+ */
+inline simdfloat fma(const simdfloat& _val1, const simdfloat& _val2, const simdfloat& _addend)
+{
+	return simd_add_float(simd_mul_float(_val1, _val2), _addend);
+}
+
+/**
+ * @brief Computes fused multiply-add (a * b + c).
+ * @param _val1 The first factor for multiplication.
+ * @param _val2 The second factor for multiplication.
+ * @param _addend The value to add.
+ */
+inline simdfloat fma(const float& _val1, const float& _val2, const float& _addend)
+{
+	return simd_set1_float(_val1 * _val2 + _addend);
+}
+#endif
+
+/**
+ * @brief Computes fused multiply-add (a * b + c).
+ * @param _val1 The first factor for multiplication.
+ * @param _val2 The second factor for multiplication.
+ * @param _addend The value to add.
+ */
+inline vec2 fma(const vec2& _val1, const vec2& _val2, const vec2& _addend)
+{
+	return { fma(_val1.x, _val2.x, _addend.x), fma(_val1.y, _val2.y, _addend.y) };
+}
+
+/**
+ * @brief Computes fused multiply-add (a * b + c).
+ * @param _val1 The first factor for multiplication.
+ * @param _val2 The second factor for multiplication.
+ * @param _addend The value to add.
+ */
+inline vec3 fma(const vec3& _val1, const vec3& _val2, const vec3& _addend)
+{
+	return { fma(_val1.x, _val2.x, _addend.x), fma(_val1.y, _val2.y, _addend.y), fma(_val1.z, _val2.z, _addend.z) };
+}
+
+/**
+ * @brief Computes fused multiply-add (a * b + c).
+ * @param _val1 The first factor for multiplication.
+ * @param _val2 The second factor for multiplication.
+ * @param _addend The value to add.
+ */
+inline vec4 fma(const vec4& _val1, const vec4& _val2, const vec4& _addend)
+{
+	return { fma(_val1.x, _val2.x, _addend.x), fma(_val1.y, _val2.y, _addend.y), fma(_val1.z, _val2.z, _addend.z), fma(_val1.w, _val2.w, _addend.w) };
+}
+
+// fract functions
+/**
+ * @brief Computes the fractional part of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat fract(const simdfloat& _x)
+{
+	return simd_sub_float(_x, simd_floor_float(_x));
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the fractional part of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat fract(const float& _x)
+{
+	return simd_set1_float(_x - floorf(_x));
+}
+#endif
+
+/**
+ * @brief Computes the fractional part of each component.
+ * @param _x The input value or vector.
+ */
+inline vec2 fract(const vec2& _x)
+{
+	return { fract(_x.x), fract(_x.y) };
+}
+
+/**
+ * @brief Computes the fractional part of each component.
+ * @param _x The input value or vector.
+ */
+inline vec3 fract(const vec3& _x)
+{
+	return { fract(_x.x), fract(_x.y), fract(_x.z) };
+}
+
+/**
+ * @brief Computes the fractional part of each component.
+ * @param _x The input value or vector.
+ */
+inline vec4 fract(const vec4& _x)
+{
+	return { fract(_x.x), fract(_x.y), fract(_x.z), fract(_x.w) };
+}
+
+// inversesqrt functions
+/**
+ * @brief Computes the inverse square root of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat inversesqrt(const simdfloat& _x)
+{
+#ifndef USE_AVX512
+	return simd_rsqrt_float(_x);
+#else
+	return simd_div_float(simd_set1_float(1.0f), simd_sqrt_float(_x));
+#endif
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the inverse square root of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat inversesqrt(const float& _x)
+{
+	return simd_set1_float(1.0f / sqrtf(_x));
+}
+#endif
+
+/**
+ * @brief Computes the inverse square root of each component.
+ * @param _x The input value or vector.
+ */
+inline vec2 inversesqrt(const vec2& _x)
+{
+	return { inversesqrt(_x.x), inversesqrt(_x.y) };
+}
+
+/**
+ * @brief Computes the inverse square root of each component.
+ * @param _x The input value or vector.
+ */
+inline vec3 inversesqrt(const vec3& _x)
+{
+	return { inversesqrt(_x.x), inversesqrt(_x.y), inversesqrt(_x.z) };
+}
+
+/**
+ * @brief Computes the inverse square root of each component.
+ * @param _x The input value or vector.
+ */
+inline vec4 inversesqrt(const vec4& _x)
+{
+	return { inversesqrt(_x.x), inversesqrt(_x.y), inversesqrt(_x.z), inversesqrt(_x.w) };
+}
+
+// ldexp functions
+/**
+ * @brief Computes mantissa * 2^exponent.
+ * @param _mantissa The mantissa (significand).
+ * @param _exponent The exponent value.
+ */
+inline simdfloat ldexp(const simdfloat& _mantissa, const simdfloat& _exponent)
+{
+	return simd_mul_float(_mantissa, exp2(_exponent));
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes mantissa * 2^exponent.
+ * @param _mantissa The mantissa (significand).
+ * @param _exponent The exponent value.
+ */
+inline simdfloat ldexp(const simdfloat& _mantissa, const float& _exponent)
+{
+	return simd_mul_float(_mantissa, exp2(simd_set1_float(_exponent)));
+}
+#endif
+
+/**
+ * @brief Computes mantissa * 2^exponent.
+ * @param _mantissa The mantissa (significand).
+ * @param _exponent The exponent value.
+ */
+inline vec2 ldexp(const vec2& _mantissa, const vec2& _exponent)
+{
+	return { ldexp(_mantissa.x, _exponent.x), ldexp(_mantissa.y, _exponent.y) };
+}
+
+/**
+ * @brief Computes mantissa * 2^exponent.
+ * @param _mantissa The mantissa (significand).
+ * @param _exponent The exponent value.
+ */
+inline vec3 ldexp(const vec3& _mantissa, const vec3& _exponent)
+{
+	return { ldexp(_mantissa.x, _exponent.x), ldexp(_mantissa.y, _exponent.y), ldexp(_mantissa.z, _exponent.z) };
+}
+
+/**
+ * @brief Computes mantissa * 2^exponent.
+ * @param _mantissa The mantissa (significand).
+ * @param _exponent The exponent value.
+ */
+inline vec4 ldexp(const vec4& _mantissa, const vec4& _exponent)
+{
+	return { ldexp(_mantissa.x, _exponent.x), ldexp(_mantissa.y, _exponent.y), ldexp(_mantissa.z, _exponent.z), ldexp(_mantissa.w, _exponent.w) };
+}
+
+// length functions
+/**
+ * @brief Computes the length of a vector.
+ * @param _vec The input vector.
+ */
+inline simdfloat length(const simdfloat& _vec)
+{
+	return simd_sqrt_float(_vec * _vec);
+}
+
+/**
+ * @brief Computes the length of a vector.
+ * @param _vec The input vector.
+ */
+inline simdfloat length(const vec2& _vec)
+{
+	return simd_sqrt_float(_vec.x * _vec.x + _vec.y * _vec.y);
+}
+
+/**
+ * @brief Computes the length of a vector.
+ * @param _vec The input vector.
+ */
+inline simdfloat length(const vec3& _vec)
+{
+	return simd_sqrt_float(_vec.x * _vec.x + _vec.y * _vec.y + _vec.z * _vec.z);
+}
+
+/**
+ * @brief Computes the length of a vector.
+ * @param _vec The input vector.
+ */
+inline simdfloat length(const vec4& _vec)
+{
+	return simd_sqrt_float(_vec.x * _vec.x + _vec.y * _vec.y + _vec.z * _vec.z + _vec.w * _vec.w);
+}
+
+// lerp functions
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simdfloat lerp(const simdfloat& _from, const simdfloat& _to, const simdfloat& _t)
+{
+	return simd_add_float(simd_mul_float(simd_sub_float(_to, _from), _t), _from);
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simdfloat lerp(const simdfloat& _from, const simdfloat& _to, const float& _t)
+{
+	return _from + _t * (_to - _from);
+}
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simdfloat lerp(const simdfloat& _from, const float& _to, const simdfloat& _t)
+{
+	return _from + _t * (_to - _from);
+}
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simdfloat lerp(const simdfloat& _from, const float& _to, const float& _t)
+{
+	return _from + _t * (_to - _from);
+}
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simdfloat lerp(const float& _from, const simdfloat& _to, const simdfloat& _t)
+{
+	return _from + _t * (_to - _from);
+}
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simdfloat lerp(const float& _from, const simdfloat& _to, const float& _t)
+{
+	return _from + _t * (_to - _from);
+}
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simdfloat lerp(const float& _from, const float& _to, const simdfloat& _t)
+{
+	return _from + _t * (_to - _from);
+}
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simdfloat lerp(const float& _from, const float& _to, const float& _t)
+{
+	return simd_set1_float(_from + _t * (_to - _from));
+}
+#endif
+
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline vec2 lerp(const vec2& _from, const vec2& _to, const vec2& _t)
+{
+	return { lerp(_from.x, _to.x, _t.x), lerp(_from.y, _to.y, _t.y) };
+}
+
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline vec3 lerp(const vec3& _from, const vec3& _to, const vec3& _t)
+{
+	return { lerp(_from.x, _to.x, _t.x), lerp(_from.y, _to.y, _t.y), lerp(_from.z, _to.z, _t.z) };
+}
+
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline vec4 lerp(const vec4& _from, const vec4& _to, const vec4& _t)
+{
+	return { lerp(_from.x, _to.x, _t.x), lerp(_from.y, _to.y, _t.y), lerp(_from.z, _to.z, _t.z), lerp(_from.w, _to.w, _t.w) };
+}
+
+// log functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the natural (base-e) logarithm of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat log(const simdfloat& _x)
+{
+#ifndef __GNUC__
+	return simd_log_float(_x);
+#else
+	alignas(64) float tempTab[simdwidth];
+	simd_store_float(tempTab, _x);
+	for (int i = 0; i < simdwidth; i++)
+	{
+		tempTab[i] = logf(tempTab[i]);
+	}
+	return simd_load_float(tempTab);
+#endif
+}
+
+/**
+ * @brief Computes the natural (base-e) logarithm of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat log(const float& _x)
+{
+	return simd_set1_float(logf(_x));
+}
+#endif
+
+/**
+ * @brief Computes the natural (base-e) logarithm of each component.
+ * @param _x The input value or vector.
+ */
+inline vec2 log(const vec2& _x)
+{
+	return { log(_x.x), log(_x.y) };
+}
+
+/**
+ * @brief Computes the natural (base-e) logarithm of each component.
+ * @param _x The input value or vector.
+ */
+inline vec3 log(const vec3& _x)
+{
+	return { log(_x.x), log(_x.y), log(_x.z) };
+}
+
+/**
+ * @brief Computes the natural (base-e) logarithm of each component.
+ * @param _x The input value or vector.
+ */
+inline vec4 log(const vec4& _x)
+{
+	return { log(_x.x), log(_x.y), log(_x.z), log(_x.w) };
+}
+
+// log2 functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the base-2 logarithm of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat log2(const simdfloat& _x)
+{
+#ifndef __GNUC__
+	return simd_log2_float(_x);
+#else
+	alignas(64) float tempTab[simdwidth];
+	simd_store_float(tempTab, _x);
+	for (int i = 0; i < simdwidth; i++)
+	{
+		tempTab[i] = log2f(tempTab[i]);
+	}
+	return simd_load_float(tempTab);
+#endif
+}
+
+/**
+ * @brief Computes the base-2 logarithm of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat log2(const float& _x)
+{
+	return simd_set1_float(log2f(_x));
+}
+#endif
+
+/**
+ * @brief Computes the base-2 logarithm of each component.
+ * @param _x The input value or vector.
+ */
+inline vec2 log2(const vec2& _x)
+{
+	return { log2(_x.x), log2(_x.y) };
+}
+
+/**
+ * @brief Computes the base-2 logarithm of each component.
+ * @param _x The input value or vector.
+ */
+inline vec3 log2(const vec3& _x)
+{
+	return { log2(_x.x), log2(_x.y), log2(_x.z) };
+}
+
+/**
+ * @brief Computes the base-2 logarithm of each component.
+ * @param _x The input value or vector.
+ */
+inline vec4 log2(const vec4& _x)
+{
+	return { log2(_x.x), log2(_x.y), log2(_x.z), log2(_x.w) };
+}
+
+// mix functions
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simdfloat mix(const simdfloat& _from, const simdfloat& _to, const simdfloat& _t)
+{
+	return simd_add_float(simd_mul_float(simd_sub_float(_to, _from), _t), _from);
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simdfloat mix(const simdfloat& _from, const simdfloat& _to, const float& _t)
+{
+	return _from + _t * (_to - _from);
+}
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simdfloat mix(const simdfloat& _from, const float& _to, const simdfloat& _t)
+{
+	return _from + _t * (_to - _from);
+}
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simdfloat mix(const simdfloat& _from, const float& _to, const float& _t)
+{
+	return _from + _t * (_to - _from);
+}
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simdfloat mix(const float& _from, const simdfloat& _to, const simdfloat& _t)
+{
+	return _from + _t * (_to - _from);
+}
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simdfloat mix(const float& _from, const simdfloat& _to, const float& _t)
+{
+	return _from + _t * (_to - _from);
+}
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simdfloat mix(const float& _from, const float& _to, const simdfloat& _t)
+{
+	return _from + _t * (_to - _from);
+}
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simdfloat mix(const float& _from, const float& _to, const float& _t)
+{
+	return simd_set1_float(_from + _t * (_to - _from));
+}
+
+#endif
+
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline vec2 mix(const vec2& _from, const vec2& _to, const simdfloat& _t)
+{
+	return { mix(_from.x, _to.x, _t), mix(_from.y, _to.y, _t) };
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline vec2 mix(const vec2& _from, const vec2& _to, const float& _t)
+{
+	return { mix(_from.x, _to.x, _t), mix(_from.y, _to.y, _t) };
+}
+#endif
+
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline vec2 mix(const vec2& _from, const vec2& _to, const vec2& _t)
+{
+	return { mix(_from.x, _to.x, _t.x), mix(_from.y, _to.y, _t.y) };
+}
+
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline vec3 mix(const vec3& _from, const vec3& _to, const simdfloat& _t)
+{
+	return { mix(_from.x, _to.x, _t), mix(_from.y, _to.y, _t), mix(_from.z, _to.z, _t) };
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline vec3 mix(const vec3& _from, const vec3& _to, const float& _t)
+{
+	return { mix(_from.x, _to.x, _t), mix(_from.y, _to.y, _t), mix(_from.z, _to.z, _t) };
+}
+#endif
+
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline vec3 mix(const vec3& _from, const vec3& _to, const vec3& _t)
+{
+	return { mix(_from.x, _to.x, _t.x), mix(_from.y, _to.y, _t.y), mix(_from.z, _to.z, _t.z) };
+}
+
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline vec4 mix(const vec4& _from, const vec4& _to, const simdfloat& _t)
+{
+	return { mix(_from.x, _to.x, _t), mix(_from.y, _to.y, _t), mix(_from.z, _to.z, _t), mix(_from.w, _to.w, _t) };
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline vec4 mix(const vec4& _from, const vec4& _to, const float& _t)
+{
+	return { mix(_from.x, _to.x, _t), mix(_from.y, _to.y, _t), mix(_from.z, _to.z, _t), mix(_from.w, _to.w, _t) };
+}
+#endif
+
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline vec4 mix(const vec4& _from, const vec4& _to, const vec4& _t)
+{
+	return { mix(_from.x, _to.x, _t.x), mix(_from.y, _to.y, _t.y), mix(_from.z, _to.z, _t.z), mix(_from.w, _to.w, _t.w) };
+}
+
+
+// modf functions
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline simdfloat modf(const simdfloat& _value, const simdfloat& _modulus)
+{
+	return simd_sub_float(_value, simd_mul_float(simd_floor_float(simd_div_float(_value, _modulus)), _modulus));
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline simdfloat modf(const float& _value, const float& _modulus)
+{
+	return simd_set1_float(_value - floorf(_value / _modulus) * _modulus);
+}
+#endif
+
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline vec2 modf(const vec2& _value, const vec2& _modulus)
+{
+	return { modf(_value.x, _modulus.x), modf(_value.y, _modulus.y) };
+}
+
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline vec3 modf(const vec3& _value, const vec3& _modulus)
+{
+	return { modf(_value.x, _modulus.x), modf(_value.y, _modulus.y), modf(_value.z, _modulus.z) };
+}
+
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline vec4 modf(const vec4& _value, const vec4& _modulus)
+{
+	return { modf(_value.x, _modulus.x), modf(_value.y, _modulus.y), modf(_value.z, _modulus.z), modf(_value.w, _modulus.w) };
+}
+
+// normalize functions
+/**
+ * @brief Computes the normalized vector (unit vector).
+ * @param _vec The input vector.
+ */
+inline vec2 normalize(const vec2& _vec)
+{
+	return {
+		_vec.x / length(_vec),
+		_vec.y / length(_vec)
+	};
+}
+
+/**
+ * @brief Computes the normalized vector (unit vector).
+ * @param _vec The input vector.
+ */
+inline vec3 normalize(const vec3& _vec)
+{
+	return {
+		_vec.x / length(_vec),
+		_vec.y / length(_vec),
+		_vec.z / length(_vec)
+	};
+}
+
+/**
+ * @brief Computes the normalized vector (unit vector).
+ * @param _vec The input vector.
+ */
+inline vec4 normalize(const vec4& _vec)
+{
+	return {
+		_vec.x / length(_vec),
+		_vec.y / length(_vec),
+		_vec.z / length(_vec),
+		_vec.w / length(_vec)
+	};
+}
+
+// pow functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the component-wise power of a base raised to an exponent.
+ * @param _base The base value.
+ * @param _exponent The exponent value.
+ */
+inline simdfloat pow(const simdfloat& _base, const simdfloat& _exponent)
+{
+#ifndef __GNUC__
+	return simd_pow_float(_base, _exponent);
+#else
+	alignas(64) float tempTabA[simdwidth];
+	alignas(64) float tempTabB[simdwidth];
+	simd_store_float(tempTabA, _base);
+	simd_store_float(tempTabB, _exponent);
+	for (int i = 0; i < simdwidth; i++)
+	{
+		tempTabA[i] = powf(tempTabA[i], tempTabB[i]);
+	}
+	return simd_load_float(tempTabA);
+#endif
+}
+#endif
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the component-wise power of a base raised to an exponent.
+ * @param _base The base value.
+ * @param _exponent The exponent value.
+ */
+inline simdfloat pow(const simdfloat& _base, const float& _exponent)
+{
+	return pow(_base, simd_set1_float(_exponent));
+}
+#endif
+
+/**
+ * @brief Computes the component-wise power of a base raised to an exponent.
+ * @param _base The base value.
+ * @param _exponent The exponent value.
+ */
+inline vec2 pow(const vec2& _base, const simdfloat& _exponent)
+{
+	return {
+		pow(_base.x, _exponent),
+		pow(_base.y, _exponent)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the component-wise power of a base raised to an exponent.
+ * @param _base The base value.
+ * @param _exponent The exponent value.
+ */
+inline vec2 pow(const vec2& _base, const float& _exponent)
+{
+	return pow(_base, simd_set1_float(_exponent));
+}
+#endif
+
+/**
+ * @brief Computes the component-wise power of a base raised to an exponent.
+ * @param _base The base value.
+ * @param _exponent The exponent value.
+ */
+inline vec2 pow(const vec2& _base, const vec2& _exponent)
+{
+	return {
+		pow(_base.x, _exponent.x),
+		pow(_base.y, _exponent.y)
+	};
+}
+/**
+ * @brief Computes the component-wise power of a base raised to an exponent.
+ * @param _base The base value.
+ * @param _exponent The exponent value.
+ */
+inline vec3 pow(const vec3& _base, const simdfloat& _exponent)
+{
+	return {
+		pow(_base.x, _exponent),
+		pow(_base.y, _exponent),
+		pow(_base.z, _exponent)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the component-wise power of a base raised to an exponent.
+ * @param _base The base value.
+ * @param _exponent The exponent value.
+ */
+inline vec3 pow(const vec3& _base, const float& _exponent)
+{
+	return pow(_base, simd_set1_float(_exponent));
+}
+#endif
+
+/**
+ * @brief Computes the component-wise power of a base raised to an exponent.
+ * @param _base The base value.
+ * @param _exponent The exponent value.
+ */
+inline vec3 pow(const vec3& _base, const vec3& _exponent)
+{
+	return {
+		pow(_base.x, _exponent.x),
+		pow(_base.y, _exponent.y),
+		pow(_base.z, _exponent.z)
+	};
+}
+
+/**
+ * @brief Computes the component-wise power of a base raised to an exponent.
+ * @param _base The base value.
+ * @param _exponent The exponent value.
+ */
+inline vec4 pow(const vec4& _base, const simdfloat& _exponent)
+{
+	return {
+		pow(_base.x, _exponent),
+		pow(_base.y, _exponent),
+		pow(_base.z, _exponent),
+		pow(_base.w, _exponent)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the component-wise power of a base raised to an exponent.
+ * @param _base The base value.
+ * @param _exponent The exponent value.
+ */
+inline vec4 pow(const vec4& _base, const float& _exponent)
+{
+	return pow(_base, simd_set1_float(_exponent));
+}
+#endif
+
+/**
+ * @brief Computes the component-wise power of a base raised to an exponent.
+ * @param _base The base value.
+ * @param _exponent The exponent value.
+ */
+inline vec4 pow(const vec4& _base, const vec4& _exponent)
+{
+	return {
+		pow(_base.x, _exponent.x),
+		pow(_base.y, _exponent.y),
+		pow(_base.z, _exponent.z),
+		pow(_base.w, _exponent.w)
+	};
+}
+
+// radians functions
+/**
+ * @brief Converts degrees to radians for each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat radians(const simdfloat& _x)
+{
+	return simd_mul_float(_x, simd_set1_float(3.1415927f / 180.0f));
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Converts degrees to radians for each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat radians(const float& _x)
+{
+	return simd_set1_float(_x * (3.1415927f / 180.0f));
+}
+#endif
+
+/**
+ * @brief Converts degrees to radians for each component.
+ * @param _x The input value or vector.
+ */
+inline vec2 radians(const vec2& _x)
+{
+	return { radians(_x.x), radians(_x.y) };
+}
+
+/**
+ * @brief Converts degrees to radians for each component.
+ * @param _x The input value or vector.
+ */
+inline vec3 radians(const vec3& _x)
+{
+	return { radians(_x.x), radians(_x.y), radians(_x.z) };
+}
+
+/**
+ * @brief Converts degrees to radians for each component.
+ * @param _x The input value or vector.
+ */
+inline vec4 radians(const vec4& _x)
+{
+	return { radians(_x.x), radians(_x.y), radians(_x.z), radians(_x.w) };
+}
+
+// reflect functions
+/**
+ * @brief Computes the reflection vector.
+ * @param _incident The incident vector.
+ * @param _normal The normal vector.
+ */
+inline vec2 reflect(const vec2& _incident, const vec2& _normal)
+{
+	return _incident - 2.0f * dot(_normal, _incident) * _normal;
+}
+
+/**
+ * @brief Computes the reflection vector.
+ * @param _incident The incident vector.
+ * @param _normal The normal vector.
+ */
+inline vec3 reflect(const vec3& _incident, const vec3& _normal)
+{
+	return _incident - 2.0f * dot(_normal, _incident) * _normal;
+}
+
+/**
+ * @brief Computes the reflection vector.
+ * @param _incident The incident vector.
+ * @param _normal The normal vector.
+ */
+inline vec4 reflect(const vec4& _incident, const vec4& _normal)
+{
+	return _incident - 2.0f * dot(_normal, _incident) * _normal;
+}
+
+// refract functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the refraction vector.
+ * @param _incident The incident vector.
+ * @param _normal The normal vector.
+ * @param _ior The index of refraction.
+ */
+inline vec2 refract(const vec2& _incident, const vec2& _normal, const float& _ior)
+{
+	return _incident * simd_set1_float(_ior) - _normal * simd_sqrt_float(simd_set1_float(1.0f) - simd_set1_float(_ior) * simd_set1_float(_ior) * (simd_set1_float(1.0f) - dot(_incident, _incident)));
+}
+#endif
+
+/**
+ * @brief Computes the refraction vector.
+ * @param _incident The incident vector.
+ * @param _normal The normal vector.
+ * @param _ior The index of refraction.
+ */
+inline vec2 refract(const vec2& _incident, const vec2& _normal, const simdfloat& _ior)
+{
+	return _incident * _ior - _normal * simd_sqrt_float(simd_sub_float(simd_set1_float(1.0f), simd_mul_float(_ior, simd_mul_float(_ior, simd_sub_float(simd_set1_float(1.0f), dot(_incident, _incident))))));
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the refraction vector.
+ * @param _incident The incident vector.
+ * @param _normal The normal vector.
+ * @param _ior The index of refraction.
+ */
+inline vec3 refract(const vec3& _incident, const vec3& _normal, const float& _ior)
+{
+	return _incident * simd_set1_float(_ior) - _normal * simd_sqrt_float(simd_set1_float(1.0f) - simd_set1_float(_ior) * simd_set1_float(_ior) * (simd_set1_float(1.0f) - dot(_incident, _incident)));
+}
+#endif
+
+/**
+ * @brief Computes the refraction vector.
+ * @param _incident The incident vector.
+ * @param _normal The normal vector.
+ * @param _ior The index of refraction.
+ */
+inline vec3 refract(const vec3& _incident, const vec3& _normal, const simdfloat& _ior)
+{
+	return _incident * _ior - _normal * simd_sqrt_float(simd_sub_float(simd_set1_float(1.0f), simd_mul_float(_ior, simd_mul_float(_ior, simd_sub_float(simd_set1_float(1.0f), dot(_incident, _incident))))));
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the refraction vector.
+ * @param _incident The incident vector.
+ * @param _normal The normal vector.
+ * @param _ior The index of refraction.
+ */
+inline vec4 refract(const vec4& _incident, const vec4& _normal, const float& _ior)
+{
+	return _incident * simd_set1_float(_ior) - _normal * simd_sqrt_float(simd_set1_float(1.0f) - simd_set1_float(_ior) * simd_set1_float(_ior) * (simd_set1_float(1.0f) - dot(_incident, _incident)));
+}
+#endif
+
+/**
+ * @brief Computes the refraction vector.
+ * @param _incident The incident vector.
+ * @param _normal The normal vector.
+ * @param _ior The index of refraction.
+ */
+inline vec4 refract(const vec4& _incident, const vec4& _normal, const simdfloat& _ior)
+{
+	return _incident * _ior - _normal * simd_sqrt_float(simd_sub_float(simd_set1_float(1.0f), simd_mul_float(_ior, simd_mul_float(_ior, simd_sub_float(simd_set1_float(1.0f), dot(_incident, _incident))))));
+}
+
+// round functions
+#ifndef USE_SCALAR
+/**
+ * @brief Rounds each component to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline simdfloat round(const simdfloat& _x)
+{
+#ifndef USE_AVX512
+	return simd_round_float(_x, 0x09);
+#else
+	return _mm512_roundscale_ps(_x, _MM_FROUND_TO_ZERO | _MM_FROUND_NO_EXC);
+#endif
+
+}
+
+/**
+ * @brief Rounds each component to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline simdfloat round(const float& _x)
+{
+	return simd_set1_float(roundf(_x));
+}
+#endif
+
+/**
+ * @brief Rounds each component to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline vec2 round(const vec2& _x)
+{
+	return { round(_x.x), round(_x.y) };
+}
+
+/**
+ * @brief Rounds each component to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline vec3 round(const vec3& _x)
+{
+	return { round(_x.x), round(_x.y), round(_x.z) };
+}
+
+/**
+ * @brief Rounds each component to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline vec4 round(const vec4& _x)
+{
+	return { round(_x.x), round(_x.y), round(_x.z), round(_x.w) };
+}
+
+// sign functions
+/**
+ * @brief Extracts the sign of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat sign(const simdfloat& _x)
+{
+	simdmask _mask = simd_cmp_float(_x, simd_set1_float(0.0f), _CMP_LT_OQ);
+	return blendv(simd_set1_float(1.0f), simd_set1_float(-1.0f), _mask);
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Extracts the sign of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat sign(const float& _x)
+{
+	return simd_set1_float((float)((_x > 0.0f) - (_x < 0.0f)));
+}
+#endif
+
+/**
+ * @brief Extracts the sign of each component.
+ * @param _x The input value or vector.
+ */
+inline vec2 sign(const vec2& _x)
+{
+	return { sign(_x.x), sign(_x.y) };
+}
+
+/**
+ * @brief Extracts the sign of each component.
+ * @param _x The input value or vector.
+ */
+inline vec3 sign(const vec3& _x)
+{
+	return { sign(_x.x), sign(_x.y), sign(_x.z) };
+}
+
+/**
+ * @brief Extracts the sign of each component.
+ * @param _x The input value or vector.
+ */
+inline vec4 sign(const vec4& _x)
+{
+	return { sign(_x.x), sign(_x.y), sign(_x.z), sign(_x.w) };
+}
+
+// sin functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the sine of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat sin(const simdfloat& _x)
+{
+#ifndef __GNUC__
+	return simd_sin_float(_x);
+#else
+#ifndef GCC_FASTCOS
+	alignas(64) float tempTab[simdwidth];
+	simd_store_float(tempTab, _x);
+	for (int i = 0; i < simdwidth; i++)
+	{
+		tempTab[i] = sinf(tempTab[i]);
+	}
+	return simd_load_float(tempTab);
+#else
+	return cos(_x - SIMDHALFPI);
+#endif
+#endif
+}
+#endif
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the sine of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat sin(const float& _x)
+{
+	return simd_set1_float(sinf(_x));
+}
+#endif
+
+/**
+ * @brief Computes the sine of each component.
+ * @param _x The input value or vector.
+ */
+inline vec2 sin(const vec2& _x)
+{
+	return { sin(_x.x), sin(_x.y) };
+}
+
+/**
+ * @brief Computes the sine of each component.
+ * @param _x The input value or vector.
+ */
+inline vec3 sin(const vec3& _x)
+{
+	return { sin(_x.x), sin(_x.y), sin(_x.z) };
+}
+
+/**
+ * @brief Computes the sine of each component.
+ * @param _x The input value or vector.
+ */
+inline vec4 sin(const vec4& _x)
+{
+	return { sin(_x.x), sin(_x.y), sin(_x.z), sin(_x.w) };
+}
+
+// sinh functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the hyperbolic sine of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat sinh(const simdfloat& _x)
+{
+#ifndef __GNUC__
+	return simd_sinh_float(_x);
+#else
+	alignas(64) float tempTab[simdwidth];
+	simd_store_float(tempTab, _x);
+	for (int i = 0; i < simdwidth; i++)
+	{
+		tempTab[i] = sinhf(tempTab[i]);
+	}
+	return simd_load_float(tempTab);
+#endif
+}
+
+/**
+ * @brief Computes the hyperbolic sine of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat sinh(const float& _x)
+{
+	return simd_set1_float(sinhf(_x));
+}
+#endif
+
+/**
+ * @brief Computes the hyperbolic sine of each component.
+ * @param _x The input value or vector.
+ */
+inline vec2 sinh(const vec2& _x)
+{
+	return { sinh(_x.x), sinh(_x.y) };
+}
+
+/**
+ * @brief Computes the hyperbolic sine of each component.
+ * @param _x The input value or vector.
+ */
+inline vec3 sinh(const vec3& _x)
+{
+	return { sinh(_x.x), sinh(_x.y), sinh(_x.z) };
+}
+
+/**
+ * @brief Computes the hyperbolic sine of each component.
+ * @param _x The input value or vector.
+ */
+inline vec4 sinh(const vec4& _x)
+{
+	return { sinh(_x.x), sinh(_x.y), sinh(_x.z), sinh(_x.w) };
+}
+
+// smoothstep functions
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline simdfloat smoothstep(const simdfloat& _edge0, const simdfloat& _edge1, const simdfloat& _x)
+{
+	simdfloat t = clamp((_x - _edge0) / (_edge1 - _edge0), 0.0f, 1.0f);
+	return t * t * (3.0f - 2.0f * t);
+}
+#ifndef USE_SCALAR
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline simdfloat smoothstep(const float& _edge0, const float& _edge1, const simdfloat& _x)
+{
+	return smoothstep(simd_set1_float(_edge0), simd_set1_float(_edge1), _x);
+}
+
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline simdfloat smoothstep(const float& _edge0, const float& _edge1, const float& _x)
+{
+	return smoothstep(simd_set1_float(_edge0), simd_set1_float(_edge1), simd_set1_float(_x));
+}
+#endif
+
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline vec2 smoothstep(const vec2& _edge0, const vec2& _edge1, const simdfloat& _x)
+{
+	return {
+		smoothstep(_edge0.x, _edge1.x, _x),
+		smoothstep(_edge0.y, _edge1.y, _x)
+	};
+}
+#ifndef USE_SCALAR
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline vec2 smoothstep(const vec2& _edge0, const vec2& _edge1, const float& _x)
+{
+	return smoothstep(_edge0, _edge1, simd_set1_float(_x));
+}
+#endif
+
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline vec2 smoothstep(const vec2& _edge0, const vec2& _edge1, const vec2& _x)
+{
+	return {
+		smoothstep(_edge0.x, _edge1.x, _x.x),
+		smoothstep(_edge0.y, _edge1.y, _x.y)
+	};
+}
+
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline vec3 smoothstep(const vec3& _edge0, const vec3& _edge1, const simdfloat& _x)
+{
+	return {
+		smoothstep(_edge0.x, _edge1.x, _x),
+		smoothstep(_edge0.y, _edge1.y, _x),
+		smoothstep(_edge0.z, _edge1.z, _x)
+	};
+}
+#ifndef USE_SCALAR
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline vec3 smoothstep(const vec3& _edge0, const vec3& _edge1, const float& _x)
+{
+	return smoothstep(_edge0, _edge1, simd_set1_float(_x));
+}
+#endif
+
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline vec3 smoothstep(const vec3& _edge0, const vec3& _edge1, const vec3& _x)
+{
+	return {
+		smoothstep(_edge0.x, _edge1.x, _x.x),
+		smoothstep(_edge0.y, _edge1.y, _x.y),
+		smoothstep(_edge0.z, _edge1.z, _x.z)
+	};
+}
+
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline vec4 smoothstep(const vec4& _edge0, const vec4& _edge1, const simdfloat& _x)
+{
+	return {
+		smoothstep(_edge0.x, _edge1.x, _x),
+		smoothstep(_edge0.y, _edge1.y, _x),
+		smoothstep(_edge0.z, _edge1.z, _x),
+		smoothstep(_edge0.w, _edge1.w, _x)
+	};
+}
+#ifndef USE_SCALAR
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline vec4 smoothstep(const vec4& _edge0, const vec4& _edge1, const float& _x)
+{
+	return smoothstep(_edge0, _edge1, simd_set1_float(_x));
+}
+#endif
+
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline vec4 smoothstep(const vec4& _edge0, const vec4& _edge1, const vec4& _x)
+{
+	return {
+		smoothstep(_edge0.x, _edge1.x, _x.x),
+		smoothstep(_edge0.y, _edge1.y, _x.y),
+		smoothstep(_edge0.z, _edge1.z, _x.z),
+		smoothstep(_edge0.w, _edge1.w, _x.w)
+	};
+}
+
+// step functions
+/**
+ * @brief Generates a step function by comparing two values.
+ * @param _edge The edge of the step function.
+ * @param _x The input value or vector.
+ */
+inline simdfloat step(const simdfloat& _edge, const simdfloat& _x)
+{
+	simdmask _mask = _x < _edge;
+	return blendv(simd_set1_float(1.0f), simd_set1_float(0.0f), _mask);
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Generates a step function by comparing two values.
+ * @param _edge The edge of the step function.
+ * @param _x The input value or vector.
+ */
+inline simdfloat step(const float& _edge, const simdfloat& _x)
+{
+	return step(simd_set1_float(_edge), _x);
+}
+
+/**
+ * @brief Generates a step function by comparing two values.
+ * @param _edge The edge of the step function.
+ * @param _x The input value or vector.
+ */
+inline simdfloat step(const simdfloat& _edge, const float& _x)
+{
+	return step(_edge, simd_set1_float(_x));
+}
+#endif
+
+/**
+ * @brief Generates a step function by comparing two values.
+ * @param _edge The edge of the step function.
+ * @param _x The input value or vector.
+ */
+inline vec2 step(const vec2& _edge, const simdfloat& _x)
+{
+	return {
+		step(_edge.x, _x),
+		step(_edge.y, _x)
+	};
+}
+
+/**
+ * @brief Generates a step function by comparing two values.
+ * @param _edge The edge of the step function.
+ * @param _x The input value or vector.
+ */
+inline vec2 step(const simdfloat& _edge, const vec2& _x)
+{
+	return {
+		step(_edge, _x.x),
+		step(_edge, _x.y)
+	};
+}
+
+/**
+ * @brief Generates a step function by comparing two values.
+ * @param _edge The edge of the step function.
+ * @param _x The input value or vector.
+ */
+inline vec2 step(const vec2& _edge, const vec2& _x)
+{
+	return {
+		step(_edge.x, _x.x),
+		step(_edge.y, _x.y)
+	};
+}
+
+/**
+ * @brief Generates a step function by comparing two values.
+ * @param _edge The edge of the step function.
+ * @param _x The input value or vector.
+ */
+inline vec3 step(const vec3& _edge, const simdfloat& _x)
+{
+	return {
+		step(_edge.x, _x),
+		step(_edge.y, _x),
+		step(_edge.z, _x)
+	};
+}
+
+/**
+ * @brief Generates a step function by comparing two values.
+ * @param _edge The edge of the step function.
+ * @param _x The input value or vector.
+ */
+inline vec3 step(const simdfloat& _edge, const vec3& _x)
+{
+	return {
+		step(_edge, _x.x),
+		step(_edge, _x.y),
+		step(_edge, _x.z)
+	};
+}
+
+/**
+ * @brief Generates a step function by comparing two values.
+ * @param _edge The edge of the step function.
+ * @param _x The input value or vector.
+ */
+inline vec3 step(const vec3& _edge, const vec3& _x)
+{
+	return {
+		step(_edge.x, _x.x),
+		step(_edge.y, _x.y),
+		step(_edge.z, _x.z)
+	};
+}
+
+/**
+ * @brief Generates a step function by comparing two values.
+ * @param _edge The edge of the step function.
+ * @param _x The input value or vector.
+ */
+inline vec4 step(const vec4& _edge, const simdfloat& _x)
+{
+	return {
+		step(_edge.x, _x),
+		step(_edge.y, _x),
+		step(_edge.z, _x),
+		step(_edge.w, _x)
+	};
+}
+
+/**
+ * @brief Generates a step function by comparing two values.
+ * @param _edge The edge of the step function.
+ * @param _x The input value or vector.
+ */
+inline vec4 step(const simdfloat& _edge, const vec4& _x)
+{
+	return {
+		step(_edge, _x.x),
+		step(_edge, _x.y),
+		step(_edge, _x.z),
+		step(_edge, _x.w)
+	};
+}
+
+/**
+ * @brief Generates a step function by comparing two values.
+ * @param _edge The edge of the step function.
+ * @param _x The input value or vector.
+ */
+inline vec4 step(const vec4& _edge, const vec4& _x)
+{
+	return {
+		step(_edge.x, _x.x),
+		step(_edge.y, _x.y),
+		step(_edge.z, _x.z),
+		step(_edge.w, _x.w)
+	};
+}
+
+// sqrt functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the square root of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat sqrt(const simdfloat& _x)
+{
+	return simd_sqrt_float(_x);
+}
+#endif
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the square root of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat sqrt(const float& _x)
+{
+	return simd_set1_float(sqrtf(_x));
+}
+#endif
+
+/**
+ * @brief Computes the square root of each component.
+ * @param _x The input value or vector.
+ */
+inline vec2 sqrt(const vec2& _x)
+{
+	return {
+		sqrt(_x.x),
+		sqrt(_x.y)
+	};
+}
+
+/**
+ * @brief Computes the square root of each component.
+ * @param _x The input value or vector.
+ */
+inline vec3 sqrt(const vec3& _x)
+{
+	return {
+		sqrt(_x.x),
+		sqrt(_x.y),
+		sqrt(_x.z)
+	};
+}
+
+/**
+ * @brief Computes the square root of each component.
+ * @param _x The input value or vector.
+ */
+inline vec4 sqrt(const vec4& _x)
+{
+	return {
+		sqrt(_x.x),
+		sqrt(_x.y),
+		sqrt(_x.z),
+		sqrt(_x.w)
+	};
+}
+
+// stanh functions
+/**
+ * @brief Computes an approximation of the hyperbolic tangent.
+ * @param _x The input value or vector.
+ */
+inline simdfloat stanh(const simdfloat& _x)
+{
+	// Approximate tanh using _a polynomial (5th degree)
+	// tanh(_x) = _x * (27 + _x^2) / (27 + 9x^2)
+	simdfloat x2 = simd_mul_float(_x, _x);
+	simdfloat numerator = simd_mul_float(_x, simd_add_float(simd_set1_float(27.0f), x2));
+	simdfloat denominator = simd_add_float(simd_set1_float(27.0f), simd_mul_float(simd_set1_float(9.0f), x2));
+	return simd_div_float(numerator, denominator);
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes an approximation of the hyperbolic tangent.
+ * @param _x The input value or vector.
+ */
+inline simdfloat stanh(const float& _x)
+{
+	return stanh(simd_set1_float(_x));
+}
+#endif
+
+/**
+ * @brief Computes an approximation of the hyperbolic tangent.
+ * @param _vec The input vector.
+ */
+inline vec2 stanh(const vec2& _vec)
+{
+	return {
+		stanh(_vec.x),
+		stanh(_vec.y)
+	};
+}
+
+/**
+ * @brief Computes an approximation of the hyperbolic tangent.
+ * @param _vec The input vector.
+ */
+inline vec3 stanh(const vec3& _vec)
+{
+	return {
+		stanh(_vec.x),
+		stanh(_vec.y),
+		stanh(_vec.z)
+	};
+}
+
+/**
+ * @brief Computes an approximation of the hyperbolic tangent.
+ * @param _vec The input vector.
+ */
+inline vec4 stanh(const vec4& _vec)
+{
+	return {
+		stanh(_vec.x),
+		stanh(_vec.y),
+		stanh(_vec.z),
+		stanh(_vec.w)
+	};
+}
+
+// tan functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat tan(const simdfloat& _x)
+{
+#ifndef __GNUC__
+	return simd_tan_float(_x);
+#else
+	alignas(64) float tempTab[simdwidth];
+	simd_store_float(tempTab, _x);
+	for (int i = 0; i < simdwidth; i++)
+	{
+		tempTab[i] = tanf(tempTab[i]);
+	}
+	return simd_load_float(tempTab);
+#endif
+}
+#endif
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat tan(const float& _x)
+{
+	return simd_set1_float(tanf(_x));
+}
+#endif
+
+/**
+ * @brief Computes the tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline vec2 tan(const vec2& _x)
+{
+	return {
+		tan(_x.x),
+		tan(_x.y)
+	};
+}
+
+/**
+ * @brief Computes the tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline vec3 tan(const vec3& _x)
+{
+	return {
+		tan(_x.x),
+		tan(_x.y),
+		tan(_x.z)
+	};
+}
+
+/**
+ * @brief Computes the tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline vec4 tan(const vec4& _x)
+{
+	return {
+		tan(_x.x),
+		tan(_x.y),
+		tan(_x.z),
+		tan(_x.w)
+	};
+}
+
+// tanh functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the hyperbolic tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat tanh(const simdfloat& _x)
+{
+#ifndef __GNUC__
+	return simd_tanh_float(_x);
+#else
+	alignas(64) float tempTab[simdwidth];
+	simd_store_float(tempTab, _x);
+	for (int i = 0; i < simdwidth; i++)
+	{
+		tempTab[i] = tanhf(tempTab[i]);
+	}
+	return simd_load_float(tempTab);
+#endif
+}
+
+/**
+ * @brief Computes the hyperbolic tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat tanh(const float& _x)
+{
+	return simd_set1_float(tanhf(_x));
+}
+#endif
+
+/**
+ * @brief Computes the hyperbolic tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline vec2 tanh(const vec2& _x)
+{
+	return {
+		tanh(_x.x),
+		tanh(_x.y)
+	};
+}
+
+/**
+ * @brief Computes the hyperbolic tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline vec3 tanh(const vec3& _x)
+{
+	return {
+		tanh(_x.x),
+		tanh(_x.y),
+		tanh(_x.z)
+	};
+}
+
+/**
+ * @brief Computes the hyperbolic tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline vec4 tanh(const vec4& _x)
+{
+	return {
+		tanh(_x.x),
+		tanh(_x.y),
+		tanh(_x.z),
+		tanh(_x.w)
+	};
+}
+
+// trunc functions
+#ifndef USE_SCALAR
+/**
+ * @brief Truncates the fractional part of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat trunc(const simdfloat& _x)
+{
+#ifndef USE_AVX512
+	return simd_round_float(_x, _MM_FROUND_TO_ZERO | _MM_FROUND_NO_EXC);
+#else
+	return _mm512_roundscale_ps(_x, _MM_FROUND_TO_ZERO | _MM_FROUND_NO_EXC);
+#endif
+}
+
+/**
+ * @brief Truncates the fractional part of each component.
+ * @param _x The input value or vector.
+ */
+inline simdfloat trunc(const float& _x)
+{
+	return simd_set1_float(_x - floorf(_x));
+}
+#endif
+
+/**
+ * @brief Truncates the fractional part of each component.
+ * @param _x The input value or vector.
+ */
+inline vec2 trunc(const vec2& _x)
+{
+	return {
+		trunc(_x.x),
+		trunc(_x.y)
+	};
+}
+
+/**
+ * @brief Truncates the fractional part of each component.
+ * @param _x The input value or vector.
+ */
+inline vec3 trunc(const vec3& _x)
+{
+	return {
+		trunc(_x.x),
+		trunc(_x.y),
+		trunc(_x.z)
+	};
+}
+
+/**
+ * @brief Truncates the fractional part of each component.
+ * @param _x The input value or vector.
+ */
+inline vec4 trunc(const vec4& _x)
+{
+	return {
+		trunc(_x.x),
+		trunc(_x.y),
+		trunc(_x.z),
+		trunc(_x.w)
+	};
+}
+
+
+#pragma region matrix operators and functions
+
+/**
+ * @brief Performs matrix or matrix-vector multiplication.
+ * @param _mat The input matrix.
+ * @param _vec The input vector.
+ */
+inline vec2 mul(const mat2& _mat, const vec2& _vec)
+{
+	return {
+		dot({_mat.columns[0].x, _mat.columns[1].x}, _vec),
+		dot({_mat.columns[0].y, _mat.columns[1].y}, _vec)
+	};
+}
+
+/**
+ * @brief Performs matrix or matrix-vector multiplication.
+ * @param _vec The input vector.
+ * @param _mat The input matrix.
+ */
+inline vec2 mul(const vec2& _vec, const mat2& _mat)
+{
+	return {
+		dot(_vec, _mat.columns[0]),
+		dot(_vec, _mat.columns[1])
+	};
+}
+
+/**
+ * @brief Performs matrix or matrix-vector multiplication.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline mat2 mul(const mat2& _val1, const mat2& _val2)
+{
+	return {
+		dot(vec2(_val1.columns[0].x, _val1.columns[1].x), _val2.columns[0]),
+		dot(vec2(_val1.columns[0].y, _val1.columns[1].y), _val2.columns[0]),
+		dot(vec2(_val1.columns[0].x, _val1.columns[1].x), _val2.columns[1]),
+		dot(vec2(_val1.columns[0].y, _val1.columns[1].y), _val2.columns[1])
+	};
+}
+
+
+/**
+ * @brief Performs matrix or matrix-vector multiplication.
+ * @param _mat The input matrix.
+ * @param _vec The input vector.
+ */
+inline vec3 mul(const mat3& _mat, const vec3& _vec)
+{
+	return {
+		dot({_mat.columns[0].x, _mat.columns[1].x, _mat.columns[2].x}, _vec),
+		dot({_mat.columns[0].y, _mat.columns[1].y, _mat.columns[2].y}, _vec),
+		dot({_mat.columns[0].z, _mat.columns[1].z, _mat.columns[2].z}, _vec)
+	};
+}
+
+/**
+ * @brief Performs matrix or matrix-vector multiplication.
+ * @param _vec The input vector.
+ * @param _mat The input matrix.
+ */
+inline vec3 mul(const vec3& _vec, const mat3& _mat)
+{
+	return {
+		dot(_vec, _mat.columns[0]),
+		dot(_vec, _mat.columns[1]),
+		dot(_vec, _mat.columns[2])
+	};
+}
+
+/**
+ * @brief Performs matrix or matrix-vector multiplication.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline mat3 mul(const mat3& _val1, const mat3& _val2)
+{
+	return {
+		dot(vec3(_val1.columns[0].x, _val1.columns[1].x, _val1.columns[2].x), _val2.columns[0]),
+		dot(vec3(_val1.columns[0].y, _val1.columns[1].y, _val1.columns[2].y), _val2.columns[0]),
+		dot(vec3(_val1.columns[0].z, _val1.columns[1].z, _val1.columns[2].z), _val2.columns[0]),
+		dot(vec3(_val1.columns[0].x, _val1.columns[1].x, _val1.columns[2].x), _val2.columns[1]),
+		dot(vec3(_val1.columns[0].y, _val1.columns[1].y, _val1.columns[2].y), _val2.columns[1]),
+		dot(vec3(_val1.columns[0].z, _val1.columns[1].z, _val1.columns[2].z), _val2.columns[1]),
+		dot(vec3(_val1.columns[0].x, _val1.columns[1].x, _val1.columns[2].x), _val2.columns[2]),
+		dot(vec3(_val1.columns[0].y, _val1.columns[1].y, _val1.columns[2].y), _val2.columns[2]),
+		dot(vec3(_val1.columns[0].z, _val1.columns[1].z, _val1.columns[2].z), _val2.columns[2])
+	};
+}
+
+// Mat4
+/**
+ * @brief Performs matrix or matrix-vector multiplication.
+ * @param _mat The input matrix.
+ * @param _vec The input vector.
+ */
+inline vec4 mul(const mat4& _mat, const vec4& _vec)
+{
+	return {
+		dot({_mat.columns[0].x, _mat.columns[1].x, _mat.columns[2].x, _mat.columns[3].x}, _vec),
+		dot({_mat.columns[0].y, _mat.columns[1].y, _mat.columns[2].y, _mat.columns[3].y}, _vec),
+		dot({_mat.columns[0].z, _mat.columns[1].z, _mat.columns[2].z, _mat.columns[3].z}, _vec),
+		dot({_mat.columns[0].w, _mat.columns[1].w, _mat.columns[2].w, _mat.columns[3].w}, _vec)
+	};
+}
+
+/**
+ * @brief Performs matrix or matrix-vector multiplication.
+ * @param _vec The input vector.
+ * @param _mat The input matrix.
+ */
+inline vec4 mul(const vec4& _vec, const mat4& _mat)
+{
+	return {
+		dot(_vec, _mat.columns[0]),
+		dot(_vec, _mat.columns[1]),
+		dot(_vec, _mat.columns[2]),
+		dot(_vec, _mat.columns[3])
+	};
+}
+
+/**
+ * @brief Performs matrix or matrix-vector multiplication.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline mat4 mul(const mat4& _val1, const mat4& _val2)
+{
+	return {
+		dot(vec4(_val1.columns[0].x, _val1.columns[1].x, _val1.columns[2].x, _val1.columns[3].x), _val2.columns[0]),
+		dot(vec4(_val1.columns[0].y, _val1.columns[1].y, _val1.columns[2].y, _val1.columns[3].y), _val2.columns[0]),
+		dot(vec4(_val1.columns[0].z, _val1.columns[1].z, _val1.columns[2].z, _val1.columns[3].z), _val2.columns[0]),
+		dot(vec4(_val1.columns[0].w, _val1.columns[1].w, _val1.columns[2].w, _val1.columns[3].w), _val2.columns[0]),
+		dot(vec4(_val1.columns[0].x, _val1.columns[1].x, _val1.columns[2].x, _val1.columns[3].x), _val2.columns[1]),
+		dot(vec4(_val1.columns[0].y, _val1.columns[1].y, _val1.columns[2].y, _val1.columns[3].y), _val2.columns[1]),
+		dot(vec4(_val1.columns[0].z, _val1.columns[1].z, _val1.columns[2].z, _val1.columns[3].z), _val2.columns[1]),
+		dot(vec4(_val1.columns[0].w, _val1.columns[1].w, _val1.columns[2].w, _val1.columns[3].w), _val2.columns[1]),
+		dot(vec4(_val1.columns[0].x, _val1.columns[1].x, _val1.columns[2].x, _val1.columns[3].x), _val2.columns[2]),
+		dot(vec4(_val1.columns[0].y, _val1.columns[1].y, _val1.columns[2].y, _val1.columns[3].y), _val2.columns[2]),
+		dot(vec4(_val1.columns[0].z, _val1.columns[1].z, _val1.columns[2].z, _val1.columns[3].z), _val2.columns[2]),
+		dot(vec4(_val1.columns[0].w, _val1.columns[1].w, _val1.columns[2].w, _val1.columns[3].w), _val2.columns[2]),
+		dot(vec4(_val1.columns[0].x, _val1.columns[1].x, _val1.columns[2].x, _val1.columns[3].x), _val2.columns[3]),
+		dot(vec4(_val1.columns[0].y, _val1.columns[1].y, _val1.columns[2].y, _val1.columns[3].y), _val2.columns[3]),
+		dot(vec4(_val1.columns[0].z, _val1.columns[1].z, _val1.columns[2].z, _val1.columns[3].z), _val2.columns[3]),
+		dot(vec4(_val1.columns[0].w, _val1.columns[1].w, _val1.columns[2].w, _val1.columns[3].w), _val2.columns[3])
+	};
+}
+
+
+#pragma endregion
+
+#pragma region matrix operators
+// Matrix operators
+/**
+ * @brief Overloaded addition operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline mat2 operator+(const mat2& _val1, const mat2& _val2)
+{
+	return {
+		_val1.columns[0] + _val2.columns[0],
+		_val1.columns[1] + _val2.columns[1]
+	};
+}
+
+/**
+ * @brief Overloaded subtraction operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline mat2 operator-(const mat2& _val1, const mat2& _val2)
+{
+	return {
+		_val1.columns[0] - _val2.columns[0],
+		_val1.columns[1] - _val2.columns[1]
+	};
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline mat2 operator*(const mat2& _val1, const mat2& _val2)
+{
+	return mul(_val1, _val2);
+}
+
+/**
+ * @brief Overloaded addition-assignment operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline mat2 operator+=(mat2& _val1, const mat2& _val2)
+{
+	_val1 = _val1 + _val2;
+	return _val1;
+}
+
+/**
+ * @brief Overloaded subtraction-assignment operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline mat2 operator-=(mat2& _val1, const mat2& _val2)
+{
+	_val1 = _val1 - _val2;
+	return _val1;
+}
+
+/**
+ * @brief Overloaded multiplication-assignment operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline mat2 operator*=(mat2& _val1, const mat2& _val2)
+{
+	_val1 = _val1 * _val2;
+	return _val1;
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _mat The input matrix.
+ * @param _scalar The scalar value.
+ */
+inline mat2 operator*(const mat2& _mat, const simdfloat& _scalar)
+{
+	return {
+		_mat.columns[0] * _scalar,
+		_mat.columns[1] * _scalar
+	};
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _scalar The scalar value.
+ * @param _mat The input matrix.
+ */
+inline mat2 operator*(const simdfloat& _scalar, const mat2& _mat)
+{
+	return {
+		_mat.columns[0] * _scalar,
+		_mat.columns[1] * _scalar
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _mat The input matrix.
+ * @param _scalar The scalar value.
+ */
+inline mat2 operator*(const mat2& _mat, const float& _scalar)
+{
+	return {
+		_mat.columns[0] * _scalar,
+		_mat.columns[1] * _scalar
+	};
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _scalar The scalar value.
+ * @param _mat The input matrix.
+ */
+inline mat2 operator*(const float& _scalar, const mat2& _mat)
+{
+	return {
+		_mat.columns[0] * _scalar,
+		_mat.columns[1] * _scalar
+	};
+}
+#endif
+
+// Matrix vector multiplication
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _vec The input vector.
+ * @param _mat The input matrix.
+ */
+inline vec2 operator*(const vec2& _vec, const mat2& _mat)
+{
+	return mul(_vec, _mat);
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _mat The input matrix.
+ * @param _vec The input vector.
+ */
+inline vec2 operator*(const mat2& _mat, const vec2& _vec)
+{
+	return mul(_mat, _vec);
+}
+
+/**
+ * @brief Overloaded multiplication-assignment operator.
+ * @param _vec The input vector.
+ * @param _mat The input matrix.
+ */
+inline vec2 operator*=(vec2& _vec, const mat2& _mat)
+{
+	_vec = mul(_vec, _mat);
+	return _vec;
+}
+
+// Mat3 multiplication
+/**
+ * @brief Overloaded addition operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline mat3 operator+(const mat3& _val1, const mat3& _val2)
+{
+	return {
+		_val1.columns[0] + _val2.columns[0],
+		_val1.columns[1] + _val2.columns[1],
+		_val1.columns[2] + _val2.columns[2]
+	};
+}
+
+/**
+ * @brief Overloaded subtraction operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline mat3 operator-(const mat3& _val1, const mat3& _val2)
+{
+	return {
+		_val1.columns[0] - _val2.columns[0],
+		_val1.columns[1] - _val2.columns[1],
+		_val1.columns[2] - _val2.columns[2]
+	};
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline mat3 operator*(const mat3& _val1, const mat3& _val2)
+{
+	return mul(_val1, _val2);
+}
+
+/**
+ * @brief Overloaded addition-assignment operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline mat3 operator+=(mat3& _val1, const mat3& _val2)
+{
+	_val1 = _val1 + _val2;
+	return _val1;
+}
+
+/**
+ * @brief Overloaded subtraction-assignment operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline mat3 operator-=(mat3& _val1, const mat3& _val2)
+{
+	_val1 = _val1 - _val2;
+	return _val1;
+}
+
+/**
+ * @brief Overloaded multiplication-assignment operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline mat3 operator*=(mat3& _val1, const mat3& _val2)
+{
+	_val1 = _val1 * _val2;
+	return _val1;
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _mat The input matrix.
+ * @param _scalar The scalar value.
+ */
+inline mat3 operator*(const mat3& _mat, const simdfloat& _scalar)
+{
+	return {
+		_mat.columns[0] * _scalar,
+		_mat.columns[1] * _scalar,
+		_mat.columns[2] * _scalar
+	};
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _scalar The scalar value.
+ * @param _mat The input matrix.
+ */
+inline mat3 operator*(const simdfloat& _scalar, const mat3& _mat)
+{
+	return {
+		_mat.columns[0] * _scalar,
+		_mat.columns[1] * _scalar,
+		_mat.columns[2] * _scalar
+	};
+}
+#ifndef USE_SCALAR
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _mat The input matrix.
+ * @param _scalar The scalar value.
+ */
+inline mat3 operator*(const mat3& _mat, const float& _scalar)
+{
+	return {
+		_mat.columns[0] * _scalar,
+		_mat.columns[1] * _scalar,
+		_mat.columns[2] * _scalar
+	};
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _scalar The scalar value.
+ * @param _mat The input matrix.
+ */
+inline mat3 operator*(const float& _scalar, const mat3& _mat)
+{
+	return {
+		_mat.columns[0] * _scalar,
+		_mat.columns[1] * _scalar,
+		_mat.columns[2] * _scalar
+	};
+}
+#endif
+
+// Matrix vector multiplication
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _vec The input vector.
+ * @param _mat The input matrix.
+ */
+inline vec3 operator*(const vec3& _vec, const mat3& _mat)
+{
+	return mul(_vec, _mat);
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _mat The input matrix.
+ * @param _vec The input vector.
+ */
+inline vec3 operator*(const mat3& _mat, const vec3& _vec)
+{
+	return mul(_mat, _vec);
+}
+
+/**
+ * @brief Overloaded multiplication-assignment operator.
+ * @param _vec The input vector.
+ * @param _mat The input matrix.
+ */
+inline vec3 operator*=(vec3& _vec, const mat3& _mat)
+{
+	_vec = mul(_vec, _mat);
+	return _vec;
+}
+
+// Mat4 multiplication
+/**
+ * @brief Overloaded addition operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline mat4 operator+(const mat4& _val1, const mat4& _val2)
+{
+	return {
+		_val1.columns[0] + _val2.columns[0],
+		_val1.columns[1] + _val2.columns[1],
+		_val1.columns[2] + _val2.columns[2],
+		_val1.columns[3] + _val2.columns[3]
+	};
+}
+
+/**
+ * @brief Overloaded subtraction operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline mat4 operator-(const mat4& _val1, const mat4& _val2)
+{
+	return {
+		_val1.columns[0] - _val2.columns[0],
+		_val1.columns[1] - _val2.columns[1],
+		_val1.columns[2] - _val2.columns[2],
+		_val1.columns[3] - _val2.columns[3]
+	};
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline mat4 operator*(const mat4& _val1, const mat4& _val2)
+{
+	return mul(_val1, _val2);
+}
+
+/**
+ * @brief Overloaded addition-assignment operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline mat4 operator+=(mat4& _val1, const mat4& _val2)
+{
+	_val1 = _val1 + _val2;
+	return _val1;
+}
+
+/**
+ * @brief Overloaded subtraction-assignment operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline mat4 operator-=(mat4& _val1, const mat4& _val2)
+{
+	_val1 = _val1 - _val2;
+	return _val1;
+}
+
+/**
+ * @brief Overloaded multiplication-assignment operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline mat4 operator*=(mat4& _val1, const mat4& _val2)
+{
+	_val1 = _val1 * _val2;
+	return _val1;
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _mat The input matrix.
+ * @param _scalar The scalar value.
+ */
+inline mat4 operator*(const mat4& _mat, const simdfloat& _scalar)
+{
+	return {
+		_mat.columns[0] * _scalar,
+		_mat.columns[1] * _scalar,
+		_mat.columns[2] * _scalar,
+		_mat.columns[3] * _scalar
+	};
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _scalar The scalar value.
+ * @param _mat The input matrix.
+ */
+inline mat4 operator*(const simdfloat& _scalar, const mat4& _mat)
+{
+	return {
+		_mat.columns[0] * _scalar,
+		_mat.columns[1] * _scalar,
+		_mat.columns[2] * _scalar,
+		_mat.columns[3] * _scalar
+	};
+}
+
+// Matrix vector multiplication
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _vec The input vector.
+ * @param _mat The input matrix.
+ */
+inline vec4 operator*(const vec4& _vec, const mat4& _mat)
+{
+	return mul(_vec, _mat);
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _mat The input matrix.
+ * @param _vec The input vector.
+ */
+inline vec4 operator*(const mat4& _mat, const vec4& _vec)
+{
+	return mul(_mat, _vec);
+}
+
+/**
+ * @brief Overloaded multiplication-assignment operator.
+ * @param _vec The input vector.
+ * @param _mat The input matrix.
+ */
+inline vec4 operator*=(vec4& _vec, const mat4& _mat)
+{
+	_vec = mul(_vec, _mat);
+	return _vec;
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _mat The input matrix.
+ * @param _scalar The scalar value.
+ */
+inline mat4 operator*(const mat4& _mat, const float& _scalar)
+{
+	return {
+		_mat.columns[0] * _scalar,
+		_mat.columns[1] * _scalar,
+		_mat.columns[2] * _scalar,
+		_mat.columns[3] * _scalar
+	};
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _scalar The scalar value.
+ * @param _mat The input matrix.
+ */
+inline mat4 operator*(const float& _scalar, const mat4& _mat)
+{
+	return {
+		_mat.columns[0] * _scalar,
+		_mat.columns[1] * _scalar,
+		_mat.columns[2] * _scalar,
+		_mat.columns[3] * _scalar
+	};
+}
+#endif
+
+// determinant for matrices
+/**
+ * @brief Computes the determinant of a matrix.
+ * @param _mat The input matrix.
+ */
+inline simdfloat determinant(const mat2& _mat)
+{
+	return _mat.columns[0].x * _mat.columns[1].y - _mat.columns[0].y * _mat.columns[1].x;
+}
+
+/**
+ * @brief Computes the determinant of a matrix.
+ * @param _mat The input matrix.
+ */
+inline simdfloat determinant(const mat3& _mat)
+{
+	return _mat.columns[0].x * (_mat.columns[1].y * _mat.columns[2].z - _mat.columns[1].z * _mat.columns[2].y) -
+		_mat.columns[0].y * (_mat.columns[1].x * _mat.columns[2].z - _mat.columns[1].z * _mat.columns[2].x) +
+		_mat.columns[0].z * (_mat.columns[1].x * _mat.columns[2].y - _mat.columns[1].y * _mat.columns[2].x);
+}
+
+/**
+ * @brief Computes the determinant of a matrix.
+ * @param _mat The input matrix.
+ */
+inline simdfloat determinant(const mat4& _mat)
+{
+	return _mat.columns[0].x * (_mat.columns[1].y * (_mat.columns[2].z * _mat.columns[3].w - _mat.columns[2].w * _mat.columns[3].z) -
+		_mat.columns[1].z * (_mat.columns[2].y * _mat.columns[3].w - _mat.columns[2].w * _mat.columns[3].y) +
+		_mat.columns[1].w * (_mat.columns[2].y * _mat.columns[3].z - _mat.columns[2].z * _mat.columns[3].y)) -
+		_mat.columns[0].y * (_mat.columns[1].x * (_mat.columns[2].z * _mat.columns[3].w - _mat.columns[2].w * _mat.columns[3].z) -
+			_mat.columns[1].z * (_mat.columns[2].x * _mat.columns[3].w - _mat.columns[2].w * _mat.columns[3].x) +
+			_mat.columns[1].w * (_mat.columns[2].x * _mat.columns[3].z - _mat.columns[2].z * _mat.columns[3].x)) +
+		_mat.columns[0].z * (_mat.columns[1].x * (_mat.columns[2].y * _mat.columns[3].w - _mat.columns[2].w * _mat.columns[3].y) -
+			_mat.columns[1].y * (_mat.columns[2].x * _mat.columns[3].w - _mat.columns[2].w * _mat.columns[3].x) +
+			_mat.columns[1].w * (_mat.columns[2].x * _mat.columns[3].y - _mat.columns[2].y * _mat.columns[3].x)) -
+		_mat.columns[0].w * (_mat.columns[1].x * (_mat.columns[2].y * _mat.columns[3].z - _mat.columns[2].z * _mat.columns[3].y) -
+			_mat.columns[1].y * (_mat.columns[2].x * _mat.columns[3].z - _mat.columns[2].z * _mat.columns[3].x) +
+			_mat.columns[1].z * (_mat.columns[2].x * _mat.columns[3].y - _mat.columns[2].y * _mat.columns[3].x));
+}
+
+// inverse for matrices
+/**
+ * @brief Computes the inverse of a matrix.
+ * @param _mat The input matrix.
+ */
+inline mat2 inverse(const mat2& _mat)
+{
+	return {
+		vec2(_mat.columns[1].y, -_mat.columns[0].y) / determinant(_mat),
+		vec2(-_mat.columns[1].x, _mat.columns[0].x) / determinant(_mat)
+	};
+}
+
+/**
+ * @brief Computes the inverse of a matrix.
+ * @param _mat The input matrix.
+ */
+inline mat3 inverse(const mat3& _mat)
+{
+	return {
+		vec3(_mat.columns[1].y * _mat.columns[2].z - _mat.columns[1].z * _mat.columns[2].y, _mat.columns[0].z * _mat.columns[2].y - _mat.columns[0].y * _mat.columns[2].z, _mat.columns[0].y * _mat.columns[1].z - _mat.columns[0].z * _mat.columns[1].y) / determinant(_mat),
+		vec3(_mat.columns[1].z * _mat.columns[2].x - _mat.columns[1].x * _mat.columns[2].z, _mat.columns[0].x * _mat.columns[2].z - _mat.columns[0].z * _mat.columns[2].x, _mat.columns[0].z * _mat.columns[1].x - _mat.columns[0].x * _mat.columns[1].z) / determinant(_mat),
+		vec3(_mat.columns[1].x * _mat.columns[2].y - _mat.columns[1].y * _mat.columns[2].x, _mat.columns[0].y * _mat.columns[2].x - _mat.columns[0].x * _mat.columns[2].y, _mat.columns[0].x * _mat.columns[1].y - _mat.columns[0].y * _mat.columns[1].x) / determinant(_mat)
+	};
+}
+
+/**
+ * @brief Computes the inverse of a matrix.
+ * @param _mat The input matrix.
+ */
+inline mat4 inverse(const mat4& _mat)
+{
+	return {
+		vec4(_mat.columns[1].y * _mat.columns[2].z * _mat.columns[3].w - _mat.columns[1].y * _mat.columns[2].w * _mat.columns[3].z - _mat.columns[1].z * _mat.columns[2].y * _mat.columns[3].w + _mat.columns[1].z * _mat.columns[2].w * _mat.columns[3].y + _mat.columns[1].w * _mat.columns[2].y * _mat.columns[3].z - _mat.columns[1].w * _mat.columns[2].z * _mat.columns[3].y, -_mat.columns[0].y * _mat.columns[2].z * _mat.columns[3].w + _mat.columns[0].y * _mat.columns[2].w * _mat.columns[3].z + _mat.columns[0].z * _mat.columns[2].y * _mat.columns[3].w - _mat.columns[0].z * _mat.columns[2].w * _mat.columns[3].y - _mat.columns[0].w * _mat.columns[2].y * _mat.columns[3].z + _mat.columns[0].w * _mat.columns[2].z * _mat.columns[3].y, _mat.columns[0].y * _mat.columns[1].z * _mat.columns[3].w - _mat.columns[0].y * _mat.columns[1].w * _mat.columns[3].z - _mat.columns[0].z * _mat.columns[1].y * _mat.columns[3].w + _mat.columns[0].z * _mat.columns[1].w * _mat.columns[3].y + _mat.columns[0].w * _mat.columns[1].y * _mat.columns[3].z - _mat.columns[0].w * _mat.columns[1].z * _mat.columns[3].y, -_mat.columns[0].y * _mat.columns[1].z * _mat.columns[2].w + _mat.columns[0].y * _mat.columns[1].w * _mat.columns[2].z + _mat.columns[0].z * _mat.columns[1].y * _mat.columns[2].w - _mat.columns[0].z * _mat.columns[1].w * _mat.columns[2].y - _mat.columns[0].w * _mat.columns[1].y * _mat.columns[2].z + _mat.columns[0].w * _mat.columns[1].z * _mat.columns[2].y) / determinant(_mat),
+		vec4(-_mat.columns[1].x * _mat.columns[2].z * _mat.columns[3].w + _mat.columns[1].x * _mat.columns[2].w * _mat.columns[3].z + _mat.columns[1].z * _mat.columns[2].x * _mat.columns[3].w - _mat.columns[1].z * _mat.columns[2].w * _mat.columns[3].x - _mat.columns[1].w * _mat.columns[2].x * _mat.columns[3].z + _mat.columns[1].w * _mat.columns[2].z * _mat.columns[3].x, _mat.columns[0].x * _mat.columns[2].z * _mat.columns[3].w - _mat.columns[0].x * _mat.columns[2].w * _mat.columns[3].z - _mat.columns[0].z * _mat.columns[2].x * _mat.columns[3].w + _mat.columns[0].z * _mat.columns[2].w * _mat.columns[3].x + _mat.columns[0].w * _mat.columns[2].x * _mat.columns[3].z - _mat.columns[0].w * _mat.columns[2].z * _mat.columns[3].x, -_mat.columns[0].x * _mat.columns[1].z * _mat.columns[3].w + _mat.columns[0].x * _mat.columns[1].w * _mat.columns[3].z + _mat.columns[0].z * _mat.columns[1].x * _mat.columns[3].w - _mat.columns[0].z * _mat.columns[1].w * _mat.columns[3].x - _mat.columns[0].w * _mat.columns[1].x * _mat.columns[3].z + _mat.columns[0].w * _mat.columns[1].z * _mat.columns[3].x, 	_mat.columns[0].x * _mat.columns[1].z * _mat.columns[2].w - _mat.columns[0].x * _mat.columns[1].w * _mat.columns[2].z - _mat.columns[0].z * _mat.columns[1].x * _mat.columns[2].w + _mat.columns[0].z * _mat.columns[1].w * _mat.columns[2].x + _mat.columns[0].w * _mat.columns[1].x * _mat.columns[2].z - _mat.columns[0].w * _mat.columns[1].z * _mat.columns[2].x) / determinant(_mat),
+		vec4(_mat.columns[1].x * _mat.columns[2].y * _mat.columns[3].w - _mat.columns[1].x * _mat.columns[2].w * _mat.columns[3].y - _mat.columns[1].y * _mat.columns[2].x * _mat.columns[3].w + _mat.columns[1].y * _mat.columns[2].w * _mat.columns[3].x + _mat.columns[1].w * _mat.columns[2].x * _mat.columns[3].y - _mat.columns[1].w * _mat.columns[2].y * _mat.columns[3].x, -_mat.columns[0].x * _mat.columns[2].y * _mat.columns[3].w + _mat.columns[0].x * _mat.columns[2].w * _mat.columns[3].y + _mat.columns[0].y * _mat.columns[2].x * _mat.columns[3].w - _mat.columns[0].y * _mat.columns[2].w * _mat.columns[3].x - _mat.columns[0].w * _mat.columns[2].x * _mat.columns[3].y + _mat.columns[0].w * _mat.columns[2].y * _mat.columns[3].x, 	_mat.columns[0].x * _mat.columns[1].y * _mat.columns[3].w - _mat.columns[0].x * _mat.columns[1].w * _mat.columns[3].y - _mat.columns[0].y * _mat.columns[1].x * _mat.columns[3].w + _mat.columns[0].y * _mat.columns[1].w * _mat.columns[3].x + _mat.columns[0].w * _mat.columns[1].x * _mat.columns[3].y - _mat.columns[0].w * _mat.columns[1].y * _mat.columns[3].x, 	-_mat.columns[0].x * _mat.columns[1].y * _mat.columns[2].w + _mat.columns[0].x * _mat.columns[1].w * _mat.columns[2].y + _mat.columns[0].y * _mat.columns[1].x * _mat.columns[2].w - _mat.columns[0].y * _mat.columns[1].w * _mat.columns[2].x - _mat.columns[0].w * _mat.columns[1].x * _mat.columns[2].y + _mat.columns[0].w * _mat.columns[1].y * _mat.columns[2].x) / determinant(_mat),
+		vec4(-_mat.columns[1].x * _mat.columns[2].y * _mat.columns[3].z + _mat.columns[1].x * _mat.columns[2].z * _mat.columns[3].y + _mat.columns[1].y * _mat.columns[2].x * _mat.columns[3].z - _mat.columns[1].y * _mat.columns[2].z * _mat.columns[3].x - _mat.columns[1].z * _mat.columns[2].x * _mat.columns[3].y + _mat.columns[1].z * _mat.columns[2].y * _mat.columns[3].x, 	_mat.columns[0].x * _mat.columns[2].y * _mat.columns[3].z - _mat.columns[0].x * _mat.columns[2].z * _mat.columns[3].y - _mat.columns[0].y * _mat.columns[2].x * _mat.columns[3].z + _mat.columns[0].y * _mat.columns[2].z * _mat.columns[3].x + _mat.columns[0].z * _mat.columns[2].x * _mat.columns[3].y - _mat.columns[0].z * _mat.columns[2].y * _mat.columns[3].x, 	-_mat.columns[0].x * _mat.columns[1].y * _mat.columns[3].z + _mat.columns[0].x * _mat.columns[1].z * _mat.columns[3].y + _mat.columns[0].y * _mat.columns[1].x * _mat.columns[3].z - _mat.columns[0].y * _mat.columns[1].z * _mat.columns[3].x - _mat.columns[0].z * _mat.columns[1].x * _mat.columns[3].y + _mat.columns[0].z * _mat.columns[1].y * _mat.columns[3].x, 	_mat.columns[0].x * _mat.columns[1].y * _mat.columns[2].z - _mat.columns[0].x * _mat.columns[1].z * _mat.columns[2].y - _mat.columns[0].y * _mat.columns[1].x * _mat.columns[2].z + _mat.columns[0].y * _mat.columns[1].z * _mat.columns[2].x + _mat.columns[0].z * _mat.columns[1].x * _mat.columns[2].y - _mat.columns[0].z * _mat.columns[1].y * _mat.columns[2].x) / determinant(_mat)
+	};
+}
+
+// transpose for matrices
+/**
+ * @brief Computes the transpose of a matrix.
+ * @param _mat The input matrix.
+ */
+inline mat2 transpose(const mat2& _mat)
+{
+	return {
+		vec2(_mat.columns[0].x, _mat.columns[1].x),
+		vec2(_mat.columns[0].y, _mat.columns[1].y)
+	};
+}
+
+/**
+ * @brief Computes the transpose of a matrix.
+ * @param _mat The input matrix.
+ */
+inline mat3 transpose(const mat3& _mat)
+{
+	return {
+		vec3(_mat.columns[0].x, _mat.columns[1].x, _mat.columns[2].x),
+		vec3(_mat.columns[0].y, _mat.columns[1].y, _mat.columns[2].y),
+		vec3(_mat.columns[0].z, _mat.columns[1].z, _mat.columns[2].z)
+	};
+}
+
+/**
+ * @brief Computes the transpose of a matrix.
+ * @param _mat The input matrix.
+ */
+inline mat4 transpose(const mat4& _mat)
+{
+	return {
+		vec4(_mat.columns[0].x, _mat.columns[1].x, _mat.columns[2].x, _mat.columns[3].x),
+		vec4(_mat.columns[0].y, _mat.columns[1].y, _mat.columns[2].y, _mat.columns[3].y),
+		vec4(_mat.columns[0].z, _mat.columns[1].z, _mat.columns[2].z, _mat.columns[3].z),
+		vec4(_mat.columns[0].w, _mat.columns[1].w, _mat.columns[2].w, _mat.columns[3].w)
+	};
+}
+
+#pragma endregion
+#pragma endregion float functions
+
+#pragma region double functions
+// abs functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the absolute value of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble abs(const simddouble& _x)
+{
+	return simd_and_double(simd_castsi_double(simd_set1_int(0x7FFFFFFF)), _x);
+}
+#endif
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the absolute value of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble abs(const double& _x)
+{
+	return simd_set1_double(std::abs(_x));
+}
+#endif
+
+/**
+ * @brief Computes the absolute value of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec2 abs(const dvec2& _x)
+{
+	return { abs(_x.x), abs(_x.y) };
+}
+
+/**
+ * @brief Computes the absolute value of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec3 abs(const dvec3& _x)
+{
+	return { abs(_x.x), abs(_x.y), abs(_x.z) };
+}
+
+/**
+ * @brief Computes the absolute value of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec4 abs(const dvec4& _x)
+{
+	return { abs(_x.x), abs(_x.y), abs(_x.z), abs(_x.w) };
+}
+
+
+
+// acosh functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the inverse hyperbolic cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble acosh(const simddouble& _x)
+{
+#ifndef __GNUC__
+	return simd_acosh_double(_x);
+
+#else
+	alignas(64) double tempTab[halfsimdwidth];
+	simd_store_double(tempTab, _x);
+	for (int i = 0; i < halfsimdwidth; i++)
+	{
+		tempTab[i] = acoshf(tempTab[i]);
+	}
+	return simd_load_double(tempTab);
+#endif
+}
+
+/**
+ * @brief Computes the inverse hyperbolic cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble acosh(const double& _x)
+{
+	return simd_set1_double(std::acosh(_x));
+}
+#endif
+
+/**
+ * @brief Computes the inverse hyperbolic cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec2 acosh(const dvec2& _x)
+{
+	return { acosh(_x.x), acosh(_x.y) };
+}
+
+/**
+ * @brief Computes the inverse hyperbolic cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec3 acosh(const dvec3& _x)
+{
+	return { acosh(_x.x), acosh(_x.y), acosh(_x.z) };
+}
+
+/**
+ * @brief Computes the inverse hyperbolic cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec4 acosh(const dvec4& _x)
+{
+	return { acosh(_x.x), acosh(_x.y), acosh(_x.z), acosh(_x.w) };
+}
+
+
+
+// asinh functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the inverse hyperbolic sine of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble asinh(const simddouble& _x)
+{
+#ifndef __GNUC__
+	return simd_asinh_double(_x);
+#else
+	alignas(64) double tempTab[halfsimdwidth];
+	simd_store_double(tempTab, _x);
+	for (int i = 0; i < halfsimdwidth; i++)
+	{
+		tempTab[i] = std::asinh(tempTab[i]);
+	}
+	return simd_load_double(tempTab);
+#endif
+}
+
+/**
+ * @brief Computes the inverse hyperbolic sine of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble asinh(const double& _x)
+{
+	return simd_set1_double(std::asinh(_x));
+}
+#endif
+
+/**
+ * @brief Computes the inverse hyperbolic sine of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec2 asinh(const dvec2& _x)
+{
+	return { asinh(_x.x), asinh(_x.y) };
+}
+
+/**
+ * @brief Computes the inverse hyperbolic sine of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec3 asinh(const dvec3& _x)
+{
+	return { asinh(_x.x), asinh(_x.y), asinh(_x.z) };
+}
+
+/**
+ * @brief Computes the inverse hyperbolic sine of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec4 asinh(const dvec4& _x)
+{
+	return { asinh(_x.x), asinh(_x.y), asinh(_x.z), asinh(_x.w) };
+}
+
+// atan functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the inverse tangent.
+ * @param _x The input value or vector.
+ */
+inline simddouble atan(const simddouble& _x)
+{
+#ifndef __GNUC__
+	return simd_atan_double(_x);
+#else
+	alignas(64) double tempTab[halfsimdwidth];
+	simd_store_double(tempTab, _x);
+	for (int i = 0; i < halfsimdwidth; i++)
+	{
+		tempTab[i] = std::atan(tempTab[i]);
+	}
+	return simd_load_double(tempTab);
+#endif
+}
+
+/**
+ * @brief Computes the inverse tangent.
+ * @param _x The input value or vector.
+ */
+inline simddouble atan(const double& _x)
+{
+	return simd_set1_double(std::atan(_x));
+}
+#endif
+
+/**
+ * @brief Computes the inverse tangent.
+ * @param _x The input value or vector.
+ */
+inline dvec2 atan(const dvec2& _x)
+{
+	return { atan(_x.x), atan(_x.y) };
+}
+
+/**
+ * @brief Computes the inverse tangent.
+ * @param _x The input value or vector.
+ */
+inline dvec3 atan(const dvec3& _x)
+{
+	return { atan(_x.x), atan(_x.y), atan(_x.z) };
+}
+
+/**
+ * @brief Computes the inverse tangent.
+ * @param _x The input value or vector.
+ */
+inline dvec4 atan(const dvec4& _x)
+{
+	return { atan(_x.x), atan(_x.y), atan(_x.z), atan(_x.w) };
+}
+
+// atan2 functions
+/**
+ * @brief Computes the 2-argument inverse tangent.
+ * @param _y The y-component for 2-argument atan.
+ * @param _x The input value or vector.
+ */
+inline simddouble atan(const simddouble& _y, const simddouble& _x)
+{
+#ifndef __GNUC__
+	return simd_atan2_double(_y, _x);
+#else
+	alignas(64) double tempTaba[halfsimdwidth];
+	alignas(64) double tempTabb[halfsimdwidth];
+	simd_store_double(tempTaba, _y);
+	simd_store_double(tempTabb, _x);
+	for (int i = 0; i < halfsimdwidth; i++)
+	{
+		tempTaba[i] = std::atan2(tempTaba[i], tempTabb[i]);
+	}
+	return simd_load_double(tempTaba);
+#endif
+}
+
+/**
+ * @brief Computes the 2-argument inverse tangent.
+ * @param _y The y-component for 2-argument atan.
+ * @param _x The input value or vector.
+ */
+inline dvec2 atan(const dvec2& _y, const dvec2& _x)
+{
+	return { atan(_y.x, _x.x), atan(_y.y, _x.y) };
+}
+
+/**
+ * @brief Computes the 2-argument inverse tangent.
+ * @param _y The y-component for 2-argument atan.
+ * @param _x The input value or vector.
+ */
+inline dvec3 atan(const dvec3& _y, const dvec3& _x)
+{
+	return { atan(_y.x, _x.x), atan(_y.y, _x.y), atan(_y.z, _x.z) };
+}
+
+/**
+ * @brief Computes the 2-argument inverse tangent.
+ * @param _y The y-component for 2-argument atan.
+ * @param _x The input value or vector.
+ */
+inline dvec4 atan(const dvec4& _y, const dvec4& _x)
+{
+	return { atan(_y.x, _x.x), atan(_y.y, _x.y), atan(_y.z, _x.z), atan(_y.w, _x.w)};
+}
+
+
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the 2-argument inverse tangent.
+ * @param _y The y-component for 2-argument atan.
+ * @param _x The input value or vector.
+ */
+inline simddouble atan(const double& _y, const double& _x)
+{
+	return simd_set1_double(std::atan2(_y, _x));
+}
+#endif
+
+// atanh functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the inverse hyperbolic tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble atanh(const simddouble& _x)
+{
+#ifndef __GNUC__
+	return simd_atanh_double(_x);
+#else
+	alignas(64) double tempTab[halfsimdwidth];
+	simd_store_double(tempTab, _x);
+	for (int i = 0; i < halfsimdwidth; i++)
+	{
+		tempTab[i] = atanh(tempTab[i]);
+	}
+	return simd_load_double(tempTab);
+#endif
+}
+
+/**
+ * @brief Computes the inverse hyperbolic tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble atanh(const double& _x)
+{
+	return simd_set1_double(std::atanh(_x));
+}
+#endif
+
+/**
+ * @brief Computes the inverse hyperbolic tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec2 atanh(const dvec2& _x)
+{
+	return { atanh(_x.x), atanh(_x.y) };
+}
+
+/**
+ * @brief Computes the inverse hyperbolic tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec3 atanh(const dvec3& _x)
+{
+	return { atanh(_x.x), atanh(_x.y), atanh(_x.z) };
+}
+
+/**
+ * @brief Computes the inverse hyperbolic tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec4 atanh(const dvec4& _x)
+{
+	return { atanh(_x.x), atanh(_x.y), atanh(_x.z), atanh(_x.w) };
+}
+
+// blendv functions
+/**
+ * @brief Blends two values based on a mask.
+ * @param _false_val The value to use when the mask is false.
+ * @param _true_val The value to use when the mask is true.
+ * @param _mask The selection mask.
+ */
+inline simddouble blendv(const simddouble& _false_val, const simddouble& _true_val, const simddmask& _mask)
+{
+#ifdef USE_AVX512
+	return _mm512_mask_blend_pd(_mask, _false_val, _true_val);
+#else
+	return simd_blendv_double(_false_val, _true_val, _mask);
+#endif
+}
+
+/**
+ * @brief Blends two values based on a mask.
+ * @param _false_val The value to use when the mask is false.
+ * @param _true_val The value to use when the mask is true.
+ * @param _mask The selection mask.
+ */
+inline dvec2 blendv(const dvec2& _false_val, const dvec2& _true_val, const simddmask& _mask)
+{
+	return {
+		blendv(_false_val.x, _true_val.x, _mask),
+		blendv(_false_val.y, _true_val.y, _mask)
+	};
+}
+
+/**
+ * @brief Blends two values based on a mask.
+ * @param _false_val The value to use when the mask is false.
+ * @param _true_val The value to use when the mask is true.
+ * @param _mask The selection mask.
+ */
+inline dvec3 blendv(const dvec3& _false_val, const dvec3& _true_val, const simddmask& _mask)
+{
+	return {
+		blendv(_false_val.x, _true_val.x, _mask),
+		blendv(_false_val.y, _true_val.y, _mask),
+		blendv(_false_val.z, _true_val.z, _mask)
+	};
+}
+
+/**
+ * @brief Blends two values based on a mask.
+ * @param _false_val The value to use when the mask is false.
+ * @param _true_val The value to use when the mask is true.
+ * @param _mask The selection mask.
+ */
+inline dvec4 blendv(const dvec4& _false_val, const dvec4& _true_val, const simddmask& _mask)
+{
+	return {
+		blendv(_false_val.x, _true_val.x, _mask),
+		blendv(_false_val.y, _true_val.y, _mask),
+		blendv(_false_val.z, _true_val.z, _mask),
+		blendv(_false_val.w, _true_val.w, _mask)
+	};
+}
+
+// ceil functions
+#ifndef USE_SCALAR
+/**
+ * @brief Rounds each component up to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline simddouble ceil(const simddouble& _x)
+{
+	return simd_ceil_double(_x);
+}
+
+/**
+ * @brief Rounds each component up to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline simddouble ceil(const double& _x)
+{
+	return simd_set1_double(std::ceil(_x));
+}
+#endif
+
+/**
+ * @brief Rounds each component up to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline dvec2 ceil(const dvec2& _x)
+{
+	return { ceil(_x.x), ceil(_x.y) };
+}
+
+/**
+ * @brief Rounds each component up to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline dvec3 ceil(const dvec3& _x)
+{
+	return { ceil(_x.x), ceil(_x.y), ceil(_x.z) };
+}
+
+/**
+ * @brief Rounds each component up to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline dvec4 ceil(const dvec4& _x)
+{
+	return { ceil(_x.x), ceil(_x.y), ceil(_x.z), ceil(_x.w) };
+}
+
+// max functions
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simddouble max(const simddouble& _val1, const simddouble& _val2)
+{
+	return simd_max_double(_val1, _val2);
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simddouble max(const simddouble& _val1, const double& _val2)
+{
+	return max(_val1, simd_set1_double(_val2));
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simddouble max(const double& _val1, const simddouble& _val2)
+{
+	return max(simd_set1_double(_val1), _val2);
+}
+#endif
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec2 max(const dvec2& _val1, const simddouble& _val2)
+{
+	return {
+		max(_val1.x, _val2),
+		max(_val1.y, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec2 max(const simddouble& _val1, const dvec2& _val2)
+{
+	return {
+		max(_val1, _val2.x),
+		max(_val1, _val2.y)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec2 max(const dvec2& _val1, const double& _val2)
+{
+	return {
+		max(_val1.x, _val2),
+		max(_val1.y, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec2 max(const double& _val1, const dvec2& _val2)
+{
+	return {
+		max(_val1, _val2.x),
+		max(_val1, _val2.y)
+	};
+}
+#endif
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec2 max(const dvec2& _val1, const dvec2& _val2)
+{
+	return {
+		max(_val1.x, _val2.x),
+		max(_val1.y, _val2.y)
+	};
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec3 max(const dvec3& _val1, const simddouble& _val2)
+{
+	return {
+		max(_val1.x, _val2),
+		max(_val1.y, _val2),
+		max(_val1.z, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec3 max(const simddouble& _val1, const dvec3& _val2)
+{
+	return {
+		max(_val1, _val2.x),
+		max(_val1, _val2.y),
+		max(_val1, _val2.z)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec3 max(const dvec3& _val1, const double& _val2)
+{
+	return {
+		max(_val1.x, _val2),
+		max(_val1.y, _val2),
+		max(_val1.z, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec3 max(const double& _val1, const dvec3& _val2)
+{
+	return {
+		max(_val1, _val2.x),
+		max(_val1, _val2.y),
+		max(_val1, _val2.z)
+	};
+}
+#endif
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec3 max(const dvec3& _val1, const dvec3& _val2)
+{
+	return {
+		max(_val1.x, _val2.x),
+		max(_val1.y, _val2.y),
+		max(_val1.z, _val2.z)
+	};
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec4 max(const dvec4& _val1, const simddouble& _val2)
+{
+	return {
+		max(_val1.x, _val2),
+		max(_val1.y, _val2),
+		max(_val1.z, _val2),
+		max(_val1.w, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec4 max(const simddouble& _val1, const dvec4& _val2)
+{
+	return {
+		max(_val1, _val2.x),
+		max(_val1, _val2.y),
+		max(_val1, _val2.z),
+		max(_val1, _val2.w)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec4 max(const dvec4& _val1, const double& _val2)
+{
+	return {
+		max(_val1.x, _val2),
+		max(_val1.y, _val2),
+		max(_val1.z, _val2),
+		max(_val1.w, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec4 max(const double& _val1, const dvec4& _val2)
+{
+	return {
+		max(_val1, _val2.x),
+		max(_val1, _val2.y),
+		max(_val1, _val2.z),
+		max(_val1, _val2.w)
+	};
+}
+#endif
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec4 max(const dvec4& _val1, const dvec4& _val2)
+{
+	return {
+		max(_val1.x, _val2.x),
+		max(_val1.y, _val2.y),
+		max(_val1.z, _val2.z),
+		max(_val1.w, _val2.w)
+	};
+}
+
+// min functions
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simddouble min(const simddouble& _val1, const simddouble& _val2)
+{
+	return simd_min_double(_val1, _val2);
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simddouble min(const simddouble& _val1, const double& _val2)
+{
+	return min(_val1, simd_set1_double(_val2));
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simddouble min(const double& _val1, const simddouble& _val2)
+{
+	return min(simd_set1_double(_val1), _val2);
+}
+#endif
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec2 min(const dvec2& _val1, const simddouble& _val2)
+{
+	return {
+		min(_val1.x, _val2),
+		min(_val1.y, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec2 min(const simddouble& _val1, const dvec2& _val2)
+{
+	return {
+		min(_val1, _val2.x),
+		min(_val1, _val2.y)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec2 min(const dvec2& _val1, const double& _val2)
+{
+	return {
+		min(_val1.x, _val2),
+		min(_val1.y, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec2 min(const double& _val1, const dvec2& _val2)
+{
+	return {
+		min(_val1, _val2.x),
+		min(_val1, _val2.y)
+	};
+}
+#endif
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec2 min(const dvec2& _val1, const dvec2& _val2)
+{
+	return {
+		min(_val1.x, _val2.x),
+		min(_val1.y, _val2.y)
+	};
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec3 min(const dvec3& _val1, const simddouble& _val2)
+{
+	return {
+		min(_val1.x, _val2),
+		min(_val1.y, _val2),
+		min(_val1.z, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec3 min(const simddouble& _val1, const dvec3& _val2)
+{
+	return {
+		min(_val1, _val2.x),
+		min(_val1, _val2.y),
+		min(_val1, _val2.z)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec3 min(const dvec3& _val1, const double& _val2)
+{
+	return {
+		min(_val1.x, _val2),
+		min(_val1.y, _val2),
+		min(_val1.z, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec3 min(const double& _val1, const dvec3& _val2)
+{
+	return {
+		min(_val1, _val2.x),
+		min(_val1, _val2.y),
+		min(_val1, _val2.z)
+	};
+}
+#endif
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec3 min(const dvec3& _val1, const dvec3& _val2)
+{
+	return {
+		min(_val1.x, _val2.x),
+		min(_val1.y, _val2.y),
+		min(_val1.z, _val2.z)
+	};
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec4 min(const dvec4& _val1, const simddouble& _val2)
+{
+	return {
+		min(_val1.x, _val2),
+		min(_val1.y, _val2),
+		min(_val1.z, _val2),
+		min(_val1.w, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec4 min(const simddouble& _val1, const dvec4& _val2)
+{
+	return {
+		min(_val1, _val2.x),
+		min(_val1, _val2.y),
+		min(_val1, _val2.z),
+		min(_val1, _val2.w)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec4 min(const dvec4& _val1, const double& _val2)
+{
+	return {
+		min(_val1.x, _val2),
+		min(_val1.y, _val2),
+		min(_val1.z, _val2),
+		min(_val1.w, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec4 min(const double& _val1, const dvec4& _val2)
+{
+	return {
+		min(_val1, _val2.x),
+		min(_val1, _val2.y),
+		min(_val1, _val2.z),
+		min(_val1, _val2.w)
+	};
+}
+#endif
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec4 min(const dvec4& _val1, const dvec4& _val2)
+{
+	return {
+		min(_val1.x, _val2.x),
+		min(_val1.y, _val2.y),
+		min(_val1.z, _val2.z),
+		min(_val1.w, _val2.w)
+	};
+}
+
+// clamp functions
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline double clamp(const double& _x, const double& _min_val, const double& _max_val)
+{
+	return std::max(std::min(_x, _max_val), _min_val);
+}
+#ifndef USE_SCALAR
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline simddouble clamp(const simddouble& _x, const simddouble& _min_val, const simddouble& _max_val)
+{
+	return max(min(_x, _max_val), _min_val);
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline simddouble clamp(const simddouble& _x, const double& _min_val, const double& _max_val)
+{
+	return clamp(_x, simd_set1_double(_min_val), simd_set1_double(_max_val));
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline dvec2 clamp(const dvec2& _x, const simddouble& _min_val, const simddouble& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val, _max_val),
+		clamp(_x.y, _min_val, _max_val)
+	};
+}
+#endif
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline dvec2 clamp(const dvec2& _x, const double& _min_val, const double& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val, _max_val),
+		clamp(_x.y, _min_val, _max_val)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline dvec2 clamp(const dvec2& _x, const dvec2& _min_val, const dvec2& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val.x, _max_val.x),
+		clamp(_x.y, _min_val.y, _max_val.y)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline dvec3 clamp(const dvec3& _x, const simddouble& _min_val, const simddouble& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val, _max_val),
+		clamp(_x.y, _min_val, _max_val),
+		clamp(_x.z, _min_val, _max_val)
+	};
+}
+#endif
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline dvec3 clamp(const dvec3& _x, const double& _min_val, const double& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val, _max_val),
+		clamp(_x.y, _min_val, _max_val),
+		clamp(_x.z, _min_val, _max_val)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline dvec3 clamp(const dvec3& _x, const dvec3& _min_val, const dvec3& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val.x, _max_val.x),
+		clamp(_x.y, _min_val.y, _max_val.y),
+		clamp(_x.z, _min_val.z, _max_val.z)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline dvec4 clamp(const dvec4& _x, const simddouble& _min_val, const simddouble& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val, _max_val),
+		clamp(_x.y, _min_val, _max_val),
+		clamp(_x.z, _min_val, _max_val),
+		clamp(_x.w, _min_val, _max_val)
+	};
+}
+#endif
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline dvec4 clamp(const dvec4& _x, const double& _min_val, const double& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val, _max_val),
+		clamp(_x.y, _min_val, _max_val),
+		clamp(_x.z, _min_val, _max_val),
+		clamp(_x.w, _min_val, _max_val)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline dvec4 clamp(const dvec4& _x, const dvec4& _min_val, const dvec4& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val.x, _max_val.x),
+		clamp(_x.y, _min_val.y, _max_val.y),
+		clamp(_x.z, _min_val.z, _max_val.z),
+		clamp(_x.w, _min_val.w, _max_val.w)
+	};
+}
+
+// acos functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the inverse cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble acos(const simddouble& _x)
+{
+#ifndef __GNUC__
+	return simd_acos_double(_x);
+#else
+#ifndef GCC_FASTCOS
+	alignas(64) double tempTab[halfsimdwidth];
+	simd_store_double(tempTab, _x);
+	for (int i = 0; i < halfsimdwidth; i++)
+	{
+		tempTab[i] = std::acos(tempTab[i]);
+	}
+	return simd_load_double(tempTab);
+#else
+	// Clamp input
+	simddouble x = clamp(_x, 1.0, -1.0);
+
+	simddouble x2 = x * x;
+	simddouble x3 = x2 * x;
+	simddouble x4 = x2 * x2;
+	simddouble x5 = x3 * x2;
+
+	return SIMDDHALFPI
+		- x * 1.0
+		- x3 * 0.16666586685
+		- x5 * 0.074953002686;
+#endif
+#endif
+}
+#endif
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the inverse cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble acos(const double& _x)
+{
+	return simd_set1_double(std::acos(_x));
+}
+#endif
+
+/**
+ * @brief Computes the inverse cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec2 acos(const dvec2& _x)
+{
+	return { acos(_x.x), acos(_x.y) };
+}
+
+/**
+ * @brief Computes the inverse cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec3 acos(const dvec3& _x)
+{
+	return { acos(_x.x), acos(_x.y), acos(_x.z) };
+}
+
+/**
+ * @brief Computes the inverse cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec4 acos(const dvec4& _x)
+{
+	return { acos(_x.x), acos(_x.y), acos(_x.z), acos(_x.w) };
+}
+
+// asin functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the inverse sine of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble asin(const simddouble& _x)
+{
+#ifndef __GNUC__
+	return simd_asin_double(_x);
+#else
+#ifndef GCC_FASTCOS
+	alignas(64) double tempTab[halfsimdwidth];
+	simd_store_double(tempTab, _x);
+	for (int i = 0; i < halfsimdwidth; i++)
+	{
+		tempTab[i] = asinf(tempTab[i]);
+	}
+	return simd_load_double(tempTab);
+#else
+	return acos(_x - SIMDDHALFPI);
+#endif
+#endif
+}
+#endif
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the inverse sine of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble asin(const double& _x)
+{
+	return simd_set1_double(std::asin(_x));
+}
+#endif
+
+/**
+ * @brief Computes the inverse sine of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec2 asin(const dvec2& _x)
+{
+	return { asin(_x.x), asin(_x.y) };
+}
+
+/**
+ * @brief Computes the inverse sine of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec3 asin(const dvec3& _x)
+{
+	return { asin(_x.x), asin(_x.y), asin(_x.z) };
+}
+
+/**
+ * @brief Computes the inverse sine of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec4 asin(const dvec4& _x)
+{
+	return { asin(_x.x), asin(_x.y), asin(_x.z), asin(_x.w) };
+}
+
+// floor functions
+#ifndef USE_SCALAR
+/**
+ * @brief Rounds each component down to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline simddouble floor(const simddouble& _x)
+{
+	return simd_floor_double(_x);
+}
+
+/**
+ * @brief Rounds each component down to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline simddouble floor(const double& _x)
+{
+	return simd_set1_double(std::floor(_x));
+}
+#endif
+
+/**
+ * @brief Rounds each component down to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline dvec2 floor(const dvec2& _x)
+{
+	return { floor(_x.x), floor(_x.y) };
+}
+
+/**
+ * @brief Rounds each component down to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline dvec3 floor(const dvec3& _x)
+{
+	return { floor(_x.x), floor(_x.y), floor(_x.z) };
+}
+
+/**
+ * @brief Rounds each component down to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline dvec4 floor(const dvec4& _x)
+{
+	return { floor(_x.x), floor(_x.y), floor(_x.z), floor(_x.w) };
+}
+
+
+// mod functions
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline simddouble mod(const simddouble& _value, const simddouble& _modulus)
+{
+	return _value - (simd_floor_double(_value/_modulus)*_modulus);
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline simddouble mod(const simddouble& _value, const double& _modulus)
+{
+	return _value - floor(_value / simd_set1_double(_modulus)) * _modulus;
+}
+
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline simddouble mod(const double& _value, const simddouble& _modulus)
+{
+	return simd_set1_double(_value) - floor(simd_set1_double(_value) / _modulus) * _modulus;
+}
+
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline simddouble mod(const double& _value, const double& _modulus)
+{
+	return simd_set1_double(_value - std::floor(_value / _modulus) * _modulus);
+}
+#endif
+
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline dvec2 mod(const dvec2& _value, const dvec2& _modulus)
+{
+	return { mod(_value.x, _modulus.x), mod(_value.y, _modulus.y) };
+}
+
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline dvec3 mod(const dvec3& _value, const dvec3& _modulus)
+{
+	return { mod(_value.x, _modulus.x), mod(_value.y, _modulus.y), mod(_value.z, _modulus.z) };
+}
+
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline dvec4 mod(const dvec4& _value, const dvec4& _modulus)
+{
+	return { mod(_value.x, _modulus.x), mod(_value.y, _modulus.y), mod(_value.z, _modulus.z), mod(_value.w, _modulus.w) };
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble cos(const simddouble& _x)
+{
+#ifndef __GNUC__
+	return simd_cos_double(_x);
+#else
+#ifndef GCC_FASTCOS
+	alignas(64) double tabIndex[halfsimdwidth];
+	simd_store_double(tabIndex, _x);
+
+	// Pr�fetch des donn�es
+	alignas(64) double tabResult[halfsimdwidth];
+	for (int i = 0; i < halfsimdwidth; i++)
+	{
+		tabResult[i] = std::cos(tabIndex[i]);
+	}
+
+	return simd_load_double(tabResult);
+#else
+	simddouble moda = mod(_x, SIMDDTWOPI);
+	moda = blendv(moda, moda + SIMDDTWOPI, moda < -SIMDDPI);
+	moda = blendv(moda, moda - SIMDDTWOPI, moda > SIMDDPI);
+
+	moda = abs(moda);
+
+	simddmask mask1 = moda > SIMDDHALFPI;
+	moda = blendv(moda, SIMDDPI - moda, mask1);
+	simddouble sign = blendv(simd_set1_double(1.0), simd_set1_double(-1.0), mask1);
+
+	simddouble x2 = moda * moda;
+	simddouble x4 = x2 * x2;
+	simddouble x6 = x4 * x2;
+	simddouble x8 = x6 * x2;
+
+	return (1.0
+		- 0.5 * x2
+		+ 0.0416666666666666666667 * x4
+		- 0.00138888888888888888889 * x6
+		+ 2.48015873015873e-5 * x8) * sign;
+#endif
+#endif
+}
+#endif
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble cos(const double& _x)
+{
+	return simd_set1_double(std::cos(_x));
+}
+#endif
+
+/**
+ * @brief Computes the cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec2 cos(const dvec2& _x)
+{
+	return { cos(_x.x), cos(_x.y) };
+}
+
+/**
+ * @brief Computes the cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec3 cos(const dvec3& _x)
+{
+	return { cos(_x.x), cos(_x.y), cos(_x.z) };
+}
+
+/**
+ * @brief Computes the cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec4 cos(const dvec4& _x)
+{
+	return { cos(_x.x), cos(_x.y), cos(_x.z), cos(_x.w) };
+}
+
+// cosh functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the hyperbolic cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble cosh(const simddouble& _x)
+{
+#ifndef __GNUC__
+	return simd_cosh_double(_x);
+#else
+	alignas(64) double tempTab[halfsimdwidth];
+	simd_store_double(tempTab, _x);
+	for (int i = 0; i < halfsimdwidth; i++)
+	{
+		tempTab[i] = cosh(tempTab[i]);
+	}
+	return simd_load_double(tempTab);
+#endif
+}
+
+/**
+ * @brief Computes the hyperbolic cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble cosh(const double& _x)
+{
+	return simd_set1_double(std::cosh(_x));
+}
+#endif
+
+/**
+ * @brief Computes the hyperbolic cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec2 cosh(const dvec2& _x)
+{
+	return { cosh(_x.x), cosh(_x.y) };
+}
+
+/**
+ * @brief Computes the hyperbolic cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec3 cosh(const dvec3& _x)
+{
+	return { cosh(_x.x), cosh(_x.y), cosh(_x.z) };
+}
+
+/**
+ * @brief Computes the hyperbolic cosine of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec4 cosh(const dvec4& _x)
+{
+	return { cosh(_x.x), cosh(_x.y), cosh(_x.z), cosh(_x.w) };
+}
+
+// cross functions
+/**
+ * @brief Computes the cross product of two 3D vectors.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dvec3 cross(const dvec3& _val1, const dvec3& _val2)
+{
+	return { _val1.y * _val2.z - _val1.z * _val2.y, _val1.z * _val2.x - _val1.x * _val2.z, _val1.x * _val2.y - _val1.y * _val2.x };
+}
+
+// degrees functions
+/**
+ * @brief Converts radians to degrees for each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble degrees(const simddouble& _x)
+{
+	return simd_mul_double(_x, simd_set1_double(180.0 / 3.141592653589793));
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Converts radians to degrees for each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble degrees(const double& _x)
+{
+	return simd_set1_double(_x * (180.0 / 3.141592653589793));
+}
+#endif
+
+/**
+ * @brief Converts radians to degrees for each component.
+ * @param _x The input value or vector.
+ */
+inline dvec2 degrees(const dvec2& _x)
+{
+	return { degrees(_x.x), degrees(_x.y) };
+}
+
+/**
+ * @brief Converts radians to degrees for each component.
+ * @param _x The input value or vector.
+ */
+inline dvec3 degrees(const dvec3& _x)
+{
+	return { degrees(_x.x), degrees(_x.y), degrees(_x.z) };
+}
+
+/**
+ * @brief Converts radians to degrees for each component.
+ * @param _x The input value or vector.
+ */
+inline dvec4 degrees(const dvec4& _x)
+{
+	return { degrees(_x.x), degrees(_x.y), degrees(_x.z), degrees(_x.w) };
+}
+
+// distance functions
+/**
+ * @brief Computes the distance between two points.
+ * @param _point_a The first point.
+ * @param _point_b The second point.
+ */
+inline simddouble distance(const simddouble& _point_a, const simddouble& _point_b)
+{
+	return simd_sqrt_double(simd_mul_double(simd_sub_double(_point_a, _point_b), simd_sub_double(_point_a, _point_b)));
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the distance between two points.
+ * @param _point_a The first point.
+ * @param _point_b The second point.
+ */
+inline simddouble distance(const double& _point_a, const double& _point_b)
+{
+	return simd_set1_double(std::sqrt((_point_a - _point_b) * (_point_a - _point_b)));
+}
+#endif
+
+/**
+ * @brief Computes the distance between two points.
+ * @param _point_a The first point.
+ * @param _point_b The second point.
+ */
+inline simddouble distance(const dvec2& _point_a, const dvec2& _point_b)
+{
+	return simd_sqrt_double(simd_add_double(simd_mul_double(simd_sub_double(_point_a.x, _point_b.x), simd_sub_double(_point_a.x, _point_b.x)), simd_mul_double(simd_sub_double(_point_a.y, _point_b.y), simd_sub_double(_point_a.y, _point_b.y))));
+}
+
+/**
+ * @brief Computes the distance between two points.
+ * @param _point_a The first point.
+ * @param _point_b The second point.
+ */
+inline simddouble distance(const dvec3& _point_a, const dvec3& _point_b)
+{
+	return simd_sqrt_double(simd_add_double(simd_add_double(simd_mul_double(simd_sub_double(_point_a.x, _point_b.x), simd_sub_double(_point_a.x, _point_b.x)), simd_mul_double(simd_sub_double(_point_a.y, _point_b.y), simd_sub_double(_point_a.y, _point_b.y))), simd_mul_double(simd_sub_double(_point_a.z, _point_b.z), simd_sub_double(_point_a.z, _point_b.z))));
+}
+
+/**
+ * @brief Computes the distance between two points.
+ * @param _point_a The first point.
+ * @param _point_b The second point.
+ */
+inline simddouble distance(const dvec4& _point_a, const dvec4& _point_b)
+{
+	return simd_sqrt_double(simd_add_double(simd_add_double(simd_add_double(simd_mul_double(simd_sub_double(_point_a.x, _point_b.x), simd_sub_double(_point_a.x, _point_b.x)), simd_mul_double(simd_sub_double(_point_a.y, _point_b.y), simd_sub_double(_point_a.y, _point_b.y))), simd_mul_double(simd_sub_double(_point_a.z, _point_b.z), simd_sub_double(_point_a.z, _point_b.z))), simd_mul_double(simd_sub_double(_point_a.w, _point_b.w), simd_sub_double(_point_a.w, _point_b.w))));
+}
+
+// dot functions
+/**
+ * @brief Computes the dot product of two vectors.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simddouble dot(const dvec2& _val1, const dvec2& _val2)
+{
+	return simd_add_double(simd_mul_double(_val1.x, _val2.x), simd_mul_double(_val1.y, _val2.y));
+}
+
+/**
+ * @brief Computes the dot product of two vectors.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simddouble dot(const dvec3& _val1, const dvec3& _val2)
+{
+	return simd_add_double(simd_add_double(simd_mul_double(_val1.x, _val2.x), simd_mul_double(_val1.y, _val2.y)), simd_mul_double(_val1.z, _val2.z));
+}
+
+/**
+ * @brief Computes the dot product of two vectors.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simddouble dot(const dvec4& _val1, const dvec4& _val2)
+{
+	return simd_add_double(simd_add_double(simd_add_double(simd_mul_double(_val1.x, _val2.x), simd_mul_double(_val1.y, _val2.y)), simd_mul_double(_val1.z, _val2.z)), simd_mul_double(_val1.w, _val2.w));
+}
+
+// exp functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the base-e exponential of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble exp(const simddouble& _x)
+{
+#ifndef __GNUC__
+	return simd_exp_double(_x);
+#else
+	alignas(64) double tempTab[halfsimdwidth];
+	simd_store_double(tempTab, _x);
+	for (int i = 0; i < halfsimdwidth; i++)
+	{
+		tempTab[i] = std::exp(tempTab[i]);
+	}
+	return simd_load_double(tempTab);
+#endif
+}
+#endif
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the base-e exponential of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble exp(const double& _x)
+{
+	return simd_set1_double(std::exp(_x));
+}
+#endif
+
+/**
+ * @brief Computes the base-e exponential of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec2 exp(const dvec2& _x)
+{
+	return { exp(_x.x), exp(_x.y) };
+}
+
+/**
+ * @brief Computes the base-e exponential of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec3 exp(const dvec3& _x)
+{
+	return { exp(_x.x), exp(_x.y), exp(_x.z) };
+}
+
+/**
+ * @brief Computes the base-e exponential of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec4 exp(const dvec4& _x)
+{
+	return { exp(_x.x), exp(_x.y), exp(_x.z), exp(_x.w) };
+
+}
+
+// exp2 functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the base-2 exponential of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble exp2(const simddouble& _x)
+{
+#ifndef __GNUC__
+	return simd_exp2_double(_x);
+#else
+	alignas(64) double tempTab[halfsimdwidth];
+	simd_store_double(tempTab, _x);
+	for (int i = 0; i < halfsimdwidth; i++)
+	{
+		tempTab[i] = std::exp2(tempTab[i]);
+	}
+	return simd_load_double(tempTab);
+#endif
+}
+
+/**
+ * @brief Computes the base-2 exponential of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble exp2(const double& _x)
+{
+	return simd_set1_double(std::exp2(_x));
+}
+#endif
+
+/**
+ * @brief Computes the base-2 exponential of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec2 exp2(const dvec2& _x)
+{
+	return { exp2(_x.x), exp2(_x.y) };
+}
+
+/**
+ * @brief Computes the base-2 exponential of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec3 exp2(const dvec3& _x)
+{
+	return { exp2(_x.x), exp2(_x.y), exp2(_x.z) };
+}
+
+/**
+ * @brief Computes the base-2 exponential of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec4 exp2(const dvec4& _x)
+{
+	return { exp2(_x.x), exp2(_x.y), exp2(_x.z), exp2(_x.w) };
+}
+
+// fma functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes fused multiply-add (a * b + c).
+ * @param _val1 The first factor for multiplication.
+ * @param _val2 The second factor for multiplication.
+ * @param _addend The value to add.
+ */
+inline simddouble fma(const simddouble& _val1, const simddouble& _val2, const simddouble& _addend)
+{
+	return simd_add_double(simd_mul_double(_val1, _val2), _addend);
+}
+
+/**
+ * @brief Computes fused multiply-add (a * b + c).
+ * @param _val1 The first factor for multiplication.
+ * @param _val2 The second factor for multiplication.
+ * @param _addend The value to add.
+ */
+inline simddouble fma(const double& _val1, const double& _val2, const double& _addend)
+{
+	return simd_set1_double(_val1 * _val2 + _addend);
+}
+#endif
+
+/**
+ * @brief Computes fused multiply-add (a * b + c).
+ * @param _val1 The first factor for multiplication.
+ * @param _val2 The second factor for multiplication.
+ * @param _addend The value to add.
+ */
+inline dvec2 fma(const dvec2& _val1, const dvec2& _val2, const dvec2& _addend)
+{
+	return { fma(_val1.x, _val2.x, _addend.x), fma(_val1.y, _val2.y, _addend.y) };
+}
+
+/**
+ * @brief Computes fused multiply-add (a * b + c).
+ * @param _val1 The first factor for multiplication.
+ * @param _val2 The second factor for multiplication.
+ * @param _addend The value to add.
+ */
+inline dvec3 fma(const dvec3& _val1, const dvec3& _val2, const dvec3& _addend)
+{
+	return { fma(_val1.x, _val2.x, _addend.x), fma(_val1.y, _val2.y, _addend.y), fma(_val1.z, _val2.z, _addend.z) };
+}
+
+/**
+ * @brief Computes fused multiply-add (a * b + c).
+ * @param _val1 The first factor for multiplication.
+ * @param _val2 The second factor for multiplication.
+ * @param _addend The value to add.
+ */
+inline dvec4 fma(const dvec4& _val1, const dvec4& _val2, const dvec4& _addend)
+{
+	return { fma(_val1.x, _val2.x, _addend.x), fma(_val1.y, _val2.y, _addend.y), fma(_val1.z, _val2.z, _addend.z), fma(_val1.w, _val2.w, _addend.w) };
+}
+
+// fract functions
+/**
+ * @brief Computes the fractional part of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble fract(const simddouble& _x)
+{
+	return simd_sub_double(_x, simd_floor_double(_x));
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the fractional part of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble fract(const double& _x)
+{
+	return simd_set1_double(_x - std::floor(_x));
+}
+#endif
+
+/**
+ * @brief Computes the fractional part of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec2 fract(const dvec2& _x)
+{
+	return { fract(_x.x), fract(_x.y) };
+}
+
+/**
+ * @brief Computes the fractional part of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec3 fract(const dvec3& _x)
+{
+	return { fract(_x.x), fract(_x.y), fract(_x.z) };
+}
+
+/**
+ * @brief Computes the fractional part of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec4 fract(const dvec4& _x)
+{
+	return { fract(_x.x), fract(_x.y), fract(_x.z), fract(_x.w) };
+}
+
+// inversesqrt functions
+/**
+ * @brief Computes the inverse square root of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble inversesqrt(const simddouble& _x)
+{
+	// return simd_rsqrt_double(_x);
+	alignas(64) double tempTab[halfsimdwidth];
+	simd_store_double(tempTab, _x);
+	for (int i = 0; i < halfsimdwidth; i++)
+	{
+		tempTab[i] = 1.0 / std::sqrt(tempTab[i]);
+	}
+	return simd_load_double(tempTab);
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the inverse square root of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble inversesqrt(const double& _x)
+{
+	return simd_set1_double(1.0f / std::sqrt(_x));
+}
+#endif
+
+/**
+ * @brief Computes the inverse square root of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec2 inversesqrt(const dvec2& _x)
+{
+	return { inversesqrt(_x.x), inversesqrt(_x.y) };
+}
+
+/**
+ * @brief Computes the inverse square root of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec3 inversesqrt(const dvec3& _x)
+{
+	return { inversesqrt(_x.x), inversesqrt(_x.y), inversesqrt(_x.z) };
+}
+
+/**
+ * @brief Computes the inverse square root of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec4 inversesqrt(const dvec4& _x)
+{
+	return { inversesqrt(_x.x), inversesqrt(_x.y), inversesqrt(_x.z), inversesqrt(_x.w) };
+}
+
+// ldexp functions
+/**
+ * @brief Computes mantissa * 2^exponent.
+ * @param _mantissa The mantissa (significand).
+ * @param _exponent The exponent value.
+ */
+inline simddouble ldexp(const simddouble& _mantissa, const simddouble& _exponent)
+{
+	return simd_mul_double(_mantissa, exp2(_exponent));
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes mantissa * 2^exponent.
+ * @param _mantissa The mantissa (significand).
+ * @param _exponent The exponent value.
+ */
+inline simddouble ldexp(const simddouble& _mantissa, const double& _exponent)
+{
+	return simd_mul_double(_mantissa, exp2(simd_set1_double(_exponent)));
+}
+#endif
+
+/**
+ * @brief Computes mantissa * 2^exponent.
+ * @param _mantissa The mantissa (significand).
+ * @param _exponent The exponent value.
+ */
+inline dvec2 ldexp(const dvec2& _mantissa, const dvec2& _exponent)
+{
+	return { ldexp(_mantissa.x, _exponent.x), ldexp(_mantissa.y, _exponent.y) };
+}
+
+/**
+ * @brief Computes mantissa * 2^exponent.
+ * @param _mantissa The mantissa (significand).
+ * @param _exponent The exponent value.
+ */
+inline dvec3 ldexp(const dvec3& _mantissa, const dvec3& _exponent)
+{
+	return { ldexp(_mantissa.x, _exponent.x), ldexp(_mantissa.y, _exponent.y), ldexp(_mantissa.z, _exponent.z) };
+}
+
+/**
+ * @brief Computes mantissa * 2^exponent.
+ * @param _mantissa The mantissa (significand).
+ * @param _exponent The exponent value.
+ */
+inline dvec4 ldexp(const dvec4& _mantissa, const dvec4& _exponent)
+{
+	return { ldexp(_mantissa.x, _exponent.x), ldexp(_mantissa.y, _exponent.y), ldexp(_mantissa.z, _exponent.z), ldexp(_mantissa.w, _exponent.w) };
+}
+
+// length functions
+/**
+ * @brief Computes the length of a vector.
+ * @param _vec The input vector.
+ */
+inline simddouble length(const simddouble& _vec)
+{
+	return simd_sqrt_double(_vec * _vec);
+}
+
+/**
+ * @brief Computes the length of a vector.
+ * @param _vec The input vector.
+ */
+inline simddouble length(const dvec2& _vec)
+{
+	return simd_sqrt_double(_vec.x * _vec.x + _vec.y * _vec.y);
+}
+
+/**
+ * @brief Computes the length of a vector.
+ * @param _vec The input vector.
+ */
+inline simddouble length(const dvec3& _vec)
+{
+	return simd_sqrt_double(_vec.x * _vec.x + _vec.y * _vec.y + _vec.z * _vec.z);
+}
+
+/**
+ * @brief Computes the length of a vector.
+ * @param _vec The input vector.
+ */
+inline simddouble length(const dvec4& _vec)
+{
+	return simd_sqrt_double(_vec.x * _vec.x + _vec.y * _vec.y + _vec.z * _vec.z + _vec.w * _vec.w);
+}
+
+// lerp functions
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simddouble lerp(const simddouble& _from, const simddouble& _to, const simddouble& _t)
+{
+	return simd_add_double(simd_mul_double(simd_sub_double(_to, _from), _t), _from);
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simddouble lerp(const simddouble& _from, const simddouble& _to, const double& _t)
+{
+	return _from + _t * (_to - _from);
+}
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simddouble lerp(const simddouble& _from, const double& _to, const simddouble& _t)
+{
+	return _from + _t * (_to - _from);
+}
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simddouble lerp(const simddouble& _from, const double& _to, const double& _t)
+{
+	return _from + _t * (_to - _from);
+}
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simddouble lerp(const double& _from, const simddouble& _to, const simddouble& _t)
+{
+	return _from + _t * (_to - _from);
+}
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simddouble lerp(const double& _from, const simddouble& _to, const double& _t)
+{
+	return _from + _t * (_to - _from);
+}
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simddouble lerp(const double& _from, const double& _to, const simddouble& _t)
+{
+	return _from + _t * (_to - _from);
+}
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simddouble lerp(const double& _from, const double& _to, const double& _t)
+{
+	return simd_set1_double(_from + _t * (_to - _from));
+}
+#endif
+
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline dvec2 lerp(const dvec2& _from, const dvec2& _to, const dvec2& _t)
+{
+	return { lerp(_from.x, _to.x, _t.x), lerp(_from.y, _to.y, _t.y) };
+}
+
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline dvec3 lerp(const dvec3& _from, const dvec3& _to, const dvec3& _t)
+{
+	return { lerp(_from.x, _to.x, _t.x), lerp(_from.y, _to.y, _t.y), lerp(_from.z, _to.z, _t.z) };
+}
+
+/**
+ * @brief Performs linear interpolation.
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline dvec4 lerp(const dvec4& _from, const dvec4& _to, const dvec4& _t)
+{
+	return { lerp(_from.x, _to.x, _t.x), lerp(_from.y, _to.y, _t.y), lerp(_from.z, _to.z, _t.z), lerp(_from.w, _to.w, _t.w) };
+}
+
+// log functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the natural (base-e) logarithm of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble log(const simddouble& _x)
+{
+#ifndef __GNUC__
+	return simd_log_double(_x);
+#else
+	alignas(64) double tempTab[halfsimdwidth];
+	simd_store_double(tempTab, _x);
+	for (int i = 0; i < halfsimdwidth; i++)
+	{
+		tempTab[i] = logf(tempTab[i]);
+	}
+	return simd_load_double(tempTab);
+#endif
+}
+
+/**
+ * @brief Computes the natural (base-e) logarithm of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble log(const double& _x)
+{
+	return simd_set1_double(std::log(_x));
+}
+#endif
+
+/**
+ * @brief Computes the natural (base-e) logarithm of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec2 log(const dvec2& _x)
+{
+	return { log(_x.x), log(_x.y) };
+}
+
+/**
+ * @brief Computes the natural (base-e) logarithm of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec3 log(const dvec3& _x)
+{
+	return { log(_x.x), log(_x.y), log(_x.z) };
+}
+
+/**
+ * @brief Computes the natural (base-e) logarithm of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec4 log(const dvec4& _x)
+{
+	return { log(_x.x), log(_x.y), log(_x.z), log(_x.w) };
+}
+
+// log2 functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the base-2 logarithm of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble log2(const simddouble& _x)
+{
+#ifndef __GNUC__
+	return simd_log2_double(_x);
+#else
+	alignas(64) double tempTab[halfsimdwidth];
+	simd_store_double(tempTab, _x);
+	for (int i = 0; i < halfsimdwidth; i++)
+	{
+		tempTab[i] = log2f(tempTab[i]);
+	}
+	return simd_load_double(tempTab);
+#endif
+}
+
+/**
+ * @brief Computes the base-2 logarithm of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble log2(const double& _x)
+{
+	return simd_set1_double(std::log2(_x));
+}
+#endif
+
+/**
+ * @brief Computes the base-2 logarithm of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec2 log2(const dvec2& _x)
+{
+	return { log2(_x.x), log2(_x.y) };
+}
+
+/**
+ * @brief Computes the base-2 logarithm of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec3 log2(const dvec3& _x)
+{
+	return { log2(_x.x), log2(_x.y), log2(_x.z) };
+}
+
+/**
+ * @brief Computes the base-2 logarithm of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec4 log2(const dvec4& _x)
+{
+	return { log2(_x.x), log2(_x.y), log2(_x.z), log2(_x.w) };
+}
+
+// mix functions
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simddouble mix(const simddouble& _from, const simddouble& _to, const simddouble& _t)
+{
+	return simd_add_double(simd_mul_double(simd_sub_double(_to, _from), _t), _from);
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simddouble mix(const simddouble& _from, const simddouble& _to, const double& _t)
+{
+	return _from + _t * (_to - _from);
+}
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simddouble mix(const simddouble& _from, const double& _to, const simddouble& _t)
+{
+	return _from + _t * (_to - _from);
+}
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simddouble mix(const simddouble& _from, const double& _to, const double& _t)
+{
+	return _from + _t * (_to - _from);
+}
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simddouble mix(const double& _from, const simddouble& _to, const simddouble& _t)
+{
+	return _from + _t * (_to - _from);
+}
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simddouble mix(const double& _from, const simddouble& _to, const double& _t)
+{
+	return _from + _t * (_to - _from);
+}
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simddouble mix(const double& _from, const double& _to, const simddouble& _t)
+{
+	return _from + _t * (_to - _from);
+}
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline simddouble mix(const double& _from, const double& _to, const double& _t)
+{
+	return simd_set1_double(_from + _t * (_to - _from));
+}
+
+#endif
+
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline dvec2 mix(const dvec2& _from, const dvec2& _to, const simddouble& _t)
+{
+	return { mix(_from.x, _to.x, _t), mix(_from.y, _to.y, _t) };
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline dvec2 mix(const dvec2& _from, const dvec2& _to, const double& _t)
+{
+	return { mix(_from.x, _to.x, _t), mix(_from.y, _to.y, _t) };
+}
+#endif
+
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline dvec2 mix(const dvec2& _from, const dvec2& _to, const dvec2& _t)
+{
+	return { mix(_from.x, _to.x, _t.x), mix(_from.y, _to.y, _t.y) };
+}
+
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline dvec3 mix(const dvec3& _from, const dvec3& _to, const simddouble& _t)
+{
+	return { mix(_from.x, _to.x, _t), mix(_from.y, _to.y, _t), mix(_from.z, _to.z, _t) };
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline dvec3 mix(const dvec3& _from, const dvec3& _to, const double& _t)
+{
+	return { mix(_from.x, _to.x, _t), mix(_from.y, _to.y, _t), mix(_from.z, _to.z, _t) };
+}
+#endif
+
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline dvec3 mix(const dvec3& _from, const dvec3& _to, const dvec3& _t)
+{
+	return { mix(_from.x, _to.x, _t.x), mix(_from.y, _to.y, _t.y), mix(_from.z, _to.z, _t.z) };
+}
+
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline dvec4 mix(const dvec4& _from, const dvec4& _to, const simddouble& _t)
+{
+	return { mix(_from.x, _to.x, _t), mix(_from.y, _to.y, _t), mix(_from.z, _to.z, _t), mix(_from.w, _to.w, _t) };
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline dvec4 mix(const dvec4& _from, const dvec4& _to, const double& _t)
+{
+	return { mix(_from.x, _to.x, _t), mix(_from.y, _to.y, _t), mix(_from.z, _to.z, _t), mix(_from.w, _to.w, _t) };
+}
+#endif
+
+/**
+ * @brief Performs linear interpolation (equivalent to lerp).
+ * @param _from The start value for interpolation.
+ * @param _to The end value for interpolation.
+ * @param _t The interpolation factor.
+ */
+inline dvec4 mix(const dvec4& _from, const dvec4& _to, const dvec4& _t)
+{
+	return { mix(_from.x, _to.x, _t.x), mix(_from.y, _to.y, _t.y), mix(_from.z, _to.z, _t.z), mix(_from.w, _to.w, _t.w) };
+}
+
+// modf functions
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline simddouble modf(const simddouble& _value, const simddouble& _modulus)
+{
+	return simd_sub_double(_value, simd_mul_double(simd_floor_double(simd_div_double(_value, _modulus)), _modulus));
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline simddouble modf(const double& _value, const double& _modulus)
+{
+	return simd_set1_double(_value - std::floor(_value / _modulus) * _modulus);
+}
+#endif
+
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline dvec2 modf(const dvec2& _value, const dvec2& _modulus)
+{
+	return { modf(_value.x, _modulus.x), modf(_value.y, _modulus.y) };
+}
+
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline dvec3 modf(const dvec3& _value, const dvec3& _modulus)
+{
+	return { modf(_value.x, _modulus.x), modf(_value.y, _modulus.y), modf(_value.z, _modulus.z) };
+}
+
+/**
+ * @brief Computes the component-wise floating-point remainder.
+ * @param _value The value to be modulated.
+ * @param _modulus The modulus.
+ */
+inline dvec4 modf(const dvec4& _value, const dvec4& _modulus)
+{
+	return { modf(_value.x, _modulus.x), modf(_value.y, _modulus.y), modf(_value.z, _modulus.z), modf(_value.w, _modulus.w) };
+}
+
+// normalize functions
+/**
+ * @brief Computes the normalized vector (unit vector).
+ * @param _vec The input vector.
+ */
+inline dvec2 normalize(const dvec2& _vec)
+{
+	return {
+		_vec.x / length(_vec),
+		_vec.y / length(_vec)
+	};
+}
+
+/**
+ * @brief Computes the normalized vector (unit vector).
+ * @param _vec The input vector.
+ */
+inline dvec3 normalize(const dvec3& _vec)
+{
+	return {
+		_vec.x / length(_vec),
+		_vec.y / length(_vec),
+		_vec.z / length(_vec)
+	};
+}
+
+/**
+ * @brief Computes the normalized vector (unit vector).
+ * @param _vec The input vector.
+ */
+inline dvec4 normalize(const dvec4& _vec)
+{
+	return {
+		_vec.x / length(_vec),
+		_vec.y / length(_vec),
+		_vec.z / length(_vec),
+		_vec.w / length(_vec)
+	};
+}
+
+// pow functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the component-wise power of a base raised to an exponent.
+ * @param _base The base value.
+ * @param _exponent The exponent value.
+ */
+inline simddouble pow(const simddouble& _base, const simddouble& _exponent)
+{
+#ifndef __GNUC__
+	return simd_pow_double(_base, _exponent);
+#else
+	alignas(64) double tempTabA[halfsimdwidth];
+	alignas(64) double tempTabB[halfsimdwidth];
+	simd_store_double(tempTabA, _base);
+	simd_store_double(tempTabB, _exponent);
+	for (int i = 0; i < halfsimdwidth; i++)
+	{
+		tempTabA[i] = pow(tempTabA[i], tempTabB[i]);
+	}
+	return simd_load_double(tempTabA);
+#endif
+}
+#endif
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the component-wise power of a base raised to an exponent.
+ * @param _base The base value.
+ * @param _exponent The exponent value.
+ */
+inline simddouble pow(const simddouble& _base, const double& _exponent)
+{
+	return pow(_base, simd_set1_double(_exponent));
+}
+#endif
+
+/**
+ * @brief Computes the component-wise power of a base raised to an exponent.
+ * @param _base The base value.
+ * @param _exponent The exponent value.
+ */
+inline dvec2 pow(const dvec2& _base, const simddouble& _exponent)
+{
+	return {
+		pow(_base.x, _exponent),
+		pow(_base.y, _exponent)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the component-wise power of a base raised to an exponent.
+ * @param _base The base value.
+ * @param _exponent The exponent value.
+ */
+inline dvec2 pow(const dvec2& _base, const double& _exponent)
+{
+	return pow(_base, simd_set1_double(_exponent));
+}
+#endif
+
+/**
+ * @brief Computes the component-wise power of a base raised to an exponent.
+ * @param _base The base value.
+ * @param _exponent The exponent value.
+ */
+inline dvec2 pow(const dvec2& _base, const dvec2& _exponent)
+{
+	return {
+		pow(_base.x, _exponent.x),
+		pow(_base.y, _exponent.y)
+	};
+}
+/**
+ * @brief Computes the component-wise power of a base raised to an exponent.
+ * @param _base The base value.
+ * @param _exponent The exponent value.
+ */
+inline dvec3 pow(const dvec3& _base, const simddouble& _exponent)
+{
+	return {
+		pow(_base.x, _exponent),
+		pow(_base.y, _exponent),
+		pow(_base.z, _exponent)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the component-wise power of a base raised to an exponent.
+ * @param _base The base value.
+ * @param _exponent The exponent value.
+ */
+inline dvec3 pow(const dvec3& _base, const double& _exponent)
+{
+	return pow(_base, simd_set1_double(_exponent));
+}
+#endif
+
+/**
+ * @brief Computes the component-wise power of a base raised to an exponent.
+ * @param _base The base value.
+ * @param _exponent The exponent value.
+ */
+inline dvec3 pow(const dvec3& _base, const dvec3& _exponent)
+{
+	return {
+		pow(_base.x, _exponent.x),
+		pow(_base.y, _exponent.y),
+		pow(_base.z, _exponent.z)
+	};
+}
+
+/**
+ * @brief Computes the component-wise power of a base raised to an exponent.
+ * @param _base The base value.
+ * @param _exponent The exponent value.
+ */
+inline dvec4 pow(const dvec4& _base, const simddouble& _exponent)
+{
+	return {
+		pow(_base.x, _exponent),
+		pow(_base.y, _exponent),
+		pow(_base.z, _exponent),
+		pow(_base.w, _exponent)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the component-wise power of a base raised to an exponent.
+ * @param _base The base value.
+ * @param _exponent The exponent value.
+ */
+inline dvec4 pow(const dvec4& _base, const double& _exponent)
+{
+	return pow(_base, simd_set1_double(_exponent));
+}
+#endif
+
+/**
+ * @brief Computes the component-wise power of a base raised to an exponent.
+ * @param _base The base value.
+ * @param _exponent The exponent value.
+ */
+inline dvec4 pow(const dvec4& _base, const dvec4& _exponent)
+{
+	return {
+		pow(_base.x, _exponent.x),
+		pow(_base.y, _exponent.y),
+		pow(_base.z, _exponent.z),
+		pow(_base.w, _exponent.w)
+	};
+}
+
+// radians functions
+/**
+ * @brief Converts degrees to radians for each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble radians(const simddouble& _x)
+{
+	return simd_mul_double(_x, simd_set1_double(3.141592653589793 / 180.0));
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Converts degrees to radians for each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble radians(const double& _x)
+{
+	return simd_set1_double(_x * (3.141592653589793 / 180.0));
+}
+#endif
+
+/**
+ * @brief Converts degrees to radians for each component.
+ * @param _x The input value or vector.
+ */
+inline dvec2 radians(const dvec2& _x)
+{
+	return { radians(_x.x), radians(_x.y) };
+}
+
+/**
+ * @brief Converts degrees to radians for each component.
+ * @param _x The input value or vector.
+ */
+inline dvec3 radians(const dvec3& _x)
+{
+	return { radians(_x.x), radians(_x.y), radians(_x.z) };
+}
+
+/**
+ * @brief Converts degrees to radians for each component.
+ * @param _x The input value or vector.
+ */
+inline dvec4 radians(const dvec4& _x)
+{
+	return { radians(_x.x), radians(_x.y), radians(_x.z), radians(_x.w) };
+}
+
+// reflect functions
+/**
+ * @brief Computes the reflection vector.
+ * @param _incident The incident vector.
+ * @param _normal The normal vector.
+ */
+inline dvec2 reflect(const dvec2& _incident, const dvec2& _normal)
+{
+	return _incident - 2.0 * dot(_normal, _incident) * _normal;
+}
+
+/**
+ * @brief Computes the reflection vector.
+ * @param _incident The incident vector.
+ * @param _normal The normal vector.
+ */
+inline dvec3 reflect(const dvec3& _incident, const dvec3& _normal)
+{
+	return _incident - 2.0 * dot(_normal, _incident) * _normal;
+}
+
+/**
+ * @brief Computes the reflection vector.
+ * @param _incident The incident vector.
+ * @param _normal The normal vector.
+ */
+inline dvec4 reflect(const dvec4& _incident, const dvec4& _normal)
+{
+	return _incident - 2.0 * dot(_normal, _incident) * _normal;
+}
+
+// refract functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the refraction vector.
+ * @param _incident The incident vector.
+ * @param _normal The normal vector.
+ * @param _ior The index of refraction.
+ */
+inline dvec2 refract(const dvec2& _incident, const dvec2& _normal, const double& _ior)
+{
+	return _incident * simd_set1_double(_ior) - _normal * simd_sqrt_double(simd_set1_double(1.0) - simd_set1_double(_ior) * simd_set1_double(_ior) * (simd_set1_double(1.0) - dot(_incident, _incident)));
+}
+#endif
+
+/**
+ * @brief Computes the refraction vector.
+ * @param _incident The incident vector.
+ * @param _normal The normal vector.
+ * @param _ior The index of refraction.
+ */
+inline dvec2 refract(const dvec2& _incident, const dvec2& _normal, const simddouble& _ior)
+{
+	return _incident * _ior - _normal * simd_sqrt_double(simd_sub_double(simd_set1_double(1.0), simd_mul_double(_ior, simd_mul_double(_ior, simd_sub_double(simd_set1_double(1.0), dot(_incident, _incident))))));
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the refraction vector.
+ * @param _incident The incident vector.
+ * @param _normal The normal vector.
+ * @param _ior The index of refraction.
+ */
+inline dvec3 refract(const dvec3& _incident, const dvec3& _normal, const double& _ior)
+{
+	return _incident * simd_set1_double(_ior) - _normal * simd_sqrt_double(simd_set1_double(1.0) - simd_set1_double(_ior) * simd_set1_double(_ior) * (simd_set1_double(1.0) - dot(_incident, _incident)));
+}
+#endif
+
+/**
+ * @brief Computes the refraction vector.
+ * @param _incident The incident vector.
+ * @param _normal The normal vector.
+ * @param _ior The index of refraction.
+ */
+inline dvec3 refract(const dvec3& _incident, const dvec3& _normal, const simddouble& _ior)
+{
+	return _incident * _ior - _normal * simd_sqrt_double(simd_sub_double(simd_set1_double(1.0), simd_mul_double(_ior, simd_mul_double(_ior, simd_sub_double(simd_set1_double(1.0), dot(_incident, _incident))))));
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the refraction vector.
+ * @param _incident The incident vector.
+ * @param _normal The normal vector.
+ * @param _ior The index of refraction.
+ */
+inline dvec4 refract(const dvec4& _incident, const dvec4& _normal, const double& _ior)
+{
+	return _incident * simd_set1_double(_ior) - _normal * simd_sqrt_double(simd_set1_double(1.0) - simd_set1_double(_ior) * simd_set1_double(_ior) * (simd_set1_double(1.0) - dot(_incident, _incident)));
+}
+#endif
+
+/**
+ * @brief Computes the refraction vector.
+ * @param _incident The incident vector.
+ * @param _normal The normal vector.
+ * @param _ior The index of refraction.
+ */
+inline dvec4 refract(const dvec4& _incident, const dvec4& _normal, const simddouble& _ior)
+{
+	return _incident * _ior - _normal * simd_sqrt_double(simd_sub_double(simd_set1_double(1.0), simd_mul_double(_ior, simd_mul_double(_ior, simd_sub_double(simd_set1_double(1.0), dot(_incident, _incident))))));
+}
+
+// round functions
+#ifndef USE_SCALAR
+/**
+ * @brief Rounds each component to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline simddouble round(const simddouble& _x)
+{
+#ifndef USE_AVX512
+	return simd_round_double(_x, 0x09);
+#else
+	return _mm512_roundscale_pd(_x, _MM_FROUND_TO_ZERO | _MM_FROUND_NO_EXC);
+#endif
+}
+
+/**
+ * @brief Rounds each component to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline simddouble round(const double& _x)
+{
+	return simd_set1_double(std::round(_x));
+}
+#endif
+
+/**
+ * @brief Rounds each component to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline dvec2 round(const dvec2& _x)
+{
+	return { round(_x.x), round(_x.y) };
+}
+
+/**
+ * @brief Rounds each component to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline dvec3 round(const dvec3& _x)
+{
+	return { round(_x.x), round(_x.y), round(_x.z) };
+}
+
+/**
+ * @brief Rounds each component to the nearest integer.
+ * @param _x The input value or vector.
+ */
+inline dvec4 round(const dvec4& _x)
+{
+	return { round(_x.x), round(_x.y), round(_x.z), round(_x.w) };
+}
+
+// sign functions
+/**
+ * @brief Extracts the sign of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble sign(const simddouble& _x)
+{
+	simddmask _mask = simd_cmp_double(_x, simd_set1_double(0.0), _CMP_LT_OQ);
+	return blendv(simd_set1_double(1.0), simd_set1_double(-1.0), _mask);
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Extracts the sign of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble sign(const double& _x)
+{
+	return simd_set1_double((_x > 0.0) - (_x < 0.0));
+}
+#endif
+
+/**
+ * @brief Extracts the sign of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec2 sign(const dvec2& _x)
+{
+	return { sign(_x.x), sign(_x.y) };
+}
+
+/**
+ * @brief Extracts the sign of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec3 sign(const dvec3& _x)
+{
+	return { sign(_x.x), sign(_x.y), sign(_x.z) };
+}
+
+/**
+ * @brief Extracts the sign of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec4 sign(const dvec4& _x)
+{
+	return { sign(_x.x), sign(_x.y), sign(_x.z), sign(_x.w) };
+}
+
+
+// sin functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the sine of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble sin(const simddouble& _x)
+{
+#ifndef __GNUC__
+	return simd_sin_double(_x);
+#else
+#ifndef GCC_FASTCOS
+	alignas(64) double tempTab[halfsimdwidth];
+	simd_store_double(tempTab, _x);
+	for (int i = 0; i < halfsimdwidth; i++)
+	{
+		tempTab[i] = sinf(tempTab[i]);
+	}
+	return simd_load_double(tempTab);
+#else
+	return cos(_x - SIMDDHALFPI);
+#endif
+#endif
+}
+#endif
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the sine of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble sin(const double& _x)
+{
+	return simd_set1_double(std::sin(_x));
+}
+#endif
+
+/**
+ * @brief Computes the sine of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec2 sin(const dvec2& _x)
+{
+	return { sin(_x.x), sin(_x.y) };
+}
+
+/**
+ * @brief Computes the sine of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec3 sin(const dvec3& _x)
+{
+	return { sin(_x.x), sin(_x.y), sin(_x.z) };
+}
+
+/**
+ * @brief Computes the sine of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec4 sin(const dvec4& _x)
+{
+	return { sin(_x.x), sin(_x.y), sin(_x.z), sin(_x.w) };
+}
+
+// sinh functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the hyperbolic sine of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble sinh(const simddouble& _x)
+{
+#ifndef __GNUC__
+	return simd_sinh_double(_x);
+#else
+	alignas(64) double tempTab[halfsimdwidth];
+	simd_store_double(tempTab, _x);
+	for (int i = 0; i < halfsimdwidth; i++)
+	{
+		tempTab[i] = sinhf(tempTab[i]);
+	}
+	return simd_load_double(tempTab);
+#endif
+}
+
+/**
+ * @brief Computes the hyperbolic sine of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble sinh(const double& _x)
+{
+	return simd_set1_double(std::sinh(_x));
+}
+#endif
+
+/**
+ * @brief Computes the hyperbolic sine of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec2 sinh(const dvec2& _x)
+{
+	return { sinh(_x.x), sinh(_x.y) };
+}
+
+/**
+ * @brief Computes the hyperbolic sine of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec3 sinh(const dvec3& _x)
+{
+	return { sinh(_x.x), sinh(_x.y), sinh(_x.z) };
+}
+
+/**
+ * @brief Computes the hyperbolic sine of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec4 sinh(const dvec4& _x)
+{
+	return { sinh(_x.x), sinh(_x.y), sinh(_x.z), sinh(_x.w) };
+}
+
+// smoothstep functions
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline simddouble smoothstep(const simddouble& _edge0, const simddouble& _edge1, const simddouble& _x)
+{
+	simddouble t = clamp((_x - _edge0) / (_edge1 - _edge0), 0.0, 1.0);
+	return t * t * (3.0 - 2.0 * t);
+}
+#ifndef USE_SCALAR
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline simddouble smoothstep(const double& _edge0, const double& _edge1, const simddouble& _x)
+{
+	return smoothstep(simd_set1_double(_edge0), simd_set1_double(_edge1), _x);
+}
+
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline simddouble smoothstep(const double& _edge0, const double& _edge1, const double& _x)
+{
+	return smoothstep(simd_set1_double(_edge0), simd_set1_double(_edge1), simd_set1_double(_x));
+}
+#endif
+
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline dvec2 smoothstep(const dvec2& _edge0, const dvec2& _edge1, const simddouble& _x)
+{
+	return {
+		smoothstep(_edge0.x, _edge1.x, _x),
+		smoothstep(_edge0.y, _edge1.y, _x)
+	};
+}
+#ifndef USE_SCALAR
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline dvec2 smoothstep(const dvec2& _edge0, const dvec2& _edge1, const double& _x)
+{
+	return smoothstep(_edge0, _edge1, simd_set1_double(_x));
+}
+#endif
+
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline dvec2 smoothstep(const dvec2& _edge0, const dvec2& _edge1, const dvec2& _x)
+{
+	return {
+		smoothstep(_edge0.x, _edge1.x, _x.x),
+		smoothstep(_edge0.y, _edge1.y, _x.y)
+	};
+}
+
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline dvec3 smoothstep(const dvec3& _edge0, const dvec3& _edge1, const simddouble& _x)
+{
+	return {
+		smoothstep(_edge0.x, _edge1.x, _x),
+		smoothstep(_edge0.y, _edge1.y, _x),
+		smoothstep(_edge0.z, _edge1.z, _x)
+	};
+}
+#ifndef USE_SCALAR
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline dvec3 smoothstep(const dvec3& _edge0, const dvec3& _edge1, const double& _x)
+{
+	return smoothstep(_edge0, _edge1, simd_set1_double(_x));
+}
+#endif
+
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline dvec3 smoothstep(const dvec3& _edge0, const dvec3& _edge1, const dvec3& _x)
+{
+	return {
+		smoothstep(_edge0.x, _edge1.x, _x.x),
+		smoothstep(_edge0.y, _edge1.y, _x.y),
+		smoothstep(_edge0.z, _edge1.z, _x.z)
+	};
+}
+
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline dvec4 smoothstep(const dvec4& _edge0, const dvec4& _edge1, const simddouble& _x)
+{
+	return {
+		smoothstep(_edge0.x, _edge1.x, _x),
+		smoothstep(_edge0.y, _edge1.y, _x),
+		smoothstep(_edge0.z, _edge1.z, _x),
+		smoothstep(_edge0.w, _edge1.w, _x)
+	};
+}
+#ifndef USE_SCALAR
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline dvec4 smoothstep(const dvec4& _edge0, const dvec4& _edge1, const double& _x)
+{
+	return smoothstep(_edge0, _edge1, simd_set1_double(_x));
+}
+#endif
+
+/**
+ * @brief Performs a smooth Hermite interpolation.
+ * @param _edge0 The lower edge of the smooth step function.
+ * @param _edge1 The upper edge of the smooth step function.
+ * @param _x The input value or vector.
+ */
+inline dvec4 smoothstep(const dvec4& _edge0, const dvec4& _edge1, const dvec4& _x)
+{
+	return {
+		smoothstep(_edge0.x, _edge1.x, _x.x),
+		smoothstep(_edge0.y, _edge1.y, _x.y),
+		smoothstep(_edge0.z, _edge1.z, _x.z),
+		smoothstep(_edge0.w, _edge1.w, _x.w)
+	};
+}
+
+// step functions
+/**
+ * @brief Generates a step function by comparing two values.
+ * @param _edge The edge of the step function.
+ * @param _x The input value or vector.
+ */
+inline simddouble step(const simddouble& _edge, const simddouble& _x)
+{
+	simddmask _mask = _x < _edge;
+	return blendv(simd_set1_double(1.0), simd_set1_double(0.0), _mask);
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Generates a step function by comparing two values.
+ * @param _edge The edge of the step function.
+ * @param _x The input value or vector.
+ */
+inline simddouble step(const double& _edge, const simddouble& _x)
+{
+	return step(simd_set1_double(_edge), _x);
+}
+
+/**
+ * @brief Generates a step function by comparing two values.
+ * @param _edge The edge of the step function.
+ * @param _x The input value or vector.
+ */
+inline simddouble step(const simddouble& _edge, const double& _x)
+{
+	return step(_edge, simd_set1_double(_x));
+}
+#endif
+
+/**
+ * @brief Generates a step function by comparing two values.
+ * @param _edge The edge of the step function.
+ * @param _x The input value or vector.
+ */
+inline dvec2 step(const dvec2& _edge, const simddouble& _x)
+{
+	return {
+		step(_edge.x, _x),
+		step(_edge.y, _x)
+	};
+}
+
+/**
+ * @brief Generates a step function by comparing two values.
+ * @param _edge The edge of the step function.
+ * @param _x The input value or vector.
+ */
+inline dvec2 step(const simddouble& _edge, const dvec2& _x)
+{
+	return {
+		step(_edge, _x.x),
+		step(_edge, _x.y)
+	};
+}
+
+/**
+ * @brief Generates a step function by comparing two values.
+ * @param _edge The edge of the step function.
+ * @param _x The input value or vector.
+ */
+inline dvec2 step(const dvec2& _edge, const dvec2& _x)
+{
+	return {
+		step(_edge.x, _x.x),
+		step(_edge.y, _x.y)
+	};
+}
+
+/**
+ * @brief Generates a step function by comparing two values.
+ * @param _edge The edge of the step function.
+ * @param _x The input value or vector.
+ */
+inline dvec3 step(const dvec3& _edge, const simddouble& _x)
+{
+	return {
+		step(_edge.x, _x),
+		step(_edge.y, _x),
+		step(_edge.z, _x)
+	};
+}
+
+/**
+ * @brief Generates a step function by comparing two values.
+ * @param _edge The edge of the step function.
+ * @param _x The input value or vector.
+ */
+inline dvec3 step(const simddouble& _edge, const dvec3& _x)
+{
+	return {
+		step(_edge, _x.x),
+		step(_edge, _x.y),
+		step(_edge, _x.z)
+	};
+}
+
+/**
+ * @brief Generates a step function by comparing two values.
+ * @param _edge The edge of the step function.
+ * @param _x The input value or vector.
+ */
+inline dvec3 step(const dvec3& _edge, const dvec3& _x)
+{
+	return {
+		step(_edge.x, _x.x),
+		step(_edge.y, _x.y),
+		step(_edge.z, _x.z)
+	};
+}
+
+/**
+ * @brief Generates a step function by comparing two values.
+ * @param _edge The edge of the step function.
+ * @param _x The input value or vector.
+ */
+inline dvec4 step(const dvec4& _edge, const simddouble& _x)
+{
+	return {
+		step(_edge.x, _x),
+		step(_edge.y, _x),
+		step(_edge.z, _x),
+		step(_edge.w, _x)
+	};
+}
+
+/**
+ * @brief Generates a step function by comparing two values.
+ * @param _edge The edge of the step function.
+ * @param _x The input value or vector.
+ */
+inline dvec4 step(const simddouble& _edge, const dvec4& _x)
+{
+	return {
+		step(_edge, _x.x),
+		step(_edge, _x.y),
+		step(_edge, _x.z),
+		step(_edge, _x.w)
+	};
+}
+
+/**
+ * @brief Generates a step function by comparing two values.
+ * @param _edge The edge of the step function.
+ * @param _x The input value or vector.
+ */
+inline dvec4 step(const dvec4& _edge, const dvec4& _x)
+{
+	return {
+		step(_edge.x, _x.x),
+		step(_edge.y, _x.y),
+		step(_edge.z, _x.z),
+		step(_edge.w, _x.w)
+	};
+}
+
+// sqrt functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the square root of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble sqrt(const simddouble& _x)
+{
+	return simd_sqrt_double(_x);
+}
+#endif
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the square root of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble sqrt(const double& _x)
+{
+	return simd_set1_double(std::sqrt(_x));
+}
+#endif
+
+/**
+ * @brief Computes the square root of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec2 sqrt(const dvec2& _x)
+{
+	return {
+		sqrt(_x.x),
+		sqrt(_x.y)
+	};
+}
+
+/**
+ * @brief Computes the square root of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec3 sqrt(const dvec3& _x)
+{
+	return {
+		sqrt(_x.x),
+		sqrt(_x.y),
+		sqrt(_x.z)
+	};
+}
+
+/**
+ * @brief Computes the square root of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec4 sqrt(const dvec4& _x)
+{
+	return {
+		sqrt(_x.x),
+		sqrt(_x.y),
+		sqrt(_x.z),
+		sqrt(_x.w)
+	};
+}
+
+// stanh functions
+/**
+ * @brief Computes an approximation of the hyperbolic tangent.
+ * @param _x The input value or vector.
+ */
+inline simddouble stanh(const simddouble& _x)
+{
+	// Approximate tanh using _a polynomial (5th degree)
+	// tanh(_x) = _x * (27 + _x^2) / (27 + 9x^2)
+	simddouble x2 = simd_mul_double(_x, _x);
+	simddouble numerator = simd_mul_double(_x, simd_add_double(simd_set1_double(27.0), x2));
+	simddouble denominator = simd_add_double(simd_set1_double(27.0), simd_mul_double(simd_set1_double(9.0), x2));
+	return simd_div_double(numerator, denominator);
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes an approximation of the hyperbolic tangent.
+ * @param _x The input value or vector.
+ */
+inline simddouble stanh(const double& _x)
+{
+	return stanh(simd_set1_double(_x));
+}
+#endif
+
+/**
+ * @brief Computes an approximation of the hyperbolic tangent.
+ * @param _vec The input vector.
+ */
+inline dvec2 stanh(const dvec2& _vec)
+{
+	return {
+		stanh(_vec.x),
+		stanh(_vec.y)
+	};
+}
+
+/**
+ * @brief Computes an approximation of the hyperbolic tangent.
+ * @param _vec The input vector.
+ */
+inline dvec3 stanh(const dvec3& _vec)
+{
+	return {
+		stanh(_vec.x),
+		stanh(_vec.y),
+		stanh(_vec.z)
+	};
+}
+
+/**
+ * @brief Computes an approximation of the hyperbolic tangent.
+ * @param _vec The input vector.
+ */
+inline dvec4 stanh(const dvec4& _vec)
+{
+	return {
+		stanh(_vec.x),
+		stanh(_vec.y),
+		stanh(_vec.z),
+		stanh(_vec.w)
+	};
+}
+
+// tan functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble tan(const simddouble& _x)
+{
+#ifndef __GNUC__
+	return simd_tan_double(_x);
+#else
+	alignas(64) double tempTab[halfsimdwidth];
+	simd_store_double(tempTab, _x);
+	for (int i = 0; i < halfsimdwidth; i++)
+	{
+		tempTab[i] = tanf(tempTab[i]);
+	}
+	return simd_load_double(tempTab);
+#endif
+}
+#endif
+
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble tan(const double& _x)
+{
+	return simd_set1_double(std::tan(_x));
+}
+#endif
+
+/**
+ * @brief Computes the tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec2 tan(const dvec2& _x)
+{
+	return {
+		tan(_x.x),
+		tan(_x.y)
+	};
+}
+
+/**
+ * @brief Computes the tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec3 tan(const dvec3& _x)
+{
+	return {
+		tan(_x.x),
+		tan(_x.y),
+		tan(_x.z)
+	};
+}
+
+/**
+ * @brief Computes the tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec4 tan(const dvec4& _x)
+{
+	return {
+		tan(_x.x),
+		tan(_x.y),
+		tan(_x.z),
+		tan(_x.w)
+	};
+}
+
+// tanh functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the hyperbolic tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble tanh(const simddouble& _x)
+{
+#ifndef __GNUC__
+	return simd_tanh_double(_x);
+#else
+	alignas(64) double tempTab[halfsimdwidth];
+	simd_store_double(tempTab, _x);
+	for (int i = 0; i < halfsimdwidth; i++)
+	{
+		tempTab[i] = tanhf(tempTab[i]);
+	}
+	return simd_load_double(tempTab);
+#endif
+}
+
+/**
+ * @brief Computes the hyperbolic tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble tanh(const double& _x)
+{
+	return simd_set1_double(std::tanh(_x));
+}
+#endif
+
+/**
+ * @brief Computes the hyperbolic tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec2 tanh(const dvec2& _x)
+{
+	return {
+		tanh(_x.x),
+		tanh(_x.y)
+	};
+}
+
+/**
+ * @brief Computes the hyperbolic tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec3 tanh(const dvec3& _x)
+{
+	return {
+		tanh(_x.x),
+		tanh(_x.y),
+		tanh(_x.z)
+	};
+}
+
+/**
+ * @brief Computes the hyperbolic tangent of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec4 tanh(const dvec4& _x)
+{
+	return {
+		tanh(_x.x),
+		tanh(_x.y),
+		tanh(_x.z),
+		tanh(_x.w)
+	};
+}
+
+// trunc functions
+#ifndef USE_SCALAR
+/**
+ * @brief Truncates the fractional part of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble trunc(const simddouble& _x)
+{
+#ifndef USE_AVX512
+	return simd_round_double(_x, _MM_FROUND_TO_ZERO | _MM_FROUND_NO_EXC);
+#else
+	return _mm512_roundscale_pd(_x, _MM_FROUND_TO_ZERO | _MM_FROUND_NO_EXC);
+#endif
+}
+
+/**
+ * @brief Truncates the fractional part of each component.
+ * @param _x The input value or vector.
+ */
+inline simddouble trunc(const double& _x)
+{
+	return simd_set1_double(_x - std::floor(_x));
+}
+#endif
+
+/**
+ * @brief Truncates the fractional part of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec2 trunc(const dvec2& _x)
+{
+	return {
+		trunc(_x.x),
+		trunc(_x.y)
+	};
+}
+
+/**
+ * @brief Truncates the fractional part of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec3 trunc(const dvec3& _x)
+{
+	return {
+		trunc(_x.x),
+		trunc(_x.y),
+		trunc(_x.z)
+	};
+}
+
+/**
+ * @brief Truncates the fractional part of each component.
+ * @param _x The input value or vector.
+ */
+inline dvec4 trunc(const dvec4& _x)
+{
+	return {
+		trunc(_x.x),
+		trunc(_x.y),
+		trunc(_x.z),
+		trunc(_x.w)
+	};
+}
+
+
+#pragma region matrix operators and functions
+
+/**
+ * @brief Performs matrix or matrix-vector multiplication.
+ * @param _mat The input matrix.
+ * @param _vec The input vector.
+ */
+inline dvec2 mul(const dmat2& _mat, const dvec2& _vec)
+{
+	return {
+		dot({_mat.columns[0].x, _mat.columns[1].x}, _vec),
+		dot({_mat.columns[0].y, _mat.columns[1].y}, _vec)
+	};
+}
+
+/**
+ * @brief Performs matrix or matrix-vector multiplication.
+ * @param _vec The input vector.
+ * @param _mat The input matrix.
+ */
+inline dvec2 mul(const dvec2& _vec, const dmat2& _mat)
+{
+	return {
+		dot(_vec, _mat.columns[0]),
+		dot(_vec, _mat.columns[1])
+	};
+}
+
+/**
+ * @brief Performs matrix or matrix-vector multiplication.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dmat2 mul(const dmat2& _val1, const dmat2& _val2)
+{
+	return {
+		dot(dvec2(_val1.columns[0].x, _val1.columns[1].x), _val2.columns[0]),
+		dot(dvec2(_val1.columns[0].y, _val1.columns[1].y), _val2.columns[0]),
+		dot(dvec2(_val1.columns[0].x, _val1.columns[1].x), _val2.columns[1]),
+		dot(dvec2(_val1.columns[0].y, _val1.columns[1].y), _val2.columns[1])
+	};
+}
+
+
+/**
+ * @brief Performs matrix or matrix-vector multiplication.
+ * @param _mat The input matrix.
+ * @param _vec The input vector.
+ */
+inline dvec3 mul(const dmat3& _mat, const dvec3& _vec)
+{
+	return {
+		dot({_mat.columns[0].x, _mat.columns[1].x, _mat.columns[2].x}, _vec),
+		dot({_mat.columns[0].y, _mat.columns[1].y, _mat.columns[2].y}, _vec),
+		dot({_mat.columns[0].z, _mat.columns[1].z, _mat.columns[2].z}, _vec)
+	};
+}
+
+/**
+ * @brief Performs matrix or matrix-vector multiplication.
+ * @param _vec The input vector.
+ * @param _mat The input matrix.
+ */
+inline dvec3 mul(const dvec3& _vec, const dmat3& _mat)
+{
+	return {
+		dot(_vec, _mat.columns[0]),
+		dot(_vec, _mat.columns[1]),
+		dot(_vec, _mat.columns[2])
+	};
+}
+
+/**
+ * @brief Performs matrix or matrix-vector multiplication.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dmat3 mul(const dmat3& _val1, const dmat3& _val2)
+{
+	return {
+		dot(dvec3(_val1.columns[0].x, _val1.columns[1].x, _val1.columns[2].x), _val2.columns[0]),
+		dot(dvec3(_val1.columns[0].y, _val1.columns[1].y, _val1.columns[2].y), _val2.columns[0]),
+		dot(dvec3(_val1.columns[0].z, _val1.columns[1].z, _val1.columns[2].z), _val2.columns[0]),
+		dot(dvec3(_val1.columns[0].x, _val1.columns[1].x, _val1.columns[2].x), _val2.columns[1]),
+		dot(dvec3(_val1.columns[0].y, _val1.columns[1].y, _val1.columns[2].y), _val2.columns[1]),
+		dot(dvec3(_val1.columns[0].z, _val1.columns[1].z, _val1.columns[2].z), _val2.columns[1]),
+		dot(dvec3(_val1.columns[0].x, _val1.columns[1].x, _val1.columns[2].x), _val2.columns[2]),
+		dot(dvec3(_val1.columns[0].y, _val1.columns[1].y, _val1.columns[2].y), _val2.columns[2]),
+		dot(dvec3(_val1.columns[0].z, _val1.columns[1].z, _val1.columns[2].z), _val2.columns[2])
+
+
+	};
+}
+
+// dmat4
+/**
+ * @brief Performs matrix or matrix-vector multiplication.
+ * @param _mat The input matrix.
+ * @param _vec The input vector.
+ */
+inline dvec4 mul(const dmat4& _mat, const dvec4& _vec)
+{
+	return {
+		dot({_mat.columns[0].x, _mat.columns[1].x, _mat.columns[2].x, _mat.columns[3].x}, _vec),
+		dot({_mat.columns[0].y, _mat.columns[1].y, _mat.columns[2].y, _mat.columns[3].y}, _vec),
+		dot({_mat.columns[0].z, _mat.columns[1].z, _mat.columns[2].z, _mat.columns[3].z}, _vec),
+		dot({_mat.columns[0].w, _mat.columns[1].w, _mat.columns[2].w, _mat.columns[3].w}, _vec)
+	};
+}
+
+/**
+ * @brief Performs matrix or matrix-vector multiplication.
+ * @param _vec The input vector.
+ * @param _mat The input matrix.
+ */
+inline dvec4 mul(const dvec4& _vec, const dmat4& _mat)
+{
+	return {
+		dot(_vec, _mat.columns[0]),
+		dot(_vec, _mat.columns[1]),
+		dot(_vec, _mat.columns[2]),
+		dot(_vec, _mat.columns[3])
+	};
+}
+
+/**
+ * @brief Performs matrix or matrix-vector multiplication.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dmat4 mul(const dmat4& _val1, const dmat4& _val2)
+{
+	return {
+		dot(dvec4(_val1.columns[0].x, _val1.columns[1].x, _val1.columns[2].x, _val1.columns[3].x), _val2.columns[0]),
+		dot(dvec4(_val1.columns[0].y, _val1.columns[1].y, _val1.columns[2].y, _val1.columns[3].y), _val2.columns[0]),
+		dot(dvec4(_val1.columns[0].z, _val1.columns[1].z, _val1.columns[2].z, _val1.columns[3].z), _val2.columns[0]),
+		dot(dvec4(_val1.columns[0].w, _val1.columns[1].w, _val1.columns[2].w, _val1.columns[3].w), _val2.columns[0]),
+		dot(dvec4(_val1.columns[0].x, _val1.columns[1].x, _val1.columns[2].x, _val1.columns[3].x), _val2.columns[1]),
+		dot(dvec4(_val1.columns[0].y, _val1.columns[1].y, _val1.columns[2].y, _val1.columns[3].y), _val2.columns[1]),
+		dot(dvec4(_val1.columns[0].z, _val1.columns[1].z, _val1.columns[2].z, _val1.columns[3].z), _val2.columns[1]),
+		dot(dvec4(_val1.columns[0].w, _val1.columns[1].w, _val1.columns[2].w, _val1.columns[3].w), _val2.columns[1]),
+		dot(dvec4(_val1.columns[0].x, _val1.columns[1].x, _val1.columns[2].x, _val1.columns[3].x), _val2.columns[2]),
+		dot(dvec4(_val1.columns[0].y, _val1.columns[1].y, _val1.columns[2].y, _val1.columns[3].y), _val2.columns[2]),
+		dot(dvec4(_val1.columns[0].z, _val1.columns[1].z, _val1.columns[2].z, _val1.columns[3].z), _val2.columns[2]),
+		dot(dvec4(_val1.columns[0].w, _val1.columns[1].w, _val1.columns[2].w, _val1.columns[3].w), _val2.columns[2]),
+		dot(dvec4(_val1.columns[0].x, _val1.columns[1].x, _val1.columns[2].x, _val1.columns[3].x), _val2.columns[3]),
+		dot(dvec4(_val1.columns[0].y, _val1.columns[1].y, _val1.columns[2].y, _val1.columns[3].y), _val2.columns[3]),
+		dot(dvec4(_val1.columns[0].z, _val1.columns[1].z, _val1.columns[2].z, _val1.columns[3].z), _val2.columns[3]),
+		dot(dvec4(_val1.columns[0].w, _val1.columns[1].w, _val1.columns[2].w, _val1.columns[3].w), _val2.columns[3])
+	};
+}
+
+
+#pragma endregion
+
+#pragma region matrix operators
+// matrix operators
+/**
+ * @brief Overloaded addition operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dmat2 operator+(const dmat2& _val1, const dmat2& _val2)
+{
+	return {
+		_val1.columns[0] + _val2.columns[0],
+		_val1.columns[1] + _val2.columns[1]
+	};
+}
+
+/**
+ * @brief Overloaded subtraction operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dmat2 operator-(const dmat2& _val1, const dmat2& _val2)
+{
+	return {
+		_val1.columns[0] - _val2.columns[0],
+		_val1.columns[1] - _val2.columns[1]
+	};
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dmat2 operator*(const dmat2& _val1, const dmat2& _val2)
+{
+	return mul(_val1, _val2);
+}
+
+/**
+ * @brief Overloaded addition-assignment operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dmat2 operator+=(dmat2& _val1, const dmat2& _val2)
+{
+	_val1 = _val1 + _val2;
+	return _val1;
+}
+
+/**
+ * @brief Overloaded subtraction-assignment operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dmat2 operator-=(dmat2& _val1, const dmat2& _val2)
+{
+	_val1 = _val1 - _val2;
+	return _val1;
+}
+
+/**
+ * @brief Overloaded multiplication-assignment operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dmat2 operator*=(dmat2& _val1, const dmat2& _val2)
+{
+	_val1 = _val1 * _val2;
+	return _val1;
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _mat The input matrix.
+ * @param _scalar The scalar value.
+ */
+inline dmat2 operator*(const dmat2& _mat, const simddouble& _scalar)
+{
+	return {
+		_mat.columns[0] * _scalar,
+		_mat.columns[1] * _scalar
+	};
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _scalar The scalar value.
+ * @param _mat The input matrix.
+ */
+inline dmat2 operator*(const simddouble& _scalar, const dmat2& _mat)
+{
+	return {
+		_mat.columns[0] * _scalar,
+		_mat.columns[1] * _scalar
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _mat The input matrix.
+ * @param _scalar The scalar value.
+ */
+inline dmat2 operator*(const dmat2& _mat, const double& _scalar)
+{
+	return {
+		_mat.columns[0] * _scalar,
+		_mat.columns[1] * _scalar
+	};
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _scalar The scalar value.
+ * @param _mat The input matrix.
+ */
+inline dmat2 operator*(const double& _scalar, const dmat2& _mat)
+{
+	return {
+		_mat.columns[0] * _scalar,
+		_mat.columns[1] * _scalar
+	};
+}
+#endif
+
+
+// matrix vector multiplication
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _vec The input vector.
+ * @param _mat The input matrix.
+ */
+inline dvec2 operator*(const dvec2& _vec, const dmat2& _mat)
+{
+	return mul(_vec, _mat);
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _mat The input matrix.
+ * @param _vec The input vector.
+ */
+inline dvec2 operator*(const dmat2& _mat, const dvec2& _vec)
+{
+	return mul(_mat, _vec);
+}
+
+/**
+ * @brief Overloaded multiplication-assignment operator.
+ * @param _vec The input vector.
+ * @param _mat The input matrix.
+ */
+inline dvec2 operator*=(dvec2& _vec, const dmat2& _mat)
+{
+	_vec = mul(_vec, _mat);
+	return _vec;
+}
+
+// dmat3 multiplication
+/**
+ * @brief Overloaded addition operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dmat3 operator+(const dmat3& _val1, const dmat3& _val2)
+{
+	return {
+		_val1.columns[0] + _val2.columns[0],
+		_val1.columns[1] + _val2.columns[1],
+		_val1.columns[2] + _val2.columns[2]
+	};
+}
+
+/**
+ * @brief Overloaded subtraction operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dmat3 operator-(const dmat3& _val1, const dmat3& _val2)
+{
+	return {
+		_val1.columns[0] - _val2.columns[0],
+		_val1.columns[1] - _val2.columns[1],
+		_val1.columns[2] - _val2.columns[2]
+	};
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dmat3 operator*(const dmat3& _val1, const dmat3& _val2)
+{
+	return mul(_val1, _val2);
+}
+
+/**
+ * @brief Overloaded addition-assignment operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dmat3 operator+=(dmat3& _val1, const dmat3& _val2)
+{
+	_val1 = _val1 + _val2;
+	return _val1;
+}
+
+/**
+ * @brief Overloaded subtraction-assignment operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dmat3 operator-=(dmat3& _val1, const dmat3& _val2)
+{
+	_val1 = _val1 - _val2;
+	return _val1;
+}
+
+/**
+ * @brief Overloaded multiplication-assignment operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dmat3 operator*=(dmat3& _val1, const dmat3& _val2)
+{
+	_val1 = _val1 * _val2;
+	return _val1;
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _mat The input matrix.
+ * @param _scalar The scalar value.
+ */
+inline dmat3 operator*(const dmat3& _mat, const simddouble& _scalar)
+{
+	return {
+		_mat.columns[0] * _scalar,
+		_mat.columns[1] * _scalar,
+		_mat.columns[2] * _scalar
+	};
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _scalar The scalar value.
+ * @param _mat The input matrix.
+ */
+inline dmat3 operator*(const simddouble& _scalar, const dmat3& _mat)
+{
+	return {
+		_mat.columns[0] * _scalar,
+		_mat.columns[1] * _scalar,
+		_mat.columns[2] * _scalar
+	};
+}
+#ifndef USE_SCALAR
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _mat The input matrix.
+ * @param _scalar The scalar value.
+ */
+inline dmat3 operator*(const dmat3& _mat, const double& _scalar)
+{
+	return {
+		_mat.columns[0] * _scalar,
+		_mat.columns[1] * _scalar,
+		_mat.columns[2] * _scalar
+	};
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _scalar The scalar value.
+ * @param _mat The input matrix.
+ */
+inline dmat3 operator*(const double& _scalar, const dmat3& _mat)
+{
+	return {
+		_mat.columns[0] * _scalar,
+		_mat.columns[1] * _scalar,
+		_mat.columns[2] * _scalar
+	};
+}
+#endif
+
+// matrix vector multiplication
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _vec The input vector.
+ * @param _mat The input matrix.
+ */
+inline dvec3 operator*(const dvec3& _vec, const dmat3& _mat)
+{
+	return mul(_vec, _mat);
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _mat The input matrix.
+ * @param _vec The input vector.
+ */
+inline dvec3 operator*(const dmat3& _mat, const dvec3& _vec)
+{
+	return mul(_mat, _vec);
+}
+
+/**
+ * @brief Overloaded multiplication-assignment operator.
+ * @param _vec The input vector.
+ * @param _mat The input matrix.
+ */
+inline dvec3 operator*=(dvec3& _vec, const dmat3& _mat)
+{
+	_vec = mul(_vec, _mat);
+	return _vec;
+}
+
+// dmat4 multiplication
+/**
+ * @brief Overloaded addition operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dmat4 operator+(const dmat4& _val1, const dmat4& _val2)
+{
+	return {
+		_val1.columns[0] + _val2.columns[0],
+		_val1.columns[1] + _val2.columns[1],
+		_val1.columns[2] + _val2.columns[2],
+		_val1.columns[3] + _val2.columns[3]
+	};
+}
+
+/**
+ * @brief Overloaded subtraction operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dmat4 operator-(const dmat4& _val1, const dmat4& _val2)
+{
+	return {
+		_val1.columns[0] - _val2.columns[0],
+		_val1.columns[1] - _val2.columns[1],
+		_val1.columns[2] - _val2.columns[2],
+		_val1.columns[3] - _val2.columns[3]
+	};
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dmat4 operator*(const dmat4& _val1, const dmat4& _val2)
+{
+	return mul(_val1, _val2);
+}
+
+/**
+ * @brief Overloaded addition-assignment operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dmat4 operator+=(dmat4& _val1, const dmat4& _val2)
+{
+	_val1 = _val1 + _val2;
+	return _val1;
+}
+
+/**
+ * @brief Overloaded subtraction-assignment operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dmat4 operator-=(dmat4& _val1, const dmat4& _val2)
+{
+	_val1 = _val1 - _val2;
+	return _val1;
+}
+
+/**
+ * @brief Overloaded multiplication-assignment operator.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline dmat4 operator*=(dmat4& _val1, const dmat4& _val2)
+{
+	_val1 = _val1 * _val2;
+	return _val1;
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _mat The input matrix.
+ * @param _scalar The scalar value.
+ */
+inline dmat4 operator*(const dmat4& _mat, const simddouble& _scalar)
+{
+	return {
+		_mat.columns[0] * _scalar,
+		_mat.columns[1] * _scalar,
+		_mat.columns[2] * _scalar,
+		_mat.columns[3] * _scalar
+	};
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _scalar The scalar value.
+ * @param _mat The input matrix.
+ */
+inline dmat4 operator*(const simddouble& _scalar, const dmat4& _mat)
+{
+	return {
+		_mat.columns[0] * _scalar,
+		_mat.columns[1] * _scalar,
+		_mat.columns[2] * _scalar,
+		_mat.columns[3] * _scalar
+	};
+}
+
+// matrix vector multiplication
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _vec The input vector.
+ * @param _mat The input matrix.
+ */
+inline dvec4 operator*(const dvec4& _vec, const dmat4& _mat)
+{
+	return mul(_vec, _mat);
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _mat The input matrix.
+ * @param _vec The input vector.
+ */
+inline dvec4 operator*(const dmat4& _mat, const dvec4& _vec)
+{
+	return mul(_mat, _vec);
+}
+
+/**
+ * @brief Overloaded multiplication-assignment operator.
+ * @param _vec The input vector.
+ * @param _mat The input matrix.
+ */
+inline dvec4 operator*=(dvec4& _vec, const dmat4& _mat)
+{
+	_vec = mul(_vec, _mat);
+	return _vec;
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _mat The input matrix.
+ * @param _scalar The scalar value.
+ */
+inline dmat4 operator*(const dmat4& _mat, const double& _scalar)
+{
+	return {
+		_mat.columns[0] * _scalar,
+		_mat.columns[1] * _scalar,
+		_mat.columns[2] * _scalar,
+		_mat.columns[3] * _scalar
+	};
+}
+
+/**
+ * @brief Overloaded multiplication operator.
+ * @param _scalar The scalar value.
+ * @param _mat The input matrix.
+ */
+inline dmat4 operator*(const double& _scalar, const dmat4& _mat)
+{
+	return {
+		_mat.columns[0] * _scalar,
+		_mat.columns[1] * _scalar,
+		_mat.columns[2] * _scalar,
+		_mat.columns[3] * _scalar
+	};
+}
+#endif
+
+// determinant for matrices
+/**
+ * @brief Computes the determinant of a matrix.
+ * @param _mat The input matrix.
+ */
+inline simddouble determinant(const dmat2& _mat)
+{
+	return _mat.columns[0].x * _mat.columns[1].y - _mat.columns[0].y * _mat.columns[1].x;
+}
+
+/**
+ * @brief Computes the determinant of a matrix.
+ * @param _mat The input matrix.
+ */
+inline simddouble determinant(const dmat3& _mat)
+{
+	return _mat.columns[0].x * (_mat.columns[1].y * _mat.columns[2].z - _mat.columns[1].z * _mat.columns[2].y) -
+		_mat.columns[0].y * (_mat.columns[1].x * _mat.columns[2].z - _mat.columns[1].z * _mat.columns[2].x) +
+		_mat.columns[0].z * (_mat.columns[1].x * _mat.columns[2].y - _mat.columns[1].y * _mat.columns[2].x);
+}
+
+/**
+ * @brief Computes the determinant of a matrix.
+ * @param _mat The input matrix.
+ */
+inline simddouble determinant(const dmat4& _mat)
+{
+	return _mat.columns[0].x * (_mat.columns[1].y * (_mat.columns[2].z * _mat.columns[3].w - _mat.columns[2].w * _mat.columns[3].z) -
+		_mat.columns[1].z * (_mat.columns[2].y * _mat.columns[3].w - _mat.columns[2].w * _mat.columns[3].y) +
+		_mat.columns[1].w * (_mat.columns[2].y * _mat.columns[3].z - _mat.columns[2].z * _mat.columns[3].y)) -
+		_mat.columns[0].y * (_mat.columns[1].x * (_mat.columns[2].z * _mat.columns[3].w - _mat.columns[2].w * _mat.columns[3].z) -
+			_mat.columns[1].z * (_mat.columns[2].x * _mat.columns[3].w - _mat.columns[2].w * _mat.columns[3].x) +
+			_mat.columns[1].w * (_mat.columns[2].x * _mat.columns[3].z - _mat.columns[2].z * _mat.columns[3].x)) +
+		_mat.columns[0].z * (_mat.columns[1].x * (_mat.columns[2].y * _mat.columns[3].w - _mat.columns[2].w * _mat.columns[3].y) -
+			_mat.columns[1].y * (_mat.columns[2].x * _mat.columns[3].w - _mat.columns[2].w * _mat.columns[3].x) +
+			_mat.columns[1].w * (_mat.columns[2].x * _mat.columns[3].y - _mat.columns[2].y * _mat.columns[3].x)) -
+		_mat.columns[0].w * (_mat.columns[1].x * (_mat.columns[2].y * _mat.columns[3].z - _mat.columns[2].z * _mat.columns[3].y) -
+			_mat.columns[1].y * (_mat.columns[2].x * _mat.columns[3].z - _mat.columns[2].z * _mat.columns[3].x) +
+			_mat.columns[1].z * (_mat.columns[2].x * _mat.columns[3].y - _mat.columns[2].y * _mat.columns[3].x));
+}
+
+// inverse for matrices
+/**
+ * @brief Computes the inverse of a matrix.
+ * @param _mat The input matrix.
+ */
+inline dmat2 inverse(const dmat2& _mat)
+{
+	return {
+		dvec2(_mat.columns[1].y, -_mat.columns[0].y) / determinant(_mat),
+		dvec2(-_mat.columns[1].x, _mat.columns[0].x) / determinant(_mat)
+	};
+}
+
+/**
+ * @brief Computes the inverse of a matrix.
+ * @param _mat The input matrix.
+ */
+inline dmat3 inverse(const dmat3& _mat)
+{
+	return {
+		dvec3(_mat.columns[1].y * _mat.columns[2].z - _mat.columns[1].z * _mat.columns[2].y, _mat.columns[0].z * _mat.columns[2].y - _mat.columns[0].y * _mat.columns[2].z, _mat.columns[0].y * _mat.columns[1].z - _mat.columns[0].z * _mat.columns[1].y) / determinant(_mat),
+		dvec3(_mat.columns[1].z * _mat.columns[2].x - _mat.columns[1].x * _mat.columns[2].z, _mat.columns[0].x * _mat.columns[2].z - _mat.columns[0].z * _mat.columns[2].x, _mat.columns[0].z * _mat.columns[1].x - _mat.columns[0].x * _mat.columns[1].z) / determinant(_mat),
+		dvec3(_mat.columns[1].x * _mat.columns[2].y - _mat.columns[1].y * _mat.columns[2].x, _mat.columns[0].y * _mat.columns[2].x - _mat.columns[0].x * _mat.columns[2].y, _mat.columns[0].x * _mat.columns[1].y - _mat.columns[0].y * _mat.columns[1].x) / determinant(_mat)
+	};
+}
+
+/**
+ * @brief Computes the inverse of a matrix.
+ * @param _mat The input matrix.
+ */
+inline dmat4 inverse(const dmat4& _mat)
+{
+	return {
+		dvec4(_mat.columns[1].y * _mat.columns[2].z * _mat.columns[3].w - _mat.columns[1].y * _mat.columns[2].w * _mat.columns[3].z - _mat.columns[1].z * _mat.columns[2].y * _mat.columns[3].w + _mat.columns[1].z * _mat.columns[2].w * _mat.columns[3].y + _mat.columns[1].w * _mat.columns[2].y * _mat.columns[3].z - _mat.columns[1].w * _mat.columns[2].z * _mat.columns[3].y, -_mat.columns[0].y * _mat.columns[2].z * _mat.columns[3].w + _mat.columns[0].y * _mat.columns[2].w * _mat.columns[3].z + _mat.columns[0].z * _mat.columns[2].y * _mat.columns[3].w - _mat.columns[0].z * _mat.columns[2].w * _mat.columns[3].y - _mat.columns[0].w * _mat.columns[2].y * _mat.columns[3].z + _mat.columns[0].w * _mat.columns[2].z * _mat.columns[3].y, _mat.columns[0].y * _mat.columns[1].z * _mat.columns[3].w - _mat.columns[0].y * _mat.columns[1].w * _mat.columns[3].z - _mat.columns[0].z * _mat.columns[1].y * _mat.columns[3].w + _mat.columns[0].z * _mat.columns[1].w * _mat.columns[3].y + _mat.columns[0].w * _mat.columns[1].y * _mat.columns[3].z - _mat.columns[0].w * _mat.columns[1].z * _mat.columns[3].y, -_mat.columns[0].y * _mat.columns[1].z * _mat.columns[2].w + _mat.columns[0].y * _mat.columns[1].w * _mat.columns[2].z + _mat.columns[0].z * _mat.columns[1].y * _mat.columns[2].w - _mat.columns[0].z * _mat.columns[1].w * _mat.columns[2].y - _mat.columns[0].w * _mat.columns[1].y * _mat.columns[2].z + _mat.columns[0].w * _mat.columns[1].z * _mat.columns[2].y) / determinant(_mat),
+		dvec4(-_mat.columns[1].x * _mat.columns[2].z * _mat.columns[3].w + _mat.columns[1].x * _mat.columns[2].w * _mat.columns[3].z + _mat.columns[1].z * _mat.columns[2].x * _mat.columns[3].w - _mat.columns[1].z * _mat.columns[2].w * _mat.columns[3].x - _mat.columns[1].w * _mat.columns[2].x * _mat.columns[3].z + _mat.columns[1].w * _mat.columns[2].z * _mat.columns[3].x, _mat.columns[0].x * _mat.columns[2].z * _mat.columns[3].w - _mat.columns[0].x * _mat.columns[2].w * _mat.columns[3].z - _mat.columns[0].z * _mat.columns[2].x * _mat.columns[3].w + _mat.columns[0].z * _mat.columns[2].w * _mat.columns[3].x + _mat.columns[0].w * _mat.columns[2].x * _mat.columns[3].z - _mat.columns[0].w * _mat.columns[2].z * _mat.columns[3].x, -_mat.columns[0].x * _mat.columns[1].z * _mat.columns[3].w + _mat.columns[0].x * _mat.columns[1].w * _mat.columns[3].z + _mat.columns[0].z * _mat.columns[1].x * _mat.columns[3].w - _mat.columns[0].z * _mat.columns[1].w * _mat.columns[3].x - _mat.columns[0].w * _mat.columns[1].x * _mat.columns[3].z + _mat.columns[0].w * _mat.columns[1].z * _mat.columns[3].x, 	_mat.columns[0].x * _mat.columns[1].z * _mat.columns[2].w - _mat.columns[0].x * _mat.columns[1].w * _mat.columns[2].z - _mat.columns[0].z * _mat.columns[1].x * _mat.columns[2].w + _mat.columns[0].z * _mat.columns[1].w * _mat.columns[2].x + _mat.columns[0].w * _mat.columns[1].x * _mat.columns[2].z - _mat.columns[0].w * _mat.columns[1].z * _mat.columns[2].x) / determinant(_mat),
+		dvec4(_mat.columns[1].x * _mat.columns[2].y * _mat.columns[3].w - _mat.columns[1].x * _mat.columns[2].w * _mat.columns[3].y - _mat.columns[1].y * _mat.columns[2].x * _mat.columns[3].w + _mat.columns[1].y * _mat.columns[2].w * _mat.columns[3].x + _mat.columns[1].w * _mat.columns[2].x * _mat.columns[3].y - _mat.columns[1].w * _mat.columns[2].y * _mat.columns[3].x, -_mat.columns[0].x * _mat.columns[2].y * _mat.columns[3].w + _mat.columns[0].x * _mat.columns[2].w * _mat.columns[3].y + _mat.columns[0].y * _mat.columns[2].x * _mat.columns[3].w - _mat.columns[0].y * _mat.columns[2].w * _mat.columns[3].x - _mat.columns[0].w * _mat.columns[2].x * _mat.columns[3].y + _mat.columns[0].w * _mat.columns[2].y * _mat.columns[3].x, 	_mat.columns[0].x * _mat.columns[1].y * _mat.columns[3].w - _mat.columns[0].x * _mat.columns[1].w * _mat.columns[3].y - _mat.columns[0].y * _mat.columns[1].x * _mat.columns[3].w + _mat.columns[0].y * _mat.columns[1].w * _mat.columns[3].x + _mat.columns[0].w * _mat.columns[1].x * _mat.columns[3].y - _mat.columns[0].w * _mat.columns[1].y * _mat.columns[3].x, 	-_mat.columns[0].x * _mat.columns[1].y * _mat.columns[2].w + _mat.columns[0].x * _mat.columns[1].w * _mat.columns[2].y + _mat.columns[0].y * _mat.columns[1].x * _mat.columns[2].w - _mat.columns[0].y * _mat.columns[1].w * _mat.columns[2].x - _mat.columns[0].w * _mat.columns[1].x * _mat.columns[2].y + _mat.columns[0].w * _mat.columns[1].y * _mat.columns[2].x) / determinant(_mat),
+		dvec4(-_mat.columns[1].x * _mat.columns[2].y * _mat.columns[3].z + _mat.columns[1].x * _mat.columns[2].z * _mat.columns[3].y + _mat.columns[1].y * _mat.columns[2].x * _mat.columns[3].z - _mat.columns[1].y * _mat.columns[2].z * _mat.columns[3].x - _mat.columns[1].z * _mat.columns[2].x * _mat.columns[3].y + _mat.columns[1].z * _mat.columns[2].y * _mat.columns[3].x, 	_mat.columns[0].x * _mat.columns[2].y * _mat.columns[3].z - _mat.columns[0].x * _mat.columns[2].z * _mat.columns[3].y - _mat.columns[0].y * _mat.columns[2].x * _mat.columns[3].z + _mat.columns[0].y * _mat.columns[2].z * _mat.columns[3].x + _mat.columns[0].z * _mat.columns[2].x * _mat.columns[3].y - _mat.columns[0].z * _mat.columns[2].y * _mat.columns[3].x, 	-_mat.columns[0].x * _mat.columns[1].y * _mat.columns[3].z + _mat.columns[0].x * _mat.columns[1].z * _mat.columns[3].y + _mat.columns[0].y * _mat.columns[1].x * _mat.columns[3].z - _mat.columns[0].y * _mat.columns[1].z * _mat.columns[3].x - _mat.columns[0].z * _mat.columns[1].x * _mat.columns[3].y + _mat.columns[0].z * _mat.columns[1].y * _mat.columns[3].x, 	_mat.columns[0].x * _mat.columns[1].y * _mat.columns[2].z - _mat.columns[0].x * _mat.columns[1].z * _mat.columns[2].y - _mat.columns[0].y * _mat.columns[1].x * _mat.columns[2].z + _mat.columns[0].y * _mat.columns[1].z * _mat.columns[2].x + _mat.columns[0].z * _mat.columns[1].x * _mat.columns[2].y - _mat.columns[0].z * _mat.columns[1].y * _mat.columns[2].x) / determinant(_mat)
+	};
+}
+
+// transpose for matrices
+/**
+ * @brief Computes the transpose of a matrix.
+ * @param _mat The input matrix.
+ */
+inline dmat2 transpose(const dmat2& _mat)
+{
+	return {
+		dvec2(_mat.columns[0].x, _mat.columns[1].x),
+		dvec2(_mat.columns[0].y, _mat.columns[1].y)
+	};
+}
+
+/**
+ * @brief Computes the transpose of a matrix.
+ * @param _mat The input matrix.
+ */
+inline dmat3 transpose(const dmat3& _mat)
+{
+	return {
+		dvec3(_mat.columns[0].x, _mat.columns[1].x, _mat.columns[2].x),
+		dvec3(_mat.columns[0].y, _mat.columns[1].y, _mat.columns[2].y),
+		dvec3(_mat.columns[0].z, _mat.columns[1].z, _mat.columns[2].z)
+	};
+}
+
+/**
+ * @brief Computes the transpose of a matrix.
+ * @param _mat The input matrix.
+ */
+inline dmat4 transpose(const dmat4& _mat)
+{
+	return {
+		dvec4(_mat.columns[0].x, _mat.columns[1].x, _mat.columns[2].x, _mat.columns[3].x),
+		dvec4(_mat.columns[0].y, _mat.columns[1].y, _mat.columns[2].y, _mat.columns[3].y),
+		dvec4(_mat.columns[0].z, _mat.columns[1].z, _mat.columns[2].z, _mat.columns[3].z),
+		dvec4(_mat.columns[0].w, _mat.columns[1].w, _mat.columns[2].w, _mat.columns[3].w)
+	};
+}
+
+#pragma endregion
+
+#pragma endregion double functions
+
+#pragma region int functions
+
+// abs functions
+#ifndef USE_SCALAR
+/**
+ * @brief Computes the absolute value of each component.
+ * @param _x The input value or vector.
+ */
+inline simdint abs(const simdint& _x)
+{
+	return simd_abs_int(_x);
+}
+
+/**
+ * @brief Computes the absolute value of each component.
+ * @param _x The input value or vector.
+ */
+inline simdint abs(const int& _x)
+{
+	return simd_set1_int(std::abs(_x));
+}
+#endif
+
+/**
+ * @brief Computes the absolute value of each component.
+ * @param _x The input value or vector.
+ */
+inline ivec2 abs(const ivec2& _x)
+{
+	return { abs(_x.x), abs(_x.y) };
+}
+
+/**
+ * @brief Computes the absolute value of each component.
+ * @param _x The input value or vector.
+ */
+inline ivec3 abs(const ivec3& _x)
+{
+	return { abs(_x.x), abs(_x.y), abs(_x.z) };
+}
+
+/**
+ * @brief Computes the absolute value of each component.
+ * @param _x The input value or vector.
+ */
+inline ivec4 abs(const ivec4& _x)
+{
+	return { abs(_x.x), abs(_x.y), abs(_x.z), abs(_x.w) };
+}
+
+// blendv functions
+/**
+ * @brief Blends two values based on a mask.
+ * @param _false_val The value to use when the mask is false.
+ * @param _true_val The value to use when the mask is true.
+ * @param _mask The selection mask.
+ */
+inline simdint blendv(const simdint& _false_val, const simdint& _true_val, const simdimask& _mask)
+{
+#ifdef USE_AVX512
+	return _mm512_mask_blend_epi32(_mask, _false_val, _true_val);
+#else
+	return simd_blendv_int(_false_val, _true_val, _mask);
+#endif
+}
+
+/**
+ * @brief Blends two values based on a mask.
+ * @param _false_val The value to use when the mask is false.
+ * @param _true_val The value to use when the mask is true.
+ * @param _mask The selection mask.
+ */
+inline ivec2 blendv(const ivec2& _false_val, const ivec2& _true_val, const simdimask& _mask)
+{
+	return {
+		blendv(_false_val.x, _true_val.x, _mask),
+		blendv(_false_val.y, _true_val.y, _mask)
+	};
+}
+
+/**
+ * @brief Blends two values based on a mask.
+ * @param _false_val The value to use when the mask is false.
+ * @param _true_val The value to use when the mask is true.
+ * @param _mask The selection mask.
+ */
+inline ivec3 blendv(const ivec3& _false_val, const ivec3& _true_val, const simdimask& _mask)
+{
+	return {
+		blendv(_false_val.x, _true_val.x, _mask),
+		blendv(_false_val.y, _true_val.y, _mask),
+		blendv(_false_val.z, _true_val.z, _mask)
+	};
+}
+
+/**
+ * @brief Blends two values based on a mask.
+ * @param _false_val The value to use when the mask is false.
+ * @param _true_val The value to use when the mask is true.
+ * @param _mask The selection mask.
+ */
+inline ivec4 blendv(const ivec4& _false_val, const ivec4& _true_val, const simdimask& _mask)
+{
+	return {
+		blendv(_false_val.x, _true_val.x, _mask),
+		blendv(_false_val.y, _true_val.y, _mask),
+		blendv(_false_val.z, _true_val.z, _mask),
+		blendv(_false_val.w, _true_val.w, _mask)
+	};
+}
+
+// max functions
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simdint max(const simdint& _val1, const simdint& _val2)
+{
+	return simd_max_int(_val1, _val2);
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simdint max(const simdint& _val1, const int& _val2)
+{
+	return max(_val1, simd_set1_int(_val2));
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simdint max(const int& _val1, const simdint& _val2)
+{
+	return max(simd_set1_int(_val1), _val2);
+}
+#endif
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec2 max(const ivec2& _val1, const simdint& _val2)
+{
+	return {
+		max(_val1.x, _val2),
+		max(_val1.y, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec2 max(const simdint& _val1, const ivec2& _val2)
+{
+	return {
+		max(_val1, _val2.x),
+		max(_val1, _val2.y)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec2 max(const ivec2& _val1, const int& _val2)
+{
+	return {
+		max(_val1.x, _val2),
+		max(_val1.y, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec2 max(const int& _val1, const ivec2& _val2)
+{
+	return {
+		max(_val1, _val2.x),
+		max(_val1, _val2.y)
+	};
+}
+#endif
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec2 max(const ivec2& _val1, const ivec2& _val2)
+{
+	return {
+		max(_val1.x, _val2.x),
+		max(_val1.y, _val2.y)
+	};
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec3 max(const ivec3& _val1, const simdint& _val2)
+{
+	return {
+		max(_val1.x, _val2),
+		max(_val1.y, _val2),
+		max(_val1.z, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec3 max(const simdint& _val1, const ivec3& _val2)
+{
+	return {
+		max(_val1, _val2.x),
+		max(_val1, _val2.y),
+		max(_val1, _val2.z)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec3 max(const ivec3& _val1, const int& _val2)
+{
+	return {
+		max(_val1.x, _val2),
+		max(_val1.y, _val2),
+		max(_val1.z, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec3 max(const int& _val1, const ivec3& _val2)
+{
+	return {
+		max(_val1, _val2.x),
+		max(_val1, _val2.y),
+		max(_val1, _val2.z)
+	};
+}
+#endif
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec3 max(const ivec3& _val1, const ivec3& _val2)
+{
+	return {
+		max(_val1.x, _val2.x),
+		max(_val1.y, _val2.y),
+		max(_val1.z, _val2.z)
+	};
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec4 max(const ivec4& _val1, const simdint& _val2)
+{
+	return {
+		max(_val1.x, _val2),
+		max(_val1.y, _val2),
+		max(_val1.z, _val2),
+		max(_val1.w, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec4 max(const simdint& _val1, const ivec4& _val2)
+{
+	return {
+		max(_val1, _val2.x),
+		max(_val1, _val2.y),
+		max(_val1, _val2.z),
+		max(_val1, _val2.w)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec4 max(const ivec4& _val1, const int& _val2)
+{
+	return {
+		max(_val1.x, _val2),
+		max(_val1.y, _val2),
+		max(_val1.z, _val2),
+		max(_val1.w, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec4 max(const int& _val1, const ivec4& _val2)
+{
+	return {
+		max(_val1, _val2.x),
+		max(_val1, _val2.y),
+		max(_val1, _val2.z),
+		max(_val1, _val2.w)
+	};
+}
+#endif
+
+/**
+ * @brief Returns the component-wise maximum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec4 max(const ivec4& _val1, const ivec4& _val2)
+{
+	return {
+		max(_val1.x, _val2.x),
+		max(_val1.y, _val2.y),
+		max(_val1.z, _val2.z),
+		max(_val1.w, _val2.w)
+	};
+}
+
+// min functions
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simdint min(const simdint& _val1, const simdint& _val2)
+{
+	return simd_min_int(_val1, _val2);
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simdint min(const simdint& _val1, const int& _val2)
+{
+	return min(_val1, simd_set1_int(_val2));
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline simdint min(const int& _val1, const simdint& _val2)
+{
+	return min(simd_set1_int(_val1), _val2);
+}
+#endif
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec2 min(const ivec2& _val1, const simdint& _val2)
+{
+	return {
+		min(_val1.x, _val2),
+		min(_val1.y, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec2 min(const simdint& _val1, const ivec2& _val2)
+{
+	return {
+		min(_val1, _val2.x),
+		min(_val1, _val2.y)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec2 min(const ivec2& _val1, const int& _val2)
+{
+	return {
+		min(_val1.x, _val2),
+		min(_val1.y, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec2 min(const int& _val1, const ivec2& _val2)
+{
+	return {
+		min(_val1, _val2.x),
+		min(_val1, _val2.y)
+	};
+}
+#endif
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec2 min(const ivec2& _val1, const ivec2& _val2)
+{
+	return {
+		min(_val1.x, _val2.x),
+		min(_val1.y, _val2.y)
+	};
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec3 min(const ivec3& _val1, const simdint& _val2)
+{
+	return {
+		min(_val1.x, _val2),
+		min(_val1.y, _val2),
+		min(_val1.z, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec3 min(const simdint& _val1, const ivec3& _val2)
+{
+	return {
+		min(_val1, _val2.x),
+		min(_val1, _val2.y),
+		min(_val1, _val2.z)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec3 min(const ivec3& _val1, const int& _val2)
+{
+	return {
+		min(_val1.x, _val2),
+		min(_val1.y, _val2),
+		min(_val1.z, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec3 min(const int& _val1, const ivec3& _val2)
+{
+	return {
+		min(_val1, _val2.x),
+		min(_val1, _val2.y),
+		min(_val1, _val2.z)
+	};
+}
+#endif
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec3 min(const ivec3& _val1, const ivec3& _val2)
+{
+	return {
+		min(_val1.x, _val2.x),
+		min(_val1.y, _val2.y),
+		min(_val1.z, _val2.z)
+	};
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec4 min(const ivec4& _val1, const simdint& _val2)
+{
+	return {
+		min(_val1.x, _val2),
+		min(_val1.y, _val2),
+		min(_val1.z, _val2),
+		min(_val1.w, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec4 min(const simdint& _val1, const ivec4& _val2)
+{
+	return {
+		min(_val1, _val2.x),
+		min(_val1, _val2.y),
+		min(_val1, _val2.z),
+		min(_val1, _val2.w)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec4 min(const ivec4& _val1, const int& _val2)
+{
+	return {
+		min(_val1.x, _val2),
+		min(_val1.y, _val2),
+		min(_val1.z, _val2),
+		min(_val1.w, _val2)
+	};
+}
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec4 min(const int& _val1, const ivec4& _val2)
+{
+	return {
+		min(_val1, _val2.x),
+		min(_val1, _val2.y),
+		min(_val1, _val2.z),
+		min(_val1, _val2.w)
+	};
+}
+#endif
+
+/**
+ * @brief Returns the component-wise minimum of two values.
+ * @param _val1 The left-hand side operand.
+ * @param _val2 The right-hand side operand.
+ */
+inline ivec4 min(const ivec4& _val1, const ivec4& _val2)
+{
+	return {
+		min(_val1.x, _val2.x),
+		min(_val1.y, _val2.y),
+		min(_val1.z, _val2.z),
+		min(_val1.w, _val2.w)
+	};
+}
+
+// clamp functions
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline int clamp(const int& _x, const int& _min_val, const int& _max_val)
+{
+	return std::max(std::min(_x, _max_val), _min_val);
+}
+#ifndef USE_SCALAR
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline simdint clamp(const simdint& _x, const simdint& _min_val, const simdint& _max_val)
+{
+	return max(min(_x, _max_val), _min_val);
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline simdint clamp(const simdint& _x, const int& _min_val, const int& _max_val)
+{
+	return clamp(_x, simd_set1_int(_min_val), simd_set1_int(_max_val));
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline ivec2 clamp(const ivec2& _x, const simdint& _min_val, const simdint& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val, _max_val),
+		clamp(_x.y, _min_val, _max_val)
+	};
+}
+#endif
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline ivec2 clamp(const ivec2& _x, const int& _min_val, const int& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val, _max_val),
+		clamp(_x.y, _min_val, _max_val)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline ivec2 clamp(const ivec2& _x, const ivec2& _min_val, const ivec2& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val.x, _max_val.x),
+		clamp(_x.y, _min_val.y, _max_val.y)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline ivec3 clamp(const ivec3& _x, const simdint& _min_val, const simdint& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val, _max_val),
+		clamp(_x.y, _min_val, _max_val),
+		clamp(_x.z, _min_val, _max_val)
+	};
+}
+#endif
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline ivec3 clamp(const ivec3& _x, const int& _min_val, const int& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val, _max_val),
+		clamp(_x.y, _min_val, _max_val),
+		clamp(_x.z, _min_val, _max_val)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline ivec3 clamp(const ivec3& _x, const ivec3& _min_val, const ivec3& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val.x, _max_val.x),
+		clamp(_x.y, _min_val.y, _max_val.y),
+		clamp(_x.z, _min_val.z, _max_val.z)
+	};
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline ivec4 clamp(const ivec4& _x, const simdint& _min_val, const simdint& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val, _max_val),
+		clamp(_x.y, _min_val, _max_val),
+		clamp(_x.z, _min_val, _max_val),
+		clamp(_x.w, _min_val, _max_val)
+	};
+}
+#endif
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline ivec4 clamp(const ivec4& _x, const int& _min_val, const int& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val, _max_val),
+		clamp(_x.y, _min_val, _max_val),
+		clamp(_x.z, _min_val, _max_val),
+		clamp(_x.w, _min_val, _max_val)
+	};
+}
+
+/**
+ * @brief Clamps a value between a minimum and maximum value.
+ * @param _x The input value or vector.
+ * @param _min_val The minimum value.
+ * @param _max_val The maximum value.
+ */
+inline ivec4 clamp(const ivec4& _x, const ivec4& _min_val, const ivec4& _max_val)
+{
+	return {
+		clamp(_x.x, _min_val.x, _max_val.x),
+		clamp(_x.y, _min_val.y, _max_val.y),
+		clamp(_x.z, _min_val.z, _max_val.z),
+		clamp(_x.w, _min_val.w, _max_val.w)
+	};
+}
+
+
+// sign functions
+/**
+ * @brief Extracts the sign of each component.
+ * @param _x The input value or vector.
+ */
+inline simdint sign(const simdint& _x)
+{
+	simdimask testmask = simd_cmpgt_int(_x, simd_set1_int(0));
+	return blendv(simd_set1_int(-1), simd_set1_int(1), testmask);
+}
+
+#ifndef USE_SCALAR
+/**
+ * @brief Extracts the sign of each component.
+ * @param _x The input value or vector.
+ */
+inline simdint sign(const int& _x)
+{
+	return simd_set1_int((_x > 0) - (_x < 0));
+}
+#endif
+
+/**
+ * @brief Extracts the sign of each component.
+ * @param _x The input value or vector.
+ */
+inline ivec2 sign(const ivec2& _x)
+{
+	return { sign(_x.x), sign(_x.y) };
+}
+
+/**
+ * @brief Extracts the sign of each component.
+ * @param _x The input value or vector.
+ */
+inline ivec3 sign(const ivec3& _x)
+{
+	return { sign(_x.x), sign(_x.y), sign(_x.z) };
+}
+
+/**
+ * @brief Extracts the sign of each component.
+ * @param _x The input value or vector.
+ */
+inline ivec4 sign(const ivec4& _x)
+{
+	return { sign(_x.x), sign(_x.y), sign(_x.z), sign(_x.w) };
+}
+
+
+#pragma endregion int functions
+
+
+
+#pragma region testmask functions
+
+#if !(defined(USE_SCALAR) || defined(USE_AVX512)) // For AVX2 and SSE
+// float
+/**
+ * @brief Return 1 if every mask component is True, 0 otherwise.
+ * @param _mask The selection mask.
+ */
+inline int maskAll(const simdmask& _mask) // Mask full of 1s
+{
+#ifdef USE_AVX2
+	int maxmask = 0xFF;
+#elif defined(USE_SSE41)
+		int maxmask = 0xF;
+#endif
+	if (simd_movemask_float(_mask) == maxmask)
+		return 1;
+	else
+		return 0;
+}
+
+/**
+ * @brief Return 1 if every mask component is False, 0 otherwise.
+ * @param _mask The selection mask.
+ */
+inline int maskNone(const simdmask& _mask) // Mask full of 0s
+{
+	if (simd_movemask_float(_mask) == 0)
+		return 1;
+	else
+		return 0;
+}
+// double
+/**
+ * @brief Return 1 if every mask component is True, 0 otherwise.
+ * @param _mask The selection mask.
+ */
+inline int maskAll(const simddmask& _mask) // Mask full of 1s
+{
+#ifdef USE_AVX2
+	int maxmask = 0xF;
+#elif defined(USE_SSE41)
+	int maxmask = 0x3;
+#endif
+	if (simd_movemask_double(_mask) == maxmask)
+		return 1;
+	else
+		return 0;
+}
+
+/**
+ * @brief Return 1 if every mask component is False, 0 otherwise.
+ * @param _mask The selection mask.
+ */
+inline int maskNone(const simddmask& _mask) // Mask full of 0s
+{
+	if (simd_movemask_double(_mask) == 0)
+		return 1;
+	else
+		return 0;
+}
+
+// int
+/**
+ * @brief Return 1 if every mask component is True, 0 otherwise.
+ * @param _mask The selection mask.
+ */
+inline int maskAll(const simdimask& _mask) // Mask full of 1s
+{
+#ifdef USE_AVX2
+	int maxmask = 0xFF;
+#elif defined(USE_SSE41)
+	int maxmask = 0xF;
+#endif
+	if (simd_movemask_epi8(_mask) == maxmask)
+		return 1;
+	else
+		return 0;
+}
+
+/**
+ * @brief Return 1 if every mask component is False, 0 otherwise.
+ * @param _mask The selection mask.
+ */
+inline int maskNone(const simdimask& _mask) // Mask full of 0s
+{
+	if (simd_movemask_epi8(_mask) == 0)
+		return 1;
+	else
+		return 0;
+}
+#elif defined(USE_AVX512) // For AVX-512
+
+/**
+ * @brief Return 1 if every mask component is True, 0 otherwise.
+ * @param _mask The selection mask.
+ */
+inline int maskAll(const simdmask& _mask) // Mask full of 1s
+{
+	if (_mask == 0xFFFF)
+		return 1;
+	else
+		return 0;
+}
+
+/**
+ * @brief Return 1 if every mask component is False, 0 otherwise.
+ * @param _mask The selection mask.
+ */
+inline int maskNone(const simdmask& _mask) // Mask full of 0s
+{
+	if (_mask == 0x0000)
+		return 1;
+	else
+		return 0;
+}
+
+/**
+ * @brief Return 1 if every mask component is True, 0 otherwise.
+ * @param _mask The selection mask.
+ */
+inline int maskAll(const simddmask& _mask) // Mask full of 1s
+{
+	if (_mask == 0xFF)
+		return 1;
+	else
+		return 0;
+}
+
+/**
+ * @brief Return 1 if every mask component is False, 0 otherwise.
+ * @param _mask The selection mask.
+ */
+inline int maskNone(const simddmask& _mask) // Mask full of 0s
+{
+	if (_mask == 0x0000)
+		return 1;
+	else
+		return 0;
+}
+
+#else
+/**
+ * @brief Return 1 if every mask component is True, 0 otherwise.
+ * @param _mask The selection mask.
+ */
+inline int maskAll(const int& _mask) // Mask full of 1s
+{
+	return _mask;
+}
+
+/**
+ * @brief Return 1 if every mask component is False, 0 otherwise.
+ * @param _mask The selection mask.
+ */
+inline int maskNone(const int& _mask) // Mask full of 0s
+{
+	return !_mask;
+}
+#endif// USE_SCALAR
+
+#pragma endregion testmask functions
+
+
+
+// Undefining symbols that aren't used outside of this file
+#undef	simd_set1_float
+#undef	simd_add_float
+#undef	simd_sub_float
+#undef	simd_mul_float
+#undef	simd_div_float
+#undef	simd_cmp_float
+#undef	simd_blendv_float
+#undef	simd_and_float
+#undef	simd_or_float
+#undef	simd_andnot_float
+#undef	simd_movemask_float
+#undef	simd_castsi_float
+#undef	simd_set1_int
+#undef	simd_acos_float
+#undef	simd_acosh_float
+#undef	simd_asin_float
+#undef	simd_asinh_float
+#undef	simd_atan_float
+#undef	simd_atan2_float
+#undef	simd_atanh_float
+#undef	simd_ceil_float
+#undef	simd_cos_float
+#undef	simd_cosh_float
+#undef	simd_exp_float
+#undef	simd_exp2_float
+#undef	simd_floor_float
+#undef	simd_fma_float
+#undef	simd_rsqrt_float
+#undef	simd_log_float
+#undef	simd_log2_float
+#undef	simd_max_float
+#undef	simd_min_float
+#undef	simd_mod_float
+#undef	simd_pow_float
+#undef	simd_round_float
+#undef	simd_sin_float
+#undef	simd_sinh_float
+#undef	simd_sqrt_float
+#undef	simd_tan_float
+#undef	simd_tanh_float
+#undef	simd_set1_double
+#undef	simd_add_double
+#undef	simd_sub_double
+#undef	simd_mul_double
+#undef	simd_div_double
+#undef	simd_cmp_double
+#undef	simd_blendv_float
+#undef	simd_and_double
+#undef	simd_or_double
+#undef	simd_andnot_double
+#undef	simd_movemask_double
+#undef	simd_castsi_double
+#undef	simd_set1_int
+#undef	simd_acos_double
+#undef	simd_acosh_double
+#undef	simd_asin_double
+#undef	simd_asinh_double
+#undef	simd_atan_double
+#undef	simd_atan2_double
+#undef	simd_atanh_double
+#undef	simd_ceil_double
+#undef	simd_cos_double
+#undef	simd_cosh_double
+#undef	simd_exp_double
+#undef	simd_exp2_double
+#undef	simd_floor_double
+#undef	simd_fma_double
+#undef	simd_rsqrt_double
+#undef	simd_log_double
+#undef	simd_log2_double
+#undef	simd_max_double
+#undef	simd_min_double
+#undef	simd_mod_double
+#undef	simd_pow_double
+#undef	simd_round_double
+#undef	simd_sin_double
+#undef	simd_sinh_double
+#undef	simd_sqrt_double
+#undef	simd_tan_double
+#undef	simd_tanh_double
+#undef	simd_add_int
+#undef	simd_sub_int
+#undef	simd_mul_int
+#undef	simd_min_int
+#undef	simd_max_int
+#undef	simd_abs_int
+#undef	simd_set1_int
+#undef	simd_cvtps_int
+#undef	simd_cvtepi32_float
+#undef	simd_and_si512
+#undef	simd_i32gather_float
+#undef	simd_castps_si
+#undef	simd_and_int
+#undef	simd_or_int
+#undef	simd_xor_int
+#undef	simd_andnot_int
+#undef	simd_slli_int
+#undef	simd_srli_int
+#undef	simd_srai_int
+#undef	simd_cmpeq_int
+#undef	simd_cmplt_int
+#undef	simd_cmpgt_int
+#undef	simd_abs_int
+#undef	simd_movemask_epi8
+
+
+#endif // _CPP_SHADER__H
