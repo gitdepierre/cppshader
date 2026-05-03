@@ -1,6 +1,6 @@
-# cppshader
+# Cppshader
 
-> **Bringing the fun of GLSL to native C++**
+**Bringing the fun of GLSL to native C++**
 
 cppshader is a header-only C++ library that brings much of GLSL syntax and its
 programming model into regular C++ code. It reimplements many GLSL features in
@@ -79,9 +79,9 @@ without source changes.
 
 ## Core Types
 
-### `simdfloat`: The Scalar Lane
+### `simdfloat`: the SIMD-enabled math type of cppshader
 
-`simdfloat` is the fundamental math type. It represents `simdwidth` packed
+`simdfloat` is the fundamental datatype of cppshader. It represents `simdwidth` packed
 floating-point values and can often be used much like a regular C++ `float`.
 The examples below assume that `USE_SSE` is enabled.
 
@@ -110,8 +110,8 @@ static const simdfloat SIMDPI = 3.1415927f;
 // search for "useful constants" in cppshader.h to see the rest.
 ```
 
-When using SIMD internal types, operations are parallelized at the instruction
-level only. Lanes are independent from one another. For example, with
+When using SIMD internal types, operations are parallelized at instruction
+level but don't see each others. Lanes are independent. For example, with
 `USE_AVX2`, a dot product on `simdfloat` values does not compute the dot product
 of two 8D vectors. Instead, it performs eight independent dot products in
 parallel and returns a `simdfloat` containing those eight results.
@@ -125,9 +125,9 @@ component is a `simdfloat`, so a `vec3` stores three SIMD values at once.
 
 | Type | Aliases | Components |
 |---|---|---|
-| `vec2` | - | `x, y`, `r, g`, or `s, t` |
-| `vec3` | - | `x, y, z`, `r, g, b`, or `s, t, p` |
-| `vec4` | - | `x, y, z, w`, `r, g, b, a`, or `s, t, p, q` |
+| `vec2` | - | `x, y` or `r, g`, or `s, t` |
+| `vec3` | - | `x, y, z` or `r, g, b`, or `s, t, p` |
+| `vec4` | - | `x, y, z, w` or `r, g, b, a`, or `s, t, p, q` |
 | `dvec2/3/4` | - | same layout, double precision |
 | `ivec2/3/4` | - | same layout, integer |
 
@@ -209,10 +209,10 @@ not provided.
 ## Swizzling
 
 One of the most recognizable features of GPU shading languages is swizzling,
-and cppshader reimplements it here.
+and cppshader reimplements it mostly.
 
 Every vector type exposes the full set of GLSL read swizzles as member
-functions, using both `xyzw` and `rgba` notation. The main difference from GLSL
+functions, using both `xyzw` and `rgba` (and `stpq`) notation. The main difference from GLSL
 is that reading more than one component at once requires an explicit function
 call, and assigning a group of components also uses a setter-style function
 call.
@@ -471,7 +471,7 @@ back into an image buffer.
 
 Samples are rewritten Shadertoy shaders (see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)). They
 can be compiled using Visual Studio or GCC, with SFML 2.5 or 2.6 as the only dependency. At runtime,
-you can switch demos using the number keys. Put the file assets/Inter-Regular.ttf next to the executable.
+you can switch demos using the number keys. Remember to put the file `assets/Inter-Regular.ttf` next to the executable.
 
 ---
 
