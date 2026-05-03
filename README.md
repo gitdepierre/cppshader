@@ -209,7 +209,7 @@ not provided.
 ## Swizzling
 
 One of the most recognizable features of GPU shading languages is swizzling,
-and cppshader reimplements it mostly.
+and cppshader reimplements most of it.
 
 Every vector type exposes the full set of GLSL read swizzles as member
 functions, using both `xyzw` and `rgba` (and `stpq`) notation. The main difference from GLSL
