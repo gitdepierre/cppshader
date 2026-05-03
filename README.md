@@ -82,14 +82,14 @@ without source changes.
 ### `simdfloat`: the SIMD-enabled math type of cppshader
 
 `simdfloat` is the fundamental datatype of cppshader. It represents `simdwidth` packed
-floating-point values and can often be used much like a regular C++ `float`.
+floating-point values and can often be used much like a regular C++ `float`, while holding multiple instances of primitive scalar types.
 The examples below assume that `USE_SSE` is enabled.
 
 Some basic uses:
 
 ```cpp
 simdfloat a = 1.0f;  // broadcast 1.0f to every lane
-simdfloat b = simd_set_float(1.0f, 2.0f, 3.0f, 4.0f); // not recommended, see below
+simdfloat b = simd_set_float(1.0f, 2.0f, 3.0f, 4.0f); // not recommended, load/store are better
 
 simdfloat c = a + b;  // four additions in one instruction with SSE
 simdfloat d = sin(c); // four sine evaluations in one instruction with SSE
