@@ -35,7 +35,7 @@
 #include "cppshader.h"
 #include "omp.h"
 
-simdfloat iTime;
+
 vec3 iMouse(0.5f);
 sf::Image image;
 int currentDemo = 0;
