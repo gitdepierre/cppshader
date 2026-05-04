@@ -108,7 +108,7 @@ void Pixel(int _i, int _j)
 	}
 }
 
-int main()
+int RunSFML()
 {
 	sf::RenderWindow window(sf::VideoMode(IWIDTH, IHEIGHT), "My window");
 
@@ -226,5 +226,5 @@ int main()
 		std::cout << "FPS : " << 1.0f/frameClock.restart().asSeconds() << std::endl; // Displaying frame time
 	}
 
-
+	return 0;
 }
