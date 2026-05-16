@@ -17,7 +17,7 @@ from Shadertoy, to pure C++ with only small source changes.
 - [Getting Started](#getting-started)
 - [Backend Selection](#backend-selection)
 - [Core Types](#core-types)
-  - [simdfloat: The Scalar Lane](#simdfloat-the-scalar-lane)
+  - [simdfloat: the SIMD-enabled math type of cppshader](#simdfloat-the-SIMD-enabled-math-type-of-cppshader)
   - [Vector Types](#vector-types)
   - [Matrix Types](#matrix-types)
 - [Swizzling](#swizzling)
