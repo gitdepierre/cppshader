@@ -2,7 +2,7 @@
 
 namespace ShaderArt
 {
-	// https:// www.shadertoy.com/view/mtyGWy  Shader Art Coding Introduction, by kishimisu
+	// https://www.shadertoy.com/view/mtyGWy  Shader Art Coding Introduction, by kishimisu
 	// Code has been modified a bit to fit library constraints
 
 	vec3 palette(simdfloat t) {

@@ -2,7 +2,7 @@
 
 namespace Zippy
 {
-	// https:// www.shadertoy.com/view/XXyGzh Zippy char original version, by SnoopethDuckDuck
+	// https://www.shadertoy.com/view/XXyGzh Zippy char original version, by SnoopethDuckDuck
     // Code has been modified a bit to fit library constraints
 
     vec4 mainImage(vec2 u)

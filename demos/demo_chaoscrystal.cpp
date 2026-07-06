@@ -2,7 +2,7 @@
 
 namespace ChaosCrystal
 {
-	// https:// www.shadertoy.com/view/scfGWr  Chaos Crystal, by diatribe
+	// https://www.shadertoy.com/view/scfGWr  Chaos Crystal, by diatribe
 	// Code has been modified a bit to fit library constraints
 
 	vec4 mainImage(vec2 u) {

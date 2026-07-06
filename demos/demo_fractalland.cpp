@@ -2,7 +2,7 @@
 
 namespace FractalLand
 {
-	// https:// www.shadertoy.com/view/XsBXWt Fractal Land, by Kali
+	// https://www.shadertoy.com/view/XsBXWt Fractal Land, by Kali
 	// Code has been modified a bit to fit library constraints
 
 	// #define SHOWONLYEDGES

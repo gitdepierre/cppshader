@@ -2,7 +2,7 @@
 
 namespace Creation
 {
-	// https:// www.shadertoy.com/view/XsXXDn Creation by Silexars, by Danguafer
+	// https://www.shadertoy.com/view/XsXXDn Creation by Silexars, by Danguafer
 	// Code has been modified a bit to fit library constraints
 
 #define t iTime

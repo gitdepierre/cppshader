@@ -2,7 +2,7 @@
 
 namespace New
 {
-	// https:// www.shadertoy.com/view/ssdXRs New shader from shadertoy
+	// https://www.shadertoy.com/view/ssdXRs New shader from shadertoy
 	// Code has been modified a bit to fit library constraints
 
 	vec4 mainImage(vec2 fragCoord)

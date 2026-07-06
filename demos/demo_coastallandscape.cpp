@@ -2,7 +2,7 @@
 
 namespace CoastalLandscape
 {
-	// https:// www.shadertoy.com/view/fstyD4  Coastal Landscape, by bitless
+	// https://www.shadertoy.com/view/fstyD4  Coastal Landscape, by bitless
 	// Code has been modified a bit to fit library constraints
 
 	// Author: bitless
@@ -12,12 +12,12 @@ namespace CoastalLandscape
 	// and Fabrice Neyret (FabriceNeyret2) for https:// shadertoyunofficial.wordpress.com/
 	// and Inigo Quilez (iq) for  https:// iquilezles.org/www/index.htm
 	// and whole Shadertoy community for inspiration.
-#define p(t, a, b, c, d) ( a + b*cos( 6.28318f*(c*t+d) ) ) // IQ's palette function (https:// www.iquilezles.org/www/articles/palettes/palettes.htm)
+#define p(t, a, b, c, d) ( a + b*cos( 6.28318f*(c*t+d) ) ) // IQ's palette function (https://www.iquilezles.org/www/articles/palettes/palettes.htm)
 #define sp(t) p(t,vec3(.26f,.76f,.77f),vec3(1.f,.3f,1.f),vec3(.8f,.4f,.7f),vec3(0.f,.12f,.54f)) // sky palette
 #define hue(v) ( .6f + .76f * cos(6.3f*(v) + vec4(0.f,23.f,21.f,0.f) ) ) // hue
 
 // "Hash without Sine", by Dave_Hoskins.
-// https:// www.shadertoy.com/view/4djSRW
+// https://www.shadertoy.com/view/4djSRW
 	simdfloat hash12(vec2 p)
 	{
 		vec3 p3 = fract(vec3(p.xyx()) * .1031f);
@@ -119,6 +119,7 @@ namespace CoastalLandscape
 				simdmask waterMask = id.y + i < -5.f; // Storing the 
 
 				// if (id.y + i < -5.f)
+				if (!maskNone(waterMask)) // If every simd lane don't met the condition, don't execute that code
 				{
 					lc = fract(u) - .5f;
 					lc.y = (lc.y + (sin(uv.x * 12.f - iTime * 3.f + id.y + i)) * .25f - i) * 4.f; // set the waveform and divide it into four strips
@@ -168,6 +169,7 @@ namespace CoastalLandscape
 		// Code modification : testmask + blendv logic again.
 		simdmask grassMask = u.y < 1.2f;
 		// 	if (u.y < 1.2f)
+		if (!maskNone(grassMask)) // If every simd lane don't met the condition, don't execute that code
 		{
 			for (float y = 0.f; y > -3.f; y--)
 			{

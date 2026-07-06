@@ -2,7 +2,7 @@
 
 namespace RoadRibbon
 {
-	// https:// www.shadertoy.com/view/MsfGzr To the road of ribbon, by XT95
+	// https://www.shadertoy.com/view/MsfGzr To the road of ribbon, by XT95
 	// Code has been modified a bit to fit library constraints
 
 	simdfloat tunnel(vec3 p)

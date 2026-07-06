@@ -136,11 +136,17 @@ with a minor set of modifications where they are published under CC BY-NC-SA
   demo_creation.cpp         https://www.shadertoy.com/view/XsXXDn Creation by Silexars, by Danguafer
   demo_fovea.cpp            https://www.shadertoy.com/view/4dsXzM Fovea detector, by nimitz
   demo_fractalland.cpp      https://www.shadertoy.com/view/XsBXWt Fractal Land, by Kali
-  demo_julia.cpp            https://www.shadertoy.com/view/scf3WS Julia Set, by edithidden2_71828
-  demo_linear.cpp           https://www.shadertoy.com/view/ssdXRs Linear transformation, by trinketMage
+  demo_gabor2.cpp	    https://www.shadertoy.com/view/4ljSRR Gabor^2, by mattz
+  demo_glossygradients.cpp  https://www.shadertoy.com/view/lX2GDR Glossy Gradients, by Peace
+  demo_hyperkart.cpp        https://www.shadertoy.com/view/scS3Wm Hyperkart, by diatribes
   demo_new.cpp              https://www.shadertoy.com/view/ssdXRs Default new shader on Shadertoy
-  demo_roadribbon.cpp       https://www.shadertoy.com/view/MsfGzr To the road of ribbon, by XT95
+  demo_noise.cpp            https://github.com/hughsk/glsl-noise/blob/master/simplex/3d.glsl  Array and textureless GLSL 2D/3D/4D simplex noise functions, by Ian McEwan, Ashima Arts.
   demo_protean.cpp          https://www.shadertoy.com/view/3l23Rh Protean Clouds, by nimitz
+  demo_roadribbon.cpp       https://www.shadertoy.com/view/MsfGzr To the road of ribbon, by XT95
+  demo_rollinghill.cpp      https://www.shadertoy.com/view/Xsf3zX Rolling Hill, by Dave_Hoskins
   demo_seascape.cpp         https://www.shadertoy.com/view/Ms2SD1 Seascape, by TDM
   demo_shaderart.cpp        https://www.shadertoy.com/view/mtyGWy Shader Art Coding Introduction, by kishimisu
+  demo_voxelhall.cpp        https://www.shadertoy.com/view/fsXczN Voxel Hall Colors, by elsif
+  demo_vortex.cpp           https://www.shadertoy.com/view/XlfBR7 Tribute to Marc-Antoine Mathieu, by leon
+  demo_wickedfractal.cpp    https://www.shadertoy.com/view/scfGzf Wicked Fractal Flight, by diatribes
   demo_zippy.cpp            https://www.shadertoy.com/view/XXyGzh Zippy char original version, by SnoopethDuckDuck

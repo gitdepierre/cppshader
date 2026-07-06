@@ -41,8 +41,9 @@ from Shadertoy, to pure C++ with only small source changes.
 
 ## Getting Started
 
-Include the single-header library. It has no dependencies beyond having
-a compiler that supports the SIMD width you want (SSE4.1, AVX2, or AVX512).
+Include the single-header library present in "amalgamation" folder. 
+It has no dependencies beyond having a compiler that supports 
+the SIMD width you want (SSE4.1, AVX2, or AVX512).
 
 ```cpp
 #include "cppshader.h"
@@ -100,6 +101,9 @@ Alongside `simdfloat`, two companion types are available:
 - `simddouble`: double-precision SIMD scalar type; use `halfsimdwidth` for its
   lane count.
 - `simdint`: 32-bit integer SIMD scalar type.
+
+Boolean vectors and unsigned integer vectors aren't provided though, and likely
+won't be.
 
 Useful broadcast constants are also provided:
 

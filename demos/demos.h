@@ -36,19 +36,11 @@ namespace Fovea {
 	vec4 mainImage(vec2 fragCoord);
 }
 
-namespace Linear {
-	vec4 mainImage(vec2 fragCoord);
-}
-
 namespace Protean {
 	vec4 mainImage(vec2 fragCoord);
 }
 
 namespace FractalLand {
-	vec4 mainImage(vec2 fragCoord);
-}
-
-namespace Julia {
 	vec4 mainImage(vec2 fragCoord);
 }
 
@@ -61,6 +53,40 @@ namespace ChaosCrystal {
 }
 
 namespace New {
+	vec4 mainImage(vec2 fragCoord);
+}
+
+namespace Noise {
+	vec4 mainImage(vec2 fragCoord);
+}
+
+namespace Hyperkart {
+	vec4 mainImage(vec2 fragCoord);
+}
+
+namespace GlossyGradients {
+	vec4 mainImage(vec2 fragCoord);
+}
+
+namespace WickedFractal {
+	vec4 mainImage(vec2 fragCoord);
+}
+
+namespace RollingHill {
+	vec4 mainImage(vec2 fragCoord);
+}
+
+namespace Gabor2 {
+	vec4 mainImage(vec2 fragCoord);
+}
+
+namespace VoxelHallColors
+{
+	vec4 mainImage(vec2 fragCoord);
+}
+
+namespace Vortex
+{
 	vec4 mainImage(vec2 fragCoord);
 }
 

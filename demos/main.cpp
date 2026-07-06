@@ -22,17 +22,27 @@
  * SOFTWARE.
  */
 
-//controls whether the demo will be rendered using SFML (with a window and real-time rendering) or not (in which case a single snapshot will be generated and saved as a PPM file)
-#define USE_SFML
 
-#ifdef USE_SFML
+#define USE_SFML //Comment this to remove every SFML dependancy, and generate a ppm file instead
 
 #include <iostream>
+#include <fstream>
 #include <time.h>
-
 #include "demos.h"
 #include "cppshader.h"
+#include "omp.h"
 
+
+simdfloat iTime;
+int currentDemo = 0;
+vec3 iMouse(0.5f);
+
+inline float scalar_clamp(float value, float minVal, float maxVal)
+{
+	return value < minVal ? minVal : (value > maxVal ? maxVal : value);
+}
+
+#ifdef USE_SFML
 
 #include "SFML/Window.hpp"
 #include "SFML/Audio.hpp"
@@ -40,18 +50,9 @@
 #include "SFML/Network.hpp"
 #include "SFML/OpenGL.hpp"
 
-
-#include "omp.h"
-
-simdfloat iTime;
-vec3 iMouse(0.5f);
 sf::Image image;
-int currentDemo = 0;
 
-inline float scalar_clamp(float value, float minVal, float maxVal)
-{
-	return value < minVal ? minVal : (value > maxVal ? maxVal : value);
-}
+
 
 void Pixel(int _i, int _j)
 {
@@ -92,8 +93,14 @@ void Pixel(int _i, int _j)
 		case 8: color = CoastalLandscape::mainImage(fragCoord); break;
 		case 9: color = ChaosCrystal::mainImage(fragCoord); break;
 		case 10: color = New::mainImage(fragCoord); break;
-		case 11: color = Linear::mainImage(fragCoord); break;
-		case 12: color = Julia::mainImage(fragCoord); break;
+		case 11: color = Noise::mainImage(fragCoord); break;
+		case 12: color = Hyperkart::mainImage(fragCoord); break;
+		case 13: color = GlossyGradients::mainImage(fragCoord); break;
+		case 14: color = WickedFractal::mainImage(fragCoord); break;
+		case 15: color = RollingHill::mainImage(fragCoord); break;
+		case 16: color = Gabor2::mainImage(fragCoord); break;
+		case 17: color = VoxelHallColors::mainImage(fragCoord); break;
+		case 18: color = Vortex::mainImage(fragCoord); break;
 	};
 
 	// Getting color back and writting it to a SFML image
@@ -137,11 +144,10 @@ int Run()
 	}
 	text.setFont(font);
 	text.setCharacterSize(16);
-	text.setString("To the road of ribbon, by XT95");
 
 	text2.setFont(font);
 	text2.setCharacterSize(16);
-	text2.setString("Code has been modified a bit to fit library constraints\nPress 0-9 to change demo, R to reset time");
+	text2.setString("Code has been modified a bit to fit library constraints\nPress left/right arrows to change demo, R to reset time");
 	text2.setPosition(0, 20);
 
 	sf::Clock frameClock;
@@ -158,60 +164,44 @@ int Run()
 
 			if (event.type == sf::Event::KeyPressed)
 			{
-				if (event.key.code == sf::Keyboard::Num1)
+				if (event.key.code == sf::Keyboard::Left)
 				{
-					currentDemo = 0;
-					text.setString("To the road of ribbon, by XT95");
+					currentDemo--;
 				}
-				else if (event.key.code == sf::Keyboard::Num2)
+				else if (event.key.code == sf::Keyboard::Right)
 				{
-					currentDemo = 1;
-					text.setString("Shader Art Coding Introduction, by kishimisu");
+					currentDemo++;
 				}
-				else if (event.key.code == sf::Keyboard::Num3)
-				{
-					currentDemo = 2;
-					text.setString("Creation by Silexars, by Danguafer");
-				}
-				else if (event.key.code == sf::Keyboard::Num4)
-				{
-					currentDemo = 3;
-					text.setString("Seascape, by TDM");
-				}
-				else if (event.key.code == sf::Keyboard::Num5)
-				{
-					currentDemo = 4;
-					text.setString("Zippy char, by SnoopethDuckDuck");
-				}
-				else if (event.key.code == sf::Keyboard::Num6)
-				{
-					currentDemo = 5;
-					text.setString("Fovea detector, by nimitz");
-				}
-				else if (event.key.code == sf::Keyboard::Num7)
-				{
-					currentDemo = 6;
-					text.setString("Protean Clouds, by nimitz");
-				}
-				else if (event.key.code == sf::Keyboard::Num8)
-				{
-					currentDemo = 7;
-					text.setString("Fractal Land, by Kali");
-				}
-				else if (event.key.code == sf::Keyboard::Num9)
-				{
-					currentDemo = 8;
-					text.setString("Coastal Landscape, by bitless");
-				}
-				else if (event.key.code == sf::Keyboard::Num0)
-				{
-					currentDemo = 9;
-					text.setString("Chaos Crystal, by Silexars");
-				}
-
 				else if (event.key.code == sf::Keyboard::R)
 					globalClock.restart();
 			}
+		}
+
+		if (currentDemo < 0)
+			currentDemo = 18;
+		currentDemo%=19; // Looping the demo index
+
+		switch (currentDemo)
+		{
+		case 0: text.setString("To the road of ribbon, by XT95"); break;
+		case 1:  text.setString("Shader Art Coding Introduction, by kishimisu"); break;
+		case 2:  text.setString("Creation by Silexars, by Danguafer"); break;
+		case 3:  text.setString("Seascape, by TDM"); break;
+		case 4:  text.setString("Zippy char, by SnoopethDuckDuck"); break;
+		case 5: text.setString("Fovea detector, by nimitz"); break;
+		case 6: text.setString("Protean Clouds, by nimitz"); break;
+		case 7:  text.setString("Fractal Land, by Kali"); break;
+		case 8:  text.setString("Coastal Landscape, by bitless"); break;
+		case 9:  text.setString("Chaos Crystal, by Silexars"); break;
+		case 10:  text.setString("New shader"); break;
+		case 11:  text.setString("3D Simplex Noise, by Ian McEwan, Ashima Arts, ijm"); break;
+		case 12:  text.setString("Hyperkart, by diatribes"); break;
+		case 13: text.setString("Glossy Gradients, by Peace"); break;
+		case 14: text.setString("Wicked Fractal Flight, by diatribes"); break;
+		case 15: text.setString("Rolling Hill, by Dave_Hoskins"); break;
+		case 16: text.setString("Gabor^2, by mattz"); break;
+		case 17: text.setString("Voxel Hall Colors, by elsif"); break;
+		case 18: text.setString("Tribute to Marc-Antoine Mathieu, by leon"); break;
 		}
 
 		// Updating the iTime variable, used in the demos to create animations
@@ -233,23 +223,10 @@ int Run()
 		window.display();
 		std::cout << "FPS : " << 1.0f/frameClock.restart().asSeconds() << std::endl; // Displaying frame time
 	}
-
-	return 0;
 }
-
-#else
-
-#include "demos.h"
-#include "cppshader.h"
+#else //Not using SFML
 uint32_t image[IWIDTH * IHEIGHT];
 
-simdfloat iTime;
-vec3 iMouse(0.5f);
-
-inline float scalar_clamp(float value, float minVal, float maxVal)
-{
-	return value < minVal ? minVal : (value > maxVal ? maxVal : value);
-}
 void PixelPPM(int _i, int _j)
 {
 	// Filling a big array here, able to accomodate every SIMD flavour at loading
@@ -276,7 +253,28 @@ void PixelPPM(int _i, int _j)
 	vec4 color;
 
 	// Running the current demo, and storing the result in "color" variable
-	color = RoadRibbon::mainImage(fragCoord);
+	switch (currentDemo)
+	{
+	case 0: color = RoadRibbon::mainImage(fragCoord); break;
+	case 1: color = ShaderArt::mainImage(fragCoord); break;
+	case 2: color = Creation::mainImage(fragCoord); break;
+	case 3: color = Seascape::mainImage(fragCoord); break;
+	case 4: color = Zippy::mainImage(fragCoord); break;
+	case 5: color = Fovea::mainImage(fragCoord); break;
+	case 6: color = Protean::mainImage(fragCoord); break;
+	case 7: color = FractalLand::mainImage(fragCoord); break;
+	case 8: color = CoastalLandscape::mainImage(fragCoord); break;
+	case 9: color = ChaosCrystal::mainImage(fragCoord); break;
+	case 10: color = New::mainImage(fragCoord); break;
+	case 11: color = Noise::mainImage(fragCoord); break;
+	case 12: color = Hyperkart::mainImage(fragCoord); break;
+	case 13: color = GlossyGradients::mainImage(fragCoord); break;
+	case 14: color = WickedFractal::mainImage(fragCoord); break;
+	case 15: color = RollingHill::mainImage(fragCoord); break;
+	case 16: color = Gabor2::mainImage(fragCoord); break;
+	case 17: color = VoxelHallColors::mainImage(fragCoord); break;
+	case 18: color = Vortex::mainImage(fragCoord); break;
+	};
 
 	// Getting color back and writting it to a SFML image
 	alignas(64) float colorsX[simdwidth];
@@ -298,43 +296,78 @@ void PixelPPM(int _i, int _j)
 }
 
 
- int Run()
- {
-    iTime += 5.0f;
+void Run()
+{
+	std::cout << "Choose which demo to run:" << std::endl;
+	std::cout << "[0] To the road of ribbon, by XT95" << std::endl;
+	std::cout << "[1] Shader Art Coding Introduction, by kishimisu" << std::endl;
+	std::cout << "[2] Creation by Silexars, by Danguafer" << std::endl;
+	std::cout << "[3] Seascape, by TDM" << std::endl;
+	std::cout << "[4] Zippy char, by SnoopethDuckDuck" << std::endl;
+	std::cout << "[5] Fovea detector, by nimitz" << std::endl;
+	std::cout << "[6] Protean Clouds, by nimitz" << std::endl;
+	std::cout << "[7] Fractal Land, by Kali" << std::endl;
+	std::cout << "[8] Coastal Landscape, by bitless" << std::endl;
+	std::cout << "[9] Chaos Crystal, by Silexars" << std::endl;
+	std::cout << "[10] New shader" << std::endl;
+	std::cout << "[11] 3D Simplex Noise, by Ian McEwan, Ashima Arts, ijm" << std::endl;
+	std::cout << "[12] Hyperkart, by diatribes" << std::endl;
+	std::cout << "[13] Glossy Gradients, by Peace" << std::endl;
+	std::cout << "[14] Wicked Fractal Flight, by diatribes" << std::endl;
+	std::cout << "[15] Rolling Hill, by Dave_Hoskins" << std::endl;
+	std::cout << "[16] Gabor^2, by mattz" << std::endl;
+	std::cout << "[17] Voxel Hall Colors, by elsif" << std::endl;
+	std::cout << "[18] Tribute to Marc-Antoine Mathieu, by leon" << std::endl;
+	std::string choice;
+	std::cin >> choice;
 
-    printf("Demo will generate a snapshot of 'To the road of ribbon, by XT95', and write it to a PPM file, press enter to continue...\n");
-    getchar();  
+	if (choice == std::string("0")) currentDemo = 0;
+	if (choice == std::string("1")) currentDemo = 1;
+	if (choice == std::string("2")) currentDemo = 2;
+	if (choice == std::string("3")) currentDemo = 3;
+	if (choice == std::string("4")) currentDemo = 4;
+	if (choice == std::string("5")) currentDemo = 5;
+	if (choice == std::string("6")) currentDemo = 6;
+	if (choice == std::string("7")) currentDemo = 7;
+	if (choice == std::string("8")) currentDemo = 8;
+	if (choice == std::string("9")) currentDemo = 9;
+	if (choice == std::string("10")) currentDemo = 10;
+	if (choice == std::string("11")) currentDemo = 11;
+	if (choice == std::string("12")) currentDemo = 12;
+	if (choice == std::string("13")) currentDemo = 13;
+	if (choice == std::string("14")) currentDemo = 14;
+	if (choice == std::string("15")) currentDemo = 15;
+	if (choice == std::string("16")) currentDemo = 16;
+	if (choice == std::string("17")) currentDemo = 17;
 
-    for (int i = 0; i < IHEIGHT * IWIDTH; i += simdwidth)
-    {
-        PixelPPM(i % IWIDTH, i / IWIDTH);
-    }
-    char filename[] = "To_the_road_of_ribbon_by_XT95.ppm";
-    // Writing the result to a PPM file
-    FILE* f = fopen(filename, "wb");
-    fprintf(f, "P6\n%d %d\n255\n", IWIDTH, IHEIGHT);
-    for (int i = 0; i < IWIDTH * IHEIGHT; i++)  
-    {
-        uint32_t col = image[i];
-        unsigned char r = (col >> 24) & 0xFF;
-        unsigned char g = (col >> 16) & 0xFF;
-        unsigned char b = (col >> 8) & 0xFF;
-        fputc(r, f);
-        fputc(g, f);
-        fputc(b, f);
+	iTime = 5.0f;
 
-        printf("Progress : %.2f%%\r", (float)i / (IWIDTH * IHEIGHT) * 100.0f);
-    }
-    fclose(f);
+	for (int i = 0; i < IHEIGHT * IWIDTH; i += simdwidth)
+	{
+		PixelPPM(i % IWIDTH, i / IWIDTH);
+	}
+	// Writing the result to a PPM file
+	std::fstream file("generated.ppm", std::ios::out|std::ios::binary);
+	file << "P6\n" << IWIDTH << " " << IHEIGHT <<"\n255\n";
+	for (int i = 0; i < IWIDTH * IHEIGHT; i++)
+	{
+		uint32_t col = image[i];
+		unsigned char r = (col >> 24) & 0xFF;
+		unsigned char g = (col >> 16) & 0xFF;
+		unsigned char b = (col >> 8) & 0xFF;
+		file << r;
+		file << g;
+		file << b;
+	}
 
-    printf("Snapshot has been generated as %s, press enter to exit...\n", filename);
-    getchar();  
+	std::cout <<"Snapshot has been saved as \"generated.ppm\", press enter to exit...\n";
+	getchar();
 
-    return 0;
- }
+}
+
 #endif
 int main()
 {
 
-    return Run();
+	Run();
 }

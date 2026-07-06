@@ -2,7 +2,7 @@
 
 namespace Fovea
 {
-	// https:// www.shadertoy.com/view/4dsXzM Fovea detector, by nimitz
+	// https://www.shadertoy.com/view/4dsXzM Fovea detector, by nimitz
 	// Code has been modified a bit to fit library constraints
 
 #define scale 90.f

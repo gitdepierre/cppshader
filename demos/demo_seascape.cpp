@@ -2,7 +2,7 @@
 
 namespace Seascape
 {
-	// https:// www.shadertoy.com/view/Ms2SD1 Seascape, by TDM
+	// https://www.shadertoy.com/view/Ms2SD1 Seascape, by TDM
 	// Code has been modified a bit to fit library constraints
 
 	const int NUM_STEPS = 32;

@@ -26,5 +26,5 @@ See THIRD_PARTY_NOTICES.md for full attribution and third-party license details.
 
 NOTE ON ORIGINAL WORK
 
-The SIMD framework (simdshader.h) and main project (ProjetSFML.cpp)
+The SIMD framework (cppshader.h) and main project (ProjetSFML.cpp)
 is original work by the author and is included under this same license.

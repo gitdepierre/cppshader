@@ -2,7 +2,7 @@
 
 namespace Protean
 {
-	// https:// www.shadertoy.com/view/3l23Rh Protean Clouds, by nimitz
+	// https://www.shadertoy.com/view/3l23Rh Protean Clouds, by nimitz
 	// Code has been modified a bit to fit library constraints
 
 	mat2 rot(simdfloat a) { simdfloat c = cos(a), s = sin(a); return mat2(c, s, -s, c); }
@@ -72,8 +72,6 @@ namespace Protean
 				col = blendv(col, coltemp, testmask);
 			}
 
-
-
 			simdfloat fogC = exp(t * 0.2f - 2.2f);
 			col.rgba(col.rgba() + vec4(0.06f, 0.11f, 0.11f, 0.1f) * clamp(fogC - fogT, 0.f, 1.f));
 			fogT = fogC;
@@ -90,7 +88,7 @@ namespace Protean
 		return (ma - mi) / (ma + 1e-7f);
 	}
 
-	// from my "Will it blend" shader (https:// www.shadertoy.com/view/lsdGzN)
+	// from my "Will it blend" shader (https://www.shadertoy.com/view/lsdGzN)
 	vec3 iLerp(vec3 a, vec3 b, simdfloat x)
 	{
 		vec3 ic = mix(a, b, x) + vec3(1e-6, 0.f, 0.f);
