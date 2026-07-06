@@ -478,6 +478,9 @@ Samples are rewritten Shadertoy shaders (see [THIRD_PARTY_NOTICES.md](THIRD_PART
 can be compiled using Visual Studio or GCC, with SFML 2.5 or 2.6 as the only dependency. At runtime,
 you can switch demos using the number keys. Remember to put the file `assets/Inter-Regular.ttf` next to the executable.
 
+If you prefer a no-dependancies version, just comment "#define USE_SFML" on top of main.cpp.
+You won't need SFML anymore, and a ppm image file will be generated instead.
+
 ---
 
 ## License
