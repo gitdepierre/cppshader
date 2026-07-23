@@ -5,7 +5,7 @@
 cppshader is a header-only C++ library that brings much of GLSL syntax and its
 programming model into regular C++ code. It reimplements many GLSL features in
 software, provides vector and matrix types, and includes a large set of built-
-in functions backed by SIMD intrinsics such as SSE and AVX2.
+in functions backed by SIMD intrinsics such as SSE4.1 and AVX2.
 
 As a result, you may be able to port GLSL shaders easily, including shader code
 from Shadertoy, to pure C++ with only small source changes.
@@ -66,11 +66,11 @@ Pick your SIMD width by uncommenting exactly one define near the top of
 ```cpp
 //#define USE_AVX512   // 16 floats per lane, requires AVX-512
 //#define USE_AVX2     // 8 floats per lane, requires AVX2
-#define USE_SSE       // 4 floats per lane, requires SSE4
+#define USE_SSE41       // 4 floats per lane, requires SSE4
 //#define USE_SCALAR   // 1 float per lane, no intrinsics
 ```
 
-The default is `USE_SSE`.
+The default is `USE_SSE41`.
 
 The selected backend sets `simdwidth` and the related `simd*` macros
 automatically, so the same user code can be compiled for different backends
@@ -84,7 +84,7 @@ without source changes.
 
 `simdfloat` is the fundamental datatype of cppshader. It represents `simdwidth` packed
 floating-point values and can often be used much like a regular C++ `float`, while holding multiple instances of primitive scalar types.
-The examples below assume that `USE_SSE` is enabled.
+The examples below assume that `USE_SSE41` is enabled.
 
 Some basic uses:
 
