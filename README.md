@@ -1,14 +1,14 @@
-# Cppshader
+# CPPShader
 
 ## Bringing the fun of GLSL to native C++
 
-cppshader is a header-only C++ library that brings much of GLSL syntax and its
-programming model into regular C++ code. It reimplements many GLSL features in
-software, provides vector and matrix types, and includes a large set of built-
-in functions backed by SIMD intrinsics such as SSE4.1 and AVX2.
+CPPShader is a header-only C++ library that brings much of GLSL syntax and its
+programming model into regular C++ code. It provide many GLSL-like features, as vector and matrix types, 
+and includes a large set of built-in functions backed by SIMD intrinsics such as SSE4.1 and AVX2.
 
 As a result, you may be able to port GLSL shaders easily, including shader code
-from Shadertoy, to pure C++ with only small source changes.
+from Shadertoy, to pure C++ with only small source changes, as well as run various calculations
+without having to write SIMD code directly.
 
 ---
 
@@ -17,7 +17,7 @@ from Shadertoy, to pure C++ with only small source changes.
 - [Getting Started](#getting-started)
 - [Backend Selection](#backend-selection)
 - [Core Types](#core-types)
-  - [simdfloat: the SIMD-enabled math type of cppshader](#simdfloat-the-SIMD-enabled-math-type-of-cppshader)
+  - [simdfloat: the SIMD-enabled math type of CPPShader](#simdfloat-the-SIMD-enabled-math-type-of-CPPShader)
   - [Vector Types](#vector-types)
   - [Matrix Types](#matrix-types)
 - [Swizzling](#swizzling)
@@ -41,9 +41,9 @@ from Shadertoy, to pure C++ with only small source changes.
 
 ## Getting Started
 
-Include the single-header library present in "amalgamation" folder. 
+Include `cppshader.h`from the `amalgamation` folder in your code.
 It has no dependencies beyond having a compiler that supports 
-the SIMD width you want (SSE4.1, AVX2, or AVX512).
+the SIMD backend you want (SSE, AVX, AVX512, and NEON).
 
 ```cpp
 #include "cppshader.h"
@@ -60,19 +60,21 @@ From there, the syntax looks close to GLSL, with some x86 SIMD-specific bits.
 
 ## Backend Selection
 
-Pick your SIMD width by uncommenting exactly one define near the top of
-`cppshader.h`:
+Pick your SIMD backend by uncommenting (at the top of `cppshader.h`) or defining one of those macros in your compiler:
 
 ```cpp
-//#define USE_AVX512   // 16 floats per lane, requires AVX-512
-//#define USE_AVX2     // 8 floats per lane, requires AVX2
-#define USE_SSE41       // 4 floats per lane, requires SSE4
-//#define USE_SCALAR   // 1 float per lane, no intrinsics
+//#define USE_NEON // 4 lanes (4 floats/ints, 2 doubles), requires ARM NEON (available on Apple Silicon)
+//#define USE_AVX512 // 16 lanes (16 floats/ints, 8 doubles), requires AVX512F
+//#define USE_AVX2 // 8 lanes (8 floats/ints, 4 doubles), requires AVX2
+//#define USE_SSE41 // 4 lanes (4 floats/ints, 2 doubles), requires SSE4.1
+//#define USE_SSE // 4 lanes (4 floats/ints, 2 doubles), requires SSE. Slower multiplications, max, min, blendv, round, trunc, floor, and ceil.
+//#define USE_PACKED_SCALAR // no intrinsic, but 4 packed floats/ints or 2 doubles.
+//#define USE_SCALAR // no intrinsic. No packing. Not really useful except for debugging purpose
 ```
 
-The default is `USE_SSE41`.
+The default is `USE_PACKED_SCALAR`.
 
-The selected backend sets `simdwidth` and the related `simd*` macros
+The selected backend sets `SIMDWIDTH` and the related `simd*` macros
 automatically, so the same user code can be compiled for different backends
 without source changes.
 
@@ -80,17 +82,18 @@ without source changes.
 
 ## Core Types
 
-### `simdfloat`: the SIMD-enabled math type of cppshader
+### `simdfloat`: the SIMD-enabled math type of CPPShader
 
-`simdfloat` is the fundamental datatype of cppshader. It represents `simdwidth` packed
+`simdfloat` is the fundamental datatype of CPPShader. It store `SIMDWIDTH` packed
 floating-point values and can often be used much like a regular C++ `float`, while holding multiple instances of primitive scalar types.
-The examples below assume that `USE_SSE41` is enabled.
-
-Some basic uses:
+Here is a basic usage example (assuming `USE_SSE` is enabled so `simdfloat` has 4 lanes):
 
 ```cpp
 simdfloat a = 1.0f;  // broadcast 1.0f to every lane
-simdfloat b = simd_set_float(1.0f, 2.0f, 3.0f, 4.0f); // not recommended, load/store are better
+
+float tabB[SIMDWIDTH] = {0.1f, 0.2f, 0.3f, 0.4f}; // creating an array for further loading
+
+simdfloat b = simd_load_float(tabB); // load values of tabB in b
 
 simdfloat c = a + b;  // four additions in one instruction with SSE
 simdfloat d = sin(c); // four sine evaluations in one instruction with SSE
@@ -98,14 +101,14 @@ simdfloat d = sin(c); // four sine evaluations in one instruction with SSE
 
 Alongside `simdfloat`, two companion types are available:
 
-- `simddouble`: double-precision SIMD scalar type; use `halfsimdwidth` for its
+- `simddouble`: double-precision SIMD scalar type; use `HALFSIMDWIDTH` for its
   lane count.
 - `simdint`: 32-bit integer SIMD scalar type.
 
-Boolean vectors and unsigned integer vectors aren't provided though, and likely
-won't be.
+Boolean vectors and unsigned integer vectors aren't provided unfortunately, and likely
+won't be, because there is little to no SIMD support...
 
-Useful broadcast constants are also provided:
+Useful broadcast constants are provided:
 
 ```cpp
 static const simdfloat SIMDZERO = 0.0f;
@@ -115,16 +118,15 @@ static const simdfloat SIMDPI = 3.1415927f;
 ```
 
 When using SIMD internal types, operations are parallelized at instruction
-level but don't see each others. Lanes are independent. For example, with
-`USE_AVX2`, a dot product on `simdfloat` values does not compute the dot product
-of two 8D vectors. Instead, it performs eight independent dot products in
-parallel and returns a `simdfloat` containing those eight results.
+level but lanes don't see each others. For example, when using the AVX2 backend (by defining `USE_AVX2`), 
+an addition between two `simdfloat` values does not compute the sum of all elements horizontally.
+Instead, it performs eight independent additions in parallel and returns a `simdfloat` containing those eight results.
 
 ---
 
 ### Vector Types
 
-cppshader provides vector types similar to GLSL, with the same names. Each
+CPPShader provides vector types similar to GLSL, with the same names. Each
 component is a `simdfloat`, so a `vec3` stores three SIMD values at once.
 
 | Type | Components |
@@ -140,12 +142,14 @@ values:
 
 ```cpp
 vec3 a(1.0f, 2.0f, 3.0f);  // broadcast each component
-vec3 b(0.5f);              // all components = 0.5
+vec3 b(0.5f);              // all components = 0.5f
 
-simdfloat t = simd_set_float(0.1f, 0.2f, 0.3f, 0.4f); // not recommended
+float tabB[SIMDWIDTH] = {0.1f, 0.2f, 0.3f, 0.4f};
+simdfloat t = simd_load_float(tabB); // Load values of tabB in b
+
 vec2 uv(t, 0.8f);          // per-lane x, broadcast y
 
-vec4 color(uv, 0.0f, 1.0f); // vec4 from vec2 plus two scalars
+vec4 color(uv, 0.0f, b.x); // vec4 from vec2 plus scalars and a vector component
 ```
 
 Single-component access is direct:
@@ -170,7 +174,7 @@ Double and integer vector variants are also available: `dvec2/3/4` and
 
 ### Matrix Types
 
-cppshader also provides square matrix types following GLSL naming conventions.
+CPPShader also provides square matrix types following GLSL naming conventions.
 
 | Type | Columns |
 |---|---|
@@ -213,7 +217,7 @@ not provided.
 ## Swizzling
 
 One of the most recognizable features of GPU shading languages is swizzling,
-and cppshader reimplements most of it.
+and CPPShader reimplements most of it.
 
 Every vector type exposes the full set of GLSL read swizzles as member
 functions, using both `xyzw` and `rgba` (and `stpq`) notation. The main difference from GLSL
@@ -281,24 +285,25 @@ Dot product and cross product use dedicated functions.
 
 ## Load and Store
 
-The preferred way to fill vectorized types is to use load and store operations.
+The standard way to fill vectorized types is to use load and store operations.
 This avoids hard-coded lane assignment and makes it easier to switch between SIMD
 widths.
 
-Create arrays, then transfer data to and from `simdfloat`, `simddouble`, or
+Fill arrays, then transfer data to and from `simdfloat`, `simddouble`, or
 `simdint` with `simd_load_*` and `simd_store_*`. Buffers should be aligned to
-`simdwidth * 4` bytes to preserve compatibility with wider backends. Using
+`SIMDWIDTH * 4` bytes to preserve compatibility with wider backends. Using
 `alignas(64)` for arrays is a practical default.
 
 ### Loading: Building a `simdfloat` from an array
 
 ```cpp
-alignas(64) float tab[simdwidth]; // declaring an aligned array of simdwidth elements
+alignas(64) float tab[SIMDWIDTH]; // declaring an aligned array of SIMDWIDTH elements
 
-for (int k = 0; k < simdwidth; ++k) // writing loop counter into array
+for (int k = 0; k < SIMDWIDTH; ++k) // writing loop counter into array
     tab[k] = static_cast<float>(k);
 
 simdfloat value = simd_load_float(tab); // creating a simdfloat with values from the array
+std::cout << value << std::endl; // 0,1,2,3
 ```
 
 ### Storing: Writing Results Back to an array
@@ -306,9 +311,9 @@ simdfloat value = simd_load_float(tab); // creating a simdfloat with values from
 ```cpp
 vec3 position; // initialized somewhere
 
-alignas(64) float out[simdwidth]; // declaring an aligned array of simdwidth elements
+alignas(64) float out[SIMDWIDTH]; // declaring an aligned array of SIMDWIDTH elements
 
-simd_store_float(out, position.z); // storing content of position into the array
+simd_store_float(out, position.z); // storing content of position.z into the array
 ```
 
 ---
@@ -391,11 +396,15 @@ vec3 refl = reflect(incident, normal2); // reflection vector
 ### Min and Max
 
 ```cpp
+float tabA[SIMDWIDTH] = {0.f,1.f,2.f,3.f}; // creating an array for further loading
+float tabB[SIMDWIDTH] = {0.1f, 0.2f, 0.3f, 0.4f}; // creating an array for further loading
+
+simdfloat a = simd_load_float(tabA);
+simdfloat b = simd_load_float(tabB);
+
+
 simdfloat lo = min(a, b);
 simdfloat hi = max(a, b);
-
-vec3 vlo = min(vec3(1, 2, 3), vec3(3, 1, 2)); // minimum of individual components
-vec3 vhi = max(vec3(0.0f), some_vec); // maximum
 ```
 
 ---
@@ -417,7 +426,7 @@ simdmask mask = x > 0.5f;
 // GLSL-style ternary via blendv(false_val, true_val, mask)
 simdfloat result = blendv(0.0f, 1.0f, mask);
 
-// Works on vectors too
+// works on vectors too  (assuming colorA and colorB are defined somewhere)
 vec4 selected = blendv(colorA, colorB, mask);
 ```
 
@@ -429,10 +438,10 @@ lanes now share the same state. Use `maskAll` or `maskNone` for that purpose.
 ```cpp
 simdfloat x; // initialized somewhere with values below 100
 
-// Exit the loop when every lane reaches 100
+// exit the loop when every lane reaches 100
 while (!maskAll(x == 100)) // will stop loop when every lane of x is 100
 {
-    // In GLSL (not applicable here unless using USE_SCALAR):
+    // in GLSL (not applicable here):
     // x++;
     // if (x == 100) break;
 
@@ -448,7 +457,7 @@ use `simdimask`.
 
 ## Displaying Data
 
-You can use `std::cout` to print any cppshader type, regardless of the selected
+You can use `std::cout` to print any CPPShader type, regardless of the selected
 SIMD width:
 
 ```cpp
@@ -478,7 +487,7 @@ Samples are rewritten Shadertoy shaders (see [THIRD_PARTY_NOTICES.md](THIRD_PART
 can be compiled using Visual Studio or GCC, with SFML 2.5 or 2.6 as the only dependency. At runtime,
 you can switch demos using the number keys. Remember to put the file `assets/Inter-Regular.ttf` next to the executable.
 
-If you prefer a no-dependancies version, just comment "#define USE_SFML" on top of main.cpp.
+If you prefer a no-dependancies version, just uncomment "#define NO_SFML" on top of `main.cpp`.
 You won't need SFML anymore, and a ppm image file will be generated instead.
 
 ---

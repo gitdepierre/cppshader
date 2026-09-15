@@ -72,7 +72,7 @@ namespace CoastalLandscape
 
 		sh = rotate2D(sun_pos, noise(uv + iTime * .25f) * .3f); // big noise on the sky
 
-		// Note from simdshader author: conditional statements are complicated to use in SIMD logic, so i removed it here and below. For the rest of the code, i used testmasks
+		// note from cppshader author: conditional statements are complicated to use in SIMD logic, so i removed it here and below. For the rest of the code, i used testmasks
 		// if (uv.y > -.4f) // drawing the sky
 		{
 			u = uv + sh;

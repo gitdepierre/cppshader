@@ -92,7 +92,7 @@ namespace FractalLand
 		simdfloat totdist = SIMDZERO;
 		for (int i = 0; i < RAY_STEPS; i++)
 		{
-			// Note from simdshader author: there was a conditional statement to interrupt the loop when specific conditions were met, 
+			// note from cppshader author: there was a conditional statement to interrupt the loop when specific conditions were met, 
 			// but you can't stop execution flow of some lanes in CPU SIMD logic like you do in glsl, so you need to use a testmask
 			// to store the result of the condition, and then blend the branches afterward using blendv. 
 			simdmask testmask = d > det && totdist < 25.0f;
@@ -163,15 +163,15 @@ namespace FractalLand
 
 	vec4 mainImage(vec2 fragCoord)
 	{
-		det = SIMDZERO; // Problème de race condition sinon
-		edge = SIMDZERO; // Problème de race condition sinon
+		det = SIMDZERO; 
+		edge = SIMDZERO; 
 
 		vec2 uv = fragCoord.xy() / iResolution.xy() * 2.f - 1.f;
 		vec2 oriuv = uv;
 		uv.y *= iResolution.y / iResolution.x;
 		vec2 mouse = (iMouse.xy() / iResolution.xy() - .5f) * 3.f;
 
-		// Note from simdshader author: another conditional statement here, replaced with testmask and blendv logic
+		// note from cppshader author: another conditional statement here, replaced with testmask and blendv logic
 		// if (iMouse.z < 1.f) mouse = vec2(0.f, -0.05);
 		simdmask testmask = iMouse.z < 1.f;
 		mouse = blendv(mouse, vec2(0.f, -0.05f),  testmask);
