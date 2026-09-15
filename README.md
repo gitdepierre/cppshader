@@ -41,7 +41,7 @@ without having to write SIMD code directly.
 
 ## Getting Started
 
-Include `cppshader.h`from the `amalgamation` folder in your code.
+Include `cppshader.h` from the `amalgamation` folder in your code.
 It has no dependencies beyond having a compiler that supports 
 the SIMD backend you want (SSE, AVX, AVX512, and NEON).
 
@@ -54,13 +54,13 @@ int main()
 }
 ```
 
-From there, the syntax looks close to GLSL, with some x86 SIMD-specific bits.
+From there, the syntax looks close to GLSL, with some SIMD-specific bits.
 
 ---
 
 ## Backend Selection
 
-Pick your SIMD backend by uncommenting (at the top of `cppshader.h`) or defining one of those macros in your compiler:
+Pick your SIMD backend by uncommenting (at the top of `cppshader.h`) or defining one of those macros in your compiler command line:
 
 ```cpp
 //#define USE_NEON // 4 lanes (4 floats/ints, 2 doubles), requires ARM NEON (available on Apple Silicon)
@@ -91,7 +91,7 @@ Here is a basic usage example (assuming `USE_SSE` is enabled so `simdfloat` has 
 ```cpp
 simdfloat a = 1.0f;  // broadcast 1.0f to every lane
 
-float tabB[SIMDWIDTH] = {0.1f, 0.2f, 0.3f, 0.4f}; // creating an array for further loading
+alignas(64) float tabB[SIMDWIDTH] = {0.1f, 0.2f, 0.3f, 0.4f}; // creating an array for further loading
 
 simdfloat b = simd_load_float(tabB); // load values of tabB in b
 
@@ -137,14 +137,14 @@ component is a `simdfloat`, so a `vec3` stores three SIMD values at once.
 | `dvec2/3/4` | same layout, double precision |
 | `ivec2/3/4` | same layout, integer |
 
-Construction mirrors GLSL, so you can mix `float` literals and `simdfloat`
+Construction mirrors GLSL (mostly), so you can mix `float` literals and `simdfloat`
 values:
 
 ```cpp
 vec3 a(1.0f, 2.0f, 3.0f);  // broadcast each component
 vec3 b(0.5f);              // all components = 0.5f
 
-float tabB[SIMDWIDTH] = {0.1f, 0.2f, 0.3f, 0.4f};
+alignas(64) float tabB[SIMDWIDTH] = {0.1f, 0.2f, 0.3f, 0.4f};
 simdfloat t = simd_load_float(tabB); // Load values of tabB in b
 
 vec2 uv(t, 0.8f);          // per-lane x, broadcast y
@@ -396,8 +396,8 @@ vec3 refl = reflect(incident, normal2); // reflection vector
 ### Min and Max
 
 ```cpp
-float tabA[SIMDWIDTH] = {0.f,1.f,2.f,3.f}; // creating an array for further loading
-float tabB[SIMDWIDTH] = {0.1f, 0.2f, 0.3f, 0.4f}; // creating an array for further loading
+alignas(64) float tabA[SIMDWIDTH] = {0.f,1.f,2.f,3.f}; // creating an array for further loading
+alignas(64) float tabB[SIMDWIDTH] = {0.1f, 0.2f, 0.3f, 0.4f}; // creating an array for further loading
 
 simdfloat a = simd_load_float(tabA);
 simdfloat b = simd_load_float(tabB);
