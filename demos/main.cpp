@@ -59,7 +59,7 @@ sf::Image image;
 
 void Pixel(int _i, int _j)
 {
-	// filling a big array here, able to accomodate every SIMD flavour at loading
+	// filling a big array here, able to accommodate every SIMD flavour at loading
 	alignas(64) float tab[16] = {
 			(float)_i + 0.0f,
 			(float)_i + 1.0f,
@@ -266,7 +266,7 @@ uint32_t image[IWIDTH * IHEIGHT];
 
 void PixelPPM(int _i, int _j)
 {
-	// Filling a big array here, able to accomodate every SIMD flavour at loading
+	// Filling a big array here, able to accommodate every SIMD flavour at loading
 	alignas(64) float tab[16] = {
 			(float)_i + 0.0f,
 			(float)_i + 1.0f,

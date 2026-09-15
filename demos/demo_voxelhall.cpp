@@ -229,7 +229,7 @@ namespace VoxelHallColors
 			if (maskAll(hit)) break;
 
             
-            // Note that I've put in the messy reverse step to accomodate
+            // Note that I've put in the messy reverse step to accommodate
             // the "less than or equals" logic, rather than just the "less than."
             // Without it, annoying seam lines can appear... Feel free to correct
             // me on that, if my logic isn't up to par. It often isn't. :)
