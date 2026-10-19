@@ -351,7 +351,7 @@ simdfloat a2 = asin(0.5f);
 simdfloat a3 = acos(0.5f);
 simdfloat a4 = atan(1.0f, 1.0f); // atan2
 
-// Hyperbolic
+// hyperbolic
 simdfloat sh = sinh(1.0f);
 simdfloat ch = cosh(1.0f);
 simdfloat th = tanh(0.5f);
@@ -425,6 +425,9 @@ simdmask mask = x > 0.5f;
 
 // GLSL-style ternary via blendv(false_val, true_val, mask)
 simdfloat result = blendv(0.0f, 1.0f, mask);
+
+vec4 colorA = vec4(1.0f, 0.0f, 0.0f, 1.0f); // red
+vec4 colorB = vec4(0.0f, 0.0f, 1.0f, 1.0f); // blue
 
 // works on vectors too  (assuming colorA and colorB are defined somewhere)
 vec4 selected = blendv(colorA, colorB, mask);
