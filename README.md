@@ -141,21 +141,15 @@ Construction mirrors GLSL (mostly), so you can mix `float` literals and `simdflo
 values:
 
 ```cpp
-vec3 a(1.0f, 2.0f, 3.0f); 	// broadcast each component
-vec3 b(0.5f);             	// all components = 0.5f
+vec3 a(1.0f, 2.0f, 3.0f);  // broadcast each component
+vec3 b(0.5f);              // all components = 0.5f
 
 alignas(64) float tabB[SIMDWIDTH] = {0.1f, 0.2f, 0.3f, 0.4f};
 simdfloat t = simd_load_float(tabB); // Load values of tabB in b
 
-vec2 uv(t, 0.8f);         	// per-lane x, broadcast y
+vec2 uv(t, 0.8f);          // per-lane x, broadcast y
 
-vec4 color(uv, 0.0f, b.x);	// vec4 from vec2 plus scalars and a vector component
-
-simdfloat sf = 3.0f;
-simdint si = sf;			// conversions between float/int are provided
-
-vec3 v3 = vec3(8.5f, 4.2f, 1.5f);
-ivec3 iv3 = ivec3(v3);		// (8, 4, 1);
+vec4 color(uv, 0.0f, b.x); // vec4 from vec2 plus scalars and a vector component
 ```
 
 Single-component access is direct:
@@ -357,7 +351,7 @@ simdfloat a2 = asin(0.5f);
 simdfloat a3 = acos(0.5f);
 simdfloat a4 = atan(1.0f, 1.0f); // atan2
 
-// hyperbolic
+// Hyperbolic
 simdfloat sh = sinh(1.0f);
 simdfloat ch = cosh(1.0f);
 simdfloat th = tanh(0.5f);
@@ -431,9 +425,6 @@ simdmask mask = x > 0.5f;
 
 // GLSL-style ternary via blendv(false_val, true_val, mask)
 simdfloat result = blendv(0.0f, 1.0f, mask);
-
-vec4 colorA = vec4(1.0f, 0.0f, 0.0f, 1.0f); // red
-vec4 colorB = vec4(0.0f, 0.0f, 1.0f, 1.0f); // blue
 
 // works on vectors too  (assuming colorA and colorB are defined somewhere)
 vec4 selected = blendv(colorA, colorB, mask);

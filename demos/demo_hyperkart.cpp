@@ -43,7 +43,7 @@ namespace Hyperkart
     }
 
     vec4 mainImage(vec2 u) {
-        lights = vec4(0);
+        lights = 0;
         float i = 0;
         simdfloat s, d;
         vec3  r = iResolution;
