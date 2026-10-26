@@ -1,0 +1,15 @@
+# CMake build output
+build/
+out/
+
+# Visual Studio artifacts
+.vs/
+*.user
+*.suo
+*.VC.db
+*.VC.opendb
+
+# Do NOT commit the commercial Linotype font.
+# The repo ships Inter-Regular.ttf (OFL 1.1) under assets/ instead.
+LTSuperior-Regular.ttf
+src/LTSuperior-Regular.ttf
