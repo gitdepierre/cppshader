@@ -408,10 +408,10 @@ void Run()
 		if (isBenchmark)
 		{
 			frameCount++;
-			if (frameCount == 60)
+			if (frameCount == 19)
 			{
 				long long int newTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-				std::cout << "Time for 60 frames : " << (newTime - currentTime) / 1000.0f << " seconds" << std::endl; // Displaying frame time
+				std::cout << "Benchmark time : " << (newTime - currentTime) / 1000.0f << " seconds" << std::endl; // Displaying frame time
 				currentTime = newTime;
 				frameCount = 0;
 			}
